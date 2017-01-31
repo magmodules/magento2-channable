@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Magmodules.eu. All rights reserved.
+ * Copyright © 2017 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
  
@@ -74,7 +74,13 @@ class Products
         if (!empty($productId)) {
             $collection->addAttributeToFilter('entity_id', $productId);
         }
-        
+
+        if (!empty($filters['category_ids'])) {
+            if (!empty($filters['category_type'])) {
+                $collection->addCategoriesFilter([$filters['category_type'] => $filters['category_ids']]);
+            }
+        }
+
         if (!empty($config['inventory']['attributes'])) {
             $collection->joinTable(
                 'cataloginventory_stock_item',

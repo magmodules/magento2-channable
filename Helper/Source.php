@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Magmodules.eu. All rights reserved.
+ * Copyright © 2017 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -48,6 +48,11 @@ class Source extends AbstractHelper
     const XML_PATH_QTY_INCREMENTS = 'cataloginventory/item_options/qty_increments';
     const XML_PATH_QTY_INC_ENABLED = 'cataloginventory/item_options/enable_qty_increments';
 
+    const XML_PATH_CATEGORY_FILTER = 'magmodules_channable/filter/category_enabled';
+    const XML_PATH_CATEGORY_FILTER_TYPE = 'magmodules_channable/filter/category_type';
+    const XML_PATH_CATEGORY_IDS = 'magmodules_channable/filter/category';
+
+    
     protected $general;
     protected $product;
     protected $category;
@@ -359,6 +364,16 @@ class Source extends AbstractHelper
         }
 
         $filters['stock'] = $this->general->getStoreValue(self::XML_PATH_STOCK, $storeId);
+
+        $categoryFilter = $this->general->getStoreValue(self::XML_PATH_CATEGORY_FILTER, $storeId);
+        if ($categoryFilter) {
+            $categoryIds = $this->general->getStoreValue(self::XML_PATH_CATEGORY_IDS, $storeId);
+            $filterType = $this->general->getStoreValue(self::XML_PATH_CATEGORY_FILTER_TYPE, $storeId);
+            if (!empty($categoryIds) && !empty($filterType)) {
+                $filters['category_ids'] = explode(',', $categoryIds);
+                $filters['category_type'] = $filterType;
+            }
+        }
 
         return $filters;
     }

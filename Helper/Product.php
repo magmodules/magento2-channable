@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Magmodules.eu. All rights reserved.
+ * Copyright © 2017 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -160,6 +160,11 @@ class Product extends AbstractHelper
                 return false;
             }
         }
+        if ($product->getStatus() == 1) {
+            if (empty($parent)) {
+                return false;
+            }
+        }
         if (!empty($parent)) {
             if ($parent->getStatus() == 2) {
                 return false;
@@ -290,38 +295,27 @@ class Product extends AbstractHelper
      */
     public function getPriceCollection($config, $product)
     {
-
-        $price = '';
-        $prices = [];
         $config = $config['price_config'];
-        
-        if ($product->getPrice() > 0) {
-            $price = $this->formatPrice($product->getPrice(), $config);
-        } else {
-            if ($product->getFinalPrice() > 0) {
-                $price = $this->formatPrice($product->getFinalPrice(), $config);
-            } else {
-                $price = $this->formatPrice($product->getMinimalPrice(), $config);
+
+        $price = floatval($product->getPriceInfo()->getPrice('regular_price')->getValue());
+        $final_price = floatval($product->getPriceInfo()->getPrice('final_price')->getValue());
+        $special_price = floatval($product->getPriceInfo()->getPrice('special_price')->getValue());
+
+        $prices = [];
+        $prices[$config['price']] = $this->formatPrice($price, $config);
+
+        if ($price > $final_price) {
+            $prices[$config['sales_price']] = $this->formatPrice($final_price, $config);
+        }
+
+        if ($special_price < $price) {
+            if ($product->getSpecialFromDate() && $product->getSpecialToDate()) {
+                $from = date('Y-m-d', strtotime($product->getSpecialFromDate()));
+                $to = date('Y-m-d', strtotime($product->getSpecialToDate()));
+                $prices[$config['sales_date_range']] = $from . '/' . $to;
             }
         }
-        
-        if (!empty($price)) {
-            $prices[$config['price']] = $price;
-        } else {
-            return $prices;
-        }
-        
-        if ($product->getSpecialPrice() > 0) {
-            if ($product->getSpecialPrice() < $price) {
-                $prices[$config['sales_price']] = $this->formatPrice($product->getSpecialPrice(), $config);
-                if ($product->getSpecialFromDate() && $product->getSpecialToDate()) {
-                    $from = date('Y-m-d', strtotime($product->getSpecialFromDate()));
-                    $to = date('Y-m-d', strtotime($product->getSpecialToDate()));
-                    $prices[$config['sales_date_range']] = $from . '/' . $to;
-                }
-            }
-        }
-         
+
         return $prices;
     }
 

@@ -1,3 +1,7 @@
+0.9.3
+- Fix for price rule pricing
+- Added category filter option
+
 0.9.2
 - Added default vaules
 - Fix for enable check in controller
