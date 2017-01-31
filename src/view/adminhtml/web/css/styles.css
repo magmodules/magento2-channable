@@ -1,0 +1,227 @@
+.mm-comment-channable {
+    padding: 5px 10px;
+}
+
+.mm-heading-channable {
+    color: #666;
+    text-align: left;
+    border: 1px solid rgba(229, 229, 229, 0.27);
+    border-left: 2px solid #ea4c00;
+    font-size: 14px;
+    margin: 20px 0 0;
+    padding: 5px 5px 5px 10px;
+    background: #f8f8f8;
+}
+
+.mm-block-channable {
+    background: #f8f8f8 no-repeat 8px;
+    border: 1px solid #e5e5e5;
+    border-left: 2px solid #ea4c00;
+    font-size: 12px;
+    color: #303030;
+    margin-bottom: 0;
+    padding: 1.5rem 1.5rem 1.5rem 75px;
+    background-size: 55px;
+}
+
+.mm-comment-hover:before {
+    -webkit-font-smoothing: antialiased;
+    font-size: 16px;
+    line-height: 1;
+    color: #514943;
+    content: '\e633';
+    font-family: 'Admin Icons';
+    vertical-align: middle;
+    display: inline-block;
+    font-weight: 400;
+    overflow: hidden;
+    speak: none;
+    text-align: center;
+    float: right;
+    margin-top: -29px;
+    margin-right: 2px;
+}
+
+.mm-block-channable strong {
+    font-weight: 600;
+    color: #514943;
+}
+
+.mm-block-channable p {
+    font-size: 12px;
+    margin-left: 9px;
+}
+
+.mm-block-channable tr a {
+    color: #6d6761;
+}
+
+.mm-block-channable tr td {
+    padding: 5px 25px 0 0;
+}
+
+.mm-block-channable .helpbutton {
+    color: #fff;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+    padding: 20px 10px;
+    font-weight: 700;
+    float: right;
+    background: #514943;
+}
+
+@media only screen and (min-width: 1375px) {
+    .mm-block-channable .helpbutton {
+        color: #fff;
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+        padding: 20px 20px 20px 50px;
+        font-weight: 700;
+        float: right;
+        background: url(../images/icons.png) no-repeat scroll 7px -84px #514943;
+        background-size: 35px;
+    }
+}
+
+.mm-block-channable .helpbutton:hover {
+    background-color: #373330;
+    text-decoration: none;
+}
+
+.mm-block-channable .icon1 {
+    background: url(../images/icons.png) no-repeat scroll 2px -3px;
+    background-size: 30px;
+    width: 35px;
+    height: 27px;
+    float: left;
+}
+
+.mm-block-channable .icon2 {
+    background: url(../images/icons.png) no-repeat scroll 2px -31px;
+    background-size: 31px;
+    width: 35px;
+    height: 25px;
+    float: left;
+}
+
+.mm-comment-hover .readmore {
+    cursor: help !important;
+    float: right;
+    margin-top: -30px;
+    border: 0;
+    background-color: transparent !important;
+    opacity: 1 !important;
+    color: #524a43 !important;
+    font-size: 12px;
+    text-align: right;
+    margin-right: 0px;
+    padding-right: 30px;
+}
+
+@media only screen and (max-width: 1070px) {
+    .mm-comment-hover .readmore {
+        width: 30px;
+        margin-right: 0px;
+        padding-right: 0px;
+    }
+    .mm-comment-hover:before {
+        display: none;
+    }
+}
+
+.mm-comment-hover #content {
+    display: none;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.mm-comment-hover input[type="text"] {
+    color: transparent;
+    text-shadow: 0 0 0 #000;
+    padding: 6px 12px;
+    width: 150px;
+    cursor: pointer;
+}
+
+.mm-comment-hover input[type="text"]:focus {
+    outline: none;
+}
+
+.mm-comment-hover input:focus+div#content {
+    display: block;
+}
+
+.mm-block-channable-feeds {}
+
+.mm-block-channable-feeds .title {
+    clear: both;
+    color: #0a0a0a;
+    cursor: pointer;
+    display: block;
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: .025em;
+    padding: 1.9rem 2.8rem 1.9rem 0;
+    position: relative;
+    text-decoration: none;
+    transition: color .15s linear;
+}
+
+.mm-block-channable-feed-table {
+    border-top: 1px solid rgba(81, 73, 67, 0.15);
+    width: 99%;
+    color: #666;
+    text-align: left;
+    border-right: 1px solid rgb(223, 222, 221);
+    border-left: 2px solid #ea4c00;
+    font-size: 14px;
+    margin: 20px 0 0;
+    padding: 20px;
+    background: #f8f8f8;
+}
+
+.mm-block-channable-feed-table tr {
+    border-bottom: 1px solid #dfdedd;
+}
+
+.mm-block-channable-feed-table tr td {
+    padding: 10px;
+}
+
+.mm-block-channable-feed-table a.connect {
+    color: #eb5202;
+    line-height: 2em;
+}
+
+.mm-block-channable-feed-table a.connect:before {
+    content: '\e610';
+    font-family: 'Admin Icons';
+    margin-right: 9px;
+    font-size: 16px;
+    float: left;
+}
+
+.mm-block-channable-feed-table a.preview {
+    color: #185b00;
+    line-height: 2em;
+}
+
+.mm-block-channable-feed-table a.preview:before {
+    content: '\e60f';
+    font-family: 'Admin Icons';
+    margin-right: 9px;
+    font-size: 9px;
+    float: left;
+}
+
+.mm-block-channable-feed-table a.json:before {
+    content:'\e61a';
+    font-family: 'Admin Icons';
+    font-size: 15px;
+    margin-top:2px;
+    margin-right: 10px;
+    float: left;
+}
+
+.mm-block-channable-feed-table a.download {
+    color: #666666;
+    line-height: 2em;
+}
