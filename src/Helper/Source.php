@@ -85,9 +85,8 @@ class Source extends AbstractHelper
     }
 
     /**
-     *
      * @param $storeId
-     * @param $type
+     *
      * @return array
      */
     public function getConfig($storeId)
@@ -120,7 +119,7 @@ class Source extends AbstractHelper
             'source' => 'entity_id',
             'parent_selection_disabled' => 1,
         ];
-        $attributes['name'] = [
+        $attributes['title'] = [
             'label' => 'title',
             'source' => $this->general->getStoreValue(self::XML_PATH_NAME_SOURCE, $storeId),
         ];
@@ -310,7 +309,7 @@ class Source extends AbstractHelper
         if ($enabled) {
             if ($attributes = $this->general->getStoreValue(self::XML_PATH_PARENT_ATTS, $storeId)) {
                 $attributes = explode(',', $attributes);
-
+                print_r($attributes);
                 return $attributes;
             }
         }

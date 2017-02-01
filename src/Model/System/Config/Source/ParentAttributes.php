@@ -41,9 +41,6 @@ class ParentAttributes implements ArrayInterface
             if (!empty($attribute['parent_selection_disabled'])) {
                 continue;
             }
-            if (!empty($attribute['parent'])) {
-                continue;
-            }
             $label = str_replace('_', ' ', $attribute['label']);
             $attributes[] = [
                 'value' => $key,
