@@ -52,7 +52,6 @@ class Source extends AbstractHelper
     const XML_PATH_CATEGORY_FILTER_TYPE = 'magmodules_channable/filter/category_type';
     const XML_PATH_CATEGORY_IDS = 'magmodules_channable/filter/category';
 
-    
     protected $general;
     protected $product;
     protected $category;
@@ -61,12 +60,13 @@ class Source extends AbstractHelper
 
     /**
      * Source constructor.
-     * @param Context $context
+     *
+     * @param Context               $context
      * @param StoreManagerInterface $storeManager
-     * @param General $general
-     * @param Category $category
-     * @param Product $product
-     * @param Feed $feed
+     * @param General               $general
+     * @param Category              $category
+     * @param Product               $product
+     * @param Feed                  $feed
      */
     public function __construct(
         Context $context,
@@ -108,128 +108,128 @@ class Source extends AbstractHelper
 
     /**
      * @param int $storeId
-     * @param string $type
+     *
      * @return array
      */
     public function getAttributes($storeId = 0)
     {
         $attributes = [];
         $attributes['id'] = [
-            'label' => 'id',
-            'source' => 'entity_id',
+            'label'                     => 'id',
+            'source'                    => 'entity_id',
             'parent_selection_disabled' => 1,
         ];
         $attributes['title'] = [
-            'label' => 'title',
+            'label'  => 'title',
             'source' => $this->general->getStoreValue(self::XML_PATH_NAME_SOURCE, $storeId),
         ];
         $attributes['description'] = [
-            'label' => 'description',
+            'label'  => 'description',
             'source' => $this->general->getStoreValue(self::XML_PATH_DESCRIPTION_SOURCE, $storeId),
         ];
         $attributes['link'] = [
-            'label' => 'link',
+            'label'  => 'link',
             'source' => 'product_url',
         ];
         $attributes['image_link'] = [
-            'label' => 'image_link',
+            'label'  => 'image_link',
             'source' => $this->general->getStoreValue(self::XML_PATH_IMAGE_SOURCE, $storeId),
         ];
         $attributes['price'] = [
-            'label' => 'price',
-            'collection' => 'price',
+            'label'                     => 'price',
+            'collection'                => 'price',
             'parent_selection_disabled' => 1
         ];
         $attributes['brand'] = [
-            'label' => 'brand',
+            'label'  => 'brand',
             'source' => $this->general->getStoreValue(self::XML_PATH_BRAND_SOURCE, $storeId),
         ];
         $attributes['ean'] = [
-            'label' => 'ean',
+            'label'  => 'ean',
             'source' => $this->general->getStoreValue(self::XML_PATH_EAN_SOURCE, $storeId),
         ];
         $attributes['sku'] = [
-            'label' => 'sku',
+            'label'  => 'sku',
             'source' => $this->general->getStoreValue(self::XML_PATH_SKU_SOURCE, $storeId),
         ];
         $attributes['color'] = [
-            'label' => 'color',
+            'label'  => 'color',
             'source' => $this->general->getStoreValue(self::XML_PATH_COLOR_SOURCE, $storeId),
         ];
         $attributes['gender'] = [
-            'label' => 'gender',
+            'label'  => 'gender',
             'source' => $this->general->getStoreValue(self::XML_PATH_GENDER_SOURCE, $storeId)
         ];
         $attributes['material'] = [
-            'label' => 'material',
+            'label'  => 'material',
             'source' => $this->general->getStoreValue(self::XML_PATH_MATERIAL_SOURCE, $storeId),
         ];
         $attributes['size'] = [
-            'label' => 'size',
+            'label'  => 'size',
             'source' => $this->general->getStoreValue(self::XML_PATH_SIZE_SOURCE, $storeId),
         ];
         $attributes['product_type'] = [
-            'label' => 'type_id',
-            'source' => 'type_id',
+            'label'                     => 'type_id',
+            'source'                    => 'type_id',
             'parent_selection_disabled' => 1,
         ];
         $attributes['status'] = [
-            'label' => 'status',
-            'source' => 'status',
+            'label'                     => 'status',
+            'source'                    => 'status',
             'parent_selection_disabled' => 1,
         ];
         $attributes['visibility'] = [
-            'label' => 'visibility',
+            'label'  => 'visibility',
             'source' => 'visibility',
         ];
         $attributes['manage_stock'] = [
-            'label' => 'manage_stock',
-            'source' => 'manage_stock',
+            'label'     => 'manage_stock',
+            'source'    => 'manage_stock',
             'condition' => [
                 '0:false',
                 '1:true',
             ],
         ];
         $attributes['min_sale_qty'] = [
-            'label' => 'min_sale_qty',
-            'source' => 'min_sale_qty',
+            'label'   => 'min_sale_qty',
+            'source'  => 'min_sale_qty',
             'actions' => ['number'],
             'default' => '1.00',
         ];
         $attributes['qty_increments'] = [
-            'label' => 'qty_increments',
-            'source' => 'qty_increments',
+            'label'   => 'qty_increments',
+            'source'  => 'qty_increments',
             'actions' => ['number'],
             'default' => '1.00',
         ];
         $attributes['qty'] = [
-            'label' => 'qty',
-            'source' => 'qty',
+            'label'   => 'qty',
+            'source'  => 'qty',
             'actions' => ['number'],
         ];
         $attributes['weight'] = [
-            'label' => 'shipping_weight',
-            'source' => 'weight',
-            'suffix' => 'weight_unit',
+            'label'   => 'shipping_weight',
+            'source'  => 'weight',
+            'suffix'  => 'weight_unit',
             'actions' => ['number']
         ];
         $attributes['item_group_id'] = [
-            'label' => 'item_group_id',
+            'label'  => 'item_group_id',
             'source' => $attributes['id']['source'],
             'parent' => 2
         ];
         $attributes['is_bundle'] = [
-            'label' => 'is_bundle',
-            'source' => 'type_id',
-            'condition' => [
+            'label'                     => 'is_bundle',
+            'source'                    => 'type_id',
+            'condition'                 => [
                 '*:false',
                 'bundle:true',
             ],
             'parent_selection_disabled' => 1,
         ];
         $attributes['availability'] = [
-            'label' => 'availability',
-            'source' => 'is_in_stock',
+            'label'     => 'availability',
+            'source'    => 'is_in_stock',
             'condition' => [
                 '1:in stock',
                 '0:out of stock'
@@ -246,6 +246,7 @@ class Source extends AbstractHelper
 
     /**
      * @param $storeId
+     *
      * @return array
      */
     public function getExtraFields($storeId)
@@ -255,7 +256,7 @@ class Source extends AbstractHelper
             $attributes = @unserialize($attributes);
             foreach ($attributes as $attribute) {
                 $extraFields[$attribute['name']] = [
-                    'label' => strtolower($attribute['name']),
+                    'label'  => strtolower($attribute['name']),
                     'source' => $attribute['attribute']
                 ];
             }
@@ -266,41 +267,7 @@ class Source extends AbstractHelper
 
     /**
      * @param $storeId
-     * @return array
-     */
-    public function getInventoryData($storeId)
-    {
-        $invAtt = [];
-        $enabled = $this->general->getStoreValue(self::XML_PATH_INVENTORY, $storeId);
-        if (!$enabled) {
-            return $invAtt;
-        }
-        if ($fields = $this->general->getStoreValue(self::XML_PATH_INVENTORY_DATA, $storeId)) {
-            $invAtt['attributes'] = explode(',', $fields);
-            $invAtt['attributes'][] = 'is_in_stock';
-            if (in_array('manage_stock', $invAtt['attributes'])) {
-                $invAtt['attributes'][] = 'use_config_manage_stock';
-                $invAtt['config_manage_stock'] = $this->general->getStoreValue(self::XML_PATH_MANAGE_STOCK, $storeId);
-            }
-            if (in_array('qty_increments', $invAtt['attributes'])) {
-                $invAtt['attributes'][] = 'use_config_qty_increments';
-                $invAtt['attributes'][] = 'enable_qty_increments';
-                $invAtt['attributes'][] = 'use_config_enable_qty_inc';
-                $invAtt['config_qty_increments'] = $this->general->getStoreValue(self::XML_PATH_QTY_INCREMENTS, $storeId);
-                $invAtt['config_enable_qty_inc'] = $this->general->getStoreValue(self::XML_PATH_QTY_INC_ENABLED, $storeId);
-            }
-            if (in_array('min_sale_qty', $invAtt['attributes'])) {
-                $invAtt['attributes'][] = 'use_config_min_sale_qty';
-                $invAtt['config_min_sale_qty'] = $this->general->getStoreValue(self::XML_PATH_MIN_SALES_QTY, $storeId);
-            }
-
-            return $invAtt;
-        }
-        return[];
-    }
-
-    /**
-     * @param $storeId
+     *
      * @return array|bool|mixed
      */
     public function getParentAttributes($storeId)
@@ -309,7 +276,6 @@ class Source extends AbstractHelper
         if ($enabled) {
             if ($attributes = $this->general->getStoreValue(self::XML_PATH_PARENT_ATTS, $storeId)) {
                 $attributes = explode(',', $attributes);
-                print_r($attributes);
                 return $attributes;
             }
         }
@@ -334,6 +300,7 @@ class Source extends AbstractHelper
 
     /**
      * @param $storeId
+     *
      * @return array
      */
     public function getProductFilters($storeId)
@@ -378,9 +345,48 @@ class Source extends AbstractHelper
     }
 
     /**
+     * @param $storeId
+     *
+     * @return array
+     */
+    public function getInventoryData($storeId)
+    {
+        $invAtt = [];
+        $enabled = $this->general->getStoreValue(self::XML_PATH_INVENTORY, $storeId);
+        if (!$enabled) {
+            return $invAtt;
+        }
+        if ($fields = $this->general->getStoreValue(self::XML_PATH_INVENTORY_DATA, $storeId)) {
+            $invAtt['attributes'] = explode(',', $fields);
+            $invAtt['attributes'][] = 'is_in_stock';
+            if (in_array('manage_stock', $invAtt['attributes'])) {
+                $invAtt['attributes'][] = 'use_config_manage_stock';
+                $invAtt['config_manage_stock'] = $this->general->getStoreValue(self::XML_PATH_MANAGE_STOCK, $storeId);
+            }
+            if (in_array('qty_increments', $invAtt['attributes'])) {
+                $invAtt['attributes'][] = 'use_config_qty_increments';
+                $invAtt['attributes'][] = 'enable_qty_increments';
+                $invAtt['attributes'][] = 'use_config_enable_qty_inc';
+                $invAtt['config_qty_increments'] = $this->general->getStoreValue(self::XML_PATH_QTY_INCREMENTS,
+                    $storeId);
+                $invAtt['config_enable_qty_inc'] = $this->general->getStoreValue(self::XML_PATH_QTY_INC_ENABLED,
+                    $storeId);
+            }
+            if (in_array('min_sale_qty', $invAtt['attributes'])) {
+                $invAtt['attributes'][] = 'use_config_min_sale_qty';
+                $invAtt['config_min_sale_qty'] = $this->general->getStoreValue(self::XML_PATH_MIN_SALES_QTY, $storeId);
+            }
+
+            return $invAtt;
+        }
+        return [];
+    }
+
+    /**
      * @param $dataRow
      * @param $product
      * @param $config
+     *
      * @return string
      */
     public function reformatData($dataRow, $product, $config)
@@ -401,6 +407,7 @@ class Source extends AbstractHelper
     /**
      * @param $product
      * @param $categories
+     *
      * @return array
      */
     public function getCategoryData($product, $categories)
@@ -427,6 +434,11 @@ class Source extends AbstractHelper
         return [];
     }
 
+    /**
+     * @param $dataRow
+     *
+     * @return array
+     */
     public function getImageData($dataRow)
     {
         $i = 0;
@@ -453,6 +465,12 @@ class Source extends AbstractHelper
         return $imageData;
     }
 
+    /**
+     * @param $dataRow
+     * @param $config
+     *
+     * @return array|bool
+     */
     public function getDeliveryTime($dataRow, $config)
     {
         if (!empty($config['delivery'])) {

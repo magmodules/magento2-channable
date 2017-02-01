@@ -14,7 +14,7 @@ use Magento\Backend\Block\Template\Context;
 class Header extends Field
 {
 
-    const MODULE_CODE = 'channable-magento2';
+    const MODULE_CODE = 'magento2-channable';
     const MODULE_SUPPORT_LINK = 'https://www.magmodules.eu/help/' . self::MODULE_CODE;
     const MODULE_CONTACT_LINK = 'https://www.magmodules.eu/support.html?ext=' . self::MODULE_CODE;
 
