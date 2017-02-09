@@ -10,6 +10,7 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\UrlInterface;
+use Magento\Catalog\Model\Product\Visibility;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Product as ProductHelper;
 use Magmodules\Channable\Helper\Category as CategoryHelper;
@@ -96,7 +97,8 @@ class Source extends AbstractHelper
         $config['flat'] = false;
         $config['attributes'] = $this->getAttributes($storeId);
         $config['price_config'] = $this->getPriceConfig();
-        $config['url_type_media'] = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
+        $config['url_type_media'] = $this->storeManager->getStore($storeId)->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
+        $config['base_url'] = $this->storeManager->getStore($storeId)->getBaseUrl();
         $config['filters'] = $this->getProductFilters($storeId);
         $config['weight_unit'] = ' ' . $this->general->getStoreValue(self::XML_PATH_WEIGHT_UNIT, $storeId);
         $config['categories'] = $this->category->getCollection($storeId, '', '', 'channable_cat_disable_export');
@@ -311,14 +313,16 @@ class Source extends AbstractHelper
         if ($visibilityFilter) {
             $visibility = $this->general->getStoreValue(self::XML_PATH_VISIBILITY_OPTIONS, $storeId);
             $filters['visibility'] = explode(',', $visibility);
-        } else {
-            $filters['visibility'] = [2, 3, 4];
+            $filters['visibility'] = [
+                Visibility::VISIBILITY_IN_CATALOG,
+                Visibility::VISIBILITY_IN_SEARCH,
+                Visibility::VISIBILITY_BOTH,
+            ];
         }
-
         $relations = $this->general->getStoreValue(self::XML_PATH_RELATIONS_ENABLED, $storeId);
         if ($relations) {
             $filters['relations'] = 1;
-            array_push($filters['visibility'], 1);
+            array_push($filters['visibility'], Visibility::VISIBILITY_NOT_VISIBLE);
         } else {
             $filters['relations'] = 0;
         }

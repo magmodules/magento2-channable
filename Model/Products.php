@@ -57,6 +57,7 @@ class Products
             ->addStoreFilter($config['store_id'])
             ->addAttributeToSelect($attributes)
             ->addMinimalPrice()
+            ->addUrlRewrite()
             ->addFinalPrice();
         
         if (($filters['limit'] > 0) && empty($productId) && empty($count)) {
