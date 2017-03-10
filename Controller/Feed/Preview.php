@@ -56,12 +56,20 @@ class Preview extends Action
 
         $enabled = $this->general->getEnabled($storeId);
 
-        if (!$enabled) {
-            return false;
+        if (empty($enabled)) {
+            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+            $result->setHeader('content-type', 'text/plain');
+            $result->setContents(__('Please enable extension and flush cache!'));
+
+            return $result;
         }
 
         if ($token != $this->feed->getToken()) {
-            return false;
+            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+            $result->setHeader('content-type', 'text/plain');
+            $result->setContents(__('Token invalid!'));
+
+            return $result;
         }
 
         if ($data = $this->generate->generateByStore($storeId, $productId, $page)) {
