@@ -8,7 +8,6 @@ namespace Magmodules\Channable\Controller\Feed;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
-
 use Magmodules\Channable\Model\Generate as GenerateModel;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
@@ -22,10 +21,11 @@ class Preview extends Action
 
     /**
      * Preview constructor.
-     * @param Context $context
+     *
+     * @param Context       $context
      * @param GeneralHelper $generalHelper
      * @param GenerateModel $generateModel
-     * @param FeedHelper $feedHelper
+     * @param FeedHelper    $feedHelper
      */
     public function __construct(
         Context $context,
@@ -51,17 +51,29 @@ class Preview extends Action
         $productId = $this->getRequest()->getParam('pid');
 
         if (empty($storeId) || empty($token)) {
-            return false;
+            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+            $result->setHeader('content-type', 'text/plain');
+            $result->setContents(__('Params missing!'));
+
+            return $result;
         }
 
         $enabled = $this->general->getEnabled($storeId);
 
-        if (!$enabled) {
-            return false;
+        if (empty($enabled)) {
+            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+            $result->setHeader('content-type', 'text/plain');
+            $result->setContents(__('Please enable extension and flush cache!'));
+
+            return $result;
         }
 
         if ($token != $this->feed->getToken()) {
-            return false;
+            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+            $result->setHeader('content-type', 'text/plain');
+            $result->setContents(__('Token invalid!'));
+
+            return $result;
         }
 
         if ($data = $this->generate->generateByStore($storeId, $productId, $page)) {

@@ -10,9 +10,11 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Catalog\Model\Product\Gallery\ReadHandler as GalleryReadHandler;
 use Magento\Eav\Model\Config as EavConfig;
+use Magento\Eav\Api\AttributeSetRepositoryInterface;
 use Magento\Framework\Filter\FilterManager;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
-
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\Catalog\Model\Product\Visibility;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 
 class Product extends AbstractHelper
@@ -24,6 +26,7 @@ class Product extends AbstractHelper
     protected $eavConfig;
     protected $filter;
     protected $catalogProductTypeConfigurable;
+    protected $attributeSet;
 
     /**
      * Product constructor.
@@ -40,12 +43,14 @@ class Product extends AbstractHelper
         GeneralHelper $general,
         EavConfig $eavConfig,
         FilterManager $filter,
+        AttributeSetRepositoryInterface $attributeSet,
         Configurable $catalogProductTypeConfigurable
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
         $this->general = $general;
         $this->eavConfig = $eavConfig;
         $this->filter = $filter;
+        $this->attributeSet = $attributeSet;
         $this->catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
         parent::__construct($context);
     }
@@ -119,13 +124,16 @@ class Product extends AbstractHelper
             case 'image_link':
                 $value = $this->getImage($attribute, $config, $product);
                 break;
+            case 'attribute_set_id':
+                $value = $this->getAttributeSetName($product);
+                break;
             case 'manage_stock':
             case 'min_sale_qty':
             case 'qty_increments':
                 $value = $this->getStockValue($type, $product, $config['inventory']);
                 break;
             default:
-                $value = $this->getValue($attribute, $product);
+                $value = $this->getValue($attribute, $product, $config['store_id']);
                 break;
         }
 
@@ -160,16 +168,11 @@ class Product extends AbstractHelper
                 return false;
             }
         }
-        if ($product->getStatus() == 1) {
-            if (empty($parent)) {
-                return false;
-            }
-        }
         if (!empty($parent)) {
-            if ($parent->getStatus() == 2) {
+            if ($parent->getStatus() == Status::STATUS_DISABLED) {
                 return false;
             }
-            if ($parent->getVisibility() == 1) {
+            if ($parent->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
                 return false;
             }
             if (!empty($filters['stock'])) {
@@ -222,16 +225,17 @@ class Product extends AbstractHelper
 
     /**
      * @param $attribute
-     * @param \Magento\Catalog\Model\Product $product
+     * @param $product
+     * @param $storeId
+     *
      * @return string
      */
-    public function getValue($attribute, $product)
+    public function getValue($attribute, $product, $storeId)
     {
-
         if ($attribute['type'] == 'select') {
             if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                 $value = $product->getData($attribute['source']);
-                return (string)$attr->getSource()->getOptionText($value);
+                return $attr->setStoreId($storeId)->getSource()->getOptionText($value);
             }
         }
         if ($attribute['type'] == 'multiselect') {
@@ -239,12 +243,11 @@ class Product extends AbstractHelper
                 $value_text = [];
                 $values = explode(',', $product->getData($attribute['source']));
                 foreach ($values as $value) {
-                    $value_text[] = $attr->getSource()->getOptionText($value);
+                    $value_text[] = $attr->setStoreId($storeId)->getSource()->getOptionText($value);
                 }
                 return implode('/', $value_text);
             }
         }
-        
         return $product->getData($attribute['source']);
     }
 
@@ -340,6 +343,12 @@ class Product extends AbstractHelper
         return $data;
     }
 
+    public function getAttributeSetName($product)
+    {
+        $attributeSetRepository = $this->attributeSet->get($product->getAttributeSetId());
+        return $attributeSetRepository->getAttributeSetName();
+    }
+
     /**
      * @param \Magento\Catalog\Model\Product $product
      * @param \Magento\Catalog\Model\Product $simple
@@ -348,7 +357,10 @@ class Product extends AbstractHelper
      */
     public function getProductUrl($product, $simple, $config)
     {
-        $url = $product->getUrlModel()->getUrl($product);
+        $url = '';
+        if ($requestPath = $product->getRequestPath()) {
+            $url = $config['base_url'] . $requestPath;
+        }
         if (!empty($config['utm_code'])) {
             $url .= $config['utm_code'];
         }

@@ -12,7 +12,6 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem;
 use Magento\Framework\Stdlib\DateTime\DateTime;
-
 use Magmodules\Channable\Helper\General as GeneralHelper;
 
 class Feed extends AbstractHelper

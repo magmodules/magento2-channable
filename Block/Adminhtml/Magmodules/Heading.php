@@ -22,8 +22,8 @@ class Heading extends Field
         $html = '<tr id="row_' . $element->getHtmlId() . '">';
         $html .= '  <td class="label"></td>';
         $html .= '  <td class="value">';
-        $html .= '    <div class="mm-heading-googleshopping">' . $element->getData('label') . '</div>';
-        $html .= '	  <div class="mm-comment-googleshopping">';
+        $html .= '    <div class="mm-heading-channable">' . $element->getData('label') . '</div>';
+        $html .= '	  <div class="mm-comment-channable">';
         $html .= '        <div class="mm-comment-hover">';
         $html .= '            <input class="readmore" value="Info" readonly>';
         $html .= '             <div id="content">' . $element->getData('comment') . '</div>';
