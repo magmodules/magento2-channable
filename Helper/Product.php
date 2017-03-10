@@ -126,7 +126,7 @@ class Product extends AbstractHelper
                 $value = $this->getStockValue($type, $product, $config['inventory']);
                 break;
             default:
-                $value = $this->getValue($attribute, $product);
+                $value = $this->getValue($attribute, $product, $config['store_id']);
                 break;
         }
 
@@ -218,16 +218,17 @@ class Product extends AbstractHelper
 
     /**
      * @param $attribute
-     * @param \Magento\Catalog\Model\Product $product
+     * @param $product
+     * @param $storeId
+     *
      * @return string
      */
-    public function getValue($attribute, $product)
+    public function getValue($attribute, $product, $storeId)
     {
-
         if ($attribute['type'] == 'select') {
             if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                 $value = $product->getData($attribute['source']);
-                return (string)$attr->getSource()->getOptionText($value);
+                return $attr->setStoreId($storeId)->getSource()->getOptionText($value);
             }
         }
         if ($attribute['type'] == 'multiselect') {
@@ -235,12 +236,11 @@ class Product extends AbstractHelper
                 $value_text = [];
                 $values = explode(',', $product->getData($attribute['source']));
                 foreach ($values as $value) {
-                    $value_text[] = $attr->getSource()->getOptionText($value);
+                    $value_text[] = $attr->setStoreId($storeId)->getSource()->getOptionText($value);
                 }
                 return implode('/', $value_text);
             }
         }
-        
         return $product->getData($attribute['source']);
     }
 
