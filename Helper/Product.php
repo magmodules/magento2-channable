@@ -10,6 +10,7 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Catalog\Model\Product\Gallery\ReadHandler as GalleryReadHandler;
 use Magento\Eav\Model\Config as EavConfig;
+use Magento\Eav\Api\AttributeSetRepositoryInterface;
 use Magento\Framework\Filter\FilterManager;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
@@ -25,6 +26,7 @@ class Product extends AbstractHelper
     protected $eavConfig;
     protected $filter;
     protected $catalogProductTypeConfigurable;
+    protected $attributeSet;
 
     /**
      * Product constructor.
@@ -41,12 +43,14 @@ class Product extends AbstractHelper
         GeneralHelper $general,
         EavConfig $eavConfig,
         FilterManager $filter,
+        AttributeSetRepositoryInterface $attributeSet,
         Configurable $catalogProductTypeConfigurable
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
         $this->general = $general;
         $this->eavConfig = $eavConfig;
         $this->filter = $filter;
+        $this->attributeSet = $attributeSet;
         $this->catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
         parent::__construct($context);
     }
@@ -119,6 +123,9 @@ class Product extends AbstractHelper
                 break;
             case 'image_link':
                 $value = $this->getImage($attribute, $config, $product);
+                break;
+            case 'attribute_set_id':
+                $value = $this->getAttributeSetName($product);
                 break;
             case 'manage_stock':
             case 'min_sale_qty':
@@ -334,6 +341,12 @@ class Product extends AbstractHelper
         }
 
         return $data;
+    }
+
+    public function getAttributeSetName($product)
+    {
+        $attributeSetRepository = $this->attributeSet->get($product->getAttributeSetId());
+        return $attributeSetRepository->getAttributeSetName();
     }
 
     /**

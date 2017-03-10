@@ -35,6 +35,8 @@ class Attributes implements ArrayInterface
     {
         $attributes = [];
         $attributes[] = ['value' => '', 'label' => __('None / Do not use')];
+        $attributes[] = ['value' => 'attribute_set_id', 'label' => __('Attribute Set')];
+
         $searchCriteria = $this->searchCriteriaBuilder->create();
         /** @var \Magento\Eav\Model\Entity\Attribute\AbstractAttribute $attribute */
         foreach ($this->attributeRepository->getList($searchCriteria)->getItems() as $attribute) {
