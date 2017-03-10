@@ -16,7 +16,7 @@ Channable is a cloud based data feed management platform designed to greatly sim
 
 ## Links
 
-[Knowledgebase](https://www.magmodules.eu/help/magento-2-channable-feed)
+[Knowledgebase](https://www.magmodules.eu/help/magento2-channable)
 
 [Terms and Conditions](https://www.magmodules.eu/terms.html)
 
