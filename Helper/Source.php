@@ -314,6 +314,7 @@ class Source extends AbstractHelper
         if ($visibilityFilter) {
             $visibility = $this->general->getStoreValue(self::XML_PATH_VISIBILITY_OPTIONS, $storeId);
             $filters['visibility'] = explode(',', $visibility);
+        } else {
             $filters['visibility'] = [
                 Visibility::VISIBILITY_IN_CATALOG,
                 Visibility::VISIBILITY_IN_SEARCH,
