@@ -372,10 +372,14 @@ class Source extends AbstractHelper
                 $invAtt['attributes'][] = 'use_config_qty_increments';
                 $invAtt['attributes'][] = 'enable_qty_increments';
                 $invAtt['attributes'][] = 'use_config_enable_qty_inc';
-                $invAtt['config_qty_increments'] = $this->general->getStoreValue(self::XML_PATH_QTY_INCREMENTS,
-                    $storeId);
-                $invAtt['config_enable_qty_inc'] = $this->general->getStoreValue(self::XML_PATH_QTY_INC_ENABLED,
-                    $storeId);
+                $invAtt['config_qty_increments'] = $this->general->getStoreValue(
+                    self::XML_PATH_QTY_INCREMENTS,
+                    $storeId
+                );
+                $invAtt['config_enable_qty_inc'] = $this->general->getStoreValue(
+                    self::XML_PATH_QTY_INC_ENABLED,
+                    $storeId
+                );
             }
             if (in_array('min_sale_qty', $invAtt['attributes'])) {
                 $invAtt['attributes'][] = 'use_config_min_sale_qty';
