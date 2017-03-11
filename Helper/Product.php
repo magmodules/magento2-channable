@@ -30,12 +30,13 @@ class Product extends AbstractHelper
 
     /**
      * Product constructor.
-     * @param Context $context
+     *
+     * @param Context            $context
      * @param GalleryReadHandler $galleryReadHandler
-     * @param General $general
-     * @param EavConfig $eavConfig
-     * @param FilterManager $filter
-     * @param Configurable $catalogProductTypeConfigurable
+     * @param General            $general
+     * @param EavConfig          $eavConfig
+     * @param FilterManager      $filter
+     * @param Configurable       $catalogProductTypeConfigurable
      */
     public function __construct(
         Context $context,
@@ -59,6 +60,7 @@ class Product extends AbstractHelper
      * @param $product
      * @param $parent
      * @param $config
+     *
      * @return array
      */
     public function getDataRow($product, $parent, $config)
@@ -103,8 +105,39 @@ class Product extends AbstractHelper
                 }
             }
         }
-                
+
         return $dataRow;
+    }
+
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     * @param \Magento\Catalog\Model\Product $parent
+     * @param                                $config
+     *
+     * @return bool
+     */
+    public function validateProduct($product, $parent, $config)
+    {
+        $filters = $config['filters'];
+        if (!empty($filters['exclude_parent'])) {
+            if ($product->getTypeId() == 'configurable') {
+                return false;
+            }
+        }
+        if (!empty($parent)) {
+            if ($parent->getStatus() == Status::STATUS_DISABLED) {
+                return false;
+            }
+            if ($parent->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
+                return false;
+            }
+            if (!empty($filters['stock'])) {
+                if ($parent->getIsInStock() == 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -113,6 +146,7 @@ class Product extends AbstractHelper
      * @param $config
      * @param $product
      * @param $simple
+     *
      * @return mixed|string
      */
     public function getAttributeValue($type, $attribute, $config, $product, $simple)
@@ -156,105 +190,89 @@ class Product extends AbstractHelper
 
     /**
      * @param \Magento\Catalog\Model\Product $product
-     * @param \Magento\Catalog\Model\Product $parent
-     * @param $config
-     * @return bool
-     */
-    public function validateProduct($product, $parent, $config)
-    {
-        $filters = $config['filters'];
-        if (!empty($filters['exclude_parent'])) {
-            if ($product->getTypeId() == 'configurable') {
-                return false;
-            }
-        }
-        if (!empty($parent)) {
-            if ($parent->getStatus() == Status::STATUS_DISABLED) {
-                return false;
-            }
-            if ($parent->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
-                return false;
-            }
-            if (!empty($filters['stock'])) {
-                if ($parent->getIsInStock() == 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * @param $attributes
-     * @param string $parentAttributes
-     * @return array
-     */
-    public function addAttributeData($attributes, $parentAttributes)
-    {
-        foreach ($attributes as $key => $value) {
-            if (!empty($value['source'])) {
-                $attribute = $this->eavConfig->getAttribute('catalog_product', $value['source']);
-                $frontendInput = $attribute->getFrontendInput();
-                $attributes[$key]['type'] = $frontendInput;
-            }
-            if (in_array($key, $parentAttributes)) {
-                $attributes[$key]['parent'] = 1;
-            } else {
-                $parent = (!empty($value['parent']) ? $value['parent'] : 0);
-                $attributes[$key]['parent'] = $parent;
-            }
-        }
-
-        return $attributes;
-    }
-
-    /**
-     * @param $type
-     * @param $config
-     * @param $product
-     * @return array
-     */
-    public function getAttributeCollection($type, $config, $product)
-    {
-        if ($type == 'price') {
-            return $this->getPriceCollection($config, $product);
-        }
-
-        return [];
-    }
-
-    /**
-     * @param $attribute
-     * @param $product
-     * @param $storeId
+     * @param \Magento\Catalog\Model\Product $simple
+     * @param                                $config
      *
      * @return string
      */
-    public function getValue($attribute, $product, $storeId)
+    public function getProductUrl($product, $simple, $config)
     {
-        if ($attribute['type'] == 'select') {
-            if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
-                $value = $product->getData($attribute['source']);
-                return $attr->setStoreId($storeId)->getSource()->getOptionText($value);
-            }
+        $url = '';
+        if ($requestPath = $product->getRequestPath()) {
+            $url = $config['base_url'] . $requestPath;
         }
-        if ($attribute['type'] == 'multiselect') {
-            if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
-                $value_text = [];
-                $values = explode(',', $product->getData($attribute['source']));
-                foreach ($values as $value) {
-                    $value_text[] = $attr->setStoreId($storeId)->getSource()->getOptionText($value);
+        if (!empty($config['utm_code'])) {
+            $url .= $config['utm_code'];
+        }
+        if (!empty($simple)) {
+            if ($product->getTypeId() == 'configurable') {
+                $options = $product->getTypeInstance(true)->getConfigurableAttributesAsArray($product);
+                foreach ($options as $option) {
+                    if ($id = $simple->getResource()->getAttributeRawValue(
+                        $simple->getId(),
+                        $option['attribute_code'],
+                        $config['store_id']
+                    )
+                    ) {
+                        $url_extra[] = $option['attribute_id'] . '=' . $id;
+                    }
                 }
-                return implode('/', $value_text);
+            }
+            if (!empty($url_extra)) {
+                $url = $url . '#' . implode('&', $url_extra);
             }
         }
-        return $product->getData($attribute['source']);
+
+        return $url;
+    }
+
+    /**
+     * @param                                $attribute
+     * @param                                $config
+     * @param \Magento\Catalog\Model\Product $product
+     *
+     * @return string
+     */
+    public function getImage($attribute, $config, $product)
+    {
+        if (empty($attribute['source'])) {
+            $images = [];
+            $this->galleryReadHandler->execute($product);
+            $galleryImages = $product->getMediaGalleryImages();
+
+            foreach ($galleryImages as $image) {
+                if (empty($image['disabled'])) {
+                    $images[] = $image['url'];
+                }
+            }
+
+            return $images;
+        } else {
+            $img = '';
+            if ($url = $product->getData($attribute['source'])) {
+                $img = $config['url_type_media'] . 'catalog/product' . $url;
+            }
+
+            return $img;
+        }
+    }
+
+    /**
+     * @param $product
+     *
+     * @return mixed
+     */
+    public function getAttributeSetName($product)
+    {
+        $attributeSetRepository = $this->attributeSet->get($product->getAttributeSetId());
+        return $attributeSetRepository->getAttributeSetName();
     }
 
     /**
      * @param $attribute
      * @param $product
      * @param $inventory
+     *
      * @return bool
      */
     public function getStockValue($attribute, $product, $inventory)
@@ -292,8 +310,99 @@ class Product extends AbstractHelper
     }
 
     /**
+     * @param $attribute
+     * @param $product
+     * @param $storeId
+     *
+     * @return string
+     */
+    public function getValue($attribute, $product, $storeId)
+    {
+        if ($attribute['type'] == 'select') {
+            if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
+                $value = $product->getData($attribute['source']);
+                return (string)$attr->setStoreId($storeId)->getSource()->getOptionText($value);
+            }
+        }
+        if ($attribute['type'] == 'multiselect') {
+            if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
+                $value_text = [];
+                $values = explode(',', $product->getData($attribute['source']));
+                foreach ($values as $value) {
+                    $value_text[] = $attr->setStoreId($storeId)->getSource()->getOptionText($value);
+                }
+                return implode('/', $value_text);
+            }
+        }
+        return $product->getData($attribute['source']);
+    }
+
+    /**
+     * @param $value
+     * @param $attribute
+     *
+     * @return mixed|string
+     */
+    public function getFormat($value, $attribute)
+    {
+        if (!empty($attribute['actions'])) {
+            $actions = $attribute['actions'];
+            if (in_array('striptags', $actions)) {
+                $value = str_replace(["\r", "\n"], "", $value);
+                $value = strip_tags($value);
+            }
+            if (in_array('number', $actions)) {
+                $value = number_format($value, 2);
+            }
+        }
+        if (!empty($attribute['max'])) {
+            $value = $this->filter->truncate($value, ['length' => $attribute['max']]);
+        }
+        return $value;
+    }
+
+    /**
+     * @param $value
+     * @param $conditions
+     *
+     * @return bool
+     */
+    public function getCondition($value, $conditions)
+    {
+        $data = '';
+        foreach ($conditions as $condition) {
+            $ex = explode(':', $condition);
+            if ($ex['0'] == '*') {
+                $data = $ex['1'];
+            }
+            if ($value == $ex['0']) {
+                $data = $ex[1];
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param $type
      * @param $config
+     * @param $product
+     *
+     * @return array
+     */
+    public function getAttributeCollection($type, $config, $product)
+    {
+        if ($type == 'price') {
+            return $this->getPriceCollection($config, $product);
+        }
+
+        return [];
+    }
+
+    /**
+     * @param                                $config
      * @param \Magento\Catalog\Model\Product $product
+     *
      * @return array
      */
     public function getPriceCollection($config, $product)
@@ -323,126 +432,9 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $value
-     * @param $conditions
-     * @return bool
-     */
-    public function getCondition($value, $conditions)
-    {
-        $data = '';
-        foreach ($conditions as $condition) {
-            $ex = explode(':', $condition);
-            if ($ex['0'] == '*') {
-                $data = $ex['1'];
-            }
-            if ($value == $ex['0']) {
-                $data = $ex[1];
-            }
-        }
-
-        return $data;
-    }
-
-    public function getAttributeSetName($product)
-    {
-        $attributeSetRepository = $this->attributeSet->get($product->getAttributeSetId());
-        return $attributeSetRepository->getAttributeSetName();
-    }
-
-    /**
-     * @param \Magento\Catalog\Model\Product $product
-     * @param \Magento\Catalog\Model\Product $simple
-     * @param $config
-     * @return string
-     */
-    public function getProductUrl($product, $simple, $config)
-    {
-        $url = '';
-        if ($requestPath = $product->getRequestPath()) {
-            $url = $config['base_url'] . $requestPath;
-        }
-        if (!empty($config['utm_code'])) {
-            $url .= $config['utm_code'];
-        }
-        if (!empty($simple)) {
-            if ($product->getTypeId() == 'configurable') {
-                $options = $product->getTypeInstance(true)->getConfigurableAttributesAsArray($product);
-                foreach ($options as $option) {
-                    if ($id = $simple->getResource()->getAttributeRawValue(
-                        $simple->getId(),
-                        $option['attribute_code'],
-                        $config['store_id']
-                    )
-                    ) {
-                        $url_extra[] = $option['attribute_id'] . '=' . $id;
-                    }
-                }
-            }
-            if (!empty($url_extra)) {
-                $url = $url . '#' . implode('&', $url_extra);
-            }
-        }
-                
-        return $url;
-    }
-
-    /**
-     * @param $value
-     * @param string $actions
-     * @param string $max
-     * @return mixed|string
-     */
-    public function getFormat($value, $attribute)
-    {
-        if (!empty($attribute['actions'])) {
-            $actions = $attribute['actions'];
-            if (in_array('striptags', $actions)) {
-                $value = str_replace(["\r", "\n"], "", $value);
-                $value = strip_tags($value);
-            }
-            if (in_array('number', $actions)) {
-                $value = number_format($value, 2);
-            }
-        }
-        if (!empty($attribute['max'])) {
-            $value =  $this->filter->truncate($value, ['length' => $attribute['max']]);
-        }
-        return $value;
-    }
-
-    /**
-     * @param $attribute
-     * @param $config
-     * @param \Magento\Catalog\Model\Product $product
-     * @return string
-     */
-    public function getImage($attribute, $config, $product)
-    {
-        if (empty($attribute['source'])) {
-            $images = [];
-            $this->galleryReadHandler->execute($product);
-            $galleryImages = $product->getMediaGalleryImages();
-        
-            foreach ($galleryImages as $image) {
-                if (empty($image['disabled'])) {
-                    $images[] = $image['url'];
-                }
-            }
-
-            return $images;
-        } else {
-            $img = '';
-            if ($url = $product->getData($attribute['source'])) {
-                $img = $config['url_type_media'] . 'catalog/product' . $url;
-            }
-
-            return $img;
-        }
-    }
-
-    /**
      * @param $data
      * @param $config
+     *
      * @return string
      */
     public function formatPrice($data, $config)
@@ -451,7 +443,33 @@ class Product extends AbstractHelper
     }
 
     /**
+     * @param        $attributes
+     * @param string $parentAttributes
+     *
+     * @return array
+     */
+    public function addAttributeData($attributes, $parentAttributes)
+    {
+        foreach ($attributes as $key => $value) {
+            if (!empty($value['source'])) {
+                $attribute = $this->eavConfig->getAttribute('catalog_product', $value['source']);
+                $frontendInput = $attribute->getFrontendInput();
+                $attributes[$key]['type'] = $frontendInput;
+            }
+            if (in_array($key, $parentAttributes)) {
+                $attributes[$key]['parent'] = 1;
+            } else {
+                $parent = (!empty($value['parent']) ? $value['parent'] : 0);
+                $attributes[$key]['parent'] = $parent;
+            }
+        }
+
+        return $attributes;
+    }
+
+    /**
      * @param $productId
+     *
      * @return bool
      */
     public function getParentId($productId)
