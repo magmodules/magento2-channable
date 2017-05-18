@@ -3,6 +3,7 @@
  * Copyright © 2017 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magmodules\Channable\Model\System\Config\Source;
 
 use Magento\Framework\Option\ArrayInterface;
@@ -12,12 +13,13 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 class Attributes implements ArrayInterface
 {
 
-    protected $attributeRepository;
-    protected $searchCriteriaBuilder;
+    private $attributeRepository;
+    private $searchCriteriaBuilder;
 
     /**
      * Attributes constructor.
-     * @param Repository $attributeRepository
+     *
+     * @param Repository            $attributeRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
@@ -47,7 +49,7 @@ class Attributes implements ArrayInterface
                 ];
             }
         }
-        
+
         return $attributes;
     }
 }

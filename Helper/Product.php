@@ -20,35 +20,35 @@ use Magmodules\Channable\Helper\General as GeneralHelper;
 class Product extends AbstractHelper
 {
 
-    protected $general;
-    protected $source;
-    protected $imgHelper;
-    protected $eavConfig;
-    protected $filter;
-    protected $catalogProductTypeConfigurable;
-    protected $attributeSet;
+    private $generalHelper;
+    private $eavConfig;
+    private $filter;
+    private $catalogProductTypeConfigurable;
+    private $attributeSet;
+    private $galleryReadHandler;
 
     /**
      * Product constructor.
      *
-     * @param Context            $context
-     * @param GalleryReadHandler $galleryReadHandler
-     * @param General            $general
-     * @param EavConfig          $eavConfig
-     * @param FilterManager      $filter
-     * @param Configurable       $catalogProductTypeConfigurable
+     * @param Context                         $context
+     * @param GalleryReadHandler              $galleryReadHandler
+     * @param General                         $generalHelper
+     * @param EavConfig                       $eavConfig
+     * @param FilterManager                   $filter
+     * @param AttributeSetRepositoryInterface $attributeSet
+     * @param Configurable                    $catalogProductTypeConfigurable
      */
     public function __construct(
         Context $context,
         GalleryReadHandler $galleryReadHandler,
-        GeneralHelper $general,
+        GeneralHelper $generalHelper,
         EavConfig $eavConfig,
         FilterManager $filter,
         AttributeSetRepositoryInterface $attributeSet,
         Configurable $catalogProductTypeConfigurable
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
-        $this->general = $general;
+        $this->generalHelper = $generalHelper;
         $this->eavConfig = $eavConfig;
         $this->filter = $filter;
         $this->attributeSet = $attributeSet;
@@ -141,11 +141,11 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $type
-     * @param $attribute
-     * @param $config
-     * @param $product
-     * @param $simple
+     * @param                                $type
+     * @param                                $attribute
+     * @param                                $config
+     * @param \Magento\Catalog\Model\Product $product
+     * @param \Magento\Catalog\Model\Product $simple
      *
      * @return mixed|string
      */
@@ -310,9 +310,9 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $attribute
-     * @param $product
-     * @param $storeId
+     * @param                                $attribute
+     * @param \Magento\Catalog\Model\Product $product
+     * @param                                $storeId
      *
      * @return string
      */
@@ -384,9 +384,9 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $type
-     * @param $config
-     * @param $product
+     * @param                                $type
+     * @param                                $config
+     * @param \Magento\Catalog\Model\Product $product
      *
      * @return array
      */
@@ -439,7 +439,11 @@ class Product extends AbstractHelper
      */
     public function formatPrice($data, $config)
     {
-        return number_format($data, 2, '.', '') . $config['currency'];
+        $data = number_format($data, 2, '.', '');
+        if (!empty($config['price_config']['use_currency'])) {
+            $data = ' ' . $config['currency'];
+        }
+        return $data;
     }
 
     /**

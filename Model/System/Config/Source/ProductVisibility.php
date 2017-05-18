@@ -17,10 +17,10 @@ class ProductVisibility implements ArrayInterface
     public function toOptionArray()
     {
         return [
-            ['value'=>'1', 'label'=> __('Not Visible Individually')],
-            ['value'=>'2', 'label'=> __('Catalog')],
-            ['value'=>'3', 'label'=> __('Search')],
-            ['value'=>'4', 'label'=> __('Catalog, Search')],
+            ['value' => '1', 'label' => __('Not Visible Individually')],
+            ['value' => '2', 'label' => __('Catalog')],
+            ['value' => '3', 'label' => __('Search')],
+            ['value' => '4', 'label' => __('Catalog, Search')],
         ];
     }
 }

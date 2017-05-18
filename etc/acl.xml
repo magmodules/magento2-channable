@@ -5,15 +5,18 @@
  * See COPYING.txt for license details.
  */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
     <acl>
         <resources>
             <resource id="Magento_Backend::admin">
+                <resource id="Magmodules_Channable::general" title="Channable" sortOrder="50">
+                    <resource id="Magmodules_Channable::general_item" title="Item Updates" sortOrder="1"/>
+                </resource>
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
-                            <resource id="Magmodules_Channable::config" title="Channable" sortOrder="80"/>
+                            <resource id="Magmodules_Channable::feed" title="Channable Feed Config" sortOrder="100"/>
+                            <resource id="Magmodules_Channable::marketplace" title="Channable Marketplace Config" sortOrder="101"/>
                         </resource>
                     </resource>
                 </resource>

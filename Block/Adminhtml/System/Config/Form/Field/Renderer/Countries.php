@@ -3,6 +3,7 @@
  * Copyright © 2017 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer;
 
 use Magento\Framework\View\Element\Html\Select;
@@ -17,9 +18,10 @@ class Countries extends Select
 
     /**
      * Countries constructor.
-     * @param Context $context
+     *
+     * @param Context       $context
      * @param CountrySource $countries
-     * @param array $data
+     * @param array         $data
      */
     public function __construct(
         Context $context,
@@ -32,6 +34,7 @@ class Countries extends Select
 
     /**
      * Render block HTML
+     *
      * @return string
      */
     public function _toHtml()
@@ -47,6 +50,7 @@ class Countries extends Select
 
     /**
      * Get all countries
+     *
      * @return array
      */
     protected function getCountrySource()
@@ -60,7 +64,9 @@ class Countries extends Select
 
     /**
      * Sets name for input element
+     *
      * @param $value
+     *
      * @return mixed
      */
     public function setInputName($value)

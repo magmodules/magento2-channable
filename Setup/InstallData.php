@@ -16,12 +16,14 @@ use Magento\Config\Model\ResourceModel\Config;
 class InstallData implements InstallDataInterface
 {
 
-    private $eavSetupFactory;
     protected $config;
-    
+    private $eavSetupFactory;
+
     /**
      * InstallData constructor.
+     *
      * @param EavSetupFactory $eavSetupFactory
+     * @param Config          $config
      */
     public function __construct(
         EavSetupFactory $eavSetupFactory,
@@ -33,30 +35,31 @@ class InstallData implements InstallDataInterface
 
     /**
      * @param ModuleDataSetupInterface $setup
-     * @param ModuleContextInterface $context
+     * @param ModuleContextInterface   $context
      */
     public function install(
         ModuleDataSetupInterface $setup,
         ModuleContextInterface $context
     ) {
+
         $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
         $eavSetup->addAttribute(
             \Magento\Catalog\Model\Category::ENTITY,
             'channable_cat_disable_export',
             [
-                'type' => 'int',
-                'label' => 'Disable Category from export',
-                'input' => 'select',
-                'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
-                'global' => 1,
-                'visible' => true,
-                'required' => false,
-                'user_defined'=> false,
-                'sort_order' => 100,
-                'default' => 0
+                'type'         => 'int',
+                'label'        => 'Disable Category from export',
+                'input'        => 'select',
+                'source'       => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
+                'global'       => 1,
+                'visible'      => true,
+                'required'     => false,
+                'user_defined' => false,
+                'sort_order'   => 100,
+                'default'      => 0
             ]
         );
-        
+
         $token = '';
         $chars = str_split("abcdefghijklmnopqrstuvwxyz0123456789");
         for ($i = 0; $i < 64; $i++) {

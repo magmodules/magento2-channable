@@ -10,41 +10,42 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
-
 use Magmodules\Channable\Helper\General as GeneralHelper;
 
 class Category extends AbstractHelper
 {
 
-    protected $general;
-    protected $storeManager;
-    protected $categoryCollectionFactory;
+    private $generalHelper;
+    private $storeManager;
+    private $categoryCollectionFactory;
 
     /**
      * Category constructor.
-     * @param Context $context
-     * @param General $general
-     * @param StoreManagerInterface $storeManager
+     *
+     * @param Context                   $context
+     * @param General                   $generalHelper
+     * @param StoreManagerInterface     $storeManager
      * @param CategoryCollectionFactory $categoryCollectionFactory
      */
     public function __construct(
         Context $context,
-        GeneralHelper $general,
+        GeneralHelper $generalHelper,
         StoreManagerInterface $storeManager,
         CategoryCollectionFactory $categoryCollectionFactory
     ) {
-        $this->general = $general;
+        $this->generalHelper = $generalHelper;
         $this->storeManager = $storeManager;
         $this->categoryCollectionFactory = $categoryCollectionFactory;
-        
+
         parent::__construct($context);
     }
 
     /**
-     * @param $storeId
+     * @param        $storeId
      * @param string $field
      * @param string $default
      * @param string $exclude
+     *
      * @return array
      */
     public function getCollection($storeId, $field = '', $default = '', $exclude = '')
@@ -52,7 +53,7 @@ class Category extends AbstractHelper
         $data = [];
         $parent = $this->storeManager->getStore($storeId)->getRootCategoryId();
         $attributes = ['name', 'level', 'path', 'is_active'];
-        
+
         if (!empty($field)) {
             $attributes[] = $field;
         }
@@ -66,17 +67,17 @@ class Category extends AbstractHelper
             ->addAttributeToSelect($attributes)
             ->addFieldToFilter('is_active', ['eq' => 1])
             ->load();
-        
+
         foreach ($collection as $category) {
             $data[$category->getId()] = [
-                    'name' => $category->getName(),
-                    'level' => $category->getLevel(),
-                    'path' => $category->getPath(),
-                    'custom' => (!empty($field) ? $category->getData($field) : ''),
-                    'exclude' => (!empty($exclude) ? $category->getData($exclude) : 0),
-                ];
+                'name'    => $category->getName(),
+                'level'   => $category->getLevel(),
+                'path'    => $category->getPath(),
+                'custom'  => (!empty($field) ? $category->getData($field) : ''),
+                'exclude' => (!empty($exclude) ? $category->getData($exclude) : 0),
+            ];
         }
-        
+
         $categories = [];
         foreach ($data as $key => $category) {
             $paths = explode('/', $category['path']);
@@ -98,14 +99,14 @@ class Category extends AbstractHelper
             }
             if (!$exclude) {
                 $categories[$key] = [
-                    'name' => $category['name'],
-                    'level' => $level,
-                    'path' => $path_text,
+                    'name'   => $category['name'],
+                    'level'  => $level,
+                    'path'   => $path_text,
                     'custom' => $custom
                 ];
             }
         }
-        
+
         return $categories;
     }
 }

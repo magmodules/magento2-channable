@@ -17,8 +17,8 @@ class CategoryTypeList implements ArrayInterface
     public function toOptionArray()
     {
         return [
-            ['value'=>'in', 'label'=> __('Include by Category')],
-            ['value'=>'nin', 'label'=> __('Exclude by Category')],
+            ['value' => 'in', 'label' => __('Include by Category')],
+            ['value' => 'nin', 'label' => __('Exclude by Category')],
         ];
     }
 }

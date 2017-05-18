@@ -13,8 +13,8 @@ use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 class CategoryList implements ArrayInterface
 {
 
-    protected $categoryFactory;
-    protected $categoryCollectionFactory;
+    private $categoryFactory;
+    private $categoryCollectionFactory;
 
     /**
      * CategoryList constructor.
