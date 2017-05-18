@@ -3,6 +3,7 @@
  * Copyright © 2017 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field;
 
 use Magento\Framework\DataObject;
@@ -20,7 +21,7 @@ class DeliveryTime extends AbstractFieldArray
     protected function _prepareToRender()
     {
         $this->addColumn('code', [
-            'label' => __('Country'),
+            'label'    => __('Country'),
             'renderer' => $this->getCountryRenderer()
         ]);
         $this->addColumn('in_stock', [
@@ -35,6 +36,7 @@ class DeliveryTime extends AbstractFieldArray
 
     /**
      * Returns render of countries
+     *
      * @return \Magento\Framework\View\Element\BlockInterface
      */
     protected function getCountryRenderer()
@@ -52,6 +54,7 @@ class DeliveryTime extends AbstractFieldArray
 
     /**
      * Prepare existing row data object
+     *
      * @param DataObject $row
      */
     protected function _prepareArrayRow(DataObject $row)

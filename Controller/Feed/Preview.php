@@ -3,6 +3,7 @@
  * Copyright © 2017 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magmodules\Channable\Controller\Feed;
 
 use Magento\Framework\App\Action\Action;
@@ -15,9 +16,9 @@ use Magmodules\Channable\Helper\Feed as FeedHelper;
 class Preview extends Action
 {
 
-    protected $generate;
-    protected $general;
-    protected $feed;
+    private $generateModel;
+    private $generalHelper;
+    private $feedHelper;
 
     /**
      * Preview constructor.
@@ -33,9 +34,9 @@ class Preview extends Action
         GenerateModel $generateModel,
         FeedHelper $feedHelper
     ) {
-        $this->generate = $generateModel;
-        $this->general = $generalHelper;
-        $this->feed = $feedHelper;
+        $this->generateModel = $generateModel;
+        $this->generalHelper = $generalHelper;
+        $this->feedHelper = $feedHelper;
         $this->resultFactory = $context->getResultFactory();
         parent::__construct($context);
     }
@@ -48,7 +49,6 @@ class Preview extends Action
         $storeId = (int)$this->getRequest()->getParam('id');
         $page = (int)$this->getRequest()->getParam('page');
         $token = $this->getRequest()->getParam('token');
-        $productId = $this->getRequest()->getParam('pid');
 
         if (empty($storeId) || empty($token)) {
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
@@ -58,7 +58,7 @@ class Preview extends Action
             return $result;
         }
 
-        $enabled = $this->general->getEnabled($storeId);
+        $enabled = $this->generalHelper->getEnabled($storeId);
 
         if (empty($enabled)) {
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
@@ -68,7 +68,7 @@ class Preview extends Action
             return $result;
         }
 
-        if ($token != $this->feed->getToken()) {
+        if ($token != $this->generalHelper->getToken()) {
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/plain');
             $result->setContents(__('Token invalid!'));
@@ -76,7 +76,13 @@ class Preview extends Action
             return $result;
         }
 
-        if ($data = $this->generate->generateByStore($storeId, $productId, $page)) {
+        if ($productId = $this->getRequest()->getParam('pid')) {
+            $productId = [$productId];
+        } else {
+            $productId = '';
+        }
+
+        if ($data = $this->generateModel->generateByStore($storeId, $productId, $page)) {
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/plain');
             $result->setContents(print_r($data, true));

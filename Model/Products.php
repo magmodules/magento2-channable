@@ -3,7 +3,7 @@
  * Copyright © 2017 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
- 
+
 namespace Magmodules\Channable\Model;
 
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
@@ -13,12 +13,19 @@ use Magento\CatalogInventory\Helper\Stock as StockHelper;
 
 class Products
 {
+
+    private $productCollectionFactory;
+    private $productAttributeCollectionFactory;
+    private $productFlatState;
+    private $stockHelper;
+
     /**
      * Products constructor.
-     * @param ProductCollectionFactory $productCollectionFactory
+     *
+     * @param ProductCollectionFactory          $productCollectionFactory
      * @param ProductAttributeCollectionFactory $productAttributeCollectionFactory
-     * @param StockHelper $stockHelper
-     * @param StateFactory $productFlatState
+     * @param StockHelper                       $stockHelper
+     * @param StateFactory                      $productFlatState
      */
     public function __construct(
         ProductCollectionFactory $productCollectionFactory,
@@ -33,25 +40,26 @@ class Products
     }
 
     /**
-     * @param $config
-     * @param int $page
-     * @param string $productId
+     * @param        $config
+     * @param int    $page
+     * @param string $productIds
      * @param string $count
-     * @return mixed
+     *
+     * @return $this|int
      */
-    public function getCollection($config, $page = 1, $productId = '', $count = '')
+    public function getCollection($config, $page = 1, $productIds = '', $count = '')
     {
-        
+
         $flat = $config['flat'];
         $filters = $config['filters'];
         $attributes = $this->getAttributes($config['attributes']);
-        
+
         if (!$flat) {
             $productFlatState = $this->productFlatState->create(['isAvailable' => false]);
         } else {
             $productFlatState = $this->productFlatState->create(['isAvailable' => true]);
         }
-        
+
         $collection = $this->productCollectionFactory
             ->create(['catalogProductFlatState' => $productFlatState])
             ->addStoreFilter($config['store_id'])
@@ -59,11 +67,11 @@ class Products
             ->addMinimalPrice()
             ->addUrlRewrite()
             ->addFinalPrice();
-        
+
         if (($filters['limit'] > 0) && empty($productId) && empty($count)) {
             $collection->setPage($page, $filters['limit'])->getCurPage();
         }
-        
+
         if (!empty($filters['visibility'])) {
             $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
         }
@@ -72,8 +80,8 @@ class Products
             $this->stockHelper->addInStockFilterToCollection($collection);
         }
 
-        if (!empty($productId)) {
-            $collection->addAttributeToFilter('entity_id', $productId);
+        if (!empty($productIds)) {
+            $collection->addAttributeToFilter('entity_id', ['in' => $productIds]);
         }
 
         if (!empty($filters['category_ids'])) {
@@ -89,7 +97,7 @@ class Products
                 $config['inventory']['attributes']
             );
         }
-        
+
         if (empty($count)) {
             return $collection->load();
         } else {
@@ -99,6 +107,7 @@ class Products
 
     /**
      * @param $selectedAttrs
+     *
      * @return array
      */
     public function getAttributes($selectedAttrs)
@@ -120,35 +129,44 @@ class Products
      */
     public function getProductAttributes()
     {
-        return ['entity_id', 'image', 'price', 'special_price', 'special_from_date',
-        'special_to_date', 'status', 'tax_class_id', 'weight', 'product_has_weight'];
+        return [
+            'entity_id',
+            'image',
+            'price',
+            'special_price',
+            'special_from_date',
+            'special_to_date',
+            'status',
+            'tax_class_id',
+            'weight',
+            'product_has_weight'
+        ];
     }
 
     /**
      * @param $parentId
-     * @param $storeId
      * @param $attributes
-     * @return mixed
+     *
+     * @return \Magento\Framework\DataObject
      */
-    public function loadParentProduct($parentId, $storeId, $attributes)
+    public function loadParentProduct($parentId, $attributes)
     {
         $flat = false;
-        
+
         if (!$flat) {
             $productFlatState = $this->productFlatState->create(['isAvailable' => false]);
         } else {
             $productFlatState = $this->productFlatState->create(['isAvailable' => true]);
         }
-        
+
         $attributes = $this->getAttributes($attributes);
-        
+
         $parent = $this->productCollectionFactory
             ->create(['catalogProductFlatState' => $productFlatState])
-            ->addStoreFilter($storeId)
             ->addAttributeToFilter('entity_id', $parentId)
             ->addAttributeToSelect($attributes)
             ->getFirstItem();
-            
+
         return $parent;
     }
 }

@@ -3,6 +3,7 @@
  * Copyright © 2017 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field;
 
 use Magento\Framework\DataObject;
@@ -23,7 +24,7 @@ class ExtraFields extends AbstractFieldArray
             'label' => __('Fieldname'),
         ]);
         $this->addColumn('attribute', [
-            'label' => __('Attribute'),
+            'label'    => __('Attribute'),
             'renderer' => $this->getAttributeRenderer()
         ]);
         $this->_addAfter = false;
@@ -32,6 +33,7 @@ class ExtraFields extends AbstractFieldArray
 
     /**
      * Returns render of stores
+     *
      * @return \Magento\Framework\View\Element\BlockInterface
      */
     protected function getAttributeRenderer()
@@ -49,6 +51,7 @@ class ExtraFields extends AbstractFieldArray
 
     /**
      * Prepare existing row data object
+     *
      * @param DataObject $row
      */
     protected function _prepareArrayRow(DataObject $row)

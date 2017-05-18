@@ -14,24 +14,26 @@ use Magmodules\Channable\Helper\Feed as FeedHelper;
 class Feeds extends Field
 {
 
-    protected $feed;
     protected $_template = 'Magmodules_Channable::system/config/fieldset/feeds.phtml';
+    private $feedHelper;
 
     /**
      * Feeds constructor.
-     * @param Context $context
-     * @param FeedHelper $feed
+     *
+     * @param Context    $context
+     * @param FeedHelper $feedHelper
      */
     public function __construct(
         Context $context,
-        FeedHelper $feed
+        FeedHelper $feedHelper
     ) {
-        $this->feed = $feed;
+        $this->feedHelper = $feedHelper;
         parent::__construct($context);
     }
 
     /**
      * @param AbstractElement $element
+     *
      * @return string
      */
     public function render(AbstractElement $element)
@@ -46,6 +48,6 @@ class Feeds extends Field
      */
     public function getFeedData()
     {
-        return $this->feed->getConfigData();
+        return $this->feedHelper->getConfigData();
     }
 }

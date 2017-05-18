@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="catalog_product_save_after">
+        <observer name="channable_catalog_product_save_after" instance="Magmodules\Channable\Observer\Catalog\ProductSaveAfter" />
+    </event>
+    <event name="checkout_submit_all_after">
+        <observer name="channable_checkout_submit_all_after" instance="Magmodules\Channable\Observer\Checkout\AllSubmitAfter" />
+    </event>
+    <event name="sales_order_item_cancel">
+        <observer name="channable_sales_order_item_cancel" instance="Magmodules\Channable\Observer\Sales\OrderItemCancel" />
+    </event>
+</config>

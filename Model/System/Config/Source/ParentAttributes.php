@@ -9,26 +9,33 @@ namespace Magmodules\Channable\Model\System\Config\Source;
 use Magento\Framework\Option\ArrayInterface;
 use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magento\Framework\App\Request\Http;
+use Magento\Framework\App\Area;
+use Magento\Store\Model\App\Emulation;
 
 class ParentAttributes implements ArrayInterface
 {
 
-    protected $source;
-    protected $request;
+    private $source;
+    private $request;
+    private $appEmulation;
 
     /**
      * ParentAttributes constructor.
-     * @param Http $request
+     *
+     * @param Http         $request
+     * @param Emulation    $appEmulation
      * @param SourceHelper $source
      */
     public function __construct(
         Http $request,
+        Emulation $appEmulation,
         SourceHelper $source
     ) {
         $this->source = $source;
+        $this->appEmulation = $appEmulation;
         $this->request = $request;
     }
-        
+
     /**
      * @return array
      */
@@ -36,7 +43,10 @@ class ParentAttributes implements ArrayInterface
     {
         $attributes = [];
         $storeId = $this->request->getParam('store');
-        $source = $this->source->getAttributes($storeId, 'parent');
+        $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
+        $source = $this->source->getAttributes('parent');
+        $this->appEmulation->stopEnvironmentEmulation();
+
         foreach ($source as $key => $attribute) {
             if (!empty($attribute['parent_selection_disabled'])) {
                 continue;

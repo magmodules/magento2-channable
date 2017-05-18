@@ -26,5 +26,29 @@
                 <gender_attribute>gender</gender_attribute>
             </data>
         </magmodules_channable>
+        <magmodules_channable_marketplace>
+            <general>
+                <enable>0</enable>
+            </general>
+            <order>
+                <shipping_method>flatrate_flatrate</shipping_method>
+                <shipping_method_fallback>flatrate_flatrate</shipping_method_fallback>
+                <import_customer>0</import_customer>
+            </order>
+            <item>
+                <enable>0</enable>
+                <cron>0</cron>
+            </item>
+        </magmodules_channable_marketplace>
+        <payment>
+            <channable>
+                <active>1</active>
+                <model>Magmodules\Channable\Model\Payment\Channable</model>
+                <order_status>pending</order_status>
+                <title>Channable Marketplace Payment</title>
+                <allowspecific>0</allowspecific>
+                <group>channable</group>
+            </channable>
+        </payment>
     </default>
 </config>
