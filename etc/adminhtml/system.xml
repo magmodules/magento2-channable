@@ -253,7 +253,7 @@
             </group>
         </section>
         <section id="magmodules_channable_marketplace" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Channable: Marketplace</label>
+            <label>Channable: Orders</label>
             <tab>magmodules</tab>
             <resource>Magmodules_Channable::marketplace</resource>
             <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1"
@@ -280,7 +280,7 @@
                        showInWebsite="1" showInStore="1">
                     <label>Shipping Method</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-					<comment>Select the shipping method that you want to use on the order import.</comment>
+                    <comment>Select the shipping method that you want to use on the order import.</comment>
                 </field>
                 <field id="shipping_method" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1"
                        showInStore="1">
@@ -296,7 +296,7 @@
                        showInWebsite="1" showInStore="1">
                     <label>Customers</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-					<comment>Select if you want to add customers to your Magento store.</comment>
+                    <comment>Select if you want to add customers to your Magento store.</comment>
                 </field>
                 <field id="import_customer" translate="label" type="select" sortOrder="31" showInDefault="1" showInWebsite="1"
                        showInStore="1">
@@ -315,7 +315,7 @@
                        showInStore="1">
                     <label>Address &amp; Invoice</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-					<comment>Configure the way the addresses and invoices are handled in the order import.</comment>
+                    <comment>Configure the way the addresses and invoices are handled in the order import.</comment>
                 </field>
                 <field id="seperate_housenumber" translate="label" type="select" sortOrder="41" showInDefault="1" showInWebsite="1"
                        showInStore="1">
@@ -331,7 +331,7 @@
                        showInStore="1">
                     <label>Logging</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-					<comment>Enable the Order Logging option to log all the incoming orders from the connected Marketplaces.</comment>
+                    <comment>Enable the Order Logging option to log all the incoming orders from the connected Marketplaces.</comment>
                 </field>
                 <field id="log" translate="label" type="select" sortOrder="51" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable</label>
@@ -341,7 +341,7 @@
                 <field id="heading_item_stores" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Webhooks</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-					<comment>Copy and paste the Webhook URL to configure your Magento Store in your Channable Marketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.</comment>
+                    <comment>Copy and paste the Webhook URL to configure your Magento Store in your Channable Marketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.</comment>
                 </field>
                 <field id="item_stores" translate="label" type="text" sortOrder="61" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Stores</label>
@@ -349,8 +349,8 @@
                 </field>
             </group>
             <group id="item" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Item Update</label>
-            <comment>In order to use the Channable Item API, you have to set the API settings on the store level where you want to import the orders from Channable. The settings are only visible when you have the right store-view selected through the store switcher on the top left.</comment>
+                <label>Item Update</label>
+                <comment>In order to use the Channable Item API, you have to set the API settings on the store level where you want to import the orders from Channable. The settings are only visible when you have the right store-view selected through the store switcher on the top left.</comment>
                 <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="0" showInWebsite="0" showInStore="1">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -361,7 +361,7 @@
                 <field id="heading_settings" translate="label comment" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Settings</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-					<comment>Configure the Item update with the values below, we highly recommend to check your Magento cron job functionality to make sure all your items are updated frequently.</comment>
+                    <comment>Configure the Item update with the values below, we highly recommend to check your Magento cron job functionality to make sure all your items are updated frequently.</comment>
                 </field>
                 <field id="cron" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Cron</label>
@@ -387,7 +387,7 @@
                 <field id="heading_item_stores" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enabled Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-					<comment>You can only activate and or set the Webhook per specific Store View. You can select the Store Views using the dropdown on the top of the left.</comment>
+                    <comment>You can only activate and or set the Webhook per specific Store View. You can select the Store Views using the dropdown on the top of the left.</comment>
                 </field>
                 <field id="item_stores" translate="label" type="text" sortOrder="21" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Stores</label>

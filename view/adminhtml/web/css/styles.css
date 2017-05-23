@@ -213,11 +213,17 @@
     font-weight: bold;
 }
 #row_magmodules_channable_marketplace_order_item_stores td {
-    max-width: 400px;
-    overflow: scroll;
+    max-width: 285px;
+    padding: 5px 5px 10px 5px;
     height: 30px;
-    margin: auto;
-    border: 0px;
-    vertical-align: middle;
-    box-sizing: content-box;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    font-size: 12px;
 }
