@@ -68,16 +68,6 @@ To get your authentication keys:
 7. When prompted, enter a descriptive name to identify the key pair.
 8. Click Generate New. Use the Public key as your user name and the Private key as your password.
    
-
-### Configuration
-1. Set ‘Enabled’ to ‘Yes’
-2. Select product in the Product field
-3. Enter the API key of your webshop. You can look up the API key in the merchant portal. In the portal go to ‘Settings’  > ‘Webshops’ and select the relevant webshop. The detail screen contains the API Key. 
-4. Save your configuration
-5. Configure each payment method you would like to offer in your webshop.
-6. Enable only those payment methods that you applied for and for which you have received a confirmation from us. 
-7. For every payment method you would like to offer, click on the payment method
-
 ## Development by Magmodules
 
 We are a Dutch Magento® Only Agency dedicated to the development of extensions for Magento® 1 and Magento® 2. All our extensions are coded by our own team and our support team is always there to help you out. 
