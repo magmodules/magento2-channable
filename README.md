@@ -46,12 +46,6 @@ Before you start up the installation process, we recommend that you make a backu
    ```
    After the installation. Go to your Magento® admin portal, to ‘Stores’ > ‘Configuration’ > ‘Magmodules’ > ‘Channable’.
    
-   Requirements
-   
-   This extension requires the ING API client for PHP.
-   When using composer this will be installed automatically.
-   
-   
 ### Installation using the Magento® Marketplace (not yet available) ###
 Get your authentication keys
 Overview of Magento® authentication
