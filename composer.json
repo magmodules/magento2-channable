@@ -2,7 +2,7 @@
   "name": "magmodules/magento2-channable",
   "description": "Channable integration for Magento 2",
   "type": "magento2-module",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "license": [
     "OSL-3.0",
     "AFL-3.0"
