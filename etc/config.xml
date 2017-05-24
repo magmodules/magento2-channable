@@ -45,9 +45,8 @@
                 <active>1</active>
                 <model>Magmodules\Channable\Model\Payment\Channable</model>
                 <order_status>pending</order_status>
-                <title>Channable Marketplace Payment</title>
+                <title>Channable Payment</title>
                 <allowspecific>0</allowspecific>
-                <group>channable</group>
             </channable>
         </payment>
     </default>
