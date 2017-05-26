@@ -261,12 +261,14 @@ class Source extends AbstractHelper
         $extraFields = [];
         if ($attributes = $this->generalHelper->getStoreValue(self::XML_PATH_EXTRA_FIELDS)) {
             $attributes = @unserialize($attributes);
-            foreach ($attributes as $attribute) {
-                $label = str_replace(' ', '_', $attribute['name']);
-                $extraFields[$attribute['attribute']] = [
-                    'label'  => strtolower($label),
-                    'source' => $attribute['attribute']
-                ];
+            if (is_array($attributes)) {
+                foreach ($attributes as $attribute) {
+                    $label = str_replace(' ', '_', $attribute['name']);
+                    $extraFields[$attribute['attribute']] = [
+                        'label'  => strtolower($label),
+                        'source' => $attribute['attribute']
+                    ];
+                }
             }
         }
 
