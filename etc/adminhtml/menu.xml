@@ -9,16 +9,6 @@
              parent="Magento_Backend::marketing"
              resource="Magmodules_Channable::general"
         />
-        <!--
-        <add id="Magmodules_Channable::channable_config"
-             title="Configuration"
-             module="Magmodules_Channable"
-             sortOrder="1"
-             parent="Magmodules_Channable::channable"
-             resource="Magmodules_Channable::config"
-             action="admin/system_config/edit/section/magmodules_channable"
-        />
-        -->
         <add id="Magmodules_Channable::channable_item"
              title="Item Updates"
              module="Magmodules_Channable"

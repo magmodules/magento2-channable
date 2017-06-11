@@ -10,6 +10,7 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductColl
 use Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory as ProductAttributeCollectionFactory;
 use Magento\Catalog\Model\Indexer\Product\Flat\StateFactory;
 use Magento\CatalogInventory\Helper\Stock as StockHelper;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
 class Products
 {
@@ -45,11 +46,10 @@ class Products
      * @param string $productIds
      * @param string $count
      *
-     * @return $this|int
+     * @return mixed
      */
     public function getCollection($config, $page = 1, $productIds = '', $count = '')
     {
-
         $flat = $config['flat'];
         $filters = $config['filters'];
         $attributes = $this->getAttributes($config['attributes']);
@@ -62,8 +62,8 @@ class Products
 
         $collection = $this->productCollectionFactory
             ->create(['catalogProductFlatState' => $productFlatState])
-            ->addStoreFilter($config['store_id'])
             ->addAttributeToSelect($attributes)
+            ->addAttributeToFilter('status', Status::STATUS_ENABLED)
             ->addMinimalPrice()
             ->addUrlRewrite()
             ->addFinalPrice();
@@ -101,7 +101,7 @@ class Products
         if (empty($count)) {
             return $collection->load();
         } else {
-            return $collection->count();
+            return $collection->getSize(); //$collection->count();
         }
     }
 

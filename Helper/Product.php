@@ -9,22 +9,22 @@ namespace Magmodules\Channable\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Catalog\Model\Product\Gallery\ReadHandler as GalleryReadHandler;
+use Magento\Catalog\Helper\Image as ProductImageHelper;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Api\AttributeSetRepositoryInterface;
 use Magento\Framework\Filter\FilterManager;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
-use Magmodules\Channable\Helper\General as GeneralHelper;
 
 class Product extends AbstractHelper
 {
 
-    private $generalHelper;
     private $eavConfig;
     private $filter;
     private $catalogProductTypeConfigurable;
     private $attributeSet;
+    private $productImageHelper;
     private $galleryReadHandler;
 
     /**
@@ -32,7 +32,7 @@ class Product extends AbstractHelper
      *
      * @param Context                         $context
      * @param GalleryReadHandler              $galleryReadHandler
-     * @param General                         $generalHelper
+     * @param ProductImageHelper              $productImageHelper
      * @param EavConfig                       $eavConfig
      * @param FilterManager                   $filter
      * @param AttributeSetRepositoryInterface $attributeSet
@@ -41,14 +41,14 @@ class Product extends AbstractHelper
     public function __construct(
         Context $context,
         GalleryReadHandler $galleryReadHandler,
-        GeneralHelper $generalHelper,
+        ProductImageHelper $productImageHelper,
         EavConfig $eavConfig,
         FilterManager $filter,
         AttributeSetRepositoryInterface $attributeSet,
         Configurable $catalogProductTypeConfigurable
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
-        $this->generalHelper = $generalHelper;
+        $this->productImageHelper = $productImageHelper;
         $this->eavConfig = $eavConfig;
         $this->filter = $filter;
         $this->attributeSet = $attributeSet;
@@ -57,9 +57,9 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $product
-     * @param $parent
-     * @param $config
+     * @param \Magento\Catalog\Model\Product $product
+     * @param \Magento\Catalog\Model\Product $parent
+     * @param                                $config
      *
      * @return array
      */
@@ -92,6 +92,9 @@ class Product extends AbstractHelper
             }
             if (!empty($attribute['static'])) {
                 $dataRow[$attribute['label']] = $attribute['static'];
+            }
+            if (!empty($attribute['config'])) {
+                $dataRow[$attribute['label']] = $config[$attribute['config']];
             }
             if (!empty($attribute['condition'])) {
                 $dataRow[$attribute['label']] = $this->getCondition(
@@ -167,7 +170,7 @@ class Product extends AbstractHelper
                 $value = $this->getStockValue($type, $product, $config['inventory']);
                 break;
             default:
-                $value = $this->getValue($attribute, $product, $config['store_id']);
+                $value = $this->getValue($attribute, $product);
                 break;
         }
 
@@ -249,6 +252,11 @@ class Product extends AbstractHelper
             return $images;
         } else {
             $img = '';
+            if (!empty($attribute['resize'])) {
+                $source = $attribute['source'];
+                $size = $attribute['resize'];
+                return $this->getResizedImage($product, $source, $size);
+            }
             if ($url = $product->getData($attribute['source'])) {
                 $img = $config['url_type_media'] . 'catalog/product' . $url;
             }
@@ -258,7 +266,45 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $product
+     * @param \Magento\Catalog\Model\Product $product
+     * @param                                $source
+     * @param                                $size
+     *
+     * @return string
+     */
+    public function getResizedImage($product, $source, $size)
+    {
+        $size = explode('x', $size);
+        $width = $size[0];
+        $height = end($size);
+
+        $imageId = [
+            'image'       => 'product_base_image',
+            'thumbnail'   => 'product_thumbnail_image',
+            'small_image' => 'product_small_image'
+        ];
+
+        if (isset($imageId[$source])) {
+            $source = $imageId[$source];
+        }
+
+        $resizedImage = $this->productImageHelper->init($product, $source)
+            ->constrainOnly(true)
+            ->keepAspectRatio(true)
+            ->keepTransparency(true)
+            ->keepFrame(false);
+
+        if ($height > 0 && $width > 0) {
+            $resizedImage->resize($width, $height);
+        } else {
+            $resizedImage->resize($width);
+        }
+
+        return $resizedImage->getUrl();
+    }
+
+    /**
+     * @param \Magento\Catalog\Model\Product $product
      *
      * @return mixed
      */
@@ -269,9 +315,9 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $attribute
-     * @param $product
-     * @param $inventory
+     * @param                                $attribute
+     * @param \Magento\Catalog\Model\Product $product
+     * @param                                $inventory
      *
      * @return bool
      */
@@ -307,21 +353,22 @@ class Product extends AbstractHelper
                 return $product->getData('qty_increments');
             }
         }
+
+        return '';
     }
 
     /**
      * @param                                $attribute
      * @param \Magento\Catalog\Model\Product $product
-     * @param                                $storeId
      *
      * @return string
      */
-    public function getValue($attribute, $product, $storeId)
+    public function getValue($attribute, $product)
     {
         if ($attribute['type'] == 'select') {
             if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                 $value = $product->getData($attribute['source']);
-                return (string)$attr->setStoreId($storeId)->getSource()->getOptionText($value);
+                return (string)$attr->getSource()->getOptionText($value);
             }
         }
         if ($attribute['type'] == 'multiselect') {
@@ -329,7 +376,7 @@ class Product extends AbstractHelper
                 $value_text = [];
                 $values = explode(',', $product->getData($attribute['source']));
                 foreach ($values as $value) {
-                    $value_text[] = $attr->setStoreId($storeId)->getSource()->getOptionText($value);
+                    $value_text[] = $attr->getSource()->getOptionText($value);
                 }
                 return implode('/', $value_text);
             }
@@ -353,6 +400,9 @@ class Product extends AbstractHelper
             }
             if (in_array('number', $actions)) {
                 $value = number_format($value, 2);
+            }
+            if (in_array('round', $actions)) {
+                $value = round($value);
             }
         }
         if (!empty($attribute['max'])) {
@@ -410,21 +460,46 @@ class Product extends AbstractHelper
         $config = $config['price_config'];
 
         $price = floatval($product->getPriceInfo()->getPrice('regular_price')->getValue());
-        $final_price = floatval($product->getPriceInfo()->getPrice('final_price')->getValue());
-        $special_price = floatval($product->getPriceInfo()->getPrice('special_price')->getValue());
+        $finalPrice = floatval($product->getPriceInfo()->getPrice('final_price')->getValue());
+        $specialPrice = floatval($product->getPriceInfo()->getPrice('special_price')->getValue());
 
         $prices = [];
         $prices[$config['price']] = $this->formatPrice($price, $config);
 
-        if ($price > $final_price) {
-            $prices[$config['sales_price']] = $this->formatPrice($final_price, $config);
+        if (!empty($config['final_price'])) {
+            $prices[$config['final_price']] = $this->formatPrice($finalPrice, $config);
         }
 
-        if ($special_price < $price) {
+        if (($price > $finalPrice) && !empty($config['sales_price'])) {
+            $prices[$config['sales_price']] = $this->formatPrice($finalPrice, $config);
+        }
+
+        if (($specialPrice < $price) && !empty($config['sales_date_range'])) {
             if ($product->getSpecialFromDate() && $product->getSpecialToDate()) {
                 $from = date('Y-m-d', strtotime($product->getSpecialFromDate()));
                 $to = date('Y-m-d', strtotime($product->getSpecialToDate()));
                 $prices[$config['sales_date_range']] = $from . '/' . $to;
+            }
+        }
+
+        if ($price <= 0) {
+            if (!empty($product['min_price'])) {
+                $prices[$config['price']] = $this->formatPrice($product['min_price'], $config);
+            }
+        }
+
+        if (!empty($product['min_price']) && !empty($config['min_price'])) {
+            $prices[$config['min_price']] = $this->formatPrice($product['min_price'], $config);
+        }
+        if (!empty($product['max_price']) && !empty($config['max_price'])) {
+            $prices[$config['max_price']] = $this->formatPrice($product['max_price'], $config);
+        }
+
+        if (!empty($config['discount_perc']) && isset($prices[$config['sales_price']])) {
+            $discount = ($prices[$config['sales_price']] - $prices[$config['price']]) / $prices[$config['price']];
+            $discount = $discount * -100;
+            if ($discount > 0) {
+                $prices[$config['discount_perc']] = round($discount, 1) . '%';
             }
         }
 
@@ -439,16 +514,16 @@ class Product extends AbstractHelper
      */
     public function formatPrice($data, $config)
     {
-        $data = number_format($data, 2, '.', '');
-        if (!empty($config['price_config']['use_currency'])) {
-            $data = ' ' . $config['currency'];
+        $price = number_format($data, 2, '.', '');
+        if (!empty($config['use_currency']) && ($price >= 0)) {
+            $price .= ' ' . $config['currency'];
         }
-        return $data;
+        return $price;
     }
 
     /**
      * @param        $attributes
-     * @param string $parentAttributes
+     * @param array  $parentAttributes
      *
      * @return array
      */

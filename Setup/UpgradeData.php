@@ -15,7 +15,7 @@ use Magento\Framework\DB\Ddl\Table;
 class UpgradeData implements UpgradeDataInterface
 {
 
-    const TABLE_NAME = 'channable_items';
+    const TABLE_NAME_ITEMS = 'channable_items';
 
     private $salesSetupFactory;
 
@@ -69,7 +69,7 @@ class UpgradeData implements UpgradeDataInterface
         }
 
         if (version_compare($context->getVersion(), "0.9.7", "<")) {
-            $itemsTable = $setup->getTable(self::TABLE_NAME);
+            $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
             if ($setup->getConnection()->isTableExists($itemsTable) != true) {
                 $itemsTable = $setup->getConnection()
                     ->newTable($itemsTable)
@@ -180,6 +180,24 @@ class UpgradeData implements UpgradeDataInterface
                     ->setOption('type', 'InnoDB')
                     ->setOption('charset', 'utf8');
                 $setup->getConnection()->createTable($itemsTable);
+            }
+        }
+
+        if (version_compare($context->getVersion(), "0.9.9", "<")) {
+            $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
+            if ($setup->getConnection()->isTableExists($itemsTable)) {
+                $setup->getConnection()
+                    ->addColumn(
+                        $itemsTable,
+                        'gtin',
+                        [
+                            'type'     => Table::TYPE_TEXT,
+                            'length'   => 255,
+                            'nullable' => false,
+                            'comment'  => 'Product GTIN',
+                            'after'    => 'title'
+                        ]
+                    );
             }
         }
 

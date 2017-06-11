@@ -89,9 +89,10 @@ class Item extends AbstractModel
         $data['title'] = $row['title'];
 
         if (isset($row['price'])) {
-            $data['price'] = $row['price'];
-            $data['discount_price'] = (isset($row['special_price']) ? $row['special_price'] : '');
+            $data['price'] = preg_replace('/([^0-9\.,])/i', '', $row['price']);
+            $data['discount_price'] = (isset($row['sale_price']) ? preg_replace('/([^0-9\.,])/i', '', $row['sale_price']) : '');
             $data['qty'] = (isset($row['qty']) ? $row['qty'] : '');
+            $data['gtin'] = (isset($row['ean']) ? $row['ean'] : '');
 
             if (isset($row['availability']) && $row['availability'] == 'in stock') {
                 $data['is_in_stock'] = 1;
@@ -145,30 +146,29 @@ class Item extends AbstractModel
 
         $config = $this->sourceHelper->getConfig($storeId, 'api');
 
-        if (empty($config['api']['webhook'])) {
+        if (!empty($config['api']['webhook'])) {
+            $items = $this->itemFactory->create()->getCollection()
+                ->addFieldToFilter('store_id', $storeId)
+                ->addFieldToFilter('needs_update', 1)
+                ->setOrder('last_call', 'ASC')
+                ->setPageSize($config['api']['limit']);
+            if (!$items->getSize()) {
+                $result = [
+                    'status'   => 'success',
+                    'store_id' => $storeId,
+                    'qty'      => 0,
+                    'date'     => $this->generalHelper->getGmtData()
+                ];
+            } else {
+                $result = $this->updateCollection($items, $storeId, $config);
+            }
+        } else {
             $result = [
                 'status'   => 'error',
                 'store_id' => $storeId,
                 'qty'      => 0,
                 'date'     => $this->generalHelper->getGmtData()
             ];
-        }
-
-        $items = $this->itemFactory->create()->getCollection()
-            ->addFieldToFilter('store_id', $storeId)
-            ->addFieldToFilter('needs_update', 1)
-            ->setOrder('last_call', 'ASC')
-            ->setPageSize($config['api']['limit']);
-
-        if (!$items->getSize()) {
-            $result = [
-                'status'   => 'success',
-                'store_id' => $storeId,
-                'qty'      => 0,
-                'date'     => $this->generalHelper->getGmtData()
-            ];
-        } else {
-            $result = $this->updateCollection($items, $storeId, $config);
         }
 
         if (!empty($config['api']['log'])) {
@@ -245,6 +245,10 @@ class Item extends AbstractModel
         foreach ($items as $item) {
             $id = $item->getData('id');
 
+            if(!$item->getTitle()) {
+                continue;
+            }
+
             if (isset($productData[$id])) {
                 $product = $productData[$id];
             } else {
@@ -254,11 +258,13 @@ class Item extends AbstractModel
             $update = [];
             $update['item_id'] = $item->getItemId();
             $update['id'] = $id;
-            $update['title'] = isset($product['title']) ? $product['title'] : '';
+            $update['title'] = isset($product['title']) ? $product['title'] : $item->getTitle();
+            $update['gtin'] = isset($product['ean']) ? $product['ean'] : $item->getGtin();
             $update['stock'] = isset($product['qty']) ? round($product['qty']) : '0';
             $update['availability'] = isset($product['is_in_stock']) ? $product['is_in_stock'] : '0';
-            $update['price'] = isset($product['price']) ? $product['price'] : '';
+            $update['price'] = isset($product['price']) ? $product['price'] : $item->getPrice();
             $update['discount_price'] = isset($product['discount_price']) ? $product['discount_price'] : '';
+
             $postData[] = $update;
         }
 

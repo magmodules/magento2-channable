@@ -100,7 +100,8 @@ class Source extends AbstractHelper
             $config['url_type_media'] = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
             $config['base_url'] = $this->storeManager->getStore()->getBaseUrl();
             $config['weight_unit'] = ' ' . $this->generalHelper->getStoreValue(self::XML_PATH_WEIGHT_UNIT, $storeId);
-            $config['categories'] = $this->categoryHelper->getCollection('', '', 'channable_cat_disable_export');
+            $config['categories'] = $this->categoryHelper->getCollection($storeId, '', '',
+                'channable_cat_disable_export');
             $config['item_updates'] = $this->itemHelper->isEnabled();
             $config['delivery'] = $this->generalHelper->getStoreValue(self::XML_PATH_DELIVERY_TIME);
         }
@@ -128,6 +129,10 @@ class Source extends AbstractHelper
         $attributes['title'] = [
             'label'  => 'title',
             'source' => $this->generalHelper->getStoreValue(self::XML_PATH_NAME_SOURCE),
+        ];
+        $attributes['ean'] = [
+            'label'  => 'ean',
+            'source' => $this->generalHelper->getStoreValue(self::XML_PATH_EAN_SOURCE),
         ];
         $attributes['price'] = [
             'label'                     => 'price',
@@ -186,10 +191,6 @@ class Source extends AbstractHelper
             $attributes['brand'] = [
                 'label'  => 'brand',
                 'source' => $this->generalHelper->getStoreValue(self::XML_PATH_BRAND_SOURCE),
-            ];
-            $attributes['ean'] = [
-                'label'  => 'ean',
-                'source' => $this->generalHelper->getStoreValue(self::XML_PATH_EAN_SOURCE),
             ];
             $attributes['sku'] = [
                 'label'  => 'sku',
@@ -259,16 +260,13 @@ class Source extends AbstractHelper
     public function getExtraFields()
     {
         $extraFields = [];
-        if ($attributes = $this->generalHelper->getStoreValue(self::XML_PATH_EXTRA_FIELDS)) {
-            $attributes = @unserialize($attributes);
-            if (is_array($attributes)) {
-                foreach ($attributes as $attribute) {
-                    $label = str_replace(' ', '_', $attribute['name']);
-                    $extraFields[$attribute['attribute']] = [
-                        'label'  => strtolower($label),
-                        'source' => $attribute['attribute']
-                    ];
-                }
+        if ($attributes = $this->generalHelper->getStoreValueArray(self::XML_PATH_EXTRA_FIELDS)) {
+            foreach ($attributes as $attribute) {
+                $label = str_replace(' ', '_', $attribute['name']);
+                $extraFields[$attribute['attribute']] = [
+                    'label'  => strtolower($label),
+                    'source' => $attribute['attribute']
+                ];
             }
         }
 
@@ -300,15 +298,14 @@ class Source extends AbstractHelper
     {
         $priceFields = [];
         $priceFields['price'] = 'price';
-        $priceFields['final_price'] = 'price';
         $priceFields['sales_price'] = 'sale_price';
         $priceFields['sales_date_range'] = 'sale_price_effective_date';
         $priceFields['currency'] = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
 
         if ($type != 'api') {
-            $priceFields['show_currency'] = true;
+            $priceFields['use_currency'] = true;
         } else {
-            $priceFields['show_currency'] = false;
+            $priceFields['use_currency'] = false;
         }
 
         return $priceFields;
@@ -335,17 +332,14 @@ class Source extends AbstractHelper
         $relations = $this->generalHelper->getStoreValue(self::XML_PATH_RELATIONS_ENABLED);
         if ($relations) {
             $filters['relations'] = 1;
-            array_push($filters['visibility'], Visibility::VISIBILITY_NOT_VISIBLE);
+            if (!$visibilityFilter) {
+                array_push($filters['visibility'], Visibility::VISIBILITY_NOT_VISIBLE);
+            }
         } else {
             $filters['relations'] = 0;
         }
 
         $filters['limit'] = (int)$this->generalHelper->getStoreValue(self::XML_PATH_LIMIT);
-
-        if ($filters['relations'] == 1) {
-            $filters['exclude_parent'] = 1;
-        }
-
         $filters['stock'] = $this->generalHelper->getStoreValue(self::XML_PATH_STOCK);
 
         $categoryFilter = $this->generalHelper->getStoreValue(self::XML_PATH_CATEGORY_FILTER);
@@ -493,9 +487,11 @@ class Source extends AbstractHelper
                 }
             }
             $countries = @unserialize($config['delivery']);
-            foreach ($countries as $country) {
-                if (!empty($country[$stock])) {
-                    $deliveryTime['delivery_period_' . strtolower($country['code'])] = $country[$stock];
+            if (is_array($countries)) {
+                foreach ($countries as $country) {
+                    if (!empty($country[$stock])) {
+                        $deliveryTime['delivery_period_' . strtolower($country['code'])] = $country[$stock];
+                    }
                 }
             }
             return $deliveryTime;
