@@ -103,6 +103,24 @@ class General extends AbstractHelper
     }
 
     /**
+     * @param      $path
+     * @param null $storeId
+     * @param null $scope
+     *
+     * @return array|mixed
+     */
+    public function getStoreValueArray($path, $storeId = null, $scope = null)
+    {
+        $value = $this->getStoreValue($path, $storeId, $scope);
+        $value = @unserialize($value);
+        if (is_array($value)) {
+            return $value;
+        }
+
+        return false;
+    }
+
+    /**
      * Returns current version of the extension
      *
      * @return mixed

@@ -15,7 +15,7 @@ use Magento\Store\Model\App\Emulation;
 class ParentAttributes implements ArrayInterface
 {
 
-    private $source;
+    private $sourceHelper;
     private $request;
     private $appEmulation;
 
@@ -24,14 +24,14 @@ class ParentAttributes implements ArrayInterface
      *
      * @param Http         $request
      * @param Emulation    $appEmulation
-     * @param SourceHelper $source
+     * @param SourceHelper $sourceHelper
      */
     public function __construct(
         Http $request,
         Emulation $appEmulation,
-        SourceHelper $source
+        SourceHelper $sourceHelper
     ) {
-        $this->source = $source;
+        $this->sourceHelper = $sourceHelper;
         $this->appEmulation = $appEmulation;
         $this->request = $request;
     }
@@ -44,19 +44,20 @@ class ParentAttributes implements ArrayInterface
         $attributes = [];
         $storeId = $this->request->getParam('store');
         $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
-        $source = $this->source->getAttributes('parent');
+        $source = $this->sourceHelper->getAttributes('parent');
         $this->appEmulation->stopEnvironmentEmulation();
 
         foreach ($source as $key => $attribute) {
-            if (!empty($attribute['parent_selection_disabled'])) {
-                continue;
+            if (empty($attribute['parent_selection_disabled']) && empty($attribute['parent'])) {
+                $label = str_replace('_', ' ', $key);
+                $attributes[] = [
+                    'value' => $key,
+                    'label' => ucwords($label),
+                ];
             }
-            $label = str_replace('_', ' ', $attribute['label']);
-            $attributes[] = [
-                'value' => $key,
-                'label' => ucwords($label),
-            ];
         }
+
         return $attributes;
     }
+
 }

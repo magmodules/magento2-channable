@@ -81,13 +81,13 @@ class Category extends AbstractHelper
         $categories = [];
         foreach ($data as $key => $category) {
             $paths = explode('/', $category['path']);
-            $path_text = [];
+            $pathText = [];
             $custom = $default;
             $level = 0;
             $exclude = 0;
             foreach ($paths as $path) {
                 if (!empty($data[$path]['name']) && ($path != $parent)) {
-                    $path_text[] = $data[$path]['name'];
+                    $pathText[] = $data[$path]['name'];
                     if (!empty($data[$path]['custom'])) {
                         $custom = $data[$path]['custom'];
                     }
@@ -101,7 +101,7 @@ class Category extends AbstractHelper
                 $categories[$key] = [
                     'name'   => $category['name'],
                     'level'  => $level,
-                    'path'   => $path_text,
+                    'path'   => $pathText,
                     'custom' => $custom
                 ];
             }
