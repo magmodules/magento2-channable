@@ -262,9 +262,9 @@ class Source extends AbstractHelper
         $extraFields = [];
         if ($attributes = $this->generalHelper->getStoreValueArray(self::XML_PATH_EXTRA_FIELDS)) {
             foreach ($attributes as $attribute) {
-                $label = str_replace(' ', '_', $attribute['name']);
-                $extraFields[$attribute['attribute']] = [
-                    'label'  => strtolower($label),
+                $label = strtolower(str_replace(' ', '_', $attribute['name']));
+                $extraFields[$label] = [
+                    'label'  => $label,
                     'source' => $attribute['attribute']
                 ];
             }

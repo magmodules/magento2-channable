@@ -81,7 +81,7 @@ class Product extends AbstractHelper
             if (($attribute['parent'] == 2) && !$parent) {
                 continue;
             }
-            if (!empty($attribute['source']) || ($attribute['label'] == 'image_link')) {
+            if (!empty($attribute['source']) || ($type == 'image_link')) {
                 $dataRow[$attribute['label']] = $this->getAttributeValue(
                     $type,
                     $attribute,
@@ -205,7 +205,11 @@ class Product extends AbstractHelper
             $url = $config['base_url'] . $requestPath;
         }
         if (!empty($config['utm_code'])) {
-            $url .= $config['utm_code'];
+            if ($config['utm_code'][0] != '?') {
+                $url .= '?' . $config['utm_code'];
+            } else {
+                $url .= $config['utm_code'];
+            }
         }
         if (!empty($simple)) {
             if ($product->getTypeId() == 'configurable') {
