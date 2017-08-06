@@ -18,24 +18,20 @@ class CronFrequency implements ArrayInterface
     {
         return [
             [
-                'value' => '0 0 * * *',
-                'label' => __('Daily at 0:00')
+                'value' => '*/15 * * * *',
+                'label' => __('Every 15 minutes')
             ],
             [
-                'value' => '0 */6 * * *',
-                'label' => __('Every 6 hours')
+                'value' => '*/10 * * * *',
+                'label' => __('Every 10 minutes')
             ],
             [
-                'value' => '0 */4 * * *',
-                'label' => __('Every 4 hours')
+                'value' => '*/5 * * * *',
+                'label' => __('Every 5 minutes')
             ],
             [
-                'value' => '0 */2 * * *',
-                'label' => __('Every 2 hours')
-            ],
-            [
-                'value' => '0 * * * *',
-                'label' => __('Every hour')
+                'value' => '* * * * *',
+                'label' => __('Every minute')
             ],
             [
                 'value' => 'custom',
