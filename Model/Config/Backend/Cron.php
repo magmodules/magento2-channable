@@ -59,6 +59,10 @@ class Cron extends Value
     {
         $expression = $this->getData('groups/item/fields/cron_frequency/value');
 
+        if ($expression == 'custom') {
+            $expression = trim($this->getData('groups/item/fields/custom_frequency/value'));
+        }
+
         try {
             $this->configValueFactory->create()->load(
                 self::CRON_STRING_PATH,

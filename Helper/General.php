@@ -178,6 +178,9 @@ class General extends AbstractHelper
         }
     }
 
+    /**
+     * @return mixed
+     */
     public function getMarketplaceEnabled()
     {
         return $this->getStoreValue(self::XML_PATH_MARKETPLACE_ENABLE);

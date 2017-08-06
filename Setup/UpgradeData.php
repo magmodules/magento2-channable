@@ -63,7 +63,7 @@ class UpgradeData implements UpgradeDataInterface
                 'type'     => 'varchar',
                 'visible'  => false,
                 'required' => false,
-                'label'    => 'Channable: Channel ID'
+                'label'    => 'Channable: Channel Name'
             ];
             $salesSetup->addAttribute('order', 'channel_name', $channelName);
         }
