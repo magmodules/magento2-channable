@@ -80,7 +80,8 @@ class Feed extends AbstractHelper
     {
         $url = $this->storeManager->getStore($storeId)->getBaseUrl();
         $token = $this->generalHelper->getToken();
-        return $url . sprintf('channable/feed/preview/id/%s/token/%s', $storeId, $token);
+        $timestamp = $this->generalHelper->getTimestamp();
+        return $url . sprintf('channable/feed/preview/id/%s/token/%s/no-cache/%s', $storeId, $token, $timestamp);
     }
 
     /**

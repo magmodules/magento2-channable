@@ -97,6 +97,8 @@ class Products
             );
         }
 
+        $collection->getSelect()->group('e.entity_id');
+
         return $collection;
     }
 

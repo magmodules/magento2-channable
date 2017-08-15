@@ -195,6 +195,14 @@ class General extends AbstractHelper
     }
 
     /**
+     * @return int
+     */
+    public function getTimestamp()
+    {
+        return $this->date->gmtTimestamp();
+    }
+
+    /**
      * @param $type
      * @param $data
      */
