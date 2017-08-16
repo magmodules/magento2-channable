@@ -50,7 +50,7 @@ class Json extends Action
     public function execute()
     {
         $storeId = (int)$this->getRequest()->getParam('id');
-        $page = (int)$this->getRequest()->getParam('page');
+        $page = (int)$this->getRequest()->getParam('page', 1);
         $token = $this->getRequest()->getParam('token');
 
         if (empty($storeId) || empty($token)) {
@@ -73,7 +73,7 @@ class Json extends Action
             $productId = '';
         }
 
-        if ($data = $this->generateModel->generateByStore($storeId, $productId, $page)) {
+        if ($data = $this->generateModel->generateByStore($storeId, $page, $productId)) {
             $result = $this->resultJsonFactory->create();
 
             return $result->setData($data);

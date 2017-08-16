@@ -63,12 +63,12 @@ class Generate
 
     /**
      * @param       $storeId
-     * @param array $productIds
      * @param int   $page
+     * @param array $productIds
      *
      * @return array
      */
-    public function generateByStore($storeId, $productIds = [], $page = 0)
+    public function generateByStore($storeId, $page, $productIds = [])
     {
         $feed = [];
         $timeStart = microtime(true);
