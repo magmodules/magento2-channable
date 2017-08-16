@@ -63,20 +63,24 @@ class Generate
 
     /**
      * @param       $storeId
-     * @param array $productIds
      * @param int   $page
+     * @param array $productIds
      *
      * @return array
      */
-    public function generateByStore($storeId, $productIds = [], $page = 0)
+    public function generateByStore($storeId, $page, $productIds = [])
     {
         $feed = [];
         $timeStart = microtime(true);
         $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
 
         $config = $this->sourceHelper->getConfig($storeId, 'feed');
-        $products = $this->productModel->getCollection($config, $page, $productIds);
+        $productCollection = $this->productModel->getCollection($config, $page, $productIds);
 
+        $size = $productCollection->getSize();
+        $pages = $productCollection->getLastPageNumber();
+
+        $products = $productCollection->load();
         foreach ($products as $product) {
             $parent = '';
             if (!empty($config['filters']['relations'])) {
@@ -102,12 +106,11 @@ class Generate
             }
         }
 
-        if (!empty($feed)) {
+        if ($page <= $pages) {
             $return = [];
             if (empty($productId)) {
-                $count = $this->productModel->getCollection($config, '', '', 1);
                 $limit = $config['filters']['limit'];
-                $return['config'] = $this->feedHelper->getFeedSummary($timeStart, $count, $limit, count($feed), $page);
+                $return['config'] = $this->feedHelper->getFeedSummary($timeStart, $size, $limit, count($feed), $page, $pages);
                 $return['products'] = $feed;
             } else {
                 if (!empty($feed[0])) {

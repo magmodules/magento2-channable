@@ -31,6 +31,14 @@ class OrderStores extends Field
     }
 
     /**
+     * @return null
+     */
+    public function getCacheLifetime()
+    {
+        return null;
+    }
+
+    /**
      * Version display in config
      *
      * @param AbstractElement $element

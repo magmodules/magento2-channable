@@ -178,6 +178,9 @@ class General extends AbstractHelper
         }
     }
 
+    /**
+     * @return mixed
+     */
     public function getMarketplaceEnabled()
     {
         return $this->getStoreValue(self::XML_PATH_MARKETPLACE_ENABLE);
@@ -189,6 +192,14 @@ class General extends AbstractHelper
     public function getGmtData()
     {
         return $this->date->gmtDate();
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimestamp()
+    {
+        return $this->date->gmtTimestamp();
     }
 
     /**

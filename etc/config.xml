@@ -49,5 +49,16 @@
                 <allowspecific>0</allowspecific>
             </channable>
         </payment>
+        <carriers>
+            <channable>
+                <active>1</active>
+                <sallowspecific>0</sallowspecific>
+                <model>Magmodules\Channable\Model\Carrier\Channable</model>
+                <name>Channable Shipping</name>
+                <title>Channable</title>
+                <price>0.00</price>
+                <type>I</type>
+            </channable>
+        </carriers>
     </default>
 </config>

@@ -33,6 +33,10 @@ class CronFrequency implements ArrayInterface
                 'value' => '* * * * *',
                 'label' => __('Every minute')
             ],
+            [
+                'value' => 'custom',
+                'label' => __('Custom')
+            ],
         ];
     }
 }

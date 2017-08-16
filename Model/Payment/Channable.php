@@ -13,6 +13,7 @@ class Channable extends AbstractMethod
 {
 
     const CODE = 'channable';
+
     protected $_code = self::CODE;
     protected $_isOffline = true;
     protected $_canUseCheckout = false;

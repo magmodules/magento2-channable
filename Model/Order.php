@@ -27,6 +27,7 @@ use Magento\Framework\DB\Transaction;
 use Magento\Tax\Model\Calculation as TaxCalculationn;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 use Magento\Shipping\Model\ShippingFactory;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Psr\Log\LoggerInterface;
 
 class Order
@@ -51,6 +52,7 @@ class Order
     private $generalHelper;
     private $orderHelper;
     private $shippingFactory;
+    private $checkoutSession;
     private $logger;
 
     /**
@@ -75,6 +77,7 @@ class Order
      * @param ShippingFactory             $shippingFactory
      * @param GeneralHelper               $generalHelper
      * @param OrderlHelper                $orderHelper
+     * @param CheckoutSession             $checkoutSession
      * @param LoggerInterface             $logger
      */
     public function __construct(
@@ -97,6 +100,7 @@ class Order
         ShippingFactory $shippingFactory,
         GeneralHelper $generalHelper,
         OrderlHelper $orderHelper,
+        CheckoutSession $checkoutSession,
         LoggerInterface $logger
     ) {
         $this->storeManager = $storeManager;
@@ -118,6 +122,7 @@ class Order
         $this->generalHelper = $generalHelper;
         $this->orderHelper = $orderHelper;
         $this->shippingFactory = $shippingFactory;
+        $this->checkoutSession = $checkoutSession;
         $this->logger = $logger;
     }
 
@@ -209,7 +214,6 @@ class Order
                 $itemCount += $item['quantity'];
             }
 
-            $shippingPriceCal = '';
             $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('shipping', $storeId);
             if (!empty($taxCalculation)) {
                 $shippingPriceCal = $data['price']['shipping'];
@@ -221,6 +225,8 @@ class Order
                 $shippingPriceCal = ($data['price']['shipping'] / (100 + $percent) * 100);
             }
 
+            $this->checkoutSession->setChannableEnabled(1);
+            $this->checkoutSession->setChannableShipping($shippingPriceCal);
             $shippingMethod = $this->getShippingMethod($cart, $store, $orderTotal, $orderWeight, $itemCount);
 
             $shippingAddress = $cart->getShippingAddress();
@@ -264,6 +270,9 @@ class Order
             $this->logger->debug($e);
             return $this->jsonRepsonse($e->getMessage(), '', $data['channable_id']);
         }
+
+        $this->checkoutSession->unsChannableEnabled();
+        $this->checkoutSession->unsChannableShipping();
 
         return $this->jsonRepsonse('', $order->getIncrementId());
     }
@@ -433,6 +442,15 @@ class Order
         return $street;
     }
 
+    /**
+     * @param $cart
+     * @param $store
+     * @param $orderTotal
+     * @param $orderWeight
+     * @param $itemCount
+     *
+     * @return mixed|string
+     */
     public function getShippingMethod($cart, $store, $orderTotal, $orderWeight, $itemCount)
     {
 
@@ -541,7 +559,5 @@ class Order
         } else {
             return false;
         }
-
-        return $tracking;
     }
 }

@@ -1,6 +1,6 @@
 # Channable Connect for Magento® 2
 
-The Channable Connect extension makes it effortless to connect your Magento® 2 catalog with the Channable platform. Please note this extension is still in BETA.
+The Channable Connect extension makes it effortless to connect your Magento® 2 catalog with the Channable platform.
 
 ## Installation
 To make the integration process as easy as possible for you, we have developed various plugins for your webshop software package. 

@@ -375,11 +375,18 @@
                         <field id="cron">1</field>
                     </depends>
                 </field>
-                <field id="limit" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="custom_frequency" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Custom Frequency</label>
+                    <depends>
+                        <field id="cron">1</field>
+                        <field id="cron_frequency">custom</field>
+                    </depends>
+                </field>
+                <field id="limit" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Products per run</label>
                     <comment>Set a limit on the number of products for each update.</comment>
                 </field>
-                <field id="log" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="log" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Log Calls</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Write all the calls and updates to the Channable log file located in /var/log/channable.log</comment>

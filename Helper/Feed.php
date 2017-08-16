@@ -80,7 +80,8 @@ class Feed extends AbstractHelper
     {
         $url = $this->storeManager->getStore($storeId)->getBaseUrl();
         $token = $this->generalHelper->getToken();
-        return $url . sprintf('channable/feed/preview/id/%s/token/%s', $storeId, $token);
+        $timestamp = $this->generalHelper->getTimestamp();
+        return $url . sprintf('channable/feed/preview/id/%s/token/%s/no-cache/%s', $storeId, $token, $timestamp);
     }
 
     /**
@@ -106,12 +107,16 @@ class Feed extends AbstractHelper
     }
 
     /**
-     * @param $time_start
-     * @param $count
-     * @param $limit
+     * @param     $timeStart
+     * @param int $count
+     * @param int $limit
+     * @param int $productQty
+     * @param int $page
+     * @param int $pages
+     *
      * @return array
      */
-    public function getFeedSummary($time_start, $count, $limit, $product_count, $page = 1)
+    public function getFeedSummary($timeStart, $count, $limit, $productQty, $page = 1, $pages = 1)
     {
         $summary = [];
         $summary['system'] = 'Magento 2';
@@ -120,15 +125,15 @@ class Feed extends AbstractHelper
         $summary['magento_version'] = $this->generalHelper->getMagentoVersion();
         $summary['products_total'] = $count;
         $summary['products_limit'] = $limit;
-        $summary['products_output'] = $product_count;
-        $summary['products_pages'] = (($limit) && ($count > $limit)) ? ceil($count / $limit) : 1;
+        $summary['products_output'] = $productQty;
+        $summary['products_pages'] = $pages;
         $summary['current_page'] = ($page) ? $page : 1;
-        if ($summary['products_pages'] > $summary['current_page']) {
+        if ($pages > $summary['current_page']) {
             $summary['next_page'] = 'true';
         } else {
             $summary['next_page'] = 'false';
         }
-        $summary['time'] = number_format((microtime(true) - $time_start), 2) . ' sec';
+        $summary['time'] = number_format((microtime(true) - $timeStart), 2) . ' sec';
         $summary['date'] = $this->datetime->gmtDate();
         return $summary;
     }

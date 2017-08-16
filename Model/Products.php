@@ -44,11 +44,10 @@ class Products
      * @param        $config
      * @param int    $page
      * @param string $productIds
-     * @param string $count
      *
      * @return mixed
      */
-    public function getCollection($config, $page = 1, $productIds = '', $count = '')
+    public function getCollection($config, $page = 1, $productIds = '')
     {
         $flat = $config['flat'];
         $filters = $config['filters'];
@@ -68,7 +67,7 @@ class Products
             ->addUrlRewrite()
             ->addFinalPrice();
 
-        if (($filters['limit'] > 0) && empty($productId) && empty($count)) {
+        if (($filters['limit'] > 0) && empty($productId)) {
             $collection->setPage($page, $filters['limit'])->getCurPage();
         }
 
@@ -98,11 +97,9 @@ class Products
             );
         }
 
-        if (empty($count)) {
-            return $collection->load();
-        } else {
-            return $collection->getSize(); //$collection->count();
-        }
+        $collection->getSelect()->group('e.entity_id');
+
+        return $collection;
     }
 
     /**
