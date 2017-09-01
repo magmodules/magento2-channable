@@ -389,7 +389,10 @@ class Product extends AbstractHelper
         if ($attribute['type'] == 'select') {
             if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                 $value = $product->getData($attribute['source']);
-                return (string)$attr->getSource()->getOptionText($value);
+                $data = $attr->getSource()->getOptionText($value);
+                if (!is_array($data)) {
+                    return (string)$data;
+                }
             }
         }
         if ($attribute['type'] == 'multiselect') {
