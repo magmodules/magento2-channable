@@ -420,10 +420,14 @@ class Product extends AbstractHelper
                 $value = strip_tags($value);
             }
             if (in_array('number', $actions)) {
-                $value = number_format($value, 2);
+                if (is_numeric($value)) {
+                    $value = number_format($value, 2);
+                }
             }
             if (in_array('round', $actions)) {
-                $value = round($value);
+                if (is_numeric($value)) {
+                    $value = round($value);
+                }
             }
         }
         if (!empty($attribute['max'])) {
