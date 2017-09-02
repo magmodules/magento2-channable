@@ -103,6 +103,10 @@ class General extends AbstractHelper
     }
 
     /**
+     * Get Configuration Array data.
+     * Pre Magento 2.2.x => Unserialize
+     * Magento 2.2.x and up => Json Decode
+     *
      * @param      $path
      * @param null $storeId
      * @param null $scope
@@ -112,12 +116,21 @@ class General extends AbstractHelper
     public function getStoreValueArray($path, $storeId = null, $scope = null)
     {
         $value = $this->getStoreValue($path, $storeId, $scope);
+
+        $result = json_decode($value, true);
+        if (json_last_error() == JSON_ERROR_NONE) {
+            if (is_array($result)) {
+                return $result;
+            }
+            return [];
+        }
+
         $value = @unserialize($value);
         if (is_array($value)) {
             return $value;
         }
 
-        return false;
+        return [];
     }
 
     /**

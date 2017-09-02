@@ -162,6 +162,9 @@ class Products
             ->create(['catalogProductFlatState' => $productFlatState])
             ->addAttributeToFilter('entity_id', $parentId)
             ->addAttributeToSelect($attributes)
+            ->addMinimalPrice()
+            ->addUrlRewrite()
+            ->addFinalPrice()
             ->getFirstItem();
 
         return $parent;

@@ -14,6 +14,8 @@ use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Api\AttributeSetRepositoryInterface;
 use Magento\Framework\Filter\FilterManager;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
+use Magento\GroupedProduct\Model\Product\Type\Grouped;
+use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 
@@ -23,6 +25,8 @@ class Product extends AbstractHelper
     private $eavConfig;
     private $filter;
     private $catalogProductTypeConfigurable;
+    private $catalogProductTypeGrouped;
+    private $catalogProductTypeBundle;
     private $attributeSet;
     private $productImageHelper;
     private $galleryReadHandler;
@@ -36,6 +40,8 @@ class Product extends AbstractHelper
      * @param EavConfig                       $eavConfig
      * @param FilterManager                   $filter
      * @param AttributeSetRepositoryInterface $attributeSet
+     * @param Grouped                         $catalogProductTypeGrouped
+     * @param Bundle                          $catalogProductTypeBundle
      * @param Configurable                    $catalogProductTypeConfigurable
      */
     public function __construct(
@@ -45,6 +51,8 @@ class Product extends AbstractHelper
         EavConfig $eavConfig,
         FilterManager $filter,
         AttributeSetRepositoryInterface $attributeSet,
+        Grouped $catalogProductTypeGrouped,
+        Bundle $catalogProductTypeBundle,
         Configurable $catalogProductTypeConfigurable
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
@@ -53,6 +61,8 @@ class Product extends AbstractHelper
         $this->filter = $filter;
         $this->attributeSet = $attributeSet;
         $this->catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
+        $this->catalogProductTypeGrouped = $catalogProductTypeGrouped;
+        $this->catalogProductTypeBundle = $catalogProductTypeBundle;
         parent::__construct($context);
     }
 
@@ -140,6 +150,13 @@ class Product extends AbstractHelper
                 }
             }
         }
+
+        if ($product->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
+            if (empty($parent)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -221,12 +238,12 @@ class Product extends AbstractHelper
                         $config['store_id']
                     )
                     ) {
-                        $url_extra[] = $option['attribute_id'] . '=' . $id;
+                        $urlExtra[] = $option['attribute_id'] . '=' . $id;
                     }
                 }
             }
-            if (!empty($url_extra)) {
-                $url = $url . '#' . implode('&', $url_extra);
+            if (!empty($urlExtra) && !empty($url)) {
+                $url = $url . '#' . implode('&', $urlExtra);
             }
         }
 
@@ -372,7 +389,10 @@ class Product extends AbstractHelper
         if ($attribute['type'] == 'select') {
             if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                 $value = $product->getData($attribute['source']);
-                return (string)$attr->getSource()->getOptionText($value);
+                $data = $attr->getSource()->getOptionText($value);
+                if (!is_array($data)) {
+                    return (string)$data;
+                }
             }
         }
         if ($attribute['type'] == 'multiselect') {
@@ -403,10 +423,14 @@ class Product extends AbstractHelper
                 $value = strip_tags($value);
             }
             if (in_array('number', $actions)) {
-                $value = number_format($value, 2);
+                if (is_numeric($value)) {
+                    $value = number_format($value, 2);
+                }
             }
             if (in_array('round', $actions)) {
-                $value = round($value);
+                if (is_numeric($value)) {
+                    $value = round($value);
+                }
             }
         }
         if (!empty($attribute['max'])) {
@@ -551,17 +575,29 @@ class Product extends AbstractHelper
     }
 
     /**
+     * Return Parent ID from Simple.
+     *
      * @param $productId
      *
      * @return bool
      */
     public function getParentId($productId)
     {
-        $parentByChild = $this->catalogProductTypeConfigurable->getParentIdsByChild($productId);
-        if (isset($parentByChild[0])) {
-            $id = $parentByChild[0];
-            return $id;
+        $configIds = $this->catalogProductTypeConfigurable->getParentIdsByChild($productId);
+        if (isset($configIds[0])) {
+            return $configIds[0];
         }
+
+        $groupedIds = $this->catalogProductTypeGrouped->getParentIdsByChild($productId);
+        if (isset($groupedIds[0])) {
+            return $groupedIds[0];
+        }
+
+        $bundleIds = $this->catalogProductTypeBundle->getParentIdsByChild($productId);
+        if (isset($bundleIds[0])) {
+            return $bundleIds[0];
+        }
+
         return false;
     }
 }
