@@ -487,9 +487,9 @@ class Product extends AbstractHelper
     {
         $config = $config['price_config'];
 
-        $price = floatval($product->getPriceInfo()->getPrice('regular_price')->getValue());
-        $finalPrice = floatval($product->getPriceInfo()->getPrice('final_price')->getValue());
-        $specialPrice = floatval($product->getPriceInfo()->getPrice('special_price')->getValue());
+        $price = floatval($product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue());
+        $finalPrice = floatval($product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue());
+        $specialPrice = floatval($product->getPriceInfo()->getPrice('special_price')->getAmount()->getValue());
 
         $prices = [];
         $prices[$config['price']] = $this->formatPrice($price, $config);
@@ -535,14 +535,15 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $data
+     * @param $price
      * @param $config
      *
      * @return string
      */
-    public function formatPrice($data, $config)
+    public function formatPrice($price, $config)
     {
-        $price = number_format($data, 2, '.', '');
+        $decimal = isset($config['decimal_point']) ? $config['decimal_point'] : '.';
+        $price = number_format(floatval(str_replace(',', '.', $price)), 2, $decimal, '');
         if (!empty($config['use_currency']) && ($price >= 0)) {
             $price .= ' ' . $config['currency'];
         }

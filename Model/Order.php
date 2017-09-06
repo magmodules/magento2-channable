@@ -161,7 +161,7 @@ class Order
                         ->setLastname($data['customer']['last_name'])
                         ->setEmail($data['customer']['email'])
                         ->setPassword($data['customer']['email'])
-                        ->setCustomerGroupId($customerGroupId)
+                        ->setGroupId($customerGroupId)
                         ->save();
                     $customerId = $customer->getId();
                 }

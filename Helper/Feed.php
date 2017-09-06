@@ -66,7 +66,6 @@ class Feed extends AbstractHelper
                 'preview_url' => $this->getPreviewUrl($storeId),
                 'json_url'    => $this->geJsonUrl($storeId),
                 'connect_url' => $this->getConnectUrl($storeId),
-
             ];
         }
         return $feedData;
