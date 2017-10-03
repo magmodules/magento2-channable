@@ -6,7 +6,7 @@
 
 namespace Magmodules\Channable\Model;
 
-use Magmodules\Channable\Model\Products as ProductsModel;
+use Magmodules\Channable\Model\Collection\Products as ProductsModel;
 use Magmodules\Channable\Model\Item as ItemModel;
 use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magmodules\Channable\Helper\Product as ProductHelper;
@@ -19,20 +19,43 @@ use Psr\Log\LoggerInterface;
 class Generate
 {
 
-    const XML_PATH_FEED_RESULT = 'magmodules_channable/feeds/results';
-    const XML_PATH_GENERATE = 'magmodules_channable/generate/enable';
+    const XPATH_FEED_RESULT = 'magmodules_channable/feeds/results';
+    const XPATH_GENERATE = 'magmodules_channable/generate/enable';
 
+    /**
+     * @var ProductsModel
+     */
     private $productModel;
+
+    /**
+     * @var Item
+     */
     private $itemModel;
+
+    /**
+     * @var ProductHelper
+     */
     private $productHelper;
+
+    /**
+     * @var SourceHelper
+     */
     private $sourceHelper;
+
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
+
+    /**
+     * @var FeedHelper
+     */
     private $feedHelper;
 
     /**
      * Generate constructor.
      *
-     * @param Products        $productModel
+     * @param ProductsModel   $productModel
      * @param Item            $itemModel
      * @param SourceHelper    $sourceHelper
      * @param ProductHelper   $productHelper
@@ -77,18 +100,17 @@ class Generate
         $config = $this->sourceHelper->getConfig($storeId, 'feed');
         $productCollection = $this->productModel->getCollection($config, $page, $productIds);
 
-        $size = $productCollection->getSize();
+        $size = $productCollection->count();
         $pages = $productCollection->getLastPageNumber();
 
         $products = $productCollection->load();
+        $parents = $this->productModel->getParents($products, $config);
+
         foreach ($products as $product) {
             $parent = '';
             if (!empty($config['filters']['relations'])) {
                 if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
-                    $parent = $products->getItemById($parentId);
-                    if (!$parent) {
-                        $parent = $this->productModel->loadParentProduct($parentId, $config['attributes']);
-                    }
+                    $parent = $parents->getItemById($parentId);
                 }
             }
             if (!empty($productId)) {

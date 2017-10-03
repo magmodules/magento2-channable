@@ -14,7 +14,7 @@ use Magento\Framework\Model\AbstractModel;
 use Magmodules\Channable\Model\ItemFactory;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Source as SourceHelper;
-use Magmodules\Channable\Model\Products as ProductsModel;
+use Magmodules\Channable\Model\Collection\Products as ProductsModel;
 use Magmodules\Channable\Helper\Product as ProductHelper;
 use Magmodules\Channable\Helper\Item as ItemHelper;
 use Magento\Framework\App\Area;
@@ -25,13 +25,44 @@ class Item extends AbstractModel
 
     const OUT_OF_STOCK_MSG = 'out of stock';
 
+    /**
+     * @var \Magmodules\Channable\Model\ItemFactory
+     */
     private $itemFactory;
+
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
+
+    /**
+     * @var SourceHelper
+     */
     private $sourceHelper;
+
+    /**
+     * @var ProductsModel
+     */
     private $productModel;
+
+    /**
+     * @var ProductHelper
+     */
     private $productHelper;
+
+    /**
+     * @var ItemHelper
+     */
     private $itemHelper;
+
+    /**
+     * @var Emulation
+     */
     private $appEmulation;
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     private $logger;
 
     /**
@@ -39,7 +70,7 @@ class Item extends AbstractModel
      *
      * @param \Magmodules\Channable\Model\ItemFactory $itemFactory
      * @param GeneralHelper                           $generalHelper
-     * @param Products                                $productModel
+     * @param ProductsModel                                $productModel
      * @param ProductHelper                           $productHelper
      * @param ItemHelper                              $itemHelper
      * @param SourceHelper                            $sourceHelper
@@ -212,15 +243,13 @@ class Item extends AbstractModel
         $productData = [];
         $productIds = $this->itemHelper->getProductIdsFromCollection($items);
         $products = $this->productModel->getCollection($config, '', $productIds);
+        $parents = $this->productModel->getParents($products, $config);
 
         foreach ($products as $product) {
             $parent = '';
             if (!empty($config['filters']['relations'])) {
                 if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
-                    $parent = $products->getItemById($parentId);
-                    if (!$parent) {
-                        $parent = $this->productModel->loadParentProduct($parentId, $config['attributes']);
-                    }
+                    $parent = $parents->getItemById($parentId);
                 }
             }
             if ($dataRow = $this->productHelper->getDataRow($product, $parent, $config)) {
@@ -245,7 +274,7 @@ class Item extends AbstractModel
         foreach ($items as $item) {
             $id = $item->getData('id');
 
-            if(!$item->getTitle()) {
+            if (!$item->getTitle()) {
                 continue;
             }
 

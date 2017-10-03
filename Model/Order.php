@@ -33,26 +33,109 @@ use Psr\Log\LoggerInterface;
 class Order
 {
 
+    /**
+     * @var StoreManagerInterface
+     */
     private $storeManager;
+
+    /**
+     * @var ProductFactory
+     */
     private $product;
+
+    /**
+     * @var FormKey
+     */
     private $formkey;
+
+    /**
+     * @var QuoteFactory
+     */
     private $quote;
+
+    /**
+     * @var QuoteManagement
+     */
     private $quoteManagement;
+
+    /**
+     * @var CustomerFactory
+     */
     private $customerFactory;
+
+    /**
+     * @var AddressFactory
+     */
     private $addressFactory;
+
+    /**
+     * @var CustomerRepositoryInterface
+     */
     private $customerRepository;
+
+    /**
+     * @var OrderService
+     */
     private $orderService;
+
+    /**
+     * @var OrderInterface
+     */
     private $order;
+
+    /**
+     * @var InvoiceService
+     */
     private $invoiceService;
+
+    /**
+     * @var Transaction
+     */
     private $transaction;
+
+    /**
+     * @var CartRepositoryInterface
+     */
     private $cartRepositoryInterface;
+
+    /**
+     * @var CartManagementInterface
+     */
     private $cartManagementInterface;
+
+    /**
+     * @var RateRequestFactory
+     */
     private $rateRequestFactory;
+
+    /**
+     * @var TaxCalculationn
+     */
     private $taxCalculation;
+
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
+
+    /**
+     * @var OrderlHelper
+     */
     private $orderHelper;
+
+    /**
+     * @var ShippingFactory
+     */
     private $shippingFactory;
+
+    /**
+     * @var CheckoutSession
+     */
     private $checkoutSession;
+
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
     /**

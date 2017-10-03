@@ -14,6 +14,9 @@ use Magento\Backend\Block\Template\Context;
 class Version extends Field
 {
 
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
 
     /**

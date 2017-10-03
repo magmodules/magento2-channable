@@ -12,6 +12,13 @@ use Magento\Framework\Logger\Handler\Base;
 class ChannableHandler extends Base
 {
 
+    /**
+     * @var int
+     */
     protected $loggerType = Logger::DEBUG;
+
+    /**
+     * @var string
+     */
     protected $fileName = '/var/log/channable.log';
 }

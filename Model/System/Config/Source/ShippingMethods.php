@@ -13,7 +13,14 @@ use Magento\Shipping\Model\Config as ShippingConfig;
 class ShippingMethods implements ArrayInterface
 {
 
+    /**
+     * @var ShippingConfig
+     */
     private $shipconfig;
+
+    /**
+     * @var ScopeConfigInterface
+     */
     private $scopeConfig;
 
     /**

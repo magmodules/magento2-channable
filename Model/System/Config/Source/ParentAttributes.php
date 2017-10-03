@@ -15,8 +15,19 @@ use Magento\Store\Model\App\Emulation;
 class ParentAttributes implements ArrayInterface
 {
 
+    /**
+     * @var SourceHelper
+     */
     private $sourceHelper;
+
+    /**
+     * @var Http
+     */
     private $request;
+
+    /**
+     * @var Emulation
+     */
     private $appEmulation;
 
     /**
@@ -48,7 +59,7 @@ class ParentAttributes implements ArrayInterface
         $this->appEmulation->stopEnvironmentEmulation();
 
         foreach ($source as $key => $attribute) {
-            if (empty($attribute['parent_selection_disabled']) && empty($attribute['parent'])) {
+            if (empty($attribute['parent_selection_disabled'])) {
                 $label = str_replace('_', ' ', $key);
                 $attributes[] = [
                     'value' => $key,
@@ -59,5 +70,4 @@ class ParentAttributes implements ArrayInterface
 
         return $attributes;
     }
-
 }

@@ -16,7 +16,14 @@ class ProductSaveAfter implements ObserverInterface
 
     const OBSERVER_TYPE = 'ProductSaveAfter';
 
+    /**
+     * @var ItemModel
+     */
     private $itemModel;
+
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
 
     /**

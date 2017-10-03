@@ -22,13 +22,44 @@ use Magento\Catalog\Model\Product\Visibility;
 class Product extends AbstractHelper
 {
 
+    /**
+     * @var EavConfig
+     */
     private $eavConfig;
+
+    /**
+     * @var FilterManager
+     */
     private $filter;
+
+    /**
+     * @var Configurable
+     */
     private $catalogProductTypeConfigurable;
+
+    /**
+     * @var Grouped
+     */
     private $catalogProductTypeGrouped;
+
+    /**
+     * @var Bundle
+     */
     private $catalogProductTypeBundle;
+
+    /**
+     * @var AttributeSetRepositoryInterface
+     */
     private $attributeSet;
+
+    /**
+     * @var ProductImageHelper
+     */
     private $productImageHelper;
+
+    /**
+     * @var GalleryReadHandler
+     */
     private $galleryReadHandler;
 
     /**
@@ -131,6 +162,7 @@ class Product extends AbstractHelper
      */
     public function validateProduct($product, $parent, $config)
     {
+
         $filters = $config['filters'];
         if (!empty($filters['exclude_parent'])) {
             if ($product->getTypeId() == 'configurable') {

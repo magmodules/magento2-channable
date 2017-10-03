@@ -16,8 +16,19 @@ use Magmodules\Channable\Helper\Feed as FeedHelper;
 class Preview extends Action
 {
 
+    /**
+     * @var GenerateModel
+     */
     private $generateModel;
+
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
+
+    /**
+     * @var FeedHelper
+     */
     private $feedHelper;
 
     /**

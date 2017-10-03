@@ -17,7 +17,15 @@ class Header extends Field
     const MODULE_CODE = 'magento2-channable';
     const MODULE_SUPPORT_LINK = 'https://www.magmodules.eu/help/' . self::MODULE_CODE;
     const MODULE_CONTACT_LINK = 'https://www.magmodules.eu/support.html?ext=' . self::MODULE_CODE;
+
+    /**
+     * @var string
+     */
     protected $_template = 'Magmodules_Channable::system/config/fieldset/header.phtml';
+
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
 
     /**

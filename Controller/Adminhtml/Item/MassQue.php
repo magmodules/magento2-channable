@@ -15,7 +15,14 @@ use Magento\Backend\App\Action;
 class MassQue extends Action
 {
 
+    /**
+     * @var Filter
+     */
     private $filter;
+
+    /**
+     * @var CollectionFactory
+     */
     private $collectionFactory;
 
     /**

@@ -14,6 +14,9 @@ use Magento\Backend\Block\Template\Context;
 class OrderStores extends Field
 {
 
+    /**
+     * @var OrderHelper
+     */
     private $orderHelper;
 
     /**

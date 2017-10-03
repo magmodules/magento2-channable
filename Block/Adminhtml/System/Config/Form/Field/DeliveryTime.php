@@ -12,8 +12,10 @@ use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
 class DeliveryTime extends AbstractFieldArray
 {
 
-    protected $columns = [];
-    protected $countryRenderer;
+    /**
+     * @var
+     */
+    private $countryRenderer;
 
     /**
      * Render block

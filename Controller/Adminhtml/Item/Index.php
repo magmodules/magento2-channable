@@ -13,7 +13,10 @@ use Magento\Framework\View\Result\PageFactory;
 class Index extends Action
 {
 
-    protected $resultPageFactory = false;
+    /**
+     * @var bool|PageFactory
+     */
+    private $resultPageFactory;
 
     /**
      * Index constructor.

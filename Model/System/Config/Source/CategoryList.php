@@ -13,7 +13,14 @@ use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 class CategoryList implements ArrayInterface
 {
 
+    /**
+     * @var CategoryFactory
+     */
     private $categoryFactory;
+
+    /**
+     * @var CollectionFactory
+     */
     private $categoryCollectionFactory;
 
     /**

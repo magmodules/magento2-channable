@@ -14,7 +14,14 @@ use Magento\Framework\Model\AbstractModel;
 class Item extends AbstractDb
 {
 
+    /**
+     * @var bool
+     */
     protected $_isPkAutoIncrement = false;
+
+    /**
+     * @var DateTime
+     */
     private $date;
 
     /**
