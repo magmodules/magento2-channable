@@ -25,6 +25,7 @@ class Source extends AbstractHelper
     const XPATH_BRAND_SOURCE = 'magmodules_channable/data/brand_attribute';
     const XPATH_EAN_SOURCE = 'magmodules_channable/data/ean_attribute';
     const XPATH_IMAGE_SOURCE = 'magmodules_channable/data/image';
+    const XPATH_IMAGE_INC_HIDDEN = 'magmodules_channable/data/hidden_images';
     const XPATH_SKU_SOURCE = 'magmodules_channable/data/sku_attribute';
     const XPATH_SIZE_SOURCE = 'magmodules_channable/data/size_attribute';
     const XPATH_COLOR_SOURCE = 'magmodules_channable/data/color_attribute';
@@ -116,9 +117,9 @@ class Source extends AbstractHelper
         $config['price_config'] = $this->getPriceConfig($type);
         $config['filters'] = $this->getProductFilters();
         $config['inventory'] = $this->getInventoryData();
+        $config['inc_hidden_image'] = $this->generalHelper->getStoreValue(self::XPATH_IMAGE_INC_HIDDEN);
 
         if ($type == 'feed') {
-            $config['url_type_media'] = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
             $config['base_url'] = $this->storeManager->getStore()->getBaseUrl();
             $config['weight_unit'] = ' ' . $this->generalHelper->getStoreValue(self::XPATH_WEIGHT_UNIT, $storeId);
             $config['categories'] = $this->categoryHelper->getCollection($storeId, '', '', 'channable_cat_disable_export');
