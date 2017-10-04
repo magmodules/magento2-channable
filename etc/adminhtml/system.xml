@@ -84,6 +84,14 @@
                     <label>Source</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\ImageSource</source_model>
                 </field>
+                <field id="hidden_images" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Include Hidden Images</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="image">all</field>
+                    </depends>
+                </field>
                 <field id="heading_extra" translate="label comment" type="text" sortOrder="20" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Miscellaneous fields</label>
@@ -130,7 +138,7 @@
                        showInWebsite="1" showInStore="1">
                     <label>Extra Fields</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\ExtraFields</frontend_model>
-                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    <backend_model>Magmodules\Channable\Model\Config\Backend\Serialized\ExtraFields</backend_model>
                 </field>
                 <field id="heading_stock" translate="label comment" type="text" sortOrder="3" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -180,7 +188,7 @@
                        showInWebsite="1" showInStore="1">
                     <label>Delivery Time</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\DeliveryTime</frontend_model>
-                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    <backend_model>Magmodules\Channable\Model\Config\Backend\Serialized\DeliveryTime</backend_model>
                 </field>
             </group>
             <group id="filter" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1"
@@ -244,6 +252,25 @@
                        showInStore="1">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="heading_filters" translate="label comment" type="text" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Advanced Filters</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                </field>
+                <field id="filters" translate="label" type="select" sortOrder="31" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="filters_data" translate="label" type="select" sortOrder="32" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Filter Conditions</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Filters</frontend_model>
+                    <backend_model>Magmodules\Channable\Model\Config\Backend\Serialized\Filters</backend_model>
+                    <depends>
+                        <field id="filters">1</field>
+                    </depends>
                 </field>
             </group>
             <group id="feeds" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1"

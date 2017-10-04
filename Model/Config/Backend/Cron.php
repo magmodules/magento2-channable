@@ -19,9 +19,12 @@ use Magento\Framework\Exception\LocalizedException;
 class Cron extends Value
 {
 
-    const CRON_STRING_PATH = 'crontab/default/jobs/channable_itemupdate/schedule/cron_expr';
+    const CRON_STRING_PATH = 'crontab/default/jobs/channable_item_update/schedule/cron_expr';
 
-    protected $configValueFactory;
+    /**
+     * @var ValueFactory
+     */
+    private $configValueFactory;
 
     /**
      * Cron constructor.

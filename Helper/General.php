@@ -20,15 +20,38 @@ class General extends AbstractHelper
 {
 
     const MODULE_CODE = 'Magmodules_Channable';
-    const XML_PATH_EXTENSION_ENABLED = 'magmodules_channable/general/enable';
-    const XML_PATH_MARKETPLACE_ENABLE = 'magmodules_channable_marketplace/general/enable';
-    const XML_PATH_TOKEN = 'magmodules_channable/general/token';
+    const XPATH_EXTENSION_ENABLED = 'magmodules_channable/general/enable';
+    const XPATH_MARKETPLACE_ENABLE = 'magmodules_channable_marketplace/general/enable';
+    const XPATH_TOKEN = 'magmodules_channable/general/token';
 
+    /**
+     * @var ModuleListInterface
+     */
     private $moduleList;
+
+    /**
+     * @var ProductMetadataInterface
+     */
     private $metadata;
+
+    /**
+     * @var StoreManagerInterface
+     */
     private $storeManager;
+
+    /**
+     * @var Config
+     */
     private $config;
+
+    /**
+     * @var ChannableLogger
+     */
     private $logger;
+
+    /**
+     * @var DateTime
+     */
     private $date;
 
     /**
@@ -81,7 +104,7 @@ class General extends AbstractHelper
      */
     public function getToken()
     {
-        return $this->getStoreValue(self::XML_PATH_TOKEN);
+        return $this->getStoreValue(self::XPATH_TOKEN);
     }
 
     /**
@@ -117,6 +140,29 @@ class General extends AbstractHelper
     {
         $value = $this->getStoreValue($path, $storeId, $scope);
 
+        $result = json_decode($value, true);
+        if (json_last_error() == JSON_ERROR_NONE) {
+            if (is_array($result)) {
+                return $result;
+            }
+            return [];
+        }
+
+        $value = @unserialize($value);
+        if (is_array($value)) {
+            return $value;
+        }
+
+        return [];
+    }
+
+    /**
+     * @param $value
+     *
+     * @return array|mixed
+     */
+    public function getValueArray($value)
+    {
         $result = json_decode($value, true);
         if (json_last_error() == JSON_ERROR_NONE) {
             if (is_array($result)) {
@@ -185,10 +231,23 @@ class General extends AbstractHelper
     public function getEnabled($storeId = null)
     {
         if (isset($storeId)) {
-            return $this->getStoreValue(self::XML_PATH_EXTENSION_ENABLED, $storeId);
+            return $this->getStoreValue(self::XPATH_EXTENSION_ENABLED, $storeId);
         } else {
-            return $this->getStoreValue(self::XML_PATH_EXTENSION_ENABLED);
+            return $this->getStoreValue(self::XPATH_EXTENSION_ENABLED);
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllStoreIds()
+    {
+        $storeIds = [];
+        $stores = $this->storeManager->getStores();
+        foreach ($stores as $store) {
+            $storeIds[] = $store->getId();
+        }
+        return $storeIds;
     }
 
     /**
@@ -196,7 +255,7 @@ class General extends AbstractHelper
      */
     public function getMarketplaceEnabled()
     {
-        return $this->getStoreValue(self::XML_PATH_MARKETPLACE_ENABLE);
+        return $this->getStoreValue(self::XPATH_MARKETPLACE_ENABLE);
     }
 
     /**

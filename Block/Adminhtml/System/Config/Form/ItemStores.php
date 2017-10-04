@@ -14,6 +14,9 @@ use Magento\Backend\Block\Template\Context;
 class ItemStores extends Field
 {
 
+    /**
+     * @var ItemHelper
+     */
     private $itemHelper;
 
     /**

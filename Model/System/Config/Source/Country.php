@@ -12,6 +12,9 @@ use Magento\Framework\Option\ArrayInterface;
 class Country implements ArrayInterface
 {
 
+    /**
+     * @var CountryCollectionFactory
+     */
     private $countryCollectionFactory;
 
     /**

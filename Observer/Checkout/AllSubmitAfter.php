@@ -16,7 +16,14 @@ class AllSubmitAfter implements ObserverInterface
 
     const OBSERVER_TYPE = 'AllSubmitAfter';
 
+    /**
+     * @var ItemModel
+     */
     private $itemModel;
+
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
 
     /**

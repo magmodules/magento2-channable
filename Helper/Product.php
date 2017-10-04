@@ -18,24 +18,62 @@ use Magento\GroupedProduct\Model\Product\Type\Grouped;
 use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
+use Magento\Catalog\Model\Product\Media\Config as CatalogProductMediaConfig;
 
 class Product extends AbstractHelper
 {
 
+    /**
+     * @var EavConfig
+     */
     private $eavConfig;
+
+    /**
+     * @var FilterManager
+     */
     private $filter;
+
+    /**
+     * @var Configurable
+     */
     private $catalogProductTypeConfigurable;
+
+    /**
+     * @var Grouped
+     */
     private $catalogProductTypeGrouped;
+
+    /**
+     * @var Bundle
+     */
     private $catalogProductTypeBundle;
+
+    /**
+     * @var AttributeSetRepositoryInterface
+     */
     private $attributeSet;
+
+    /**
+     * @var ProductImageHelper
+     */
     private $productImageHelper;
+
+    /**
+     * @var GalleryReadHandler
+     */
     private $galleryReadHandler;
+
+    /**
+     * @var CatalogProductMediaConfig
+     */
+    private $catalogProductMediaConfig;
 
     /**
      * Product constructor.
      *
      * @param Context                         $context
      * @param GalleryReadHandler              $galleryReadHandler
+     * @param CatalogProductMediaConfig       $catalogProductMediaConfig
      * @param ProductImageHelper              $productImageHelper
      * @param EavConfig                       $eavConfig
      * @param FilterManager                   $filter
@@ -47,6 +85,7 @@ class Product extends AbstractHelper
     public function __construct(
         Context $context,
         GalleryReadHandler $galleryReadHandler,
+        CatalogProductMediaConfig $catalogProductMediaConfig,
         ProductImageHelper $productImageHelper,
         EavConfig $eavConfig,
         FilterManager $filter,
@@ -56,6 +95,7 @@ class Product extends AbstractHelper
         Configurable $catalogProductTypeConfigurable
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
+        $this->catalogProductMediaConfig = $catalogProductMediaConfig;
         $this->productImageHelper = $productImageHelper;
         $this->eavConfig = $eavConfig;
         $this->filter = $filter;
@@ -131,6 +171,7 @@ class Product extends AbstractHelper
      */
     public function validateProduct($product, $parent, $config)
     {
+
         $filters = $config['filters'];
         if (!empty($filters['exclude_parent'])) {
             if ($product->getTypeId() == 'configurable') {
@@ -259,14 +300,13 @@ class Product extends AbstractHelper
      */
     public function getImage($attribute, $config, $product)
     {
-        if (empty($attribute['source'])) {
+        if (empty($attribute['source']) || $attribute['source'] == 'all') {
             $images = [];
             $this->galleryReadHandler->execute($product);
-            $galleryImages = $product->getMediaGalleryImages();
-
+            $galleryImages = $product->getMediaGallery('images');
             foreach ($galleryImages as $image) {
-                if (empty($image['disabled'])) {
-                    $images[] = $image['url'];
+                if (empty($image['disabled']) || !empty($config['inc_hidden_image'])) {
+                    $images[] = $this->catalogProductMediaConfig->getMediaUrl($image['file']);
                 }
             }
 
@@ -279,7 +319,7 @@ class Product extends AbstractHelper
                 return $this->getResizedImage($product, $source, $size);
             }
             if ($url = $product->getData($attribute['source'])) {
-                $img = $config['url_type_media'] . 'catalog/product' . $url;
+                $img = $this->catalogProductMediaConfig->getMediaUrl($url);
             }
 
             return $img;
@@ -386,6 +426,11 @@ class Product extends AbstractHelper
      */
     public function getValue($attribute, $product)
     {
+        if ($attribute['type'] == 'media_image') {
+            if ($url = $product->getData($attribute['source'])) {
+                return $this->catalogProductMediaConfig->getMediaUrl($url);
+            }
+        }
         if ($attribute['type'] == 'select') {
             if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                 $value = $product->getData($attribute['source']);
@@ -405,6 +450,7 @@ class Product extends AbstractHelper
                 return implode('/', $value_text);
             }
         }
+
         return $product->getData($attribute['source']);
     }
 
@@ -487,9 +533,9 @@ class Product extends AbstractHelper
     {
         $config = $config['price_config'];
 
-        $price = floatval($product->getPriceInfo()->getPrice('regular_price')->getValue());
-        $finalPrice = floatval($product->getPriceInfo()->getPrice('final_price')->getValue());
-        $specialPrice = floatval($product->getPriceInfo()->getPrice('special_price')->getValue());
+        $price = floatval($product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue());
+        $finalPrice = floatval($product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue());
+        $specialPrice = floatval($product->getPriceInfo()->getPrice('special_price')->getAmount()->getValue());
 
         $prices = [];
         $prices[$config['price']] = $this->formatPrice($price, $config);
@@ -535,14 +581,15 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $data
+     * @param $price
      * @param $config
      *
      * @return string
      */
-    public function formatPrice($data, $config)
+    public function formatPrice($price, $config)
     {
-        $price = number_format($data, 2, '.', '');
+        $decimal = isset($config['decimal_point']) ? $config['decimal_point'] : '.';
+        $price = number_format(floatval(str_replace(',', '.', $price)), 2, $decimal, '');
         if (!empty($config['use_currency']) && ($price >= 0)) {
             $price .= ' ' . $config['currency'];
         }

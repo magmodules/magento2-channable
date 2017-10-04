@@ -15,8 +15,19 @@ use Magmodules\Channable\Helper\General as GeneralHelper;
 class Category extends AbstractHelper
 {
 
+    /**
+     * @var General
+     */
     private $generalHelper;
+
+    /**
+     * @var StoreManagerInterface
+     */
     private $storeManager;
+
+    /**
+     * @var CategoryCollectionFactory
+     */
     private $categoryCollectionFactory;
 
     /**

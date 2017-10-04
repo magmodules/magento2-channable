@@ -16,7 +16,14 @@ class ProductSaveAfter implements ObserverInterface
 
     const OBSERVER_TYPE = 'ProductSaveAfter';
 
+    /**
+     * @var ItemModel
+     */
     private $itemModel;
+
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
 
     /**
@@ -38,7 +45,7 @@ class ProductSaveAfter implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        if ($this->generalHelper->getMarketplaceEnabled()) {
+        if (!$this->generalHelper->getMarketplaceEnabled()) {
             return;
         }
 

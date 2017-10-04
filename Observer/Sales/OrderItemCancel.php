@@ -16,7 +16,14 @@ class OrderItemCancel implements ObserverInterface
 
     const OBSERVER_TYPE = 'OrderItemCancel';
 
+    /**
+     * @var ItemModel
+     */
     private $itemModel;
+
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
 
     /**

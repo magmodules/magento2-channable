@@ -1,4 +1,9 @@
 <?php
+/**
+ * Copyright © 2017 Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
 namespace Magmodules\Channable\Model\Carrier;
 
 use Magento\Quote\Model\Quote\Address\RateRequest;
@@ -15,10 +20,24 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 class Channable extends AbstractCarrier implements CarrierInterface
 {
 
+    /**
+     * @var string
+     */
     protected $_code = 'channable';
+
+    /**
+     * @var ResultFactory
+     */
     protected $_rateResultFactory;
+
+    /**
+     * @var MethodFactory
+     */
     protected $_rateMethodFactory;
 
+    /**
+     * @var CheckoutSession
+     */
     private $checkoutSession;
 
     /**

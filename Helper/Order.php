@@ -15,19 +15,30 @@ use Magento\Catalog\Model\ProductFactory;
 class Order extends AbstractHelper
 {
 
-    const XML_PATH_ORDER_ENABLE = 'magmodules_channable_marketplace/general/enable';
-    const XML_PATH_IMPORT_CUSTOMER = 'magmodules_channable_marketplace/order/import_customer';
-    const XML_PATH_CUSTOMER_GROUP_ID = 'magmodules_channable_marketplace/order/customers_group';
-    const XML_PATH_INVOICE_ORDER = 'magmodules_channable_marketplace/order/invoice_order';
-    const XML_PATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
-    const XML_PATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
-    const XML_PATH_LOG = 'magmodules_channable_marketplace/order/log';
-    const XML_PATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
-    const XML_PATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
-    const XML_PATH_SHIPPING_TAX_CLASS = 'tax/classes/shipping_tax_class';
+    const XPATH_ORDER_ENABLE = 'magmodules_channable_marketplace/general/enable';
+    const XPATH_IMPORT_CUSTOMER = 'magmodules_channable_marketplace/order/import_customer';
+    const XPATH_CUSTOMER_GROUP_ID = 'magmodules_channable_marketplace/order/customers_group';
+    const XPATH_INVOICE_ORDER = 'magmodules_channable_marketplace/order/invoice_order';
+    const XPATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
+    const XPATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
+    const XPATH_LOG = 'magmodules_channable_marketplace/order/log';
+    const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
+    const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
+    const XPATH_SHIPPING_TAX_CLASS = 'tax/classes/shipping_tax_class';
 
+    /**
+     * @var General
+     */
     private $generalHelper;
+
+    /**
+     * @var StoreManagerInterface
+     */
     private $storeManager;
+
+    /**
+     * @var ProductFactory
+     */
     private $product;
 
     /**
@@ -63,7 +74,7 @@ class Order extends AbstractHelper
             return false;
         }
 
-        return $this->generalHelper->getStoreValue(self::XML_PATH_ORDER_ENABLE, $storeId);
+        return $this->generalHelper->getStoreValue(self::XPATH_ORDER_ENABLE, $storeId);
     }
 
     /**
@@ -129,7 +140,7 @@ class Order extends AbstractHelper
      */
     public function getImportCustomer($storeId = null)
     {
-        return $this->generalHelper->getStoreValue(self::XML_PATH_IMPORT_CUSTOMER, $storeId);
+        return $this->generalHelper->getStoreValue(self::XPATH_IMPORT_CUSTOMER, $storeId);
     }
 
     /**
@@ -139,7 +150,7 @@ class Order extends AbstractHelper
      */
     public function getInvoiceOrder($storeId = null)
     {
-        return $this->generalHelper->getStoreValue(self::XML_PATH_INVOICE_ORDER, $storeId);
+        return $this->generalHelper->getStoreValue(self::XPATH_INVOICE_ORDER, $storeId);
     }
 
     /**
@@ -149,7 +160,7 @@ class Order extends AbstractHelper
      */
     public function getCustomerGroupId($storeId = null)
     {
-        return $this->generalHelper->getStoreValue(self::XML_PATH_CUSTOMER_GROUP_ID, $storeId);
+        return $this->generalHelper->getStoreValue(self::XPATH_CUSTOMER_GROUP_ID, $storeId);
     }
 
     /**
@@ -166,7 +177,7 @@ class Order extends AbstractHelper
                 'code'        => $store->getCode(),
                 'name'        => $store->getName(),
                 'is_active'   => $store->getIsActive(),
-                'status'      => $this->generalHelper->getStoreValue(self::XML_PATH_ORDER_ENABLE, $storeId),
+                'status'      => $this->generalHelper->getStoreValue(self::XPATH_ORDER_ENABLE, $storeId),
                 'webhook_url' => $this->getWebhookUrl($storeId),
                 'status_url'  => $this->getOrderStatusUrl($storeId)
             ];
@@ -207,9 +218,9 @@ class Order extends AbstractHelper
     public function getNeedsTaxCalulcation($type, $storeId = null)
     {
         if ($type == 'shipping') {
-            return $this->generalHelper->getStoreValue(self::XML_PATH_TAX_PRICE, $storeId);
+            return $this->generalHelper->getStoreValue(self::XPATH_TAX_PRICE, $storeId);
         } else {
-            return $this->generalHelper->getStoreValue(self::XML_PATH_TAX_PRICE, $storeId);
+            return $this->generalHelper->getStoreValue(self::XPATH_TAX_PRICE, $storeId);
         }
     }
 
@@ -220,7 +231,7 @@ class Order extends AbstractHelper
      */
     public function getTaxClassShipping($storeId = null)
     {
-        return $this->generalHelper->getStoreValue(self::XML_PATH_SHIPPING_TAX_CLASS, $storeId);
+        return $this->generalHelper->getStoreValue(self::XPATH_SHIPPING_TAX_CLASS, $storeId);
     }
 
     /**
@@ -230,7 +241,7 @@ class Order extends AbstractHelper
      */
     public function getShippingMethod($storeId = null)
     {
-        return $this->generalHelper->getStoreValue(self::XML_PATH_SHIPPING_METHOD, $storeId);
+        return $this->generalHelper->getStoreValue(self::XPATH_SHIPPING_METHOD, $storeId);
     }
 
     /**
@@ -240,7 +251,7 @@ class Order extends AbstractHelper
      */
     public function getShippingMethodFallback($storeId = null)
     {
-        if ($method = $this->generalHelper->getStoreValue(self::XML_PATH_SHIPPING_METHOD_FALLBACK, $storeId)) {
+        if ($method = $this->generalHelper->getStoreValue(self::XPATH_SHIPPING_METHOD_FALLBACK, $storeId)) {
             return $method;
         }
         return 'flatrate_flatrate';
@@ -260,6 +271,6 @@ class Order extends AbstractHelper
      */
     public function isLoggingEnabled()
     {
-        return $this->generalHelper->getStoreValue(self::XML_PATH_LOG);
+        return $this->generalHelper->getStoreValue(self::XPATH_LOG);
     }
 }

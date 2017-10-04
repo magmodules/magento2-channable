@@ -15,16 +15,35 @@ use Magmodules\Channable\Model\ItemFactory as ItemFactory;
 class Item extends AbstractHelper
 {
 
-    const XML_PATH_ENABLE = 'magmodules_channable_marketplace/item/enable';
-    const XML_PATH_WEBHOOK = 'magmodules_channable_marketplace/item/webhook';
-    const XML_PATH_LIMIT = 'magmodules_channable_marketplace/item/limit';
-    const XML_PATH_LOG = 'magmodules_channable_marketplace/item/log';
-    const XML_PATH_CRON = 'magmodules_channable_marketplace/item/cron';
+    const XPATH_ENABLE = 'magmodules_channable_marketplace/item/enable';
+    const XPATH_WEBHOOK = 'magmodules_channable_marketplace/item/webhook';
+    const XPATH_LIMIT = 'magmodules_channable_marketplace/item/limit';
+    const XPATH_LOG = 'magmodules_channable_marketplace/item/log';
+    const XPATH_CRON = 'magmodules_channable_marketplace/item/cron';
 
+    /**
+     * @var StoreManagerInterface
+     */
     private $storeManager;
+
+    /**
+     * @var General
+     */
     private $generalHelper;
+
+    /**
+     * @var ItemFactory
+     */
     private $itemFactory;
 
+    /**
+     * Item constructor.
+     *
+     * @param Context               $context
+     * @param General               $generalHelper
+     * @param ItemFactory           $itemFactory
+     * @param StoreManagerInterface $storeManager
+     */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
@@ -45,7 +64,7 @@ class Item extends AbstractHelper
         if (!$this->generalHelper->getMarketplaceEnabled()) {
             return false;
         }
-        return $this->generalHelper->getStoreValue(self::XML_PATH_ENABLE);
+        return $this->generalHelper->getStoreValue(self::XPATH_ENABLE);
     }
 
     /**
@@ -53,7 +72,7 @@ class Item extends AbstractHelper
      */
     public function getStoreIds()
     {
-        return $this->generalHelper->getEnabledArray(self::XML_PATH_ENABLE);
+        return $this->generalHelper->getEnabledArray(self::XPATH_ENABLE);
     }
 
     /**
@@ -74,8 +93,8 @@ class Item extends AbstractHelper
     {
         $config = [];
         $config['token'] = $this->generalHelper->getToken();
-        $config['limit'] = $this->generalHelper->getStoreValue(self::XML_PATH_LIMIT, $storeId);
-        $config['webhook'] = $this->generalHelper->getStoreValue(self::XML_PATH_WEBHOOK, $storeId);
+        $config['limit'] = $this->generalHelper->getStoreValue(self::XPATH_LIMIT, $storeId);
+        $config['webhook'] = $this->generalHelper->getStoreValue(self::XPATH_WEBHOOK, $storeId);
         $config['log'] = $this->isLoggingEnabled();
 
         if ($config['limit'] > 500 || empty($config['limit'])) {
@@ -90,7 +109,7 @@ class Item extends AbstractHelper
      */
     public function isLoggingEnabled()
     {
-        return $this->generalHelper->getStoreValue(self::XML_PATH_LOG);
+        return $this->generalHelper->getStoreValue(self::XPATH_LOG);
     }
 
     /**
@@ -98,7 +117,7 @@ class Item extends AbstractHelper
      */
     public function isCronEnabled()
     {
-        return $this->generalHelper->getStoreValue(self::XML_PATH_CRON);
+        return $this->generalHelper->getStoreValue(self::XPATH_CRON);
     }
 
     /**
@@ -129,8 +148,8 @@ class Item extends AbstractHelper
                 'code'      => $store->getCode(),
                 'name'      => $store->getName(),
                 'is_active' => $store->getIsActive(),
-                'enable'    => $this->generalHelper->getStoreValue(self::XML_PATH_ENABLE, $storeId),
-                'webhook'   => $this->generalHelper->getStoreValue(self::XML_PATH_WEBHOOK, $storeId),
+                'enable'    => $this->generalHelper->getStoreValue(self::XPATH_ENABLE, $storeId),
+                'webhook'   => $this->generalHelper->getStoreValue(self::XPATH_WEBHOOK, $storeId),
                 'qty'       => $this->getQtyByStoreId($storeId),
             ];
         }

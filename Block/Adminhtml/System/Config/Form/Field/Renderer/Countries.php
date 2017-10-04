@@ -13,8 +13,15 @@ use Magento\Directory\Model\Config\Source\Country as CountrySource;
 class Countries extends Select
 {
 
-    protected $country = [];
-    protected $countries;
+    /**
+     * @var array
+     */
+    private $country = [];
+
+    /**
+     * @var CountrySource
+     */
+    private $countries;
 
     /**
      * Countries constructor.
@@ -53,7 +60,7 @@ class Countries extends Select
      *
      * @return array
      */
-    protected function getCountrySource()
+    private function getCountrySource()
     {
         if (!$this->country) {
             $this->country = $this->countries->toOptionArray();

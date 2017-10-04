@@ -16,9 +16,24 @@ use Magmodules\Channable\Model\Order as OrderModel;
 class Hook extends Action
 {
 
+    /**
+     * @var GeneralHelper
+     */
     private $generalHelper;
+
+    /**
+     * @var OrderHelper
+     */
     private $orderHelper;
+
+    /**
+     * @var OrderModel
+     */
     private $orderModel;
+
+    /**
+     * @var JsonFactory
+     */
     private $resultJsonFactory;
 
     /**

@@ -201,6 +201,56 @@ class UpgradeData implements UpgradeDataInterface
             }
         }
 
+        if (version_compare($context->getVersion(), "1.0.3", "<")) {
+            $this->addIndexes($setup);
+        }
+
         $setup->endSetup();
+    }
+
+    /**
+     * @param ModuleDataSetupInterface $setup
+     */
+    public function addIndexes(ModuleDataSetupInterface $setup)
+    {
+        $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
+        if ($setup->getConnection()->isTableExists($itemsTable)) {
+            $setup->getConnection()->addIndex(
+                $itemsTable,
+                $setup->getConnection()->getIndexName(
+                    $itemsTable,
+                    'store_id',
+                    'store_id'
+                ),
+                'store_id'
+            );
+            $setup->getConnection()->addIndex(
+                $itemsTable,
+                $setup->getConnection()->getIndexName(
+                    $itemsTable,
+                    'id',
+                    'id'
+                ),
+                'id'
+            );
+            $setup->getConnection()->addIndex(
+                $itemsTable,
+                $setup->getConnection()->getIndexName(
+                    $itemsTable,
+                    'needs_update',
+                    'needs_update'
+                ),
+                'needs_update'
+            );
+            $setup->getConnection()->addIndex(
+                $itemsTable,
+                $setup->getConnection()->getIndexName(
+                    $itemsTable,
+                    'updated_at',
+                    'updated_at'
+                ),
+                'updated_at'
+            );
+        }
     }
 }

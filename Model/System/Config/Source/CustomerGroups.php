@@ -12,6 +12,9 @@ use Magento\Framework\Option\ArrayInterface;
 class CustomerGroups implements ArrayInterface
 {
 
+    /**
+     * @var CustomerGroup
+     */
     private $customerGroup;
 
     /**

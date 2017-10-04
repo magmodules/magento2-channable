@@ -13,8 +13,19 @@ use Psr\Log\LoggerInterface as Logger;
 class ItemCleanup
 {
 
+    /**
+     * @var ItemHelper
+     */
     private $itemHelper;
+
+    /**
+     * @var ItemModel
+     */
     private $itemModel;
+
+    /**
+     * @var Logger
+     */
     private $logger;
 
     /**
@@ -39,7 +50,7 @@ class ItemCleanup
      */
     public function execute()
     {
-        if(!$this->itemHelper->isCronEnabled()) {
+        if (!$this->itemHelper->isCronEnabled()) {
             return;
         }
 

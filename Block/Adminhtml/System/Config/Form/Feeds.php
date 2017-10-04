@@ -14,7 +14,14 @@ use Magmodules\Channable\Helper\Feed as FeedHelper;
 class Feeds extends Field
 {
 
+    /**
+     * @var string
+     */
     protected $_template = 'Magmodules_Channable::system/config/fieldset/feeds.phtml';
+
+    /**
+     * @var FeedHelper
+     */
     private $feedHelper;
 
     /**

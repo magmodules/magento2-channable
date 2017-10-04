@@ -13,8 +13,19 @@ use Psr\Log\LoggerInterface as Logger;
 class ItemUpdate
 {
 
+    /**
+     * @var ItemHelper
+     */
     private $itemHelper;
+
+    /**
+     * @var ItemModel
+     */
     private $itemModel;
+
+    /**
+     * @var Logger
+     */
     private $logger;
 
     /**
@@ -34,23 +45,20 @@ class ItemUpdate
         $this->logger = $logger;
     }
 
-
+    /**
+     * Execute: Item Update Cron
+     */
     public function execute()
     {
-        $results = [];
-        if(!$this->itemHelper->isCronEnabled()) {
-            return $results;
-        }
-
-        $storeIds = $this->itemHelper->getStoreIds();
-        foreach ($storeIds as $storeId) {
-            try {
-                $results[] = $this->itemModel->updateByStore($storeId);
-            } catch (\Exception $e) {
-                $this->logger->critical($e);
+        try {
+            $cronEnabled = $this->itemHelper->isCronEnabled();
+            if ($cronEnabled) {
+                $this->itemModel->updateAll();
             }
+        } catch (\Exception $e) {
+            $this->logger->critical($e);
         }
 
-        return $results;
+        return $this;
     }
 }

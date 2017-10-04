@@ -8,47 +8,42 @@ namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer
 
 use Magento\Framework\View\Element\Html\Select;
 use Magento\Framework\View\Element\Context;
-use Magmodules\Channable\Model\System\Config\Source\Attributes as AttributesSource;
+use Magmodules\Channable\Model\System\Config\Source\Conditions as ConditionsSource;
 
-class Attributes extends Select
+class Conditions extends Select
 {
 
     /**
-     * @var array
+     * @var ConditionsSource
      */
-    private $attribute = [];
+    private $conditions;
 
     /**
-     * @var AttributesSource
-     */
-    private $attributes;
-
-    /**
-     * Attributes constructor.
+     * Conditions constructor.
      *
      * @param Context          $context
-     * @param AttributesSource $attributes
+     * @param ConditionsSource $conditions
      * @param array            $data
      */
     public function __construct(
         Context $context,
-        AttributesSource $attributes,
+        ConditionsSource $conditions,
         array $data = []
     ) {
         parent::__construct($context, $data);
-        $this->attributes = $attributes;
+        $this->conditions = $conditions;
     }
 
     /**
-     * Render block HTML
+     * Render block HTML.
      *
      * @return string
      */
     public function _toHtml()
     {
         if (!$this->getOptions()) {
-            foreach ($this->getAttributeSource() as $attribute) {
-                $this->addOption($attribute['value'], $attribute['label']);
+            foreach ($this->conditions->toOptionArray() as $condition) {
+                $this->addOption($condition['value'], $condition['label']);
             }
         }
 
@@ -56,21 +51,7 @@ class Attributes extends Select
     }
 
     /**
-     * Get all attributes
-     *
-     * @return array
-     */
-    public function getAttributeSource()
-    {
-        if (!$this->attribute) {
-            $this->attribute = $this->attributes->toOptionArray();
-        }
-
-        return $this->attribute;
-    }
-
-    /**
-     * Sets name for input element
+     * Sets name for input element.
      *
      * @param $value
      *
