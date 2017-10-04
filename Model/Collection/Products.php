@@ -9,9 +9,11 @@ namespace Magmodules\Channable\Model\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory as ProductAttributeCollectionFactory;
 use Magento\Catalog\Model\Indexer\Product\Flat\StateFactory;
+use Magento\Framework\App\ResourceConnection;
 use Magento\CatalogInventory\Helper\Stock as StockHelper;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magmodules\Channable\Helper\Product as ProductHelper;
+use Magmodules\Channable\Helper\General as GeneralHelper;
 
 class Products
 {
@@ -37,9 +39,19 @@ class Products
     private $stockHelper;
 
     /**
+     * @var GeneralHelper
+     */
+    private $generalHelper;
+
+    /**
      * @var ProductHelper
      */
     private $productHelper;
+
+    /**
+     * @var ResourceConnection
+     */
+    private $resource;
 
     /**
      * Products constructor.
@@ -47,21 +59,27 @@ class Products
      * @param ProductCollectionFactory          $productCollectionFactory
      * @param ProductAttributeCollectionFactory $productAttributeCollectionFactory
      * @param StockHelper                       $stockHelper
+     * @param GeneralHelper                     $generalHelper
      * @param ProductHelper                     $productHelper
      * @param StateFactory                      $productFlatState
+     * @param ResourceConnection                $resource
      */
     public function __construct(
         ProductCollectionFactory $productCollectionFactory,
         ProductAttributeCollectionFactory $productAttributeCollectionFactory,
         StockHelper $stockHelper,
+        GeneralHelper $generalHelper,
         ProductHelper $productHelper,
-        StateFactory $productFlatState
+        StateFactory $productFlatState,
+        ResourceConnection $resource
     ) {
         $this->productCollectionFactory = $productCollectionFactory;
         $this->productAttributeCollectionFactory = $productAttributeCollectionFactory;
         $this->productFlatState = $productFlatState;
         $this->productHelper = $productHelper;
+        $this->generalHelper = $generalHelper;
         $this->stockHelper = $stockHelper;
+        $this->resource = $resource;
     }
 
     /**
@@ -70,7 +88,7 @@ class Products
      *
      * @return mixed
      */
-    public function getCollection($config, $page, $productIds)
+    public function getCollection($config, $productIds)
     {
         $flat = $config['flat'];
         $filters = $config['filters'];
@@ -90,16 +108,16 @@ class Products
             ->addUrlRewrite()
             ->addFinalPrice();
 
-        if (($filters['limit'] > 0) && empty($productId)) {
-            $collection->setPage($page, $filters['limit'])->getCurPage();
-        }
-
         if (!empty($filters['visibility'])) {
             $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
         }
 
-        if (empty($filters['stock'])) {
-            $collection->setFlag('has_stock_status_filter', true);
+        if (!empty($filters['stock'])) {
+            if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", "<")) {
+                $this->stockHelper->addInStockFilterToCollection($collection);
+            } else {
+                $collection->setFlag('has_stock_status_filter', true);
+            }
         }
 
         if (!empty($filters['type_id'])) {
@@ -188,7 +206,7 @@ class Products
             $value = $filter['value'];
 
             if ($attribute == 'quantity_and_stock_status') {
-                if (isset($cType[$condition])) {
+                if ((isset($cType[$condition])) && is_numeric($value)) {
                     $collection->getSelect()->where(
                         'cataloginventory_stock_item.qty ' . $cType[$condition] . ' ' . $value
                     );
@@ -197,7 +215,7 @@ class Products
             }
 
             if ($attribute == 'min_sale_qty') {
-                if (isset($cType[$condition])) {
+                if ((isset($cType[$condition])) && is_numeric($value)) {
                     $collection->getSelect()->where(
                         'cataloginventory_stock_item.min_sale_qty ' . $cType[$condition] . ' ' . $value
                     );
@@ -240,6 +258,14 @@ class Products
                     break;
                 case 'not-empty':
                     $collection->addAttributeToFilter($attribute, ['notnull' => true]);
+                    break;
+                case 'gt':
+                case 'gteq':
+                case 'lt':
+                case 'lteq':
+                    if (is_numeric($value)) {
+                        $collection->addAttributeToFilter($attribute, [$condition => $value]);
+                    }
                     break;
                 default:
                     $collection->addAttributeToFilter($attribute, [$condition => $value]);
@@ -294,5 +320,20 @@ class Products
         }
 
         return [];
+    }
+
+    /**
+     * Direct Database Query to get total records of collection with filters.
+     *
+     * @param $productCollection
+     *
+     * @return int
+     */
+    public function getCollectionCountWithFilters($productCollection)
+    {
+        $selectCountSql = $productCollection->getSelectCountSql();
+        $connection = $this->resource->getConnection(ResourceConnection::DEFAULT_CONNECTION);
+        $count = $connection->fetchAll($selectCountSql);
+        return count($count);
     }
 }

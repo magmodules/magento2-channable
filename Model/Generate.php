@@ -53,6 +53,11 @@ class Generate
     private $feedHelper;
 
     /**
+     * @var Emulation
+     */
+    private $appEmulation;
+
+    /**
      * Generate constructor.
      *
      * @param ProductsModel   $productModel
@@ -98,10 +103,15 @@ class Generate
         $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
 
         $config = $this->sourceHelper->getConfig($storeId, 'feed');
-        $productCollection = $this->productModel->getCollection($config, $page, $productIds);
+        $productCollection = $this->productModel->getCollection($config, $productIds);
 
-        $size = $productCollection->count();
-        $pages = $productCollection->getLastPageNumber();
+        $pages = 1;
+        $size = $this->productModel->getCollectionCountWithFilters($productCollection);
+
+        if (($config['filters']['limit'] > 0) && empty($productId)) {
+            $productCollection->setPage($page, $config['filters']['limit'])->getCurPage();
+            $pages = ceil($size / $config['filters']['limit']);
+        }
 
         $products = $productCollection->load();
         $parents = $this->productModel->getParents($products, $config);
@@ -128,7 +138,7 @@ class Generate
             }
         }
 
-        if ($page <= $pages) {
+        if (($page <= $pages) || $pages == 0) {
             $return = [];
             if (empty($productId)) {
                 $limit = $config['filters']['limit'];

@@ -17,10 +17,12 @@ class Attributes implements ArrayInterface
      * @var array
      */
     public $options;
+
     /**
      * @var Repository
      */
     private $attributeRepository;
+
     /**
      * @var SearchCriteriaBuilder
      */
@@ -86,7 +88,7 @@ class Attributes implements ArrayInterface
      */
     public function getNonAvailableAttributes()
     {
-        return ['categories', 'gallery'];
+        return ['categories', 'gallery', 'category_ids'];
     }
 
     /**

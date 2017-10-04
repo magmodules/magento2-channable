@@ -12,6 +12,7 @@ use Magento\Framework\Controller\ResultFactory;
 use Magmodules\Channable\Model\Generate as GenerateModel;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
+use Magmodules\Channable\Helper\Preview as PreviewHelper;
 
 class Preview extends Action
 {
@@ -32,22 +33,30 @@ class Preview extends Action
     private $feedHelper;
 
     /**
+     * @var PreviewHelper
+     */
+    private $previewHelper;
+
+    /**
      * Preview constructor.
      *
      * @param Context       $context
      * @param GeneralHelper $generalHelper
      * @param GenerateModel $generateModel
      * @param FeedHelper    $feedHelper
+     * @param PreviewHelper $previewHelper
      */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
         GenerateModel $generateModel,
-        FeedHelper $feedHelper
+        FeedHelper $feedHelper,
+        PreviewHelper $previewHelper
     ) {
         $this->generateModel = $generateModel;
         $this->generalHelper = $generalHelper;
         $this->feedHelper = $feedHelper;
+        $this->previewHelper = $previewHelper;
         $this->resultFactory = $context->getResultFactory();
         parent::__construct($context);
     }
@@ -93,11 +102,11 @@ class Preview extends Action
             $productId = '';
         }
 
-        if ($data = $this->generateModel->generateByStore($storeId, $page, $productId)) {
+        if ($feed = $this->generateModel->generateByStore($storeId, $page, $productId)) {
+            $contents = $this->previewHelper->getPreviewData($feed, $storeId);
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
-            $result->setHeader('content-type', 'text/plain');
-            $result->setContents(print_r($data, true));
-
+            $result->setHeader('content-type', 'text/html');
+            $result->setContents($contents);
             return $result;
         }
 

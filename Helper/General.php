@@ -238,6 +238,19 @@ class General extends AbstractHelper
     }
 
     /**
+     * @return array
+     */
+    public function getAllStoreIds()
+    {
+        $storeIds = [];
+        $stores = $this->storeManager->getStores();
+        foreach ($stores as $store) {
+            $storeIds[] = $store->getId();
+        }
+        return $storeIds;
+    }
+
+    /**
      * @return mixed
      */
     public function getMarketplaceEnabled()

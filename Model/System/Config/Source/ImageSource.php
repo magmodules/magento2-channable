@@ -93,5 +93,4 @@ class ImageSource implements ArrayInterface
         $imageSource[] = ['value' => 'all', 'label' => __('All Images')];
         return ['label' => __('Other Options'), 'value' => $imageSource, 'optgroup-name' => __('Other Options')];
     }
-
 }

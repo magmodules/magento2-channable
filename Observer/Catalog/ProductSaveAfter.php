@@ -45,7 +45,7 @@ class ProductSaveAfter implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        if ($this->generalHelper->getMarketplaceEnabled()) {
+        if (!$this->generalHelper->getMarketplaceEnabled()) {
             return;
         }
 

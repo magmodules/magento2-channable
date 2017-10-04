@@ -9,7 +9,6 @@ namespace Magmodules\Channable\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\UrlInterface;
 use Magento\Catalog\Model\Product\Visibility;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Product as ProductHelper;
@@ -75,6 +74,7 @@ class Source extends AbstractHelper
      * @var StoreManagerInterface
      */
     private $storeManager;
+
 
     /**
      * Source constructor.

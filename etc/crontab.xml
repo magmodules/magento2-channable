@@ -9,7 +9,7 @@
     <group id="default">
         <job name="channable_item_update" instance="Magmodules\Channable\Cron\ItemUpdate" method="execute">
             <schedule>*/5 * * * *</schedule>
-            <config_path>crontab/default/jobs/channable_itemupdate/schedule/cron_expr</config_path>
+            <config_path>crontab/default/jobs/channable_item_update/schedule/cron_expr</config_path>
         </job>
         <job name="channable_item_cleanup" instance="Magmodules\Channable\Cron\ItemCleanup" method="execute">
             <schedule>0 0 * * *</schedule>

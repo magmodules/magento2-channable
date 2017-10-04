@@ -167,6 +167,17 @@ class Item extends AbstractModel
     }
 
     /**
+     * Update all Stores
+     */
+    public function updateAll()
+    {
+        $storeIds = $this->generalHelper->getAllStoreIds();
+        foreach ($storeIds as $storeId) {
+            $this->updateByStore($storeId);
+        }
+    }
+
+    /**
      * @param $storeId
      *
      * @return array
