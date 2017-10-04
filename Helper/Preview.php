@@ -74,15 +74,15 @@ class Preview extends AbstractHelper
         $filterTable = $this->getFilterTable($config);
         $attributeTabe = $this->getAttributeTable($config);
 
-        $html = '<h1 style="font-size: 20px;padding: 8px;border-left: 5px solid #f8f8f8;margin: 2px;">' . __('Config Values') . '</h1>';
+        $html = '<h1 style="font-size: 25px;padding: 10px;border-left: 6px solid;">' . __('Config Values') . '</h1>';
         $html .= '<table width="100%" cellpadding="5" cellspacing="5">';
         $html .= '  <tr>';
-        $html .= '   <td style="font-weight: bold;padding: 5px;border-left: 3px solid #f8f8f8;">' . __('Config') . '</td>';
-        $html .= '   <td style="font-weight: bold;padding: 5px;border-left: 3px solid #f8f8f8;">' . __('Attributes') . '</td>';
+        $html .= '   <td style="font-weight: bold;">' . __('Config') . '</td>';
+        $html .= '   <td style="font-weight: bold;">' . __('Attributes') . '</td>';
         $html .= '  </tr>';
         $html .= ' <tr>';
-        $html .= '  <td width="50%" valign="top" style="background: #f8f8f8;">' . $configTable . $filterTable .'</td>';
-        $html .= '  <td width="50%" valign="top" style="background: #f8f8f8;">' . $attributeTabe . '</td>';
+        $html .= '  <td width="50%" valign="top" style="background: #efefef;border: 1px solid #e7e7e7;">' . $configTable . $filterTable .'</td>';
+        $html .= '  <td width="50%" valign="top" style="background: #efefef;border: 1px solid #e7e7e7;">' . $attributeTabe . '</td>';
         $html .= ' </tr>';
         $html .= '</table>';
 
@@ -104,9 +104,9 @@ class Preview extends AbstractHelper
         $html .= '<table width="100%" cellpadding="2" cellspacing="2">';
         $html .= ' <thead>';
         $html .= '  <tr>';
-        $html .= '   <td style="padding:5px;" >' . __('Title') . '</td>';
-        $html .= '   <td style="padding:5px;" >' . __('Attribute') . '</td>';
-        $html .= '   <td style="padding:5px;" >' . __('Fallback') . '</td>';
+        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Title') . '</td>';
+        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Attribute') . '</td>';
+        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Fallback') . '</td>';
         $html .= '  </tr>';
         $html .= ' </thead>';
         $html .= ' <tbody>';
@@ -116,9 +116,9 @@ class Preview extends AbstractHelper
                 continue;
             }
             $html .= '<tr>';
-            $html .= ' <td style="padding:5px;" >' . $attribute['label'] . '</td>';
-            $html .= ' <td style="padding:5px;" >' . $attribute['source'] . '</td>';
-            $html .= ' <td style="padding:5px;" >' . (($attribute['parent'] == 1) ? 'Parent' : 'Simple') . '</td>';
+            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $attribute['label'] . '</td>';
+            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $attribute['source'] . '</td>';
+            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . (($attribute['parent'] == 1) ? 'Parent' : 'Simple') . '</td>';
             $html .= '</tr>';
         }
 
@@ -142,16 +142,16 @@ class Preview extends AbstractHelper
         $html .= '<table width="100%" cellpadding="2" cellspacing="2">';
         $html .= ' <thead>';
         $html .= '  <tr>';
-        $html .= '   <td width="50%;padding:5px;">' . __('Config') . '</td>';
-        $html .= '   <td width="50%;padding:5px;">' . __('Value') . '</td>';
+        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;">' . __('Config') . '</td>';
+        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;">' . __('Value') . '</td>';
         $html .= '  </tr>';
         $html .= ' </thead>';
         $html .= ' <tbody>';
 
         foreach ($feed['config'] as $k => $v) {
             $html .= '<tr>';
-            $html .= ' <td style="padding:5px;" >' . $k . '</td>';
-            $html .= ' <td style="padding:5px;" >' . $v . '</td>';
+            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $k . '</td>';
+            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $v . '</td>';
             $html .= '</tr>';
         }
 
@@ -195,11 +195,11 @@ class Preview extends AbstractHelper
     public function formatFeedArrayOutput($feed)
     {
         if (empty($feed['products'])) {
-            return '<h1 style="font-size: 20px;padding: 8px;border-left: 5px solid #f8f8f8;margin: 2px;">' . __('Feed Output') . '</h1>
+            return '<h1 style="font-size: 25px;padding: 10px;border-left: 6px solid;">' . __('Feed Output') . '</h1>
             ' . __('No products found in current selection / page');
         }
 
-        return '<h1 style="font-size: 20px;padding: 8px;border-left: 5px solid #f8f8f8;margin: 2px;">' . __('Feed Output') . '</h1>
+        return '<h1 style="font-size: 25px;padding: 10px;border-left: 6px solid;">' . __('Feed Output') . '</h1>
             <pre>' . print_r($feed['products'], true) . '</pre>';
     }
 
