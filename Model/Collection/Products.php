@@ -8,6 +8,7 @@ namespace Magmodules\Channable\Model\Collection;
 
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory as ProductAttributeCollectionFactory;
+use Magento\Eav\Model\Config as EavConfig;
 use Magento\Catalog\Model\Indexer\Product\Flat\StateFactory;
 use Magento\Framework\App\ResourceConnection;
 use Magento\CatalogInventory\Helper\Stock as StockHelper;
@@ -27,6 +28,11 @@ class Products
      * @var ProductAttributeCollectionFactory
      */
     private $productAttributeCollectionFactory;
+
+    /**
+     * @var EavConfig
+     */
+    private $eavConfig;
 
     /**
      * @var StateFactory
@@ -58,6 +64,7 @@ class Products
      *
      * @param ProductCollectionFactory          $productCollectionFactory
      * @param ProductAttributeCollectionFactory $productAttributeCollectionFactory
+     * @param EavConfig                         $eavConfig
      * @param StockHelper                       $stockHelper
      * @param GeneralHelper                     $generalHelper
      * @param ProductHelper                     $productHelper
@@ -67,6 +74,7 @@ class Products
     public function __construct(
         ProductCollectionFactory $productCollectionFactory,
         ProductAttributeCollectionFactory $productAttributeCollectionFactory,
+        EavConfig $eavConfig,
         StockHelper $stockHelper,
         GeneralHelper $generalHelper,
         ProductHelper $productHelper,
@@ -75,6 +83,7 @@ class Products
     ) {
         $this->productCollectionFactory = $productCollectionFactory;
         $this->productAttributeCollectionFactory = $productAttributeCollectionFactory;
+        $this->eavConfig = $eavConfig;
         $this->productFlatState = $productFlatState;
         $this->productHelper = $productHelper;
         $this->generalHelper = $generalHelper;
@@ -83,12 +92,13 @@ class Products
     }
 
     /**
-     * @param        $config
-     * @param string $productIds
+     * @param $config
+     * @param $page
+     * @param $productIds
      *
-     * @return mixed
+     * @return $this
      */
-    public function getCollection($config, $productIds)
+    public function getCollection($config, $page, $productIds)
     {
         $flat = $config['flat'];
         $filters = $config['filters'];
@@ -112,12 +122,8 @@ class Products
             $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
         }
 
-        if (!empty($filters['stock'])) {
-            if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", "<")) {
-                $this->stockHelper->addInStockFilterToCollection($collection);
-            } else {
-                $collection->setFlag('has_stock_status_filter', true);
-            }
+        if (($filters['limit'] > 0) && empty($productId)) {
+            $collection->setPage($page, $filters['limit'])->getCurPage();
         }
 
         if (!empty($filters['type_id'])) {
@@ -139,6 +145,17 @@ class Products
             'product_id=entity_id',
             $config['inventory']['attributes']
         );
+
+        if (!empty($filters['stock'])) {
+            $this->stockHelper->addInStockFilterToCollection($collection);
+            if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
+                $collection->setFlag('has_stock_status_filter', true);
+            }
+        } else {
+            if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
+                $collection->setFlag('has_stock_status_filter', false);
+            }
+        }
 
         $this->addFilters($filters, $collection);
         $collection->getSelect()->group('e.entity_id');
@@ -204,6 +221,31 @@ class Products
             $attribute = $filter['attribute'];
             $condition = $filter['condition'];
             $value = $filter['value'];
+
+            $attributeModel = $this->eavConfig->getAttribute('catalog_product', $attribute);
+            if (!$frontendInput = $attributeModel->getFrontendInput()) {
+                continue;
+            }
+
+            if ($frontendInput == 'select' || $frontendInput == 'multiselect') {
+                $options = $attributeModel->getSource()->getAllOptions();
+                if (strpos($value, ',') !== false) {
+                    $values = [];
+                    $value = explode(',', $value);
+                    foreach ($value as $v) {
+                        $valueId = array_search(trim($v), array_column($options, 'label'));
+                        if ($valueId) {
+                            $values[] = $options[$valueId]['value'];
+                        }
+                    }
+                    $value = implode(',', $values);
+                } else {
+                    $valueId = array_search($value, array_column($options, 'label'));
+                    if ($valueId) {
+                        $value = $options[$valueId]['value'];
+                    }
+                }
+            }
 
             if ($attribute == 'quantity_and_stock_status') {
                 if ((isset($cType[$condition])) && is_numeric($value)) {
@@ -282,7 +324,8 @@ class Products
      */
     public function getParents($products, $config)
     {
-        if (!empty($config['filters']['relations'])) {
+        $filters = $config['filters'];
+        if (!empty($filters['relations'])) {
             $ids = [];
             foreach ($products as $product) {
                 if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
@@ -314,6 +357,23 @@ class Products
 
             if (!empty($config['filters']['type_id'])) {
                 $collection->addAttributeToFilter('type_id', ['in' => $config['filters']['type_id']]);
+            }
+
+            $collection->joinTable(
+                'cataloginventory_stock_item',
+                'product_id=entity_id',
+                $config['inventory']['attributes']
+            );
+
+            if (!empty($filters['stock'])) {
+                $this->stockHelper->addInStockFilterToCollection($collection);
+                if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
+                    $collection->setFlag('has_stock_status_filter', true);
+                }
+            } else {
+                if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
+                    $collection->setFlag('has_stock_status_filter', false);
+                }
             }
 
             return $collection->load();

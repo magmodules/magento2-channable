@@ -171,7 +171,6 @@ class Product extends AbstractHelper
      */
     public function validateProduct($product, $parent, $config)
     {
-
         $filters = $config['filters'];
         if (!empty($filters['exclude_parent'])) {
             if ($product->getTypeId() == 'configurable') {
@@ -191,13 +190,11 @@ class Product extends AbstractHelper
                 }
             }
         }
-
         if ($product->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
             if (empty($parent)) {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -465,7 +462,7 @@ class Product extends AbstractHelper
         if (!empty($attribute['actions'])) {
             $actions = $attribute['actions'];
             if (in_array('striptags', $actions)) {
-                $value = str_replace(["\r", "\n"], "", $value);
+                $value = str_replace(["\r", "\n"], " ", $value);
                 $value = strip_tags($value);
             }
             if (in_array('number', $actions)) {
@@ -570,10 +567,12 @@ class Product extends AbstractHelper
         }
 
         if (!empty($config['discount_perc']) && isset($prices[$config['sales_price']])) {
-            $discount = ($prices[$config['sales_price']] - $prices[$config['price']]) / $prices[$config['price']];
-            $discount = $discount * -100;
-            if ($discount > 0) {
-                $prices[$config['discount_perc']] = round($discount, 1) . '%';
+            if ($prices[$config['price']] > 0) {
+                $discount = ($prices[$config['sales_price']] - $prices[$config['price']]) / $prices[$config['price']];
+                $discount = $discount * -100;
+                if ($discount > 0) {
+                    $prices[$config['discount_perc']] = round($discount, 1) . '%';
+                }
             }
         }
 

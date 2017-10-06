@@ -99,13 +99,12 @@ class Generate
     public function generateByStore($storeId, $page, $productIds = [])
     {
         $feed = [];
+        $pages = 1;
+
         $timeStart = microtime(true);
         $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
-
         $config = $this->sourceHelper->getConfig($storeId, 'feed');
-        $productCollection = $this->productModel->getCollection($config, $productIds);
-
-        $pages = 1;
+        $productCollection = $this->productModel->getCollection($config, $page, $productIds);
         $size = $this->productModel->getCollectionCountWithFilters($productCollection);
 
         if (($config['filters']['limit'] > 0) && empty($productId)) {
