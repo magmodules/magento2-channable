@@ -57,7 +57,6 @@ class Preview extends AbstractHelper
         $previewTable = $this->getPreviewTable($feed, $config);
         $feedData = $this->formatFeedArrayOutput($feed);
 
-
         return $previewTable . $feedData;
     }
 
@@ -86,44 +85,6 @@ class Preview extends AbstractHelper
         $html .= ' </tr>';
         $html .= '</table>';
 
-        return $html;
-    }
-
-    /**
-     * @param $config
-     *
-     * @return string
-     */
-    public function getAttributeTable($config)
-    {
-        $html = '';
-        if (empty($config['attributes'])) {
-            return $html;
-        }
-
-        $html .= '<table width="100%" cellpadding="2" cellspacing="2">';
-        $html .= ' <thead>';
-        $html .= '  <tr>';
-        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Title') . '</td>';
-        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Attribute') . '</td>';
-        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Fallback') . '</td>';
-        $html .= '  </tr>';
-        $html .= ' </thead>';
-        $html .= ' <tbody>';
-
-        foreach ($config['attributes'] as $attribute) {
-            if (empty($attribute['source'])) {
-                continue;
-            }
-            $html .= '<tr>';
-            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $attribute['label'] . '</td>';
-            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $attribute['source'] . '</td>';
-            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . (($attribute['parent'] == 1) ? 'Parent' : 'Simple') . '</td>';
-            $html .= '</tr>';
-        }
-
-        $html .= ' </tbody>';
-        $html .= '</table>';
         return $html;
     }
 
@@ -176,9 +137,51 @@ class Preview extends AbstractHelper
         $html .= ' <tbody>';
 
         foreach ($config['filters']['advanced'] as $filter) {
+            $attribute = $filter['attribute'];
+            if ($attribute == 'quantity_and_stock_status') {
+                $attribute = 'qty';
+            }
             $html .= '<tr>';
-            $html .= ' <td width="50%">' . __('filter') . '</td>';
-            $html .= ' <td width="50%">' . $filter['attribute'] . ' ' . $filter['condition'] . ' ' . $filter['value'] . '</td>';
+            $html .= ' <td style="padding: 20px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('filter') . '</td>';
+            $html .= ' <td style="border-bottom: 1px solid #ffffff;font-weight: bold;" >' . $attribute . ' ' . $filter['condition'] . ' ' . $filter['value'] . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= ' </tbody>';
+        $html .= '</table>';
+        return $html;
+    }
+
+    /**
+     * @param $config
+     *
+     * @return string
+     */
+    public function getAttributeTable($config)
+    {
+        $html = '';
+        if (empty($config['attributes'])) {
+            return $html;
+        }
+
+        $html .= '<table width="100%" cellpadding="2" cellspacing="2">';
+        $html .= ' <thead>';
+        $html .= '  <tr>';
+        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Title') . '</td>';
+        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Attribute') . '</td>';
+        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Fallback') . '</td>';
+        $html .= '  </tr>';
+        $html .= ' </thead>';
+        $html .= ' <tbody>';
+
+        foreach ($config['attributes'] as $attribute) {
+            if (empty($attribute['source'])) {
+                continue;
+            }
+            $html .= '<tr>';
+            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $attribute['label'] . '</td>';
+            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $attribute['source'] . '</td>';
+            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . (($attribute['parent'] == 1) ? 'Parent' : 'Simple') . '</td>';
             $html .= '</tr>';
         }
 
@@ -202,5 +205,4 @@ class Preview extends AbstractHelper
         return '<h1 style="font-size: 25px;padding: 10px;border-left: 6px solid;">' . __('Feed Output') . '</h1>
             <pre>' . print_r($feed['products'], true) . '</pre>';
     }
-
 }
