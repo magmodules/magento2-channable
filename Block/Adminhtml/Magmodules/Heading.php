@@ -13,7 +13,7 @@ class Heading extends Field
 {
 
     /**
-     * Styles heading sperator
+     * Styles heading separator.
      *
      * @param AbstractElement $element
      *
