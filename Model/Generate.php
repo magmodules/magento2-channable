@@ -116,7 +116,7 @@ class Generate
         $parents = $this->productModel->getParents($products, $config);
 
         foreach ($products as $product) {
-            $parent = '';
+            $parent = null;
             if (!empty($config['filters']['relations'])) {
                 if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
                     $parent = $parents->getItemById($parentId);

@@ -257,7 +257,7 @@ class Item extends AbstractModel
         $parents = $this->productModel->getParents($products, $config);
 
         foreach ($products as $product) {
-            $parent = '';
+            $parent = null;
             if (!empty($config['filters']['relations'])) {
                 if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
                     $parent = $parents->getItemById($parentId);
@@ -292,7 +292,7 @@ class Item extends AbstractModel
             if (isset($productData[$id])) {
                 $product = $productData[$id];
             } else {
-                $product = '';
+                $product = [];
             }
 
             $update = [];
