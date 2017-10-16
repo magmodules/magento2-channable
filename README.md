@@ -6,45 +6,38 @@ The Channable Connect extension makes it effortless to connect your Magento® 2 
 To make the integration process as easy as possible for you, we have developed various plugins for your webshop software package. 
 This is the manual for installing the Magento® 2 Plugin.
 Before you start up the installation process, we recommend that you make a backup of your webshop files, as well as the database.
-   
-   There are 2 different methods to install the Magento® 2 extension.
-   1.	Install by using Composer 
-   2.	Install by using the Magento® Marketplace (not yet available)
+
+There are 2 different methods to install the Magento® 2 extension.
+1.	Install by using Composer 
+2.	Install by using the Magento® Marketplace (not yet available)
    
 ### Installation using Composer ###
-   Magento® 2 use the Composer to manage the module package and the library. Composer is a dependency manager for PHP. Composer declare the libraries your project depends on and it will manage (install/update) them for you.
-   
-   Check if your server has composer installed by running the following command:
-   ```
-   composer –v
-   ``` 
-   If your server doesn’t have the composer install, you can easily install it. https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx
-   
-   Step-by-step to install the Magento® 2 extension by Composer:
-   
-   1.	Run the ssh console.
-   2.	Locate your Root
-   3.	Install the Magento® 2 extension
-   4.	Cache and Deploy
-   
-   1.Run your SSH Console to connect to your Magento® 2 store
-   2.Locate the root of your Magento® 2 store.
-   3.Enter the command line in your Root and wait as composer will download the extension for you:
-   ```
-   composer require magmodules/magento2-channable
-   ```
-   4.When it’s finished you can clean the caches and deploy the content in your Magento® environment using the following command line;
-   
-   ```
-   php bin/magento setup:upgrade
-   php bin/magento cache:clean
-   ```
-   
-   If Magento® is running in production mode, deploy the static content:
-   ```
-   php bin/magento setup:static-content:deploy
-   ```
-   After the installation. Go to your Magento® admin portal, to ‘Stores’ > ‘Configuration’ > ‘Magmodules’ > ‘Channable’.
+Magento® 2 use the Composer to manage the module package and the library. Composer is a dependency manager for PHP. Composer declare the libraries your project depends on and it will manage (install/update) them for you.
+
+Check if your server has composer installed by running the following command:
+```
+composer –v
+``` 
+If your server doesn’t have composer installed, you can easily install it by using this manual: https://getcomposer.org/doc/00-intro.md
+
+Step-by-step to install the Magento® 2 extension through Composer:
+
+1.	Connect to your server running Magento® 2 using SSH or other method (make sure you have access to the command line).
+2.	Locate your Magento® 2 project root.
+3.	Install the Magento® 2 extension through composer and wait till it's completed:
+```
+composer require magmodules/magento2-channable
+``` 
+4.	After that run the Magento® upgrade and clean the caches:
+```
+php bin/magento setup:upgrade
+php bin/magento cache:flush
+```
+5.  If Magento® is running in production mode you also need to redeploy the static content:
+```
+php bin/magento setup:static-content:deploy
+```
+6.  After the installation: Go to your Magento® admin portal and open ‘Stores’ > ‘Configuration’ > ‘Magmodules’ > ‘Channable’.
    
 ### Installation using the Magento® Marketplace (not yet available) ###
 Get your authentication keys
