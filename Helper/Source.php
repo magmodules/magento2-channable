@@ -348,7 +348,7 @@ class Source extends AbstractHelper
     public function getProductFilters()
     {
         $filters = [];
-        $filters['type_id'] = ['simple', 'configurable', 'downloadable', 'virtual'];
+        $filters['type_id'] = ['simple', 'configurable', 'downloadable', 'virtual', 'bundle'];
 
         $visibilityFilter = $this->generalHelper->getStoreValue(self::XPATH_VISBILITY);
         if ($visibilityFilter) {
