@@ -60,6 +60,11 @@ class ParentAttributes implements ArrayInterface
 
         foreach ($source as $key => $attribute) {
             if (empty($attribute['parent_selection_disabled'])) {
+
+                if (isset($attribute['parent']) && $attribute['parent'] == 2) {
+                    continue;
+                }
+
                 $label = str_replace('_', ' ', $key);
                 $attributes[] = [
                     'value' => $key,

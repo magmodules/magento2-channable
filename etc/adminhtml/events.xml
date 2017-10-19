@@ -9,4 +9,7 @@
     <event name="sales_order_item_cancel">
         <observer name="channable_sales_order_item_cancel" instance="Magmodules\Channable\Observer\Sales\OrderItemCancel" />
     </event>
+    <event name="controller_action_predispatch_adminhtml_system_config_edit">
+        <observer name="channable_system_config_observer" instance="Magmodules\Channable\Observer\System\Config" />
+    </event>
 </config>

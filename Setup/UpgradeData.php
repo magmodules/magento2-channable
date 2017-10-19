@@ -11,23 +11,44 @@ use Magento\Framework\Setup\UpgradeDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\DB\Ddl\Table;
+use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\ObjectManagerInterface;
 
 class UpgradeData implements UpgradeDataInterface
 {
 
     const TABLE_NAME_ITEMS = 'channable_items';
 
+    /**
+     * @var SalesSetupFactory
+     */
     private $salesSetupFactory;
 
     /**
-     * UpgradeSchema constructor.
+     * @var ObjectManagerInterface
+     */
+    private $objectManager;
+
+    /**
+     * @var ProductMetadataInterface
+     */
+    private $productMetadata;
+
+    /**
+     * UpgradeData constructor.
      *
-     * @param SalesSetupFactory $salesSetupFactory
+     * @param ProductMetadataInterface $productMetadata
+     * @param ObjectManagerInterface   $objectManager
+     * @param SalesSetupFactory        $salesSetupFactory
      */
     public function __construct(
+        ProductMetadataInterface $productMetadata,
+        ObjectManagerInterface $objectManager,
         SalesSetupFactory $salesSetupFactory
     ) {
+        $this->productMetadata = $productMetadata;
         $this->salesSetupFactory = $salesSetupFactory;
+        $this->objectManager = $objectManager;
     }
 
     /**
@@ -205,10 +226,15 @@ class UpgradeData implements UpgradeDataInterface
             $this->addIndexes($setup);
         }
 
+        if (version_compare($context->getVersion(), "1.0.5", "<")) {
+            $this->convertSerializedDataToJson($setup);
+        }
+
         $setup->endSetup();
     }
 
     /**
+     * Add Indexes to Items Table.
      * @param ModuleDataSetupInterface $setup
      */
     public function addIndexes(ModuleDataSetupInterface $setup)
@@ -250,6 +276,45 @@ class UpgradeData implements UpgradeDataInterface
                     'updated_at'
                 ),
                 'updated_at'
+            );
+        }
+    }
+
+    /**
+     * Convert Serialzed Data fields to Json for Magento 2.2
+     * Using Object Manager for backwards compatability.
+     *
+     * @param ModuleDataSetupInterface $setup
+     */
+    public function convertSerializedDataToJson(ModuleDataSetupInterface $setup)
+    {
+        $magentoVersion = $this->productMetadata->getVersion();
+        if (version_compare($magentoVersion, '2.2.0', '>=')) {
+            $fieldDataConverter = $this->objectManager
+                ->create(\Magento\Framework\DB\FieldDataConverterFactory::class)
+                ->create(\Magento\Framework\DB\DataConverter\SerializedToJson::class);
+
+            $queryModifier = $this->objectManager
+                ->create(\Magento\Framework\DB\Select\QueryModifierFactory::class)
+                ->create(
+                    'in',
+                    [
+                        'values' => [
+                            'path' => [
+                                'magmodules_channable/advanced/extra_fields',
+                                'magmodules_channable/advanced/delivery_time',
+                                'magmodules_channable/filter/filters_data'
+                            ]
+                        ]
+                    ]
+                );
+
+            $fieldDataConverter->convert(
+                $setup->getConnection(),
+                $setup->getTable('core_config_data'),
+                'config_id',
+                'value',
+                $queryModifier
             );
         }
     }

@@ -530,9 +530,15 @@ class Product extends AbstractHelper
     {
         $config = $config['price_config'];
 
-        $price = floatval($product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue());
-        $finalPrice = floatval($product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue());
-        $specialPrice = floatval($product->getPriceInfo()->getPrice('special_price')->getAmount()->getValue());
+        if ($product->getTypeId() == 'bundle') {
+            $price = $product->getPrice();
+            $finalPrice = $product->getFinalPrice();
+            $specialPrice = $product->getSpecialPrice();
+        } else {
+            $price = floatval($product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue());
+            $finalPrice = floatval($product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue());
+            $specialPrice = floatval($product->getPriceInfo()->getPrice('special_price')->getAmount()->getValue());
+        }
 
         $prices = [];
         $prices[$config['price']] = $this->formatPrice($price, $config);
@@ -559,10 +565,10 @@ class Product extends AbstractHelper
             }
         }
 
-        if (!empty($product['min_price']) && !empty($config['min_price'])) {
+        if (!empty($product['min_price']) && !empty($config['min_price']) && $product->getTypeId() != 'simple') {
             $prices[$config['min_price']] = $this->formatPrice($product['min_price'], $config);
         }
-        if (!empty($product['max_price']) && !empty($config['max_price'])) {
+        if (!empty($product['max_price']) && !empty($config['max_price']) && $product->getTypeId() != 'simple') {
             $prices[$config['max_price']] = $this->formatPrice($product['max_price'], $config);
         }
 

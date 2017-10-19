@@ -73,15 +73,18 @@ class Preview extends AbstractHelper
         $filterTable = $this->getFilterTable($config);
         $attributeTabe = $this->getAttributeTable($config);
 
+        $hStyle = 'font-weight: bold;';
+        $bStyle = 'background: #efefef;border: 1px solid #e7e7e7;';
+
         $html = '<h1 style="font-size: 25px;padding: 10px;border-left: 6px solid;">' . __('Config Values') . '</h1>';
         $html .= '<table width="100%" cellpadding="5" cellspacing="5">';
         $html .= '  <tr>';
-        $html .= '   <td style="font-weight: bold;">' . __('Config') . '</td>';
-        $html .= '   <td style="font-weight: bold;">' . __('Attributes') . '</td>';
+        $html .= '   <td style="' . $hStyle . '">' . __('Config') . '</td>';
+        $html .= '   <td style="' . $hStyle . '">' . __('Attributes') . '</td>';
         $html .= '  </tr>';
         $html .= ' <tr>';
-        $html .= '  <td width="50%" valign="top" style="background: #efefef;border: 1px solid #e7e7e7;">' . $configTable . $filterTable .'</td>';
-        $html .= '  <td width="50%" valign="top" style="background: #efefef;border: 1px solid #e7e7e7;">' . $attributeTabe . '</td>';
+        $html .= '  <td width="50%" valign="top" style="' . $bStyle . '">' . $configTable . $filterTable . '</td>';
+        $html .= '  <td width="50%" valign="top" style="' . $bStyle . '">' . $attributeTabe . '</td>';
         $html .= ' </tr>';
         $html .= '</table>';
 
@@ -100,19 +103,22 @@ class Preview extends AbstractHelper
             return $html;
         }
 
+        $hStyle = 'padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;';
+        $bStyle = 'padding:2px;border-bottom: 1px solid #ffffff;';
+
         $html .= '<table width="100%" cellpadding="2" cellspacing="2">';
         $html .= ' <thead>';
         $html .= '  <tr>';
-        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;">' . __('Config') . '</td>';
-        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;">' . __('Value') . '</td>';
+        $html .= '   <td style="' . $hStyle . '">' . __('Config') . '</td>';
+        $html .= '   <td style="' . $hStyle . '">' . __('Value') . '</td>';
         $html .= '  </tr>';
         $html .= ' </thead>';
         $html .= ' <tbody>';
 
         foreach ($feed['config'] as $k => $v) {
             $html .= '<tr>';
-            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $k . '</td>';
-            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $v . '</td>';
+            $html .= ' <td style="' . $bStyle . '" >' . $k . '</td>';
+            $html .= ' <td style="' . $bStyle . '" >' . $v . '</td>';
             $html .= '</tr>';
         }
 
@@ -133,6 +139,9 @@ class Preview extends AbstractHelper
             return $html;
         }
 
+        $fStyle = 'padding: 20px;border-bottom: 1px solid #ffffff;font-weight: bold;';
+        $cStyle = 'border-bottom: 1px solid #ffffff;font-weight: bold;';
+
         $html .= '<table width="100%" cellpadding="2" cellspacing="2">';
         $html .= ' <tbody>';
 
@@ -142,8 +151,9 @@ class Preview extends AbstractHelper
                 $attribute = 'qty';
             }
             $html .= '<tr>';
-            $html .= ' <td style="padding: 20px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('filter') . '</td>';
-            $html .= ' <td style="border-bottom: 1px solid #ffffff;font-weight: bold;" >' . $attribute . ' ' . $filter['condition'] . ' ' . $filter['value'] . '</td>';
+            $html .= ' <td style="' . $fStyle . '" >' . __('filter') . '</td>';
+            $html .= ' <td style="' . $cStyle . '" >';
+            $html .= '   ' . $attribute . ' ' . $filter['condition'] . ' ' . $filter['value'] . '</td>';
             $html .= '</tr>';
         }
 
@@ -164,12 +174,15 @@ class Preview extends AbstractHelper
             return $html;
         }
 
+        $hStyle = 'padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;';
+        $bStyle = 'padding:2px;border-bottom: 1px solid #ffffff;';
+
         $html .= '<table width="100%" cellpadding="2" cellspacing="2">';
         $html .= ' <thead>';
         $html .= '  <tr>';
-        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Title') . '</td>';
-        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Attribute') . '</td>';
-        $html .= '   <td style="padding:2px;border-bottom: 1px solid #ffffff;font-weight: bold;" >' . __('Fallback') . '</td>';
+        $html .= '   <td style="' . $hStyle . '" >' . __('Title') . '</td>';
+        $html .= '   <td style="' . $hStyle . '" >' . __('Attribute') . '</td>';
+        $html .= '   <td style="' . $hStyle . '" >' . __('Fallback') . '</td>';
         $html .= '  </tr>';
         $html .= ' </thead>';
         $html .= ' <tbody>';
@@ -179,9 +192,9 @@ class Preview extends AbstractHelper
                 continue;
             }
             $html .= '<tr>';
-            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $attribute['label'] . '</td>';
-            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . $attribute['source'] . '</td>';
-            $html .= ' <td style="padding:2px;border-bottom: 1px solid #ffffff;" >' . (($attribute['parent'] == 1) ? 'Parent' : 'Simple') . '</td>';
+            $html .= ' <td style="' . $bStyle . '" >' . $attribute['label'] . '</td>';
+            $html .= ' <td style="' . $bStyle . '" >' . $attribute['source'] . '</td>';
+            $html .= ' <td style="' . $bStyle . '" >' . (($attribute['parent'] == 1) ? 'Parent' : 'Simple') . '</td>';
             $html .= '</tr>';
         }
 
