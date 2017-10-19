@@ -330,6 +330,8 @@ class Source extends AbstractHelper
         $priceFields = [];
         $priceFields['price'] = 'price';
         $priceFields['sales_price'] = 'sale_price';
+        $priceFields['min_price'] = 'min_price';
+        $priceFields['max_price'] = 'max_price';
         $priceFields['sales_date_range'] = 'sale_price_effective_date';
         $priceFields['currency'] = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
 
@@ -348,7 +350,7 @@ class Source extends AbstractHelper
     public function getProductFilters()
     {
         $filters = [];
-        $filters['type_id'] = ['simple', 'configurable', 'downloadable', 'virtual'];
+        $filters['type_id'] = ['simple', 'configurable', 'downloadable', 'virtual', 'bundle'];
 
         $visibilityFilter = $this->generalHelper->getStoreValue(self::XPATH_VISBILITY);
         if ($visibilityFilter) {

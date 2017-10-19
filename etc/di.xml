@@ -40,4 +40,12 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="ChannableConfig" xsi:type="object">Magmodules\Channable\Console\Command\Config</item>
+                <item name="ChannableItemUpdate" xsi:type="object">Magmodules\Channable\Console\Command\ItemUpdate</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
