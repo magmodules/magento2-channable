@@ -85,7 +85,7 @@ class Json extends Action
         if ($productId = $this->getRequest()->getParam('pid')) {
             $productId = [$productId];
         } else {
-            $productId = '';
+            $productId = null;
         }
 
         if ($data = $this->generateModel->generateByStore($storeId, $page, $productId)) {

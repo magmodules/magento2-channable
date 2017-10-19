@@ -275,9 +275,9 @@ class Order
                 $cart->getShippingAddress()->addData($shippingAddress);
             }
 
-            $orderTotal = '';
-            $orderWeight = '';
-            $itemCount = '';
+            $orderTotal = 0;
+            $orderWeight = 0;
+            $itemCount = 0;
             $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $storeId);
             foreach ($data['products'] as $item) {
                 $product = $this->product->create()->load($item['id']);

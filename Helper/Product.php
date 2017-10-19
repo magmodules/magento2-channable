@@ -122,7 +122,7 @@ class Product extends AbstractHelper
         }
 
         foreach ($config['attributes'] as $type => $attribute) {
-            $simple = '';
+            $simple = null;
             $productData = $product;
             if ($attribute['parent'] && $parent) {
                 $productData = $parent;

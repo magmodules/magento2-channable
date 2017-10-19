@@ -99,7 +99,7 @@ class Preview extends Action
         if ($productId = $this->getRequest()->getParam('pid')) {
             $productId = [$productId];
         } else {
-            $productId = '';
+            $productId = null;
         }
 
         if ($feed = $this->generateModel->generateByStore($storeId, $page, $productId)) {
