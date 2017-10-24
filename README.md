@@ -39,7 +39,10 @@ php bin/magento setup:static-content:deploy
 ```
 6.  After the installation: Go to your Magento® admin portal and open ‘Stores’ > ‘Configuration’ > ‘Magmodules’ > ‘Channable’.
    
-### Installation using the Magento® Marketplace (not yet available) ###
+### Installation using the Magento® Marketplace ###
+Marketplace Link https://marketplace.magento.com/magmodules-magento2-channable.html
+
+
 Get your authentication keys
 Overview of Magento® authentication
 The repo.magento.com repository, where Magento® 2 and third-party component Composer packages are stored, requires authentication. To provide secure authentication, we enable you to generate a pair 32-¬¬character authentication tokens you can use to access the repository. You generate, access, and can also delete or regenerate your keys using Magento® Marketplace.
