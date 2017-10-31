@@ -70,7 +70,7 @@ class Item extends AbstractModel
      *
      * @param \Magmodules\Channable\Model\ItemFactory $itemFactory
      * @param GeneralHelper                           $generalHelper
-     * @param ProductsModel                                $productModel
+     * @param ProductsModel                           $productModel
      * @param ProductHelper                           $productHelper
      * @param ItemHelper                              $itemHelper
      * @param SourceHelper                            $sourceHelper
@@ -112,7 +112,6 @@ class Item extends AbstractModel
      */
     public function add($row, $storeId)
     {
-
         $data = [];
         $data['item_id'] = $storeId . sprintf('%08d', $row['id']);
         $data['store_id'] = $storeId;
@@ -138,6 +137,37 @@ class Item extends AbstractModel
                 $this->logger->debug('exception');
             }
         }
+    }
+
+    /**
+     * Update all Stores
+     */
+    public function updateAll()
+    {
+        $this->runProductUpdateCheck();
+        $storeIds = $this->generalHelper->getAllStoreIds();
+        foreach ($storeIds as $storeId) {
+            $this->updateByStore($storeId);
+        }
+    }
+
+    /**
+     * Invalidate last updated products.
+     */
+    public function runProductUpdateCheck()
+    {
+        if (!$this->itemHelper->invalidateByCron()) {
+            return;
+        }
+
+        $type = 'CronUpdate';
+        $lastRun = $this->itemHelper->getLastRun();
+        $products = $this->productModel->getLastEditedCollection($lastRun);
+        foreach ($products as $product) {
+            $this->invalidateProduct($product->getId(), $type);
+        }
+
+        $this->itemHelper->setLastRun();
     }
 
     /**
@@ -167,17 +197,6 @@ class Item extends AbstractModel
     }
 
     /**
-     * Update all Stores
-     */
-    public function updateAll()
-    {
-        $storeIds = $this->generalHelper->getAllStoreIds();
-        foreach ($storeIds as $storeId) {
-            $this->updateByStore($storeId);
-        }
-    }
-
-    /**
      * @param $storeId
      *
      * @return array
@@ -199,7 +218,7 @@ class Item extends AbstractModel
                     'status'   => 'success',
                     'store_id' => $storeId,
                     'qty'      => 0,
-                    'date'     => $this->generalHelper->getGmtData()
+                    'date'     => $this->generalHelper->getGmtDate()
                 ];
             } else {
                 $result = $this->updateCollection($items, $storeId, $config);
@@ -209,7 +228,7 @@ class Item extends AbstractModel
                 'status'   => 'error',
                 'store_id' => $storeId,
                 'qty'      => 0,
-                'date'     => $this->generalHelper->getGmtData()
+                'date'     => $this->generalHelper->getGmtDate()
             ];
         }
 
@@ -340,7 +359,7 @@ class Item extends AbstractModel
             $results['result'] = json_decode($result, true);
             $results['post_data'] = $postData;
             $results['needs_update'] = 0;
-            $results['date'] = $this->generalHelper->getGmtData();
+            $results['date'] = $this->generalHelper->getGmtDate();
         } else {
             $results['status'] = 'error';
             $results['store_id'] = $config['store_id'];
@@ -349,7 +368,7 @@ class Item extends AbstractModel
             $results['result'] = json_decode($result, true);
             $results['post_data'] = $postData;
             $results['needs_update'] = 1;
-            $results['date'] = $this->generalHelper->getGmtData();
+            $results['date'] = $this->generalHelper->getGmtDate();
         }
 
         return $results;
@@ -371,7 +390,7 @@ class Item extends AbstractModel
                 $postData[$key]['call_result'] = $item['message'];
                 $postData[$key]['status'] = ucfirst($item['status']);
                 $postData[$key]['needs_update'] = ($item['status'] == 'success') ? 0 : 1;
-                $postData[$key]['last_call'] = $this->generalHelper->getGmtData();
+                $postData[$key]['last_call'] = $this->generalHelper->getGmtDate();
 
                 if ($item['status'] == 'error') {
                     $oldStatus = $this->itemFactory->create()->load($postData[$key]['item_id'])->getStatus();

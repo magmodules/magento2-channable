@@ -161,14 +161,15 @@
                 </field>
                 <field id="heading_config" translate="label comment" type="text" sortOrder="20" showInDefault="1"
                        showInWebsite="1" showInStore="1">
-                    <label>Configurable products</label>
+                    <label>Configurable, Grouped &amp; Bundle products</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>When your using configurable products the simple products will be shown in the feed. You can choose to pull the information from the parent products. Select the fall-back data for the configurable products in the multiple-select box below.</comment>
+                    <comment><![CDATA[When your using configurable, grouped and bundle products the "Not Visible Individually" Simple Products will be exported. You can choose to pull the information from the parent products. Select the fall-back data for these products under "Use Parent Product Data for Simple Products".]]></comment>
                 </field>
                 <field id="relations" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1"
                        showInStore="1">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[This option will enable the export of <u>"Not Visible Individually"</u> Simple Products that are part of a configurable, grouped or bundle  product. ]]></comment>
                 </field>
                 <field id="parent_atts" translate="label" type="multiselect" sortOrder="22" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -177,6 +178,7 @@
                     <depends>
                         <field id="relations">1</field>
                     </depends>
+                    <comment>The selected attributes will be used for export instead of the simple data. E.g. selecting "description" will result is the use of the description data for the simples products.</comment>
                 </field>
                 <field id="heading_Delivery" translate="label comment" type="text" sortOrder="30" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -280,7 +282,7 @@
             </group>
         </section>
         <section id="magmodules_channable_marketplace" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Channable: Orders</label>
+            <label>Channable: Orders &amp; Items</label>
             <tab>magmodules</tab>
             <resource>Magmodules_Channable::marketplace</resource>
             <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1"
@@ -354,8 +356,8 @@
                     <label>Create invoice for order</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="heading_log" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1"
-                       showInStore="1">
+                <field id="heading_log" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
                     <label>Logging</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Enable the Order Logging option to log all the incoming orders from the connected Marketplaces.</comment>
@@ -385,16 +387,33 @@
                 <field id="webhook" translate="label" type="text" sortOrder="2" showInDefault="0" showInWebsite="0" showInStore="1">
                     <label>Webhook</label>
                 </field>
-                <field id="heading_settings" translate="label comment" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Settings</label>
+                <field id="heading_invalidation" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
+                    <label>Invalidation Type</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+                <field id="invalidation_modus" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
+                    <label>Modus</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\InvalidationModus</source_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment>Log Product movements using Observer or Cron.</comment>
+                </field>
+                <field id="heading_settings" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Cron</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Configure the Item update with the values below, we highly recommend to check your Magento cron job functionality to make sure all your items are updated frequently.</comment>
                 </field>
-                <field id="cron" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Cron</label>
+                <field id="cron" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="cron_frequency" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="cron_frequency" translate="label" type="select" sortOrder="22" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Frequency</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\CronFrequency</source_model>
                     <backend_model>Magmodules\Channable\Model\Config\Backend\Cron</backend_model>
@@ -402,28 +421,28 @@
                         <field id="cron">1</field>
                     </depends>
                 </field>
-                <field id="custom_frequency" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="custom_frequency" translate="label" type="text" sortOrder="23" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Custom Frequency</label>
                     <depends>
                         <field id="cron">1</field>
                         <field id="cron_frequency">custom</field>
                     </depends>
                 </field>
-                <field id="limit" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="limit" translate="label" type="text" sortOrder="24" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Products per run</label>
                     <comment>Set a limit on the number of products for each update.</comment>
                 </field>
-                <field id="log" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="log" translate="label" type="select" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Log Calls</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Write all the calls and updates to the Channable log file located in /var/log/channable.log</comment>
                 </field>
-                <field id="heading_item_stores" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="heading_item_stores" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enabled Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>You can only activate and or set the Webhook per specific Store View. You can select the Store Views using the dropdown on the top of the left.</comment>
                 </field>
-                <field id="item_stores" translate="label" type="text" sortOrder="21" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="item_stores" translate="label" type="text" sortOrder="41" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\ItemStores</frontend_model>
                 </field>

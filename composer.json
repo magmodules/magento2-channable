@@ -2,11 +2,9 @@
   "name": "magmodules/magento2-channable",
   "description": "Channable integration for Magento 2",
   "type": "magento2-module",
-  "version": "1.0.5",
-  "license": [
-    "OSL-3.0",
-    "AFL-3.0"
-  ],
+  "version": "1.0.6",
+  "license": "BSD-2-Clause",
+  "homepage": "https://github.com/magmodules/magento2-channable",
   "require": {
   },
   "autoload": {

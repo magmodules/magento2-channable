@@ -20,6 +20,8 @@ class Item extends AbstractHelper
     const XPATH_LIMIT = 'magmodules_channable_marketplace/item/limit';
     const XPATH_LOG = 'magmodules_channable_marketplace/item/log';
     const XPATH_CRON = 'magmodules_channable_marketplace/item/cron';
+    const XPATH_INVALIDATE_MODUS = 'magmodules_channable_marketplace/item/invalidation_modus';
+    const XPATH_LAST_RUN = 'magmodules_channable_marketplace/item/last_run';
 
     /**
      * @var StoreManagerInterface
@@ -65,6 +67,59 @@ class Item extends AbstractHelper
             return false;
         }
         return $this->generalHelper->getStoreValue(self::XPATH_ENABLE);
+    }
+
+    /**
+     * @return bool
+     */
+    public function invalidateByObserver()
+    {
+        if (!$this->isEnabled()) {
+            return false;
+        }
+
+        $modus = $this->generalHelper->getStoreValue(self::XPATH_INVALIDATE_MODUS);
+        if ($modus == 'cron') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function invalidateByCron()
+    {
+        $modus = $this->generalHelper->getStoreValue(self::XPATH_INVALIDATE_MODUS);
+        if ($modus == 'cron') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastRun()
+    {
+        $date = $this->generalHelper->getUncachedStoreValue(self::XPATH_LAST_RUN, 0);
+        if (!empty($date)) {
+            return $date;
+        }
+
+        $date = $this->generalHelper->getTimestamp();
+        return date('Y-m-d H:i:s', strtotime('-1 days', $date));
+    }
+
+    /**
+     *
+     */
+    public function setLastRun()
+    {
+        $date = $this->generalHelper->getGmtDate();
+        $this->generalHelper->setConfigData($date, self::XPATH_LAST_RUN);
     }
 
     /**

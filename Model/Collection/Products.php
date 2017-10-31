@@ -96,7 +96,7 @@ class Products
      * @param $page
      * @param $productIds
      *
-     * @return $this
+     * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
     public function getCollection($config, $page, $productIds)
     {
@@ -204,7 +204,7 @@ class Products
 
     /**
      * @param $filters
-     * @param $collection
+     * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $collection
      */
     public function addFilters($filters, $collection)
     {
@@ -320,10 +320,11 @@ class Products
      * @param $products
      * @param $config
      *
-     * @return $this|array
+     * @return array|\Magento\Catalog\Model\ResourceModel\Product\Collection
      */
     public function getParents($products, $config)
     {
+        $parents = [];
         $filters = $config['filters'];
         if (!empty($filters['relations'])) {
             $ids = [];
@@ -334,7 +335,7 @@ class Products
             }
 
             if (empty($ids)) {
-                return [];
+                return $parents;
             }
 
             $flat = false;
@@ -376,16 +377,32 @@ class Products
                 }
             }
 
-            return $collection->load();
+            $parents = $collection->load();
         }
 
-        return [];
+        return $parents;
     }
+
+    /**
+     * @param $date
+     *
+     * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
+     */
+    public function getLastEditedCollection($date)
+    {
+        $collection = $this->productCollectionFactory
+            ->create()
+            ->addAttributeToSelect(['last_updated','entity_id'])
+            ->addAttributeToFilter('updated_at', ['gteq' => $date]);
+
+        return $collection->load();
+    }
+
 
     /**
      * Direct Database Query to get total records of collection with filters.
      *
-     * @param $productCollection
+     * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection
      *
      * @return int
      */
