@@ -11,6 +11,8 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Config\Model\ResourceModel\Config;
+use Magento\Config\Model\ResourceModel\Config\Data\Collection as ConfigDataCollection;
+use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigDataCollectionFactory;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
@@ -45,6 +47,11 @@ class General extends AbstractHelper
     private $config;
 
     /**
+     * @var ConfigDataCollectionFactory
+     */
+    private $configDataCollectionFactory;
+
+    /**
      * @var ChannableLogger
      */
     private $logger;
@@ -57,13 +64,14 @@ class General extends AbstractHelper
     /**
      * General constructor.
      *
-     * @param Context                  $context
-     * @param StoreManagerInterface    $storeManager
-     * @param ModuleListInterface      $moduleList
-     * @param ProductMetadataInterface $metadata
-     * @param ChannableLogger          $logger
-     * @param DateTime                 $date
-     * @param Config                   $config
+     * @param Context                     $context
+     * @param StoreManagerInterface       $storeManager
+     * @param ModuleListInterface         $moduleList
+     * @param ProductMetadataInterface    $metadata
+     * @param ChannableLogger             $logger
+     * @param DateTime                    $date
+     * @param ConfigDataCollectionFactory $configDataCollectionFactory
+     * @param Config                      $config
      */
     public function __construct(
         Context $context,
@@ -72,6 +80,7 @@ class General extends AbstractHelper
         ProductMetadataInterface $metadata,
         ChannableLogger $logger,
         DateTime $date,
+        ConfigDataCollectionFactory $configDataCollectionFactory,
         Config $config
     ) {
         $this->storeManager = $storeManager;
@@ -79,6 +88,7 @@ class General extends AbstractHelper
         $this->metadata = $metadata;
         $this->date = $date;
         $this->config = $config;
+        $this->configDataCollectionFactory = $configDataCollectionFactory;
         $this->logger = $logger;
         parent::__construct($context);
     }
@@ -123,6 +133,31 @@ class General extends AbstractHelper
         }
 
         return $this->scopeConfig->getValue($path, $scope, $storeId);
+    }
+
+    /**
+     * Get Uncached Value from core_config_data
+     *
+     * @param      $path
+     * @param null $storeId
+     *
+     * @return mixed
+     */
+    public function getUncachedStoreValue($path, $storeId)
+    {
+        $collection = $this->configDataCollectionFactory->create()
+            ->addFieldToSelect('value')
+            ->addFieldToFilter('path', $path);
+
+        if ($storeId > 0) {
+            $collection->addFieldToFilter('scope_id', $storeId);
+            $collection->addFieldToFilter('scope', 'stores');
+        } else {
+            $collection->addFieldToFilter('scope_id', 0);
+            $collection->addFieldToFilter('scope', 'default');
+        }
+
+        return $collection->getFirstItem()->getValue();
     }
 
     /**
@@ -261,7 +296,7 @@ class General extends AbstractHelper
     /**
      * @return mixed
      */
-    public function getGmtData()
+    public function getGmtDate()
     {
         return $this->date->gmtDate();
     }

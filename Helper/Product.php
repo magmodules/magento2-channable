@@ -15,6 +15,7 @@ use Magento\Eav\Api\AttributeSetRepositoryInterface;
 use Magento\Framework\Filter\FilterManager;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable;
 use Magento\GroupedProduct\Model\Product\Type\Grouped;
+use Magento\Catalog\Model\Product\CatalogPrice;
 use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
@@ -69,6 +70,11 @@ class Product extends AbstractHelper
     private $catalogProductMediaConfig;
 
     /**
+     * @var CatalogPrice
+     */
+    private $commonPriceModel;
+
+    /**
      * Product constructor.
      *
      * @param Context                         $context
@@ -81,6 +87,7 @@ class Product extends AbstractHelper
      * @param Grouped                         $catalogProductTypeGrouped
      * @param Bundle                          $catalogProductTypeBundle
      * @param Configurable                    $catalogProductTypeConfigurable
+     * @param CatalogPrice                    $commonPriceModel
      */
     public function __construct(
         Context $context,
@@ -92,7 +99,8 @@ class Product extends AbstractHelper
         AttributeSetRepositoryInterface $attributeSet,
         Grouped $catalogProductTypeGrouped,
         Bundle $catalogProductTypeBundle,
-        Configurable $catalogProductTypeConfigurable
+        Configurable $catalogProductTypeConfigurable,
+        CatalogPrice $commonPriceModel
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
@@ -103,6 +111,7 @@ class Product extends AbstractHelper
         $this->catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
         $this->catalogProductTypeGrouped = $catalogProductTypeGrouped;
         $this->catalogProductTypeBundle = $catalogProductTypeBundle;
+        $this->commonPriceModel = $commonPriceModel;
         parent::__construct($context);
     }
 
@@ -174,6 +183,12 @@ class Product extends AbstractHelper
         $filters = $config['filters'];
         if (!empty($filters['exclude_parent'])) {
             if ($product->getTypeId() == 'configurable') {
+                return false;
+            }
+            if ($product->getTypeId() == 'grouped') {
+                return false;
+            }
+            if ($product->getTypeId() == 'bundle') {
                 return false;
             }
         }
@@ -528,30 +543,38 @@ class Product extends AbstractHelper
      */
     public function getPriceCollection($config, $product)
     {
-        $config = $config['price_config'];
-
-        if ($product->getTypeId() == 'bundle') {
-            $price = $product->getPrice();
-            $finalPrice = $product->getFinalPrice();
-            $specialPrice = $product->getSpecialPrice();
-        } else {
-            $price = floatval($product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue());
-            $finalPrice = floatval($product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue());
-            $specialPrice = floatval($product->getPriceInfo()->getPrice('special_price')->getAmount()->getValue());
+        switch ($product->getTypeId()) {
+            case 'grouped':
+                $groupedPrices = $this->getGroupedPrices($product, $config);
+                $price = $groupedPrices['min_price'];
+                $product['min_price'] = $groupedPrices['min_price'];
+                $product['max_price'] = $groupedPrices['max_price'];
+                break;
+            case 'bundle':
+                $price = $product->getPriceInfo()->getPrice('final_price')->getValue();
+                $product['min_price'] = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice();
+                $product['max_price'] = $product->getPriceInfo()->getPrice('final_price')->getMaximalPrice();
+                break;
+            default:
+                $price = $product->getPrice();
+                $finalPrice = $product->getFinalPrice();
+                $specialPrice = $product->getSpecialPrice();
         }
 
         $prices = [];
+        $config = $config['price_config'];
+
         $prices[$config['price']] = $this->formatPrice($price, $config);
 
-        if (!empty($config['final_price'])) {
+        if (isset($finalPrice) && !empty($config['final_price'])) {
             $prices[$config['final_price']] = $this->formatPrice($finalPrice, $config);
         }
 
-        if (($price > $finalPrice) && !empty($config['sales_price'])) {
+        if (isset($finalPrice) && ($price > $finalPrice) && !empty($config['sales_price'])) {
             $prices[$config['sales_price']] = $this->formatPrice($finalPrice, $config);
         }
 
-        if (($specialPrice < $price) && !empty($config['sales_date_range'])) {
+        if (isset($specialPrice) && ($specialPrice < $price) && !empty($config['sales_date_range'])) {
             if ($product->getSpecialFromDate() && $product->getSpecialToDate()) {
                 $from = date('Y-m-d', strtotime($product->getSpecialFromDate()));
                 $to = date('Y-m-d', strtotime($product->getSpecialToDate()));
@@ -565,10 +588,11 @@ class Product extends AbstractHelper
             }
         }
 
-        if (!empty($product['min_price']) && !empty($config['min_price']) && $product->getTypeId() != 'simple') {
+        if (!empty($product['min_price']) && !empty($config['min_price'])) {
             $prices[$config['min_price']] = $this->formatPrice($product['min_price'], $config);
         }
-        if (!empty($product['max_price']) && !empty($config['max_price']) && $product->getTypeId() != 'simple') {
+
+        if (!empty($product['max_price']) && !empty($config['max_price'])) {
             $prices[$config['max_price']] = $this->formatPrice($product['max_price'], $config);
         }
 
@@ -583,6 +607,36 @@ class Product extends AbstractHelper
         }
 
         return $prices;
+    }
+
+    /**
+     * @param $product
+     * @param $config
+     *
+     * @return array|null
+     */
+    public function getGroupedPrices($product, $config)
+    {
+        $subProducts = $product->getTypeInstance()->getAssociatedProducts($product);
+
+        $minPrice = null;
+        $maxPrice = null;
+
+        foreach ($subProducts as $subProduct) {
+            $subProduct->setWebsiteId($config['website_id']);
+            if ($subProduct->isSalable()) {
+                if ($this->commonPriceModel->getCatalogPrice($subProduct) < $minPrice || $minPrice === null) {
+                    $minPrice = $this->commonPriceModel->getCatalogPrice($subProduct);
+                    $product->setTaxClassId($subProduct->getTaxClassId());
+                }
+                if ($this->commonPriceModel->getCatalogPrice($subProduct) > $maxPrice || $maxPrice === null) {
+                    $maxPrice = $this->commonPriceModel->getCatalogPrice($subProduct);
+                    $product->setTaxClassId($subProduct->getTaxClassId());
+                }
+            }
+        }
+
+        return ['min_price' => $minPrice, 'max_price' => $maxPrice];
     }
 
     /**

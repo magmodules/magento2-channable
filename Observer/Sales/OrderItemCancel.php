@@ -9,7 +9,8 @@ namespace Magmodules\Channable\Observer\Sales;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magmodules\Channable\Model\Item as ItemModel;
-use Magmodules\Channable\Helper\General as GeneralHelper;
+use Magmodules\Channable\Helper\Item as ItemHelper;
+use Psr\Log\LoggerInterface;
 
 class OrderItemCancel implements ObserverInterface
 {
@@ -22,37 +23,52 @@ class OrderItemCancel implements ObserverInterface
     private $itemModel;
 
     /**
-     * @var GeneralHelper
+     * @var ItemHelper
      */
-    private $generalHelper;
+    private $itemHelper;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * OrderItemCancel constructor.
      *
-     * @param ItemModel     $itemModel
-     * @param GeneralHelper $generalHelper
+     * @param ItemModel       $itemModel
+     * @param ItemHelper      $itemHelper
+     * @param LoggerInterface $logger
      */
     public function __construct(
         ItemModel $itemModel,
-        GeneralHelper $generalHelper
+        ItemHelper $itemHelper,
+        LoggerInterface $logger
     ) {
         $this->itemModel = $itemModel;
-        $this->generalHelper = $generalHelper;
+        $this->itemHelper = $itemHelper;
+        $this->logger = $logger;
     }
 
     /**
      * @param Observer $observer
+     *
+     * @return $this
      */
     public function execute(Observer $observer)
     {
-        if (!$this->generalHelper->getMarketplaceEnabled()) {
-            return;
+        if (!$this->itemHelper->invalidateByObserver()) {
+            return $this;
         }
 
-        $item = $observer->getEvent()->getItem();
-        $childrenItems = $item->getChildrenItems();
-        if (empty($childrenItems)) {
-            $this->itemModel->invalidateProduct($item->getProductId(), self::OBSERVER_TYPE);
+        try {
+            $item = $observer->getEvent()->getItem();
+            $childrenItems = $item->getChildrenItems();
+            if (empty($childrenItems)) {
+                $this->itemModel->invalidateProduct($item->getProductId(), self::OBSERVER_TYPE);
+            }
+        } catch (\Exception $e) {
+            $this->logger->critical($e);
+            $this->logger->debug('exception');
         }
     }
 }

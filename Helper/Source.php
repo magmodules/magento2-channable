@@ -75,7 +75,6 @@ class Source extends AbstractHelper
      */
     private $storeManager;
 
-
     /**
      * Source constructor.
      *
@@ -112,6 +111,7 @@ class Source extends AbstractHelper
     {
         $config = [];
         $config['store_id'] = $storeId;
+        $config['website_id'] = $this->storeManager->getStore()->getWebsiteId();
         $config['flat'] = false;
         $config['attributes'] = $this->getAttributes($type);
         $config['price_config'] = $this->getPriceConfig($type);
@@ -350,7 +350,7 @@ class Source extends AbstractHelper
     public function getProductFilters()
     {
         $filters = [];
-        $filters['type_id'] = ['simple', 'configurable', 'downloadable', 'virtual', 'bundle'];
+        $filters['type_id'] = ['simple', 'configurable', 'downloadable', 'virtual', 'bundle', 'grouped'];
 
         $visibilityFilter = $this->generalHelper->getStoreValue(self::XPATH_VISBILITY);
         if ($visibilityFilter) {
@@ -434,9 +434,9 @@ class Source extends AbstractHelper
     }
 
     /**
-     * @param $dataRow
-     * @param $product
-     * @param $config
+     * @param                                $dataRow
+     * @param \Magento\Catalog\Model\Product $product
+     * @param                                $config
      *
      * @return string
      */
@@ -460,8 +460,8 @@ class Source extends AbstractHelper
     }
 
     /**
-     * @param $product
-     * @param $categories
+     * @param \Magento\Catalog\Model\Product $product
+     * @param                                $categories
      *
      * @return array
      */

@@ -9,7 +9,8 @@ namespace Magmodules\Channable\Observer\Checkout;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magmodules\Channable\Model\Item as ItemModel;
-use Magmodules\Channable\Helper\General as GeneralHelper;
+use Magmodules\Channable\Helper\Item as ItemHelper;
+use Psr\Log\LoggerInterface;
 
 class AllSubmitAfter implements ObserverInterface
 {
@@ -22,40 +23,56 @@ class AllSubmitAfter implements ObserverInterface
     private $itemModel;
 
     /**
-     * @var GeneralHelper
+     * @var ItemHelper
      */
-    private $generalHelper;
+    private $itemHelper;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * AllSubmitAfter constructor.
      *
-     * @param ItemModel     $itemModel
-     * @param GeneralHelper $generalHelper
+     * @param ItemModel       $itemModel
+     * @param ItemHelper      $itemHelper
+     * @param LoggerInterface $logger
      */
     public function __construct(
         ItemModel $itemModel,
-        GeneralHelper $generalHelper
+        ItemHelper $itemHelper,
+        LoggerInterface $logger
     ) {
         $this->itemModel = $itemModel;
-        $this->generalHelper = $generalHelper;
+        $this->itemHelper = $itemHelper;
+        $this->logger = $logger;
     }
 
     /**
      * @param Observer $observer
+     *
+     * @return $this
      */
     public function execute(Observer $observer)
     {
-        if (!$this->generalHelper->getMarketplaceEnabled()) {
-            return;
+        if (!$this->itemHelper->invalidateByObserver()) {
+            return $this;
         }
 
-        $order = $observer->getEvent()->getOrder();
-        if ($order) {
-            foreach ($order->getAllItems() as $product) {
-                if ($product->getProductType() == 'simple') {
-                    $this->itemModel->invalidateProduct($product->getProductId(), self::OBSERVER_TYPE);
+        try {
+            /** @var \Magento\Sales\Model\Order $order */
+            $order = $observer->getEvent()->getOrder();
+            if ($order) {
+                foreach ($order->getAllItems() as $item) {
+                    if ($item->getProductType() == 'simple') {
+                        $this->itemModel->invalidateProduct($item->getProductId(), self::OBSERVER_TYPE);
+                    }
                 }
             }
+        } catch (\Exception $e) {
+            $this->logger->critical($e);
+            $this->logger->debug('exception');
         }
     }
 }

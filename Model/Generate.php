@@ -12,6 +12,7 @@ use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magmodules\Channable\Helper\Product as ProductHelper;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
+use Magento\Catalog\Model\Product\Visibility;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
 use Psr\Log\LoggerInterface;
@@ -116,8 +117,11 @@ class Generate
         $parents = $this->productModel->getParents($products, $config);
 
         foreach ($products as $product) {
+            /** @var \Magento\Catalog\Model\Product $product */
             $parent = null;
-            if (!empty($config['filters']['relations'])) {
+            if (!empty($config['filters']['relations'])
+                && $product->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE
+            ) {
                 if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
                     $parent = $parents->getItemById($parentId);
                 }
