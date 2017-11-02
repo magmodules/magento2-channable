@@ -71,7 +71,7 @@ class General extends AbstractHelper
      * @param ChannableLogger             $logger
      * @param DateTime                    $date
      * @param ConfigDataCollectionFactory $configDataCollectionFactory
-     * @param Config                      $config
+     * @param ConfigData                  $config
      */
     public function __construct(
         Context $context,
