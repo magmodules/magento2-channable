@@ -10,7 +10,7 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\ScopeInterface;
-use Magento\Config\Model\ResourceModel\Config;
+use Magento\Config\Model\ResourceModel\Config as ConfigData;
 use Magento\Config\Model\ResourceModel\Config\Data\Collection as ConfigDataCollection;
 use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigDataCollectionFactory;
 use Magento\Framework\Module\ModuleListInterface;
@@ -81,7 +81,7 @@ class General extends AbstractHelper
         ChannableLogger $logger,
         DateTime $date,
         ConfigDataCollectionFactory $configDataCollectionFactory,
-        Config $config
+        ConfigData $config
     ) {
         $this->storeManager = $storeManager;
         $this->moduleList = $moduleList;
