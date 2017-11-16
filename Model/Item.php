@@ -20,46 +20,43 @@ use Magmodules\Channable\Helper\Item as ItemHelper;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
 
+/**
+ * Class Item
+ *
+ * @package Magmodules\Channable\Model
+ */
 class Item extends AbstractModel
 {
 
     const OUT_OF_STOCK_MSG = 'out of stock';
-
     /**
      * @var \Magmodules\Channable\Model\ItemFactory
      */
     private $itemFactory;
-
     /**
      * @var GeneralHelper
      */
     private $generalHelper;
-
     /**
      * @var SourceHelper
      */
     private $sourceHelper;
-
     /**
      * @var ProductsModel
      */
     private $productModel;
-
     /**
      * @var ProductHelper
      */
     private $productHelper;
-
     /**
      * @var ItemHelper
      */
     private $itemHelper;
-
     /**
      * @var Emulation
      */
     private $appEmulation;
-
     /**
      * @var \Psr\Log\LoggerInterface
      */
@@ -120,7 +117,8 @@ class Item extends AbstractModel
 
         if (isset($row['price'])) {
             $data['price'] = preg_replace('/([^0-9\.,])/i', '', $row['price']);
-            $data['discount_price'] = (isset($row['sale_price']) ? preg_replace('/([^0-9\.,])/i', '', $row['sale_price']) : '');
+            $data['discount_price'] = (isset($row['sale_price']) ? preg_replace('/([^0-9\.,])/i', '',
+                $row['sale_price']) : '');
             $data['qty'] = (isset($row['qty']) ? $row['qty'] : '');
             $data['gtin'] = (isset($row['ean']) ? $row['ean'] : '');
 

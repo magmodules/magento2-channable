@@ -10,6 +10,11 @@ use Magento\Framework\View\Element\Html\Select;
 use Magento\Framework\View\Element\Context;
 use Magmodules\Channable\Model\System\Config\Source\Attributes as AttributesSource;
 
+/**
+ * Class Attributes
+ *
+ * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer
+ */
 class Attributes extends Select
 {
 
@@ -17,7 +22,6 @@ class Attributes extends Select
      * @var array
      */
     private $attribute = [];
-
     /**
      * @var AttributesSource
      */

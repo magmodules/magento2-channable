@@ -10,11 +10,16 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
 
+/**
+ * Class Index
+ *
+ * @package Magmodules\Channable\Controller\Adminhtml\Item
+ */
 class Index extends Action
 {
 
     /**
-     * @var bool|PageFactory
+     * @var PageFactory
      */
     private $resultPageFactory;
 
@@ -38,6 +43,7 @@ class Index extends Action
     public function execute()
     {
         $resultPage = $this->resultPageFactory->create();
+        /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
         $resultPage->setActiveMenu('Magmodules_Channable::general_item');
         $resultPage->getConfig()->getTitle()->prepend(__('Channable - Items'));
         $resultPage->addBreadcrumb(__('Channable'), __('Channable'));

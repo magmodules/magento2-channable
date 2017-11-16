@@ -10,6 +10,11 @@ use Magento\Framework\View\Element\Html\Select;
 use Magento\Framework\View\Element\Context;
 use Magento\Directory\Model\Config\Source\Country as CountrySource;
 
+/**
+ * Class Countries
+ *
+ * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer
+ */
 class Countries extends Select
 {
 
@@ -17,7 +22,6 @@ class Countries extends Select
      * @var array
      */
     private $country = [];
-
     /**
      * @var CountrySource
      */

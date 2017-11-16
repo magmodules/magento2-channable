@@ -9,6 +9,11 @@ namespace Magmodules\Channable\Model\System\Config\Source;
 use Magento\Customer\Model\Customer\Source\Group as CustomerGroup;
 use Magento\Framework\Option\ArrayInterface;
 
+/**
+ * Class CustomerGroups
+ *
+ * @package Magmodules\Channable\Model\System\Config\Source
+ */
 class CustomerGroups implements ArrayInterface
 {
 

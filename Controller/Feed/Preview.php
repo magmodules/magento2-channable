@@ -14,6 +14,11 @@ use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
 use Magmodules\Channable\Helper\Preview as PreviewHelper;
 
+/**
+ * Class Preview
+ *
+ * @package Magmodules\Channable\Controller\Feed
+ */
 class Preview extends Action
 {
 
@@ -21,17 +26,14 @@ class Preview extends Action
      * @var GenerateModel
      */
     private $generateModel;
-
     /**
      * @var GeneralHelper
      */
     private $generalHelper;
-
     /**
      * @var FeedHelper
      */
     private $feedHelper;
-
     /**
      * @var PreviewHelper
      */
@@ -71,6 +73,7 @@ class Preview extends Action
         $token = $this->getRequest()->getParam('token');
 
         if (empty($storeId) || empty($token)) {
+            /** @var \Magento\Framework\Controller\Result\Raw $result */
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/plain');
             $result->setContents(__('Params missing!'));
@@ -81,6 +84,7 @@ class Preview extends Action
         $enabled = $this->generalHelper->getEnabled($storeId);
 
         if (empty($enabled)) {
+            /** @var \Magento\Framework\Controller\Result\Raw $result */
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/plain');
             $result->setContents(__('Please enable extension and flush cache!'));
@@ -89,6 +93,7 @@ class Preview extends Action
         }
 
         if ($token != $this->generalHelper->getToken()) {
+            /** @var \Magento\Framework\Controller\Result\Raw $result */
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/plain');
             $result->setContents(__('Token invalid!'));
@@ -104,6 +109,7 @@ class Preview extends Action
 
         if ($feed = $this->generateModel->generateByStore($storeId, $page, $productId)) {
             $contents = $this->previewHelper->getPreviewData($feed, $storeId);
+            /** @var \Magento\Framework\Controller\Result\Raw $result */
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/html');
             $result->setContents($contents);

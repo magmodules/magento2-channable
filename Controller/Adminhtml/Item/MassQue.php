@@ -12,6 +12,11 @@ use Magmodules\Channable\Model\ResourceModel\Item\CollectionFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Backend\App\Action;
 
+/**
+ * Class MassQue
+ *
+ * @package Magmodules\Channable\Controller\Adminhtml\Item
+ */
 class MassQue extends Action
 {
 
@@ -19,7 +24,6 @@ class MassQue extends Action
      * @var Filter
      */
     private $filter;
-
     /**
      * @var CollectionFactory
      */
@@ -65,7 +69,6 @@ class MassQue extends Action
         }
 
         $this->messageManager->addSuccess(__('A total of %1 record(s) have been updated.', $collectionSize));
-
         /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
         return $resultRedirect->setPath('*/*/');

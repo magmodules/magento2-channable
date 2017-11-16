@@ -6,15 +6,18 @@
 
 namespace Magmodules\Channable\Console\Command;
 
-use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Magento\Framework\App\State;
 use Magmodules\Channable\Model\Item as ItemModel;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 
+/**
+ * Class ItemUpdate
+ *
+ * @package Magmodules\Channable\Console\Command
+ */
 class ItemUpdate extends Command
 {
 
@@ -22,17 +25,10 @@ class ItemUpdate extends Command
      *
      */
     const COMMAND_NAME = 'channable:item:update';
-
-    /**
-     * @var State
-     */
-    public $state;
-
     /**
      * @var ItemModel
      */
     private $itemModel;
-
     /**
      * @var GeneralHelper
      */
@@ -41,31 +37,16 @@ class ItemUpdate extends Command
     /**
      * FeedGenerate constructor.
      *
-     * @param State         $state
      * @param ItemModel     $itemModel
      * @param GeneralHelper $generalHelper
      */
     public function __construct(
-        State $state,
         ItemModel $itemModel,
         GeneralHelper $generalHelper
     ) {
-        $this->setAreaCode($state);
         $this->itemModel = $itemModel;
         $this->generalHelper = $generalHelper;
         parent::__construct();
-    }
-
-    /**
-     * @param State $state
-     */
-    public function setAreaCode(State $state)
-    {
-        try {
-            $state->getAreaCode();
-        } catch (Exception $exception) {
-            $state->setAreaCode('adminhtml');
-        }
     }
 
     /**
@@ -89,6 +70,7 @@ class ItemUpdate extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+
         $storeId = $input->getOption('store-id');
         if (empty($storeId) || !is_numeric($storeId)) {
             $output->writeln('<info>Running All Stores</info>');

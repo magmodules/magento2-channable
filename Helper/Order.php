@@ -12,6 +12,11 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magento\Catalog\Model\ProductFactory;
 
+/**
+ * Class Order
+ *
+ * @package Magmodules\Channable\Helper
+ */
 class Order extends AbstractHelper
 {
 
@@ -25,17 +30,14 @@ class Order extends AbstractHelper
     const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
     const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
     const XPATH_SHIPPING_TAX_CLASS = 'tax/classes/shipping_tax_class';
-
     /**
      * @var General
      */
     private $generalHelper;
-
     /**
      * @var StoreManagerInterface
      */
     private $storeManager;
-
     /**
      * @var ProductFactory
      */

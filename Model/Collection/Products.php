@@ -12,10 +12,14 @@ use Magento\Eav\Model\Config as EavConfig;
 use Magento\Catalog\Model\Indexer\Product\Flat\StateFactory;
 use Magento\Framework\App\ResourceConnection;
 use Magento\CatalogInventory\Helper\Stock as StockHelper;
-use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magmodules\Channable\Helper\Product as ProductHelper;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 
+/**
+ * Class Products
+ *
+ * @package Magmodules\Channable\Model\Collection
+ */
 class Products
 {
 
@@ -23,37 +27,30 @@ class Products
      * @var ProductCollectionFactory
      */
     private $productCollectionFactory;
-
     /**
      * @var ProductAttributeCollectionFactory
      */
     private $productAttributeCollectionFactory;
-
     /**
      * @var EavConfig
      */
     private $eavConfig;
-
     /**
      * @var StateFactory
      */
     private $productFlatState;
-
     /**
      * @var StockHelper
      */
     private $stockHelper;
-
     /**
      * @var GeneralHelper
      */
     private $generalHelper;
-
     /**
      * @var ProductHelper
      */
     private $productHelper;
-
     /**
      * @var ResourceConnection
      */
@@ -97,6 +94,7 @@ class Products
      * @param $productIds
      *
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function getCollection($config, $page, $productIds)
     {
@@ -113,7 +111,6 @@ class Products
         $collection = $this->productCollectionFactory
             ->create(['catalogProductFlatState' => $productFlatState])
             ->addAttributeToSelect($attributes)
-            ->addAttributeToFilter('status', Status::STATUS_ENABLED)
             ->addMinimalPrice()
             ->addUrlRewrite()
             ->addFinalPrice();
@@ -177,6 +174,14 @@ class Products
                     $attributes[] = $selectedAtt['source'];
                 }
             }
+            if (!empty($selectedAtt['multi']) && is_array($selectedAtt['multi'])) {
+                foreach ($selectedAtt['multi'] as $attribute) {
+                    $attributes[] = $attribute['source'];
+                }
+            }
+            if (!empty($selectedAtt['main'])) {
+                $attributes[] = $selectedAtt['main'];
+            }
         }
 
         return array_unique($attributes);
@@ -203,10 +208,12 @@ class Products
     }
 
     /**
-     * @param $filters
+     * @param                                                         $filters
      * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $collection
+     * @param string                                                  $type
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public function addFilters($filters, $collection)
+    public function addFilters($filters, $collection, $type = 'simple')
     {
         $cType = [
             'eq'   => '=',
@@ -217,10 +224,20 @@ class Products
             'lteg' => '<='
         ];
 
+        $collection->addAttributeToFilter('status', 1);
+
         foreach ($filters['advanced'] as $filter) {
             $attribute = $filter['attribute'];
             $condition = $filter['condition'];
             $value = $filter['value'];
+            $productType = $filter['product_type'];
+
+            if ($type == 'simple' && $productType == 'parent') {
+                continue;
+            }
+            if ($type == 'parent' && $productType == 'simple') {
+                continue;
+            }
 
             $attributeModel = $this->eavConfig->getAttribute('catalog_product', $attribute);
             if (!$frontendInput = $attributeModel->getFrontendInput()) {
@@ -317,47 +334,38 @@ class Products
     }
 
     /**
-     * @param $products
+     * @param $parentRelations
      * @param $config
      *
      * @return array|\Magento\Catalog\Model\ResourceModel\Product\Collection
      */
-    public function getParents($products, $config)
+    public function getParents($parentRelations, $config)
     {
-        $parents = [];
-        $filters = $config['filters'];
-        if (!empty($filters['relations'])) {
-            $ids = [];
-            foreach ($products as $product) {
-                if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
-                    $ids[] = $parentId;
-                }
-            }
+        if (!empty($parentRelations)) {
+            $filters = $config['filters'];
 
-            if (empty($ids)) {
-                return $parents;
-            }
-
-            $flat = false;
-
-            if (!$flat) {
+            if (!$config['flat']) {
                 $productFlatState = $this->productFlatState->create(['isAvailable' => false]);
             } else {
                 $productFlatState = $this->productFlatState->create(['isAvailable' => true]);
             }
 
             $attributes = $this->getAttributes($config['attributes']);
-
             $collection = $this->productCollectionFactory
                 ->create(['catalogProductFlatState' => $productFlatState])
-                ->addAttributeToFilter('status', Status::STATUS_ENABLED)
-                ->addAttributeToFilter('entity_id', ['in' => $ids])
+                ->addAttributeToFilter('entity_id', ['in' => array_values($parentRelations)])
                 ->addAttributeToSelect($attributes)
                 ->addMinimalPrice()
                 ->addUrlRewrite();
 
-            if (!empty($config['filters']['type_id'])) {
-                $collection->addAttributeToFilter('type_id', ['in' => $config['filters']['type_id']]);
+            if (!empty($filters['category_ids'])) {
+                if (!empty($filters['category_type'])) {
+                    $collection->addCategoriesFilter([$filters['category_type'] => $filters['category_ids']]);
+                }
+            }
+
+            if (!empty($filters['visibility_parent'])) {
+                $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility_parent']]);
             }
 
             $collection->joinTable(
@@ -377,27 +385,12 @@ class Products
                 }
             }
 
-            $parents = $collection->load();
+            $this->addFilters($filters, $collection, 'parent');
+            return $collection->load();
         }
 
-        return $parents;
+        return [];
     }
-
-    /**
-     * @param $date
-     *
-     * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
-     */
-    public function getLastEditedCollection($date)
-    {
-        $collection = $this->productCollectionFactory
-            ->create()
-            ->addAttributeToSelect(['last_updated','entity_id'])
-            ->addAttributeToFilter('updated_at', ['gteq' => $date]);
-
-        return $collection->load();
-    }
-
 
     /**
      * Direct Database Query to get total records of collection with filters.

@@ -11,6 +11,11 @@ use Magento\Framework\Model\ResourceModel\Db\Context;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Framework\Model\AbstractModel;
 
+/**
+ * Class Item
+ *
+ * @package Magmodules\Channable\Model\ResourceModel
+ */
 class Item extends AbstractDb
 {
 
@@ -18,7 +23,6 @@ class Item extends AbstractDb
      * @var bool
      */
     protected $_isPkAutoIncrement = false;
-
     /**
      * @var DateTime
      */

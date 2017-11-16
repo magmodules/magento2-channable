@@ -12,11 +12,18 @@ use Magento\Framework\Setup\InstallDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Config\Model\ResourceModel\Config;
+use Magento\Catalog\Model\Category;
 
 class InstallData implements InstallDataInterface
 {
 
-    protected $config;
+    /**
+     * @var Config
+     */
+    private $config;
+    /**
+     * @var EavSetupFactory
+     */
     private $eavSetupFactory;
 
     /**
@@ -41,10 +48,10 @@ class InstallData implements InstallDataInterface
         ModuleDataSetupInterface $setup,
         ModuleContextInterface $context
     ) {
-
+        /** @var EavSetup $eavSetup */
         $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Category::ENTITY,
+            Category::ENTITY,
             'channable_cat_disable_export',
             [
                 'type'         => 'int',

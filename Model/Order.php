@@ -30,6 +30,11 @@ use Magento\Shipping\Model\ShippingFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class Order
+ *
+ * @package Magmodules\Channable\Model
+ */
 class Order
 {
 
@@ -37,102 +42,82 @@ class Order
      * @var StoreManagerInterface
      */
     private $storeManager;
-
     /**
      * @var ProductFactory
      */
     private $product;
-
     /**
      * @var FormKey
      */
     private $formkey;
-
     /**
      * @var QuoteFactory
      */
     private $quote;
-
     /**
      * @var QuoteManagement
      */
     private $quoteManagement;
-
     /**
      * @var CustomerFactory
      */
     private $customerFactory;
-
     /**
      * @var AddressFactory
      */
     private $addressFactory;
-
     /**
      * @var CustomerRepositoryInterface
      */
     private $customerRepository;
-
     /**
      * @var OrderService
      */
     private $orderService;
-
     /**
      * @var OrderInterface
      */
     private $order;
-
     /**
      * @var InvoiceService
      */
     private $invoiceService;
-
     /**
      * @var Transaction
      */
     private $transaction;
-
     /**
      * @var CartRepositoryInterface
      */
     private $cartRepositoryInterface;
-
     /**
      * @var CartManagementInterface
      */
     private $cartManagementInterface;
-
     /**
      * @var RateRequestFactory
      */
     private $rateRequestFactory;
-
     /**
      * @var TaxCalculationn
      */
     private $taxCalculation;
-
     /**
      * @var GeneralHelper
      */
     private $generalHelper;
-
     /**
      * @var OrderlHelper
      */
     private $orderHelper;
-
     /**
      * @var ShippingFactory
      */
     private $shippingFactory;
-
     /**
      * @var CheckoutSession
      */
     private $checkoutSession;
-
     /**
      * @var LoggerInterface
      */
@@ -325,6 +310,8 @@ class Order
             $cart = $this->cartRepositoryInterface->get($cart->getId());
 
             $orderId = $this->cartManagementInterface->placeOrder($cart->getId());
+
+            /** @var \Magento\Sales\Model\Order $order */
             $order = $this->order->load($orderId);
 
             if (!empty($data['channel_name'])) {
@@ -543,6 +530,7 @@ class Order
         $destCountryId = $cart->getShippingAddress()->getCountryId();
         $destPostcode = $cart->getShippingAddress()->getPostcode();
 
+        /** @var \Magento\Quote\Model\Quote\Address\RateRequest $request */
         $request = $this->rateRequestFactory->create();
         $request->setAllItems($cart->getAllItems());
         $request->setDestCountryId($destCountryId);
@@ -574,7 +562,7 @@ class Order
     }
 
     /**
-     * @param $order
+     * @param \Magento\Sales\Model\Order $order
      */
     public function invoiceOrder($order)
     {
@@ -598,6 +586,7 @@ class Order
      */
     public function getOrderById($id)
     {
+        /** @var \Magento\Sales\Model\Order $order */
         $order = $this->order->loadByIncrementId($id);
         if (!$order->getId()) {
             return $this->jsonRepsonse('No order found');
@@ -620,7 +609,7 @@ class Order
     }
 
     /**
-     * @param $order
+     * @param \Magento\Sales\Model\Order $order
      *
      * @return array|bool
      */

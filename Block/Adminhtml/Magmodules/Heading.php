@@ -9,11 +9,16 @@ namespace Magmodules\Channable\Block\Adminhtml\Magmodules;
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 
+/**
+ * Class Heading
+ *
+ * @package Magmodules\Channable\Block\Adminhtml\Magmodules
+ */
 class Heading extends Field
 {
 
     /**
-     * Styles heading separator.
+     * Styles heading sperator.
      *
      * @param AbstractElement $element
      *
@@ -25,13 +30,10 @@ class Heading extends Field
         $html .= ' <td class="label"></td>';
         $html .= ' <td class="value">';
         $html .= '  <div class="mm-heading-channable">' . $element->getData('label') . '</div>';
-        $html .= '   <div class="mm-comment-channable">';
-        $html .= '    <div class="mm-comment-hover">';
-        $html .= '     <input class="readmore" value="Info" readonly>';
-        $html .= '     <div id="content">' . $element->getData('comment') . '</div>';
-        $html .= '    </div>';
-        $html .= '   </div>';
-        $html .= '  </td>';
+        $html .= '	<div class="mm-comment-channable">';
+        $html .= '   <div id="content">' . $element->getData('comment') . '</div>';
+        $html .= '  </div>';
+        $html .= ' </td>';
         $html .= ' <td></td>';
         $html .= '</tr>';
 

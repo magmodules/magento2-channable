@@ -24,7 +24,7 @@
             <group id="general" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
                    showInStore="1">
                 <label>General</label>
-                <field id="version" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1"
+                <field id="version" translate="label" type="note" sortOrder="1" showInDefault="1" showInWebsite="1"
                        showInStore="1">
                     <label>Version</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Version</frontend_model>
@@ -40,44 +40,47 @@
                     <depends>
                         <field id="enable">1</field>
                     </depends>
-                    <comment>Limits the amount of product exported to Channable per run. This setting wil not limit the total products sent to Channable, but will lower the load.</comment>
+                    <comment>Limit the amount of product exported to Channable per page. This setting wil not limit the total products sent to Channable but will lower the load.</comment>
                 </field>
             </group>
             <group id="data" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
                    showInStore="1">
                 <label>Product Data</label>
-                <comment>In this section you will see listed all of the standard attributes needed for the Channable Connect. In order to prevent some errors please fill in as many attributes as you can, this will also improve the usability of your data on the Channable platform.</comment>
+                <comment>Connect the right attributes for the basic product values to the Channable feed.</comment>
                 <field id="heading_general" translate="label comment" type="text" sortOrder="1" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>General Fields</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>Connect the right attributes for the name and description to export the values to the Channable feed. The description will be truncated to a maximum of 5000 characters and stripped from html.</comment>
                 </field>
-                <field id="name_attribute" translate="label" type="select" sortOrder="2" showInDefault="1"
+                <field id="name_attribute" translate="label comment" type="select" sortOrder="2" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Name</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
-                </field>
-                <field id="description_attribute" translate="label" type="select" sortOrder="3" showInDefault="1"
+                    <comment>Select the attribute associate with the product name. Suggested field: Product Name</comment>
+               </field>
+                <field id="description_attribute" translate="label comment" type="select" sortOrder="3" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Description</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
+                    <comment>Select the attribute associated with the product description. Suggested field: Description</comment>
                 </field>
                 <field id="brand_attribute" translate="label" type="select" sortOrder="4" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Brand</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
+                    <comment>elect the attribute associated with the brand or manufacturer. Suggested field: Brand or manufacturer</comment>
                 </field>
                 <field id="ean_attribute" translate="label" type="select" sortOrder="5" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>EAN / GTIN</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
+                    <comment>Select the attribute associated with the product EAN / GTIN. Suggested field: EAN</comment>
                 </field>
                 <field id="heading_images" translate="label comment" type="text" sortOrder="6" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Image Source</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>Select Image Source</comment>
+                    <comment>It is recommended that you select all images if they are available, so that any additional images are also exported.</comment>
                 </field>
                 <field id="image" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1"
                        showInStore="1">
@@ -96,7 +99,7 @@
                        showInWebsite="1" showInStore="1">
                     <label>Miscellaneous fields</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>You are recommended to provide the following product information for each unique item you submit if it exists, is relevant, and if the information fits into the accepted values for the following detailed product attributes.</comment>
+                    <comment>It is recommended to provide the following product information for each unique item you submit if it exists.</comment>
                 </field>
                 <field id="sku_attribute" translate="label" type="select" sortOrder="21" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -124,10 +127,166 @@
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
                 </field>
             </group>
-            <group id="advanced" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1"
+            <group id="types" translate="label comment" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Product Types</label>
+                <comment><![CDATA[Configure the three different product types to make sure that you are using the right attribute values for the different product types.]]></comment>
+                <field id="heading_configurable" translate="label comment" type="text" sortOrder="20" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Configurable Products</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment><![CDATA[For configurable products, we recommend to only add the simple products to the configuration as a ‘configurable product’ by itself cannot be purchased. Choose the attribute(s) that you want to use from the parent relation configurable product.]]></comment>
+                </field>
+                <field id="configurable" translate="label comment" type="select" sortOrder="21" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Configurable/Simple Products</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Configurable\Option</source_model>
+                    <comment><![CDATA[<strong>Recommended:</strong> Only Linked Simple Products. Selecting this option will export linked simple products that are part of a configurable product. This option is recommended so that the unique product variants are exported to Channable.]]></comment>
+                </field>
+                <field id="configurable_link" translate="label comment" type="select" sortOrder="22" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Parent URL for Simples</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Configurable\Link</source_model>
+                    <depends>
+                        <field id="configurable" separator=",">simple,both</field>
+                    </depends>
+                    <comment><![CDATA[<strong>Recommended:</strong> Yes, with Auto-Link. In this way the URL will be automatically link to the correct simple product on the configurable product landing page.]]></comment>
+                </field>
+                <field id="configurable_image" translate="label" type="select" sortOrder="23" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Parent Image for Simples</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Configurable\Image</source_model>
+                    <depends>
+                        <field id="configurable" separator=",">simple,both</field>
+                    </depends>
+                    <comment><![CDATA[<strong>Recommended:</strong> Only if Empty. In this way the parent image will only be used when there isn't a image available on the simple product.]]></comment>
+                </field>
+                <field id="configurable_parent_atts" translate="label" type="multiselect" sortOrder="24" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Use Parent Data for Simples</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Configurable\ParentAttributes</source_model>
+                    <depends>
+                        <field id="configurable" separator=",">simple,both</field>
+                    </depends>
+                    <comment><![CDATA[Select the attributes that you want to use from the parent configurable product. It is not recommended to select the attributes that need to be unique for the simples, such as GTIN and Color.]]></comment>
+                </field>
+                <field id="configurable_nonvisible" translate="label comment" type="select" sortOrder="25" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Use Fallback only on Non Visible Simples</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[<strong>Recommended:</strong> Yes. This selecting will use the logic for the attribute fallback and relations on simples with the visibility "Not Visible Individually". Simples that are visible in the catalog are treated as "normal" simple products without relations.]]></comment>
+                    <depends>
+                        <field id="configurable" separator=",">simple,both</field>
+                    </depends>
+                </field>
+                <field id="heading_bundle" translate="label comment" type="text" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Bundle Products</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment><![CDATA[For Bundle Products, we recommend to only add the Bundle product by itself as this is the item that can be purchased.<br>]]></comment>
+                </field>
+                <field id="bundle" translate="label comment" type="select" sortOrder="31" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Bundle Products</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Bundle\Option</source_model>
+                    <comment><![CDATA[<strong>Recommended:</strong> Only Bundle Product. Selecting this option will export the bundle product by itself to Channable.]]></comment>
+                </field>
+                <field id="bundle_link" translate="label comment" type="select" sortOrder="32" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Parent URL for Simples</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Bundle\Link</source_model>
+                    <depends>
+                        <field id="bundle" separator=",">simple,both</field>
+                    </depends>
+                    <comment><![CDATA[<strong>Recommended:</strong> Yes. Selecting this option will export the URL that links directly to the Bundle Product.]]></comment>
+                </field>
+                <field id="bundle_image" translate="label comment" type="select" sortOrder="33" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Parent Image for Simples</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Bundle\Image</source_model>
+                    <depends>
+                        <field id="bundle" separator=",">simple,both</field>
+                    </depends>
+                    <comment><![CDATA[<strong>Recommended:</strong> Only if empty. Selecting this option will export the parent image which will be used if there is no image available for a simple product]]></comment>
+                </field>
+                <field id="bundle_parent_atts" translate="label comment" type="multiselect" sortOrder="34" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Use Parent Data for Simples</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Bundle\ParentAttributes</source_model>
+                    <depends>
+                        <field id="bundle" separator=",">simple,both</field>
+                    </depends>
+                    <comment><![CDATA[Select the attributes that you want to use from the parent bundle product. It is not recommended to select the attributes that need to be unique for the simples, such as GTIN and Color.]]></comment>
+                </field>
+                <field id="bundle_nonvisible" translate="label comment" type="select" sortOrder="35" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Use Fallback only on Non Visible Simples</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[<strong>Recommended:</strong> Yes. This selecting will use the logic for the attribute fallback and relations on simples with the visibility "Not Visible Individually". Simples that are visible in the catalog are treated as "normal" simple products without relations.]]></comment>
+                    <depends>
+                        <field id="bundle" separator=",">simple,both</field>
+                    </depends>
+                </field>
+                <field id="heading_grouped" translate="label comment" type="text" sortOrder="40" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Grouped Products</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment><![CDATA[For Group Products, we recommend to only add the Grouped Product by itself as that is the product that can be purchased. <br>]]></comment>
+                </field>
+                <field id="grouped" translate="label comment" type="select" sortOrder="41" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Grouped Products</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\Option</source_model>
+                    <comment><![CDATA[<strong>Recommended:</strong> Recommended: Only Grouped Product. Selecting this option will export the bundle product by itself to Channable.]]></comment>
+                </field>
+                <field id="grouped_link" translate="label comment" type="select" sortOrder="42" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Parent URL for Simples</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\Link</source_model>
+                    <depends>
+                        <field id="grouped" separator=",">simple,both</field>
+                    </depends>
+                    <comment><![CDATA[<strong>Recommended:</strong> Yes. Selecting this option will export the URL that links directly to the Grouped Product.]]></comment>
+                </field>
+                <field id="grouped_image" translate="label comment" type="select" sortOrder="43" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Parent Image for Simples</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\Image</source_model>
+                    <depends>
+                        <field id="grouped" separator=",">simple,both</field>
+                    </depends>
+                    <comment><![CDATA[<strong>Recommended:</strong> Only if Empty. Selecting this option will export the parent image which will be used if there is no image available for a simple product.]]></comment>
+                </field>
+                <field id="grouped_parent_price" translate="label" type="select" sortOrder="44" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Parent Price</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\Price</source_model>
+                    <depends>
+                        <field id="grouped" separator=",">parent,both</field>
+                    </depends>
+                </field>
+                <field id="grouped_parent_atts" translate="label comment" type="multiselect" sortOrder="45" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Use Parent Data for Simples</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\ParentAttributes</source_model>
+                    <depends>
+                        <field id="grouped" separator=",">simple,both</field>
+                    </depends>
+                    <comment><![CDATA[Select the attributes that you want to use from the parent grouped product. It is not recommended to select the attributes that need to be unique for the simples, such as GTIN and Color.]]></comment>
+                </field>
+                <field id="grouped_nonvisible" translate="label" type="select" sortOrder="46" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Use Fallback only on Non Visible Simples</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[<strong>Recommended:</strong> Yes. This selecting will use the logic for the attribute fallback and relations on simples with the visibility "Not Visible Individually". Simples that are visible in the catalog are treated as "normal" simple products without relations.]]></comment>
+                    <depends>
+                        <field id="grouped" separator=",">simple,both</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="advanced" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1"
                    showInStore="1">
                 <label>Advanced Options</label>
-                <comment>We recommend adding as many attributes as possible to the Channable feed as this will greatly improve the quality of your data. In this section you can add extra fields, set the right inventory data and configure the fallback on your configurable &amp; grouped products.</comment>
+                <comment>We recommend adding as many attributes as possible to Channable as this will improve the quality of your data. In this section you can add extra fields, set the right inventory data and configure the fallback on your configurable &amp; grouped and bundled products.</comment>
                 <field id="heading_extra" translate="label comment" type="text" sortOrder="1" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Extra Fields</label>
@@ -159,27 +318,6 @@
                         <field id="inventory">1</field>
                     </depends>
                 </field>
-                <field id="heading_config" translate="label comment" type="text" sortOrder="20" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Configurable, Grouped &amp; Bundle products</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment><![CDATA[When your using configurable, grouped and bundle products the "Not Visible Individually" Simple Products will be exported. You can choose to pull the information from the parent products. Select the fall-back data for these products under "Use Parent Product Data for Simple Products".]]></comment>
-                </field>
-                <field id="relations" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1"
-                       showInStore="1">
-                    <label>Enabled</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[This option will enable the export of <u>"Not Visible Individually"</u> Simple Products that are part of a configurable, grouped or bundle  product. ]]></comment>
-                </field>
-                <field id="parent_atts" translate="label" type="multiselect" sortOrder="22" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Use Parent Product Data for Simple Products</label>
-                    <source_model>Magmodules\Channable\Model\System\Config\Source\ParentAttributes</source_model>
-                    <depends>
-                        <field id="relations">1</field>
-                    </depends>
-                    <comment>The selected attributes will be used for export instead of the simple data. E.g. selecting "description" will result is the use of the description data for the simples products.</comment>
-                </field>
                 <field id="heading_Delivery" translate="label comment" type="text" sortOrder="30" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Delivery Time</label>
@@ -193,7 +331,7 @@
                     <backend_model>Magmodules\Channable\Model\Config\Backend\Serialized\DeliveryTime</backend_model>
                 </field>
             </group>
-            <group id="filter" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1"
+            <group id="filter" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1"
                    showInStore="1">
                 <label>Filter Options</label>
                 <comment>This option allows you to include/exclude products from the Channable feed based on the product visibility or stock information.</comment>
@@ -221,7 +359,7 @@
                        showInWebsite="1" showInStore="1">
                     <label>Filter by Category</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>Include or exclude products based on the category.</comment>
+                    <comment>Include or Exclude products based on the category.</comment>
                 </field>
                 <field id="category_enabled" translate="label" type="select" sortOrder="11" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -243,6 +381,7 @@
                     <depends>
                         <field id="category_enabled">1</field>
                     </depends>
+                    <comment><![CDATA[Include or Exclude Products based on the Category.<br><strong><br>Note for Include:</strong><br>Simple products within a bundled, configurable or grouped product are treated as own entities; these should also be present in the included categories.<br><br><strong>Note for Exclude: </strong><br>Exclude the products from these categories. Products that are available within different categories need to be excluded from all of the categories they are assigned to.]]></comment>
                 </field>
                 <field id="heading_stock" translate="label comment" type="text" sortOrder="20" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -293,7 +432,7 @@
             <group id="general" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>General</label>
                 <comment>Connect your store with Channable Marketplaces using the Channable Marketplace API, you can configure the Order Import settings and the Item Update settings per Store View.</comment>
-                <field id="version" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="version" translate="label" type="note" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Version</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Version</frontend_model>
                 </field>

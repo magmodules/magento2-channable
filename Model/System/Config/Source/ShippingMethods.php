@@ -10,6 +10,11 @@ use Magento\Framework\Option\ArrayInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Shipping\Model\Config as ShippingConfig;
 
+/**
+ * Class ShippingMethods
+ *
+ * @package Magmodules\Channable\Model\System\Config\Source
+ */
 class ShippingMethods implements ArrayInterface
 {
 
@@ -17,7 +22,6 @@ class ShippingMethods implements ArrayInterface
      * @var ShippingConfig
      */
     private $shipconfig;
-
     /**
      * @var ScopeConfigInterface
      */

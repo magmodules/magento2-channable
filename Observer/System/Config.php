@@ -10,6 +10,11 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magmodules\Channable\Helper\Config as ConfigHelper;
 
+/**
+ * Class Config
+ *
+ * @package Magmodules\Channable\Observer\System
+ */
 class Config implements ObserverInterface
 {
 

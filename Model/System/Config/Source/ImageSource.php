@@ -10,6 +10,11 @@ use Magento\Framework\Option\ArrayInterface;
 use Magento\Catalog\Model\Product\Attribute\Repository;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 
+/**
+ * Class ImageSource
+ *
+ * @package Magmodules\Channable\Model\System\Config\Source
+ */
 class ImageSource implements ArrayInterface
 {
 
@@ -72,7 +77,7 @@ class ImageSource implements ArrayInterface
             }
         }
 
-        return ['label' => __('Single Source'), 'value' => $imageSource, 'optgroup-name' => __('Single Source')];
+        return ['label' => __('Single Source'), 'value' => $imageSource, 'optgroup-name' => __('single-source')];
     }
 
     /**
@@ -91,6 +96,6 @@ class ImageSource implements ArrayInterface
     public function getMultipleImages()
     {
         $imageSource[] = ['value' => 'all', 'label' => __('All Images')];
-        return ['label' => __('Other Options'), 'value' => $imageSource, 'optgroup-name' => __('Other Options')];
+        return ['label' => __('Other Options'), 'value' => $imageSource, 'optgroup-name' => __('other-options')];
     }
 }

@@ -8,6 +8,11 @@ namespace Magmodules\Channable\Logger;
 
 use Monolog\Logger;
 
+/**
+ * Class ChannableLogger
+ *
+ * @package Magmodules\Channable\Logger
+ */
 class ChannableLogger extends Logger
 {
 

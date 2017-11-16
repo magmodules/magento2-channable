@@ -10,14 +10,24 @@ use Magento\Framework\Option\ArrayInterface;
 use Magento\Catalog\Model\CategoryFactory;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 
+/**
+ * Class CategoryList
+ *
+ * @package Magmodules\Channable\Model\System\Config\Source
+ */
 class CategoryList implements ArrayInterface
 {
 
     /**
+     * Options array
+     *
+     * @var array
+     */
+    public $options = null;
+    /**
      * @var CategoryFactory
      */
     private $categoryFactory;
-
     /**
      * @var CollectionFactory
      */
@@ -26,8 +36,8 @@ class CategoryList implements ArrayInterface
     /**
      * CategoryList constructor.
      *
-     * @param \Magento\Catalog\Model\CategoryFactory                          $categoryFactory
-     * @param \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory
+     * @param CategoryFactory   $categoryFactory
+     * @param CollectionFactory $categoryCollectionFactory
      */
     public function __construct(
         CategoryFactory $categoryFactory,
@@ -42,17 +52,15 @@ class CategoryList implements ArrayInterface
      */
     public function toOptionArray()
     {
-        $arr = $this->toArray();
-        $ret = [];
-
-        foreach ($arr as $key => $value) {
-            $ret[] = [
-                'value' => $key,
-                'label' => $value
-            ];
+        if (!$this->options) {
+            foreach ($this->toArray() as $key => $value) {
+                $this->options[] = [
+                    'value' => $key,
+                    'label' => $value
+                ];
+            }
         }
-
-        return $ret;
+        return $this->options;
     }
 
     /**
@@ -83,7 +91,7 @@ class CategoryList implements ArrayInterface
     }
 
     /**
-     * @return mixed
+     * @return \Magento\Catalog\Model\ResourceModel\Category\Collection
      */
     public function getCategoryCollection()
     {

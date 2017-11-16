@@ -13,6 +13,11 @@ use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Order as OrderHelper;
 use Magmodules\Channable\Model\Order as OrderModel;
 
+/**
+ * Class Status
+ *
+ * @package Magmodules\Channable\Controller\Order
+ */
 class Status extends Action
 {
 
@@ -20,17 +25,14 @@ class Status extends Action
      * @var GeneralHelper
      */
     private $generalHelper;
-
     /**
      * @var OrderHelper
      */
     private $orderHelper;
-
     /**
      * @var OrderModel
      */
     private $orderModel;
-
     /**
      * @var JsonFactory
      */

@@ -14,38 +14,38 @@ use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Config\Model\ResourceModel\Config as ConfigModel;
 use Magmodules\Channable\Logger\ChannableLogger;
 
+/**
+ * Class Config
+ *
+ * @package Magmodules\Channable\Helper
+ */
 class Config extends AbstractHelper
 {
 
     const XPATH_CONVERT_RUN = 'magmodules_channable/tast/convert_run';
-
     /**
      * @var ObjectManagerInterface
      */
     private $objectManager;
-
     /**
      * @var ResourceConnection
      */
     private $resource;
-
     /**
      * @var ProductMetadataInterface
      */
     private $productMetadata;
-
     /**
      * @var ChannableLogger
      */
     private $logger;
-
     /**
      * @var Config
      */
     private $config;
 
     /**
-     * Tasks constructor.
+     * Config constructor.
      *
      * @param Context                  $context
      * @param ObjectManagerInterface   $objectManager

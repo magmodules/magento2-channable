@@ -12,6 +12,12 @@ use Magento\Framework\App\Request\Http;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
 
+/**
+ * Class ParentAttributes
+ *
+ * @package Magmodules\Channable\Model\System\Config\Source
+ * @deprecated
+ */
 class ParentAttributes implements ArrayInterface
 {
 
@@ -19,12 +25,10 @@ class ParentAttributes implements ArrayInterface
      * @var SourceHelper
      */
     private $sourceHelper;
-
     /**
      * @var Http
      */
     private $request;
-
     /**
      * @var Emulation
      */
@@ -60,11 +64,9 @@ class ParentAttributes implements ArrayInterface
 
         foreach ($source as $key => $attribute) {
             if (empty($attribute['parent_selection_disabled'])) {
-
                 if (isset($attribute['parent']) && $attribute['parent'] == 2) {
                     continue;
                 }
-
                 $label = str_replace('_', ' ', $key);
                 $attributes[] = [
                     'value' => $key,
@@ -72,7 +74,6 @@ class ParentAttributes implements ArrayInterface
                 ];
             }
         }
-
         return $attributes;
     }
 }
