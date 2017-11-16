@@ -18,6 +18,11 @@ use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magmodules\Channable\Logger\ChannableLogger;
 
+/**
+ * Class General
+ *
+ * @package Magmodules\Channable\Helper
+ */
 class General extends AbstractHelper
 {
 
@@ -25,37 +30,30 @@ class General extends AbstractHelper
     const XPATH_EXTENSION_ENABLED = 'magmodules_channable/general/enable';
     const XPATH_MARKETPLACE_ENABLE = 'magmodules_channable_marketplace/general/enable';
     const XPATH_TOKEN = 'magmodules_channable/general/token';
-
     /**
      * @var ModuleListInterface
      */
     private $moduleList;
-
     /**
      * @var ProductMetadataInterface
      */
     private $metadata;
-
     /**
      * @var StoreManagerInterface
      */
     private $storeManager;
-
     /**
      * @var Config
      */
     private $config;
-
     /**
      * @var ConfigDataCollectionFactory
      */
     private $configDataCollectionFactory;
-
     /**
      * @var ChannableLogger
      */
     private $logger;
-
     /**
      * @var DateTime
      */
@@ -156,6 +154,8 @@ class General extends AbstractHelper
             $collection->addFieldToFilter('scope_id', 0);
             $collection->addFieldToFilter('scope', 'default');
         }
+
+        $collection->getSelect()->limit(1);
 
         return $collection->getFirstItem()->getValue();
     }

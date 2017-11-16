@@ -15,6 +15,11 @@ use Magmodules\Channable\Helper\Product as ProductHelper;
 use Magmodules\Channable\Helper\Item as ItemHelper;
 use Magmodules\Channable\Helper\Category as CategoryHelper;
 
+/**
+ * Class Source
+ *
+ * @package Magmodules\Channable\Helper
+ */
 class Source extends AbstractHelper
 {
 
@@ -35,8 +40,6 @@ class Source extends AbstractHelper
     const XPATH_VISBILITY = 'magmodules_channable/filter/visbility_enabled';
     const XPATH_VISIBILITY_OPTIONS = 'magmodules_channable/filter/visbility';
     const XPATH_STOCK = 'magmodules_channable/filter/stock';
-    const XPATH_RELATIONS_ENABLED = 'magmodules_channable/advanced/relations';
-    const XPATH_PARENT_ATTS = 'magmodules_channable/advanced/parent_atts';
     const XPATH_DELIVERY_TIME = 'magmodules_channable/advanced/delivery_time';
     const XPATH_INVENTORY = 'magmodules_channable/advanced/inventory';
     const XPATH_INVENTORY_DATA = 'magmodules_channable/advanced/inventory_fields';
@@ -49,27 +52,39 @@ class Source extends AbstractHelper
     const XPATH_CATEGORY_IDS = 'magmodules_channable/filter/category';
     const XPATH_FILTERS = 'magmodules_channable/filter/filters';
     const XPATH_FILTERS_DATA = 'magmodules_channable/filter/filters_data';
-
+    const XPATH_CONFIGURABLE = 'magmodules_channable/types/configurable';
+    const XPATH_CONFIGURABLE_LINK = 'magmodules_channable/types/configurable_link';
+    const XPATH_CONFIGURABLE_IMAGE = 'magmodules_channable/types/configurable_image';
+    const XPATH_CONFIGURABLE_PARENT_ATTS = 'magmodules_channable/types/configurable_parent_atts';
+    const XPATH_CONFIGURABLE_NONVISIBLE = 'magmodules_channable/types/configurable_nonvisible';
+    const XPATH_BUNDLE = 'magmodules_channable/types/bundle';
+    const XPATH_BUNDLE_LINK = 'magmodules_channable/types/bundle_link';
+    const XPATH_BUNDLE_IMAGE = 'magmodules_channable/types/bundle_image';
+    const XPATH_BUNDLE_PARENT_ATTS = 'magmodules_channable/types/bundle_parent_atts';
+    const XPATH_BUNDLE_NONVISIBLE = 'magmodules_channable/types/bundle_nonvisible';
+    const XPATH_GROUPED = 'magmodules_channable/types/grouped';
+    const XPATH_GROUPED_LINK = 'magmodules_channable/types/grouped_link';
+    const XPATH_GROUPED_IMAGE = 'magmodules_channable/types/grouped_image';
+    const XPATH_GROUPED_PARENT_PRICE = 'magmodules_channable/types/grouped_parent_price';
+    const XPATH_GROUPED_PARENT_ATTS = 'magmodules_channable/types/grouped_parrent_atts';
+    const XPATH_GROUPED_NONVISIBLE = 'magmodules_channable/types/grouped_nonvisible';
+    
     /**
      * @var General
      */
     private $generalHelper;
-
     /**
      * @var Product
      */
     private $productHelper;
-
     /**
      * @var Item
      */
     private $itemHelper;
-
     /**
      * @var Category
      */
     private $categoryHelper;
-
     /**
      * @var StoreManagerInterface
      */
@@ -110,12 +125,12 @@ class Source extends AbstractHelper
     public function getConfig($storeId, $type = 'feed')
     {
         $config = [];
+        $config['flat'] = false;
         $config['store_id'] = $storeId;
         $config['website_id'] = $this->storeManager->getStore()->getWebsiteId();
-        $config['flat'] = false;
-        $config['attributes'] = $this->getAttributes($type);
-        $config['price_config'] = $this->getPriceConfig($type);
         $config['filters'] = $this->getProductFilters();
+        $config['attributes'] = $this->getAttributes($type, $config['filters']);
+        $config['price_config'] = $this->getPriceConfig($type);
         $config['inventory'] = $this->getInventoryData();
         $config['inc_hidden_image'] = $this->generalHelper->getStoreValue(self::XPATH_IMAGE_INC_HIDDEN);
 
@@ -135,13 +150,278 @@ class Source extends AbstractHelper
     }
 
     /**
+     * @return array
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
+    public function getProductFilters()
+    {
+        $filters = [];
+        $filters['type_id'] = ['simple', 'downloadable', 'virtual'];
+        $filters['relations'] = [];
+        $filters['exclude_parents'] = [];
+        $filters['nonvisible'] = [];
+        $filters['parent_attributes'] = [];
+        $filters['image'] = [];
+        $filters['link'] = [];
+
+        $configurabale = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE);
+        switch ($configurabale) {
+            case "parent":
+                array_push($filters['type_id'], 'configurable');
+                break;
+            case "simple":
+                array_push($filters['relations'], 'configurable');
+                array_push($filters['exclude_parents'], 'configurable');
+
+                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_PARENT_ATTS)) {
+                    $filters['parent_attributes']['configurable'] = explode(',', $attributes);
+                }
+
+                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_NONVISIBLE)) {
+                    array_push($filters['nonvisible'], 'configurable');
+                }
+
+                if ($link = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_LINK)) {
+                    $filters['link']['configurable'] = $link;
+                    if (isset($filters['parent_attributes']['configurable'])) {
+                        array_push($filters['parent_attributes']['configurable'], 'link');
+                    } else {
+                        $filters['parent_attributes']['configurable'] = ['link'];
+                    }
+                }
+
+                if ($image = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_IMAGE)) {
+                    $filters['image']['configurable'] = $image;
+                    if (isset($filters['parent_attributes']['configurable'])) {
+                        array_push($filters['parent_attributes']['configurable'], 'image_link');
+                    } else {
+                        $filters['parent_attributes']['configurable'] = ['image_link'];
+                    }
+                }
+
+                break;
+            case "both":
+                array_push($filters['type_id'], 'configurable');
+                array_push($filters['relations'], 'configurable');
+
+                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_PARENT_ATTS)) {
+                    $filters['parent_attributes']['configurable'] = explode(',', $attributes);
+                }
+
+                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_NONVISIBLE)) {
+                    array_push($filters['nonvisible'], 'configurable');
+                }
+
+                if ($link = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_LINK)) {
+                    $filters['link']['configurable'] = $link;
+                    if (isset($filters['parent_attributes']['configurable'])) {
+                        array_push($filters['parent_attributes']['configurable'], 'link');
+                    } else {
+                        $filters['parent_attributes']['configurable'] = ['link'];
+                    }
+                }
+
+                if ($image = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_IMAGE)) {
+                    $filters['image']['configurable'] = $image;
+                    if (isset($filters['parent_attributes']['configurable'])) {
+                        array_push($filters['parent_attributes']['configurable'], 'image_url');
+                    } else {
+                        $filters['parent_attributes']['configurable'] = ['image_url'];
+                    }
+                }
+
+                break;
+        }
+
+        $bundle = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE);
+        switch ($bundle) {
+            case "parent":
+                array_push($filters['type_id'], 'bundle');
+                break;
+            case "simple":
+                array_push($filters['relations'], 'bundle');
+                array_push($filters['exclude_parents'], 'bundle');
+
+                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_PARENT_ATTS)) {
+                    $filters['parent_attributes']['bundle'] = explode(',', $attributes);
+                }
+
+                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_NONVISIBLE)) {
+                    array_push($filters['nonvisible'], 'bundle');
+                }
+
+                if ($link = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_LINK)) {
+                    $filters['link']['bundle'] = $link;
+                    if (isset($filters['parent_attributes']['bundle'])) {
+                        array_push($filters['parent_attributes']['bundle'], 'link');
+                    } else {
+                        $filters['parent_attributes']['bundle'] = ['link'];
+                    }
+                }
+
+                if ($image = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_IMAGE)) {
+                    $filters['image']['bundle'] = $image;
+                    if (isset($filters['parent_attributes']['bundle'])) {
+                        array_push($filters['parent_attributes']['bundle'], 'image_link');
+                    } else {
+                        $filters['parent_attributes']['bundle'] = ['image_link'];
+                    }
+                }
+
+                break;
+            case "both":
+                array_push($filters['type_id'], 'bundle');
+                array_push($filters['relations'], 'bundle');
+
+                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_PARENT_ATTS)) {
+                    $filters['parent_attributes']['bundle'] = explode(',', $attributes);
+                }
+
+                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_NONVISIBLE)) {
+                    array_push($filters['nonvisible'], 'bundle');
+                }
+
+                if ($link = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_LINK)) {
+                    $filters['link']['bundle'] = $link;
+                    if (isset($filters['parent_attributes']['bundle'])) {
+                        array_push($filters['parent_attributes']['bundle'], 'link');
+                    } else {
+                        $filters['parent_attributes']['bundle'] = ['link'];
+                    }
+                }
+
+                if ($image = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_IMAGE)) {
+                    $filters['image']['bundle'] = $image;
+                    if (isset($filters['parent_attributes']['bundle'])) {
+                        array_push($filters['parent_attributes']['bundle'], 'image_link');
+                    } else {
+                        $filters['parent_attributes']['bundle'] = ['image_link'];
+                    }
+                }
+
+                break;
+        }
+
+        $grouped = $this->generalHelper->getStoreValue(self::XPATH_GROUPED);
+        switch ($grouped) {
+            case "parent":
+                array_push($filters['type_id'], 'grouped');
+                break;
+            case "simple":
+                array_push($filters['relations'], 'grouped');
+                array_push($filters['exclude_parents'], 'grouped');
+
+                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_PARENT_ATTS)) {
+                    $filters['parent_attributes']['grouped'] = explode(',', $attributes);
+                }
+
+                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_NONVISIBLE)) {
+                    array_push($filters['nonvisible'], 'grouped');
+                }
+
+                if ($link = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_LINK)) {
+                    $filters['link']['grouped'] = $link;
+                    if (isset($filters['parent_attributes']['grouped'])) {
+                        array_push($filters['parent_attributes']['grouped'], 'link');
+                    } else {
+                        $filters['parent_attributes']['grouped'] = ['link'];
+                    }
+                }
+
+                if ($image = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_IMAGE)) {
+                    $filters['image']['grouped'] = $image;
+                    if (isset($filters['parent_attributes']['grouped'])) {
+                        array_push($filters['parent_attributes']['grouped'], 'image_link');
+                    } else {
+                        $filters['parent_attributes']['grouped'] = ['image_link'];
+                    }
+                }
+
+                break;
+            case "both":
+                array_push($filters['type_id'], 'grouped');
+                array_push($filters['relations'], 'grouped');
+
+                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_PARENT_ATTS)) {
+                    $filters['parent_attributes']['grouped'] = explode(',', $attributes);
+                }
+
+                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_NONVISIBLE)) {
+                    array_push($filters['nonvisible'], 'grouped');
+                }
+
+                if ($link = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_LINK)) {
+                    $filters['link']['grouped'] = $link;
+                    if (isset($filters['parent_attributes']['grouped'])) {
+                        array_push($filters['parent_attributes']['grouped'], 'link');
+                    } else {
+                        $filters['parent_attributes']['grouped'] = ['link'];
+                    }
+                }
+
+                if ($image = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_IMAGE)) {
+                    $filters['image']['grouped'] = $image;
+                    if (isset($filters['parent_attributes']['grouped'])) {
+                        array_push($filters['parent_attributes']['grouped'], 'image_link');
+                    } else {
+                        $filters['parent_attributes']['grouped'] = ['image_link'];
+                    }
+                }
+
+                break;
+        }
+
+        $visibilityFilter = $this->generalHelper->getStoreValue(self::XPATH_VISBILITY);
+        if ($visibilityFilter) {
+            $visibility = $this->generalHelper->getStoreValue(self::XPATH_VISIBILITY_OPTIONS);
+            $filters['visibility'] = explode(',', $visibility);
+            $filters['visibility_parents'] = $filters['visibility'];
+        } else {
+            $filters['visibility'] = [
+                Visibility::VISIBILITY_IN_CATALOG,
+                Visibility::VISIBILITY_IN_SEARCH,
+                Visibility::VISIBILITY_BOTH,
+            ];
+            $filters['visibility_parents'] = $filters['visibility'];
+            if (!empty($filters['relations'])) {
+                array_push($filters['visibility'], Visibility::VISIBILITY_NOT_VISIBLE);
+            }
+        }
+
+        $filters['limit'] = $this->generalHelper->getStoreValue(self::XPATH_LIMIT);
+        $filters['stock'] = $this->generalHelper->getStoreValue(self::XPATH_STOCK);
+
+        $categoryFilter = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_FILTER);
+        if ($categoryFilter) {
+            $categoryIds = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_IDS);
+            $filterType = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_FILTER_TYPE);
+            if (!empty($categoryIds) && !empty($filterType)) {
+                $filters['category_ids'] = explode(',', $categoryIds);
+                $filters['category_type'] = $filterType;
+            }
+        }
+
+        $filters['advanced'] = [];
+        $productFilters = $this->generalHelper->getStoreValue(self::XPATH_FILTERS);
+        if ($productFilters) {
+            if ($advFilters = $this->generalHelper->getStoreValueArray(self::XPATH_FILTERS_DATA)) {
+                foreach ($advFilters as $advFilter) {
+                    array_push($filters['advanced'], $advFilter);
+                }
+            }
+        }
+
+        return $filters;
+    }
+
+    /**
      * @param $type
+     * @param $filters
      *
      * @return array
      */
-    public function getAttributes($type)
+    public function getAttributes($type, $filters = [])
     {
-
         $inventory = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY);
 
         $attributes = [];
@@ -281,8 +561,11 @@ class Source extends AbstractHelper
             $attributes = array_merge($attributes, $extraFields);
         }
 
-        $parentAttributes = $this->getParentAttributes();
-        return $this->productHelper->addAttributeData($attributes, $parentAttributes);
+        if ($type == 'parent') {
+            return $attributes;
+        } else {
+            return $this->productHelper->addAttributeData($attributes, $filters);
+        }
     }
 
     /**
@@ -305,28 +588,14 @@ class Source extends AbstractHelper
     }
 
     /**
-     * @return array|mixed
-     */
-    public function getParentAttributes()
-    {
-        $enabled = $this->generalHelper->getStoreValue(self::XPATH_RELATIONS_ENABLED);
-        if ($enabled) {
-            if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_PARENT_ATTS)) {
-                $attributes = explode(',', $attributes);
-                return $attributes;
-            }
-        }
-
-        return [];
-    }
-
-    /**
      * @param $type
      *
      * @return array
      */
     public function getPriceConfig($type)
     {
+        $store = $this->storeManager->getStore();
+
         $priceFields = [];
         $priceFields['price'] = 'price';
         $priceFields['sales_price'] = 'sale_price';
@@ -334,6 +603,8 @@ class Source extends AbstractHelper
         $priceFields['max_price'] = 'max_price';
         $priceFields['sales_date_range'] = 'sale_price_effective_date';
         $priceFields['currency'] = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
+        $priceFields['exchange_rate'] = $store->getBaseCurrency()->getRate($priceFields['currency']);
+        $priceFields['grouped_price_type'] = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_PARENT_PRICE);
 
         if ($type != 'api') {
             $priceFields['use_currency'] = true;
@@ -342,60 +613,6 @@ class Source extends AbstractHelper
         }
 
         return $priceFields;
-    }
-
-    /**
-     * @return array
-     */
-    public function getProductFilters()
-    {
-        $filters = [];
-        $filters['type_id'] = ['simple', 'configurable', 'downloadable', 'virtual', 'bundle', 'grouped'];
-
-        $visibilityFilter = $this->generalHelper->getStoreValue(self::XPATH_VISBILITY);
-        if ($visibilityFilter) {
-            $visibility = $this->generalHelper->getStoreValue(self::XPATH_VISIBILITY_OPTIONS);
-            $filters['visibility'] = explode(',', $visibility);
-        } else {
-            $filters['visibility'] = [
-                Visibility::VISIBILITY_IN_CATALOG,
-                Visibility::VISIBILITY_IN_SEARCH,
-                Visibility::VISIBILITY_BOTH,
-            ];
-        }
-
-        $relations = $this->generalHelper->getStoreValue(self::XPATH_RELATIONS_ENABLED);
-        if ($relations) {
-            $filters['relations'] = 1;
-            if (!$visibilityFilter) {
-                array_push($filters['visibility'], Visibility::VISIBILITY_NOT_VISIBLE);
-            }
-        } else {
-            $filters['relations'] = 0;
-        }
-
-        $filters['limit'] = (int)$this->generalHelper->getStoreValue(self::XPATH_LIMIT);
-        $filters['stock'] = $this->generalHelper->getStoreValue(self::XPATH_STOCK);
-
-        $categoryFilter = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_FILTER);
-        if ($categoryFilter) {
-            $categoryIds = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_IDS);
-            $filterType = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_FILTER_TYPE);
-            if (!empty($categoryIds) && !empty($filterType)) {
-                $filters['category_ids'] = explode(',', $categoryIds);
-                $filters['category_type'] = $filterType;
-            }
-        }
-
-        $filters['advanced'] = [];
-        $productFilters = $this->generalHelper->getStoreValue(self::XPATH_FILTERS);
-        if ($productFilters) {
-            if ($advFilters = $this->generalHelper->getStoreValueArray(self::XPATH_FILTERS_DATA)) {
-                $filters['advanced'] = $advFilters;
-            }
-        }
-
-        return $filters;
     }
 
     /**

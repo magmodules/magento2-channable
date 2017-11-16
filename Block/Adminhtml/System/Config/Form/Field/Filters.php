@@ -9,6 +9,11 @@ namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field;
 use Magento\Framework\DataObject;
 use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
 
+/**
+ * Class Filters
+ *
+ * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field
+ */
 class Filters extends AbstractFieldArray
 {
 
@@ -16,11 +21,14 @@ class Filters extends AbstractFieldArray
      * @var \Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer\Attributes
      */
     private $attributeRenderer;
-
     /**
      * @var \Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer\Conditions
      */
     private $conditionRenderer;
+    /**
+     * @var \Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer\ProductTypes
+     */
+    private $productTypeRenderer;
 
     /**
      * Render block.
@@ -38,7 +46,10 @@ class Filters extends AbstractFieldArray
         $this->addColumn('value', [
             'label' => __('Value'),
         ]);
-
+        $this->addColumn('product_type', [
+            'label' => __('Apply To'),
+            'renderer' => $this->getProductTypeRenderer()
+        ]);
         $this->_addAfter = false;
         $this->_addButtonLabel = __('Add');
     }
@@ -80,22 +91,43 @@ class Filters extends AbstractFieldArray
     }
 
     /**
+     * Returns render of Product Types.
+     *
+     * @return \Magento\Framework\View\Element\BlockInterface
+     */
+    public function getProductTypeRenderer()
+    {
+        if (!$this->productTypeRenderer) {
+            $this->productTypeRenderer = $this->getLayout()->createBlock(
+                '\Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer\ProductTypes',
+                '',
+                ['data' => ['is_render_to_js_template' => true]]
+            );
+        }
+
+        return $this->productTypeRenderer;
+    }
+
+    /**
      * Prepare existing row data object.
      *
      * @param DataObject $row
      */
-    protected function _prepareArrayRow(DataObject $row)
+    public function _prepareArrayRow(DataObject $row)
     {
         $options = [];
-        $attribute = $row->getAttribute();
+        $attribute = $row->getData('attribute');
         if ($attribute) {
             $options['option_' . $this->getAttributeRenderer()->calcOptionHash($attribute)] = 'selected="selected"';
         }
-        $condition = $row->getCondition();
+        $condition = $row->getData('condition');
         if ($condition) {
             $options['option_' . $this->getConditionRenderer()->calcOptionHash($condition)] = 'selected="selected"';
         }
-
+        $productType = $row->getData('product_type');
+        if ($condition) {
+            $options['option_' . $this->getProductTypeRenderer()->calcOptionHash($productType)] = 'selected="selected"';
+        }
         $row->setData('option_extra_attrs', $options);
     }
 }

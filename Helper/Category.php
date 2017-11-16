@@ -12,6 +12,11 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 
+/**
+ * Class Category
+ *
+ * @package Magmodules\Channable\Helper
+ */
 class Category extends AbstractHelper
 {
 
@@ -19,12 +24,10 @@ class Category extends AbstractHelper
      * @var General
      */
     private $generalHelper;
-
     /**
      * @var StoreManagerInterface
      */
     private $storeManager;
-
     /**
      * @var CategoryCollectionFactory
      */
@@ -47,7 +50,6 @@ class Category extends AbstractHelper
         $this->generalHelper = $generalHelper;
         $this->storeManager = $storeManager;
         $this->categoryCollectionFactory = $categoryCollectionFactory;
-
         parent::__construct($context);
     }
 
@@ -59,7 +61,7 @@ class Category extends AbstractHelper
      *
      * @return array
      */
-    public function getCollection($storeId, $field = '', $default = '', $exclude = '')
+    public function getCollection($storeId, $field = null, $default = null, $exclude = null)
     {
         $data = [];
         $parent = $this->storeManager->getStore($storeId)->getRootCategoryId();
@@ -77,6 +79,7 @@ class Category extends AbstractHelper
             ->setStoreId($storeId)
             ->addAttributeToSelect($attributes)
             ->addFieldToFilter('is_active', ['eq' => 1])
+            ->addFieldToFilter('path', ['like' => '%/' . $parent . '/%'])
             ->load();
 
         foreach ($collection as $category) {

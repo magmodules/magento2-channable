@@ -8,24 +8,38 @@ namespace Magmodules\Channable\Model\System\Config\Source;
 
 use Magento\Framework\Option\ArrayInterface;
 
+/**
+ * Class InvalidationModus
+ *
+ * @package Magmodules\Channable\Model\System\Config\Source
+ */
 class InvalidationModus implements ArrayInterface
 {
+
+    /**
+     * Options array
+     *
+     * @var array
+     */
+    public $options = null;
 
     /**
      * @return array
      */
     public function toOptionArray()
     {
-        return [
-            [
-                'value' => '',
-                'label' => __('Observer')
-            ],
-            [
-                'value' => 'cron',
-                'label' => __('Cron')
-            ],
-
-        ];
+        if (!$this->options) {
+            $this->options = [
+                [
+                    'value' => '',
+                    'label' => __('Observer')
+                ],
+                [
+                    'value' => 'cron',
+                    'label' => __('Cron')
+                ]
+            ];
+        }
+        return $this->options;
     }
 }

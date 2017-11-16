@@ -8,6 +8,11 @@ namespace Magmodules\Channable\Model\ResourceModel\Item;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
+/**
+ * Class Collection
+ *
+ * @package Magmodules\Channable\Model\ResourceModel\Item
+ */
 class Collection extends AbstractCollection
 {
 

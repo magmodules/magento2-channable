@@ -8,13 +8,16 @@ namespace Magmodules\Channable\Model\Config\Backend\Serialized;
 
 use Magento\Config\Model\Config\Backend\Serialized\ArraySerialized;
 
+/**
+ * Class ExtraFields
+ *
+ * @package Magmodules\Channable\Model\Config\Backend\Serialized
+ */
 class ExtraFields extends ArraySerialized
 {
 
     /**
-     * Uset unused fields.
-     *
-     * @return $this
+     * @return \Magento\Config\Model\Config\Backend\Serialized\ArraySerialized
      */
     public function beforeSave()
     {

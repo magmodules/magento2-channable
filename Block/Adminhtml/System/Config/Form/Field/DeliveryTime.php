@@ -9,6 +9,11 @@ namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field;
 use Magento\Framework\DataObject;
 use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
 
+/**
+ * Class DeliveryTime
+ *
+ * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field
+ */
 class DeliveryTime extends AbstractFieldArray
 {
 
@@ -20,7 +25,7 @@ class DeliveryTime extends AbstractFieldArray
     /**
      * Render block
      */
-    protected function _prepareToRender()
+    public function _prepareToRender()
     {
         $this->addColumn('code', [
             'label'    => __('Country'),
@@ -41,7 +46,7 @@ class DeliveryTime extends AbstractFieldArray
      *
      * @return \Magento\Framework\View\Element\BlockInterface
      */
-    protected function getCountryRenderer()
+    public function getCountryRenderer()
     {
         if (!$this->countryRenderer) {
             $this->countryRenderer = $this->getLayout()->createBlock(
@@ -59,9 +64,9 @@ class DeliveryTime extends AbstractFieldArray
      *
      * @param DataObject $row
      */
-    protected function _prepareArrayRow(DataObject $row)
+    public function _prepareArrayRow(DataObject $row)
     {
-        $attribute = $row->getCode();
+        $attribute = $row->getData('code');
         $options = [];
         if ($attribute) {
             $options['option_' . $this->getCountryRenderer()->calcOptionHash($attribute)] = 'selected="selected"';

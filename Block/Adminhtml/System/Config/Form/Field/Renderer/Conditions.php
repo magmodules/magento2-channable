@@ -10,6 +10,11 @@ use Magento\Framework\View\Element\Html\Select;
 use Magento\Framework\View\Element\Context;
 use Magmodules\Channable\Model\System\Config\Source\Conditions as ConditionsSource;
 
+/**
+ * Class Conditions
+ *
+ * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer
+ */
 class Conditions extends Select
 {
 

@@ -6,6 +6,7 @@
 
 namespace Magmodules\Channable\Setup;
 
+use Magento\Sales\Setup\SalesSetup;
 use Magento\Sales\Setup\SalesSetupFactory;
 use Magento\Framework\Setup\UpgradeDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
@@ -13,26 +14,33 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\App\Config\ValueInterface;
+use Magento\Framework\App\Config\Storage\WriterInterface;
 
 class UpgradeData implements UpgradeDataInterface
 {
 
     const TABLE_NAME_ITEMS = 'channable_items';
-
     /**
      * @var SalesSetupFactory
      */
     private $salesSetupFactory;
-
     /**
      * @var ObjectManagerInterface
      */
     private $objectManager;
-
     /**
      * @var ProductMetadataInterface
      */
     private $productMetadata;
+    /**
+     * @var ValueInterface
+     */
+    private $configReader;
+    /**
+     * @var WriterInterface
+     */
+    private $configWriter;
 
     /**
      * UpgradeData constructor.
@@ -40,15 +48,21 @@ class UpgradeData implements UpgradeDataInterface
      * @param ProductMetadataInterface $productMetadata
      * @param ObjectManagerInterface   $objectManager
      * @param SalesSetupFactory        $salesSetupFactory
+     * @param ValueInterface           $configReader
+     * @param WriterInterface          $configWriter
      */
     public function __construct(
         ProductMetadataInterface $productMetadata,
         ObjectManagerInterface $objectManager,
-        SalesSetupFactory $salesSetupFactory
+        SalesSetupFactory $salesSetupFactory,
+        ValueInterface $configReader,
+        WriterInterface $configWriter
     ) {
         $this->productMetadata = $productMetadata;
         $this->salesSetupFactory = $salesSetupFactory;
         $this->objectManager = $objectManager;
+        $this->configReader = $configReader;
+        $this->configWriter = $configWriter;
     }
 
     /**
@@ -62,6 +76,8 @@ class UpgradeData implements UpgradeDataInterface
         $setup->startSetup();
 
         if (version_compare($context->getVersion(), "0.9.6", "<")) {
+
+            /** @var SalesSetup $salesSetup */
             $salesSetup = $this->salesSetupFactory->create(['setup' => $setup]);
 
             $channableId = [
@@ -230,11 +246,16 @@ class UpgradeData implements UpgradeDataInterface
             $this->convertSerializedDataToJson($setup);
         }
 
+        if (version_compare($context->getVersion(), "1.0.9", "<")) {
+            $this->changeConfigPaths();
+        }
+
         $setup->endSetup();
     }
 
     /**
      * Add Indexes to Items Table.
+     *
      * @param ModuleDataSetupInterface $setup
      */
     public function addIndexes(ModuleDataSetupInterface $setup)
@@ -315,6 +336,50 @@ class UpgradeData implements UpgradeDataInterface
                 'config_id',
                 'value',
                 $queryModifier
+            );
+        }
+    }
+
+    /**
+     * Change config paths for fields due to changes in config options.
+     */
+    public function changeConfigPaths()
+    {
+        $collection = $this->configReader->getCollection()
+            ->addFieldToFilter("path", "magmodules_channable/advanced/parent_atts");
+
+        foreach ($collection as $config) {
+            /** @var \Magento\Framework\App\Config\Value $config */
+            $this->configWriter->save(
+                "magmodules_channable/types/configurable_parent_atts",
+                $config->getValue(),
+                $config->getScope(),
+                $config->getScopeId()
+            );
+            $this->configWriter->delete(
+                "magmodules_channable/advanced/parent_atts",
+                $config->getScope(),
+                $config->getScopeId()
+            );
+        }
+
+        $collection = $this->configReader->getCollection()
+            ->addFieldToFilter("path", "magmodules_channable/advanced/relations");
+
+        foreach ($collection as $config) {
+            /** @var \Magento\Framework\App\Config\Value $config */
+            if ($config->getValue() == 1) {
+                $this->configWriter->save(
+                    "magmodules_channable/types/configurable",
+                    'simple',
+                    $config->getScope(),
+                    $config->getScopeId()
+                );
+            }
+            $this->configWriter->delete(
+                "magmodules_channable/advanced/relations",
+                $config->getScope(),
+                $config->getScopeId()
             );
         }
     }

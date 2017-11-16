@@ -14,31 +14,28 @@ use Magento\Framework\Filesystem;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 
+/**
+ * Class Feed
+ *
+ * @package Magmodules\Channable\Helper
+ */
 class Feed extends AbstractHelper
 {
 
     const XPATH_ENABLE = 'magmodules_channable/general/enable';
     const CONNECT_URL = 'https://app.channable.com/connect/magento.html?store_id=%s&url=%s&token=%s&version=v2';
-
     /**
      * @var General
      */
     private $generalHelper;
-
     /**
      * @var StoreManagerInterface
      */
     private $storeManager;
-
-    /**
-     * @var Filesystem\Directory\WriteInterface
-     */
-
     /**
      * @var Filesystem\Directory\WriteInterface
      */
     private $directory;
-
     /**
      * @var DateTime
      */
@@ -83,7 +80,7 @@ class Feed extends AbstractHelper
                 'is_active'   => $store->getIsActive(),
                 'status'      => $this->generalHelper->getStoreValue(self::XPATH_ENABLE, $storeId),
                 'preview_url' => $this->getPreviewUrl($storeId),
-                'json_url'    => $this->geJsonUrl($storeId),
+                'json_url'    => $this->getJsonUrl($storeId),
                 'connect_url' => $this->getConnectUrl($storeId),
             ];
         }
@@ -92,6 +89,7 @@ class Feed extends AbstractHelper
 
     /**
      * @param $storeId
+     *
      * @return string
      */
     public function getPreviewUrl($storeId)
@@ -104,9 +102,10 @@ class Feed extends AbstractHelper
 
     /**
      * @param $storeId
+     *
      * @return string
      */
-    public function geJsonUrl($storeId)
+    public function getJsonUrl($storeId)
     {
         $url = $this->storeManager->getStore($storeId)->getBaseUrl();
         $token = $this->generalHelper->getToken();
@@ -115,6 +114,7 @@ class Feed extends AbstractHelper
 
     /**
      * @param $storeId
+     *
      * @return string
      */
     public function getConnectUrl($storeId)

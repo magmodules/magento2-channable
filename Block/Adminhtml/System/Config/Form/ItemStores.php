@@ -11,6 +11,11 @@ use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magmodules\Channable\Helper\Item as ItemHelper;
 use Magento\Backend\Block\Template\Context;
 
+/**
+ * Class ItemStores
+ *
+ * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form
+ */
 class ItemStores extends Field
 {
 
@@ -52,9 +57,9 @@ class ItemStores extends Field
     {
 
         $html = '<tr id="row_' . $element->getHtmlId() . '">';
-        $html .= '  <td class="label"></td>';
-        $html .= '  <td class="value">' . $this->renderTabel() . '</td>';
-        $html .= '  <td></td>';
+        $html .= ' <td class="label"></td>';
+        $html .= ' <td class="value">' . $this->renderTabel() . '</td>';
+        $html .= ' <td></td>';
         $html .= '</tr>';
 
         return $html;

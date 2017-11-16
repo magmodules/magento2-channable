@@ -16,11 +16,15 @@ use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
 
+/**
+ * Class Cron
+ *
+ * @package Magmodules\Channable\Model\Config\Backend
+ */
 class Cron extends Value
 {
 
     const CRON_STRING_PATH = 'crontab/default/jobs/channable_item_update/schedule/cron_expr';
-
     /**
      * @var ValueFactory
      */
@@ -55,7 +59,7 @@ class Cron extends Value
     }
 
     /**
-     * @return $this
+     * @return \Magento\Framework\App\Config\Value
      * @throws LocalizedException
      */
     public function afterSave()

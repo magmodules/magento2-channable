@@ -11,6 +11,11 @@ use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magmodules\Channable\Helper\Order as OrderHelper;
 use Magento\Backend\Block\Template\Context;
 
+/**
+ * Class OrderStores
+ *
+ * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form
+ */
 class OrderStores extends Field
 {
 

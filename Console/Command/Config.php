@@ -6,14 +6,17 @@
 
 namespace Magmodules\Channable\Console\Command;
 
-use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Magento\Framework\App\State;
 use Magmodules\Channable\Helper\Config as ConfigHelper;
 
+/**
+ * Class Config
+ *
+ * @package Magmodules\Channable\Console\Command
+ */
 class Config extends Command
 {
 
@@ -21,12 +24,6 @@ class Config extends Command
      *
      */
     const COMMAND_NAME = 'channable:config';
-
-    /**
-     * @var State
-     */
-    public $state;
-
     /**
      * @var ConfigHelper
      */
@@ -35,28 +32,13 @@ class Config extends Command
     /**
      * Config constructor.
      *
-     * @param State        $state
      * @param ConfigHelper $configHelper
      */
     public function __construct(
-        State $state,
         ConfigHelper $configHelper
     ) {
-        $this->setAreaCode($state);
         $this->configHelper = $configHelper;
         parent::__construct();
-    }
-
-    /**
-     * @param State $state
-     */
-    public function setAreaCode(State $state)
-    {
-        try {
-            $state->getAreaCode();
-        } catch (Exception $exception) {
-            $state->setAreaCode('adminhtml');
-        }
     }
 
     /**

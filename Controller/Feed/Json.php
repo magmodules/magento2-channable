@@ -13,6 +13,11 @@ use Magmodules\Channable\Model\Generate as GenerateModel;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
 
+/**
+ * Class Json
+ *
+ * @package Magmodules\Channable\Controller\Feed
+ */
 class Json extends Action
 {
 
@@ -20,17 +25,14 @@ class Json extends Action
      * @var GenerateModel
      */
     private $generateModel;
-
     /**
      * @var GeneralHelper
      */
     private $generalHelper;
-
     /**
      * @var FeedHelper
      */
     private $feedHelper;
-
     /**
      * @var JsonFactory
      */

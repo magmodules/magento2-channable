@@ -12,6 +12,11 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Model\ItemFactory as ItemFactory;
 
+/**
+ * Class Item
+ *
+ * @package Magmodules\Channable\Helper
+ */
 class Item extends AbstractHelper
 {
 
@@ -22,17 +27,14 @@ class Item extends AbstractHelper
     const XPATH_CRON = 'magmodules_channable_marketplace/item/cron';
     const XPATH_INVALIDATE_MODUS = 'magmodules_channable_marketplace/item/invalidation_modus';
     const XPATH_LAST_RUN = 'magmodules_channable_marketplace/item/last_run';
-
     /**
      * @var StoreManagerInterface
      */
     private $storeManager;
-
     /**
      * @var General
      */
     private $generalHelper;
-
     /**
      * @var ItemFactory
      */
@@ -59,17 +61,6 @@ class Item extends AbstractHelper
     }
 
     /**
-     * @return mixed
-     */
-    public function isEnabled()
-    {
-        if (!$this->generalHelper->getMarketplaceEnabled()) {
-            return false;
-        }
-        return $this->generalHelper->getStoreValue(self::XPATH_ENABLE);
-    }
-
-    /**
      * @return bool
      */
     public function invalidateByObserver()
@@ -84,6 +75,17 @@ class Item extends AbstractHelper
         }
 
         return true;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function isEnabled()
+    {
+        if (!$this->generalHelper->getMarketplaceEnabled()) {
+            return false;
+        }
+        return $this->generalHelper->getStoreValue(self::XPATH_ENABLE);
     }
 
     /**

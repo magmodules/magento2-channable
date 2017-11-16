@@ -9,6 +9,11 @@ namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field;
 use Magento\Framework\DataObject;
 use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
 
+/**
+ * Class ExtraFields
+ *
+ * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field
+ */
 class ExtraFields extends AbstractFieldArray
 {
 
@@ -20,7 +25,7 @@ class ExtraFields extends AbstractFieldArray
     /**
      * Render block
      */
-    protected function _prepareToRender()
+    public function _prepareToRender()
     {
         $this->addColumn('name', [
             'label' => __('Fieldname'),
@@ -56,9 +61,9 @@ class ExtraFields extends AbstractFieldArray
      *
      * @param DataObject $row
      */
-    protected function _prepareArrayRow(DataObject $row)
+    public function _prepareArrayRow(DataObject $row)
     {
-        $attribute = $row->getAttribute();
+        $attribute = $row->getData('attribute');
         $options = [];
         if ($attribute) {
             $options['option_' . $this->getAttributeRenderer()->calcOptionHash($attribute)] = 'selected="selected"';

@@ -8,7 +8,6 @@ namespace Magmodules\Channable\Cron;
 
 use Magmodules\Channable\Model\Item as ItemModel;
 use Magmodules\Channable\Helper\Item as ItemHelper;
-use Psr\Log\LoggerInterface as Logger;
 
 class ItemUpdate
 {
@@ -17,36 +16,27 @@ class ItemUpdate
      * @var ItemHelper
      */
     private $itemHelper;
-
     /**
      * @var ItemModel
      */
     private $itemModel;
 
     /**
-     * @var Logger
-     */
-    private $logger;
-
-    /**
      * ItemUpdate constructor.
      *
      * @param ItemModel  $itemModel
      * @param ItemHelper $itemHelper
-     * @param Logger     $logger
      */
     public function __construct(
         ItemModel $itemModel,
-        ItemHelper $itemHelper,
-        Logger $logger
+        ItemHelper $itemHelper
     ) {
         $this->itemHelper = $itemHelper;
         $this->itemModel = $itemModel;
-        $this->logger = $logger;
     }
 
     /**
-     * Execute: Item Update Cron
+     * Execute: ItemUpdate Cron
      */
     public function execute()
     {
@@ -56,7 +46,7 @@ class ItemUpdate
                 $this->itemModel->updateAll();
             }
         } catch (\Exception $e) {
-            $this->logger->critical($e);
+            $this->itemHelper->addTolog('Cron ItemUpdate', $e->getMessage());
         }
 
         return $this;

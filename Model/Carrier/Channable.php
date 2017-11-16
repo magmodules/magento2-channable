@@ -17,6 +17,11 @@ use Magento\Shipping\Model\Rate\ResultFactory;
 use Magento\Quote\Model\Quote\Address\RateResult\MethodFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 
+/**
+ * Class Channable
+ *
+ * @package Magmodules\Channable\Model\Carrier
+ */
 class Channable extends AbstractCarrier implements CarrierInterface
 {
 
@@ -24,17 +29,14 @@ class Channable extends AbstractCarrier implements CarrierInterface
      * @var string
      */
     protected $_code = 'channable';
-
     /**
      * @var ResultFactory
      */
     protected $_rateResultFactory;
-
     /**
      * @var MethodFactory
      */
     protected $_rateMethodFactory;
-
     /**
      * @var CheckoutSession
      */

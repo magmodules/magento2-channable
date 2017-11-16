@@ -12,6 +12,11 @@ use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
 
+/**
+ * Class Preview
+ *
+ * @package Magmodules\Channable\Helper
+ */
 class Preview extends AbstractHelper
 {
 
@@ -19,7 +24,6 @@ class Preview extends AbstractHelper
      * @var Source
      */
     private $sourceHelper;
-
     /**
      * @var Emulation
      */
@@ -191,10 +195,19 @@ class Preview extends AbstractHelper
             if (empty($attribute['source'])) {
                 continue;
             }
+            $fallback = [];
+            foreach ($attribute['parent'] as $k => $v) {
+                if ($v == 1) {
+                    $fallback[] = ucfirst($k);
+                }
+            }
+            if (empty($fallback)) {
+                $fallback[] = 'Simple';
+            }
             $html .= '<tr>';
             $html .= ' <td style="' . $bStyle . '" >' . $attribute['label'] . '</td>';
             $html .= ' <td style="' . $bStyle . '" >' . $attribute['source'] . '</td>';
-            $html .= ' <td style="' . $bStyle . '" >' . (($attribute['parent'] == 1) ? 'Parent' : 'Simple') . '</td>';
+            $html .= ' <td style="' . $bStyle . '" >' . implode(' - ', $fallback) . '</td>';
             $html .= '</tr>';
         }
 

@@ -12,47 +12,43 @@ use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magmodules\Channable\Helper\Product as ProductHelper;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
-use Magento\Catalog\Model\Product\Visibility;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
-use Psr\Log\LoggerInterface;
 
+/**
+ * Class Generate
+ *
+ * @package Magmodules\Channable\Model
+ */
 class Generate
 {
 
     const XPATH_FEED_RESULT = 'magmodules_channable/feeds/results';
     const XPATH_GENERATE = 'magmodules_channable/generate/enable';
-
     /**
      * @var ProductsModel
      */
     private $productModel;
-
     /**
      * @var Item
      */
     private $itemModel;
-
     /**
      * @var ProductHelper
      */
     private $productHelper;
-
     /**
      * @var SourceHelper
      */
     private $sourceHelper;
-
     /**
      * @var GeneralHelper
      */
     private $generalHelper;
-
     /**
      * @var FeedHelper
      */
     private $feedHelper;
-
     /**
      * @var Emulation
      */
@@ -61,14 +57,13 @@ class Generate
     /**
      * Generate constructor.
      *
-     * @param ProductsModel   $productModel
-     * @param Item            $itemModel
-     * @param SourceHelper    $sourceHelper
-     * @param ProductHelper   $productHelper
-     * @param GeneralHelper   $generalHelper
-     * @param FeedHelper      $feedHelper
-     * @param Emulation       $appEmulation
-     * @param LoggerInterface $logger
+     * @param ProductsModel $productModel
+     * @param Item          $itemModel
+     * @param SourceHelper  $sourceHelper
+     * @param ProductHelper $productHelper
+     * @param GeneralHelper $generalHelper
+     * @param FeedHelper    $feedHelper
+     * @param Emulation     $appEmulation
      */
     public function __construct(
         ProductsModel $productModel,
@@ -77,8 +72,7 @@ class Generate
         ProductHelper $productHelper,
         GeneralHelper $generalHelper,
         FeedHelper $feedHelper,
-        Emulation $appEmulation,
-        LoggerInterface $logger
+        Emulation $appEmulation
     ) {
         $this->productModel = $productModel;
         $this->productHelper = $productHelper;
@@ -87,24 +81,25 @@ class Generate
         $this->generalHelper = $generalHelper;
         $this->feedHelper = $feedHelper;
         $this->appEmulation = $appEmulation;
-        $this->logger = $logger;
     }
 
     /**
-     * @param       $storeId
-     * @param int   $page
-     * @param array $productIds
+     * @param        $storeId
+     * @param        $page
+     * @param array  $productIds
+     * @param string $type
      *
      * @return array
      */
-    public function generateByStore($storeId, $page, $productIds = [])
+    public function generateByStore($storeId, $page, $productIds = [], $type = 'feed')
     {
         $feed = [];
         $pages = 1;
 
         $timeStart = microtime(true);
         $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
-        $config = $this->sourceHelper->getConfig($storeId, 'feed');
+
+        $config = $this->sourceHelper->getConfig($storeId, $type);
         $productCollection = $this->productModel->getCollection($config, $page, $productIds);
         $size = $this->productModel->getCollectionCountWithFilters($productCollection);
 
@@ -114,19 +109,20 @@ class Generate
         }
 
         $products = $productCollection->load();
-        $parents = $this->productModel->getParents($products, $config);
+        $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
+        $parents = $this->productModel->getParents($parentRelations, $config);
 
         foreach ($products as $product) {
             /** @var \Magento\Catalog\Model\Product $product */
             $parent = null;
-            if (!empty($config['filters']['relations'])
-                && $product->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE
-            ) {
-                if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
-                    $parent = $parents->getItemById($parentId);
+            if (!empty($parentRelations[$product->getEntityId()])) {
+                foreach ($parentRelations[$product->getEntityId()] as $parentId) {
+                    if ($parent = $parents->getItemById($parentId)) {
+                        continue;
+                    }
                 }
             }
-            if (!empty($productId)) {
+            if (!empty($productIds)) {
                 $feed['product_source'] = $product->getData();
                 if (!empty($parent)) {
                     $feed['parent_source'] = $parent->getData();
