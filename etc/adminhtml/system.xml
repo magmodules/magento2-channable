@@ -68,7 +68,7 @@
                        showInWebsite="1" showInStore="1">
                     <label>Brand</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
-                    <comment>elect the attribute associated with the brand or manufacturer. Suggested field: Brand or manufacturer</comment>
+                    <comment>Select the attribute associated with the brand or manufacturer. Suggested field: Brand or manufacturer</comment>
                 </field>
                 <field id="ean_attribute" translate="label" type="select" sortOrder="5" showInDefault="1"
                        showInWebsite="1" showInStore="1">
