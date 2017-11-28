@@ -393,6 +393,21 @@ class Products
     }
 
     /**
+     * @param $date
+     *
+     * @return array|\Magento\Catalog\Model\ResourceModel\Product\Collection
+     */
+    public function getLastEditedCollection($date)
+    {
+        $collection = $this->productCollectionFactory
+            ->create()
+            ->addAttributeToSelect(['last_updated', 'entity_id'])
+            ->addAttributeToFilter('updated_at', ['gteq' => $date]);
+
+        return $collection->load();
+    }
+
+    /**
      * Direct Database Query to get total records of collection with filters.
      *
      * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection
