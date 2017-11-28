@@ -35,7 +35,7 @@ class ItemUpdate extends Command
     private $generalHelper;
 
     /**
-     * FeedGenerate constructor.
+     * ItemUpdate constructor.
      *
      * @param ItemModel     $itemModel
      * @param GeneralHelper $generalHelper
