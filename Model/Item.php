@@ -124,6 +124,7 @@ class Item extends AbstractModel
             ) : '');
             $data['qty'] = (isset($row['qty']) ? $row['qty'] : '');
             $data['gtin'] = (isset($row['ean']) ? $row['ean'] : '');
+            $data['parent_id'] = (isset($row['item_group_id']) ? $row['item_group_id'] : 0);
 
             if (isset($row['availability']) && $row['availability'] == 'in stock') {
                 $data['is_in_stock'] = 1;
@@ -177,14 +178,18 @@ class Item extends AbstractModel
      */
     public function invalidateProduct($productId, $type)
     {
-        $items = $this->itemFactory->create()->getCollection()->addFieldToFilter('id', $productId);
+        $log = $this->itemHelper->isLoggingEnabled();
+        /** @var \Magmodules\Channable\Model\ResourceModel\Item\Collection $items */
+        $items = $this->itemFactory->create()
+            ->getCollection()
+            ->addFieldToFilter(['id', 'parent_id'], [['eq' => $productId], ['eq' => $productId]]);
+
         foreach ($items as $item) {
             $item->setNeedsUpdate('1')->save();
-        }
-
-        if ($this->itemHelper->isLoggingEnabled()) {
-            $msg = 'Product-id: ' . $productId . ' invalidated by ' . $type;
-            $this->addTolog('invalidate', $msg);
+            if ($log) {
+                $msg = 'Product-id: ' . $productId . ' invalidated by ' . $type;
+                $this->addTolog('invalidate', $msg);
+            }
         }
     }
 

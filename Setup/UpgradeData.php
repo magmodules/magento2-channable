@@ -68,6 +68,7 @@ class UpgradeData implements UpgradeDataInterface
     /**
      * @param ModuleDataSetupInterface $setup
      * @param ModuleContextInterface   $context
+     * @throws \Zend_Db_Exception
      */
     public function upgrade(
         ModuleDataSetupInterface $setup,
@@ -134,7 +135,7 @@ class UpgradeData implements UpgradeDataInterface
                         Table::TYPE_INTEGER,
                         null,
                         ['nullable' => false, 'default' => '0'],
-                        'Store id'
+                        'Product id'
                     )
                     ->addColumn(
                         'title',
@@ -248,6 +249,24 @@ class UpgradeData implements UpgradeDataInterface
 
         if (version_compare($context->getVersion(), "1.0.9", "<")) {
             $this->changeConfigPaths();
+        }
+
+        if (version_compare($context->getVersion(), "1.0.11", "<")) {
+            $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
+            if ($setup->getConnection()->isTableExists($itemsTable)) {
+                $setup->getConnection()
+                    ->addColumn(
+                        $itemsTable,
+                        'parent_id',
+                        [
+                            'type'     => Table::TYPE_INTEGER,
+                            'default'  => 0,
+                            'nullable' => false,
+                            'comment'  => 'Parent Id',
+                            'after'    => 'id'
+                        ]
+                    );
+            }
         }
 
         $setup->endSetup();
