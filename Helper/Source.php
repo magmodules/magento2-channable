@@ -43,6 +43,7 @@ class Source extends AbstractHelper
     const XPATH_DELIVERY_TIME = 'magmodules_channable/advanced/delivery_time';
     const XPATH_INVENTORY = 'magmodules_channable/advanced/inventory';
     const XPATH_INVENTORY_DATA = 'magmodules_channable/advanced/inventory_fields';
+    const XPATH_TAX = 'magmodules_channable/advanced/tax';
     const XPATH_MANAGE_STOCK = 'cataloginventory/item_options/manage_stock';
     const XPATH_MIN_SALES_QTY = 'cataloginventory/item_options/min_sale_qty';
     const XPATH_QTY_INCREMENTS = 'cataloginventory/item_options/qty_increments';
@@ -68,7 +69,7 @@ class Source extends AbstractHelper
     const XPATH_GROUPED_PARENT_PRICE = 'magmodules_channable/types/grouped_parent_price';
     const XPATH_GROUPED_PARENT_ATTS = 'magmodules_channable/types/grouped_parrent_atts';
     const XPATH_GROUPED_NONVISIBLE = 'magmodules_channable/types/grouped_nonvisible';
-    
+
     /**
      * @var General
      */
@@ -126,8 +127,11 @@ class Source extends AbstractHelper
     {
         $config = [];
         $config['flat'] = false;
+        $config['type'] = $type;
         $config['store_id'] = $storeId;
         $config['website_id'] = $this->storeManager->getStore()->getWebsiteId();
+        $config['timestamp'] = $this->generalHelper->getLocaleDate($storeId);
+        $config['date_time'] = $this->generalHelper->getDateTime();
         $config['filters'] = $this->getProductFilters();
         $config['attributes'] = $this->getAttributes($type, $config['filters']);
         $config['price_config'] = $this->getPriceConfig($type);
@@ -605,6 +609,10 @@ class Source extends AbstractHelper
         $priceFields['currency'] = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
         $priceFields['exchange_rate'] = $store->getBaseCurrency()->getRate($priceFields['currency']);
         $priceFields['grouped_price_type'] = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_PARENT_PRICE);
+
+        if ($this->generalHelper->getStoreValue(self::XPATH_TAX)) {
+            $priceFields['incl_vat'] = true;
+        }
 
         if ($type != 'api') {
             $priceFields['use_currency'] = true;

@@ -10,8 +10,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Magmodules\Channable\Model\Item as ItemModel;
+use Magmodules\Channable\Model\ItemFactory as ItemFactory;
 use Magmodules\Channable\Helper\General as GeneralHelper;
+use Magento\Framework\App\State as AppState;
 
 /**
  * Class ItemUpdate
@@ -26,26 +27,33 @@ class ItemUpdate extends Command
      */
     const COMMAND_NAME = 'channable:item:update';
     /**
-     * @var ItemModel
+     * @var ItemFactory
      */
-    private $itemModel;
+    private $itemFactory;
     /**
      * @var GeneralHelper
      */
     private $generalHelper;
+    /**
+     * @var AppState
+     */
+    private $appState;
 
     /**
      * ItemUpdate constructor.
      *
-     * @param ItemModel     $itemModel
+     * @param ItemFactory   $itemFactory
      * @param GeneralHelper $generalHelper
+     * @param AppState      $appState
      */
     public function __construct(
-        ItemModel $itemModel,
-        GeneralHelper $generalHelper
+        ItemFactory $itemFactory,
+        GeneralHelper $generalHelper,
+        AppState $appState
     ) {
-        $this->itemModel = $itemModel;
+        $this->itemFactory = $itemFactory;
         $this->generalHelper = $generalHelper;
+        $this->appState = $appState;
         parent::__construct();
     }
 
@@ -70,13 +78,15 @@ class ItemUpdate extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-
         $storeId = $input->getOption('store-id');
+        $this->appState->setAreaCode('frontend');
+        $itemModel = $this->itemFactory->create();
+
         if (empty($storeId) || !is_numeric($storeId)) {
             $output->writeln('<info>Running All Stores</info>');
             $storeIds = $this->generalHelper->getEnabledArray('magmodules_channable_marketplace/item/enable');
             foreach ($storeIds as $storeId) {
-                $result = $this->itemModel->updateByStore($storeId);
+                $result = $itemModel->updateByStore($storeId);
                 $msg = sprintf(
                     'Store ID: %s - %s - Products: %s',
                     $storeId,
@@ -87,7 +97,7 @@ class ItemUpdate extends Command
             }
         } else {
             $output->writeln('<info>Running Store ' . $storeId . '</info>');
-            $result = $this->itemModel->updateByStore($storeId);
+            $result = $itemModel->updateByStore($storeId);
             $msg = sprintf(
                 'Store ID: %s - %s - Products: %s',
                 $storeId,

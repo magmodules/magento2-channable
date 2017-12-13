@@ -11,8 +11,10 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\App\Config\ReinitableConfigInterface;
 use Magento\Config\Model\ResourceModel\Config as ConfigModel;
 use Magmodules\Channable\Logger\ChannableLogger;
+use Magmodules\Channable\Helper\Source as SourceHelper;
 
 /**
  * Class Config
@@ -22,7 +24,7 @@ use Magmodules\Channable\Logger\ChannableLogger;
 class Config extends AbstractHelper
 {
 
-    const XPATH_CONVERT_RUN = 'magmodules_channable/tast/convert_run';
+    const XPATH_CONVERT_RUN = 'magmodules_channable/task/convert_run';
     /**
      * @var ObjectManagerInterface
      */
@@ -43,22 +45,28 @@ class Config extends AbstractHelper
      * @var Config
      */
     private $config;
+    /**
+     * @var ReinitableConfigInterface
+     */
+    private $reinitConfig;
 
     /**
      * Config constructor.
      *
-     * @param Context                  $context
-     * @param ObjectManagerInterface   $objectManager
-     * @param ResourceConnection       $resource
-     * @param ProductMetadataInterface $productMetadata
-     * @param ConfigModel              $config
-     * @param ChannableLogger          $logger
+     * @param Context                   $context
+     * @param ObjectManagerInterface    $objectManager
+     * @param ResourceConnection        $resource
+     * @param ProductMetadataInterface  $productMetadata
+     * @param ReinitableConfigInterface $reinitConfig
+     * @param ConfigModel               $config
+     * @param ChannableLogger           $logger
      */
     public function __construct(
         Context $context,
         ObjectManagerInterface $objectManager,
         ResourceConnection $resource,
         ProductMetadataInterface $productMetadata,
+        ReinitableConfigInterface $reinitConfig,
         ConfigModel $config,
         ChannableLogger $logger
     ) {
@@ -66,6 +74,7 @@ class Config extends AbstractHelper
         $this->resource = $resource;
         $this->productMetadata = $productMetadata;
         $this->config = $config;
+        $this->reinitConfig = $reinitConfig;
         $this->logger = $logger;
         parent::__construct($context);
     }
@@ -76,7 +85,8 @@ class Config extends AbstractHelper
     public function run()
     {
         $convert = $this->scopeConfig->getValue(self::XPATH_CONVERT_RUN);
-        if (empty($convert) && version_compare($this->productMetadata->getVersion(), '2.2.0', '>=')) {
+        $magentoVersion = $this->productMetadata->getVersion();
+        if (empty($convert) && version_compare($magentoVersion, '2.2.0', '>=')) {
             try {
                 $this->convertSerializedDataToJson();
                 $this->config->saveConfig(self::XPATH_CONVERT_RUN, 1, 'default', 0);
@@ -94,13 +104,17 @@ class Config extends AbstractHelper
     {
         $magentoVersion = $this->productMetadata->getVersion();
         if (version_compare($magentoVersion, '2.2.0', '>=')) {
+
+            /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
             $connection = $this->resource
                 ->getConnection(\Magento\Framework\App\ResourceConnection::DEFAULT_CONNECTION);
 
+            /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
             $fieldDataConverter = $this->objectManager
                 ->create(\Magento\Framework\DB\FieldDataConverterFactory::class)
                 ->create(\Magento\Framework\DB\DataConverter\SerializedToJson::class);
 
+            /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
             $queryModifier = $this->objectManager
                 ->create(\Magento\Framework\DB\Select\QueryModifierFactory::class)
                 ->create(
@@ -108,9 +122,9 @@ class Config extends AbstractHelper
                     [
                         'values' => [
                             'path' => [
-                                'magmodules_channable/advanced/extra_fields',
-                                'magmodules_channable/advanced/delivery_time',
-                                'magmodules_channable/filter/filters_data'
+                                SourceHelper::XPATH_EXTRA_FIELDS,
+                                SourceHelper::XPATH_DELIVERY_TIME,
+                                SourceHelper::XPATH_FILTERS_DATA
                             ]
                         ]
                     ]
@@ -124,7 +138,8 @@ class Config extends AbstractHelper
                 $queryModifier
             );
 
-            return 'Fields upated!';
+            $this->reinitConfig->reinit();
+            return 'Fields updated!';
         } else {
             return 'Incompatible Magento Version';
         }

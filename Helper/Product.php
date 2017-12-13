@@ -8,17 +8,19 @@ namespace Magmodules\Channable\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
-use Magento\Catalog\Model\Product\Gallery\ReadHandler as GalleryReadHandler;
-use Magento\Catalog\Helper\Image as ProductImageHelper;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Api\AttributeSetRepositoryInterface;
+use Magento\Catalog\Model\Product\Gallery\ReadHandler as GalleryReadHandler;
+use Magento\Catalog\Model\Product\CatalogPrice;
+use Magento\Catalog\Model\Product\Visibility;
+use Magento\Catalog\Model\Product\Media\Config as CatalogProductMediaConfig;
+use Magento\Catalog\Helper\Image as ProductImageHelper;
+use Magento\Catalog\Helper\Data as CatalogHelper;
+use Magento\CatalogRule\Model\ResourceModel\RuleFactory as RuleFactory;
 use Magento\Framework\Filter\FilterManager;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable as ConfigurableResource;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link as GroupedResource;
 use Magento\Bundle\Model\ResourceModel\Selection as BundleResource;
-use Magento\Catalog\Model\Product\CatalogPrice;
-use Magento\Catalog\Model\Product\Visibility;
-use Magento\Catalog\Model\Product\Media\Config as CatalogProductMediaConfig;
 
 /**
  * Class Product
@@ -53,6 +55,10 @@ class Product extends AbstractHelper
      */
     private $attributeSet;
     /**
+     * @var CatalogHelper
+     */
+    private $catalogHelper;
+    /**
      * @var ProductImageHelper
      */
     private $productImageHelper;
@@ -60,6 +66,10 @@ class Product extends AbstractHelper
      * @var GalleryReadHandler
      */
     private $galleryReadHandler;
+    /**
+     * @var RuleFactory
+     */
+    private $ruleFactory;
     /**
      * @var CatalogProductMediaConfig
      */
@@ -75,7 +85,9 @@ class Product extends AbstractHelper
      * @param Context                         $context
      * @param GalleryReadHandler              $galleryReadHandler
      * @param CatalogProductMediaConfig       $catalogProductMediaConfig
+     * @param CatalogHelper                   $catalogHelper
      * @param ProductImageHelper              $productImageHelper
+     * @param RuleFactory                     $ruleFactory
      * @param EavConfig                       $eavConfig
      * @param FilterManager                   $filter
      * @param AttributeSetRepositoryInterface $attributeSet
@@ -88,7 +100,9 @@ class Product extends AbstractHelper
         Context $context,
         GalleryReadHandler $galleryReadHandler,
         CatalogProductMediaConfig $catalogProductMediaConfig,
+        CatalogHelper $catalogHelper,
         ProductImageHelper $productImageHelper,
+        RuleFactory $ruleFactory,
         EavConfig $eavConfig,
         FilterManager $filter,
         AttributeSetRepositoryInterface $attributeSet,
@@ -99,7 +113,9 @@ class Product extends AbstractHelper
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
+        $this->catalogHelper = $catalogHelper;
         $this->productImageHelper = $productImageHelper;
+        $this->ruleFactory = $ruleFactory;
         $this->eavConfig = $eavConfig;
         $this->filter = $filter;
         $this->attributeSet = $attributeSet;
@@ -282,6 +298,7 @@ class Product extends AbstractHelper
      * @param                                $config
      *
      * @return string
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function getProductUrl($product, $simple, $config)
     {
@@ -317,6 +334,10 @@ class Product extends AbstractHelper
             if (!empty($urlExtra) && !empty($url)) {
                 $url = $url . '#' . implode('&', $urlExtra);
             }
+        }
+
+        if (empty($url)) {
+            $url = $config['base_url'] . 'index.php/catalog/product/view/id/' . $product->getEntityId();
         }
 
         return $url;
@@ -643,6 +664,7 @@ class Product extends AbstractHelper
 
                 $groupedPrices = $this->getGroupedPrices($product, $config);
                 $price = $groupedPrices['min_price'];
+                $finalPrice = $price;
                 $product['min_price'] = $groupedPrices['min_price'];
                 $product['max_price'] = $groupedPrices['max_price'];
                 $product['total_price'] = $groupedPrices['total_price'];
@@ -658,12 +680,15 @@ class Product extends AbstractHelper
                 break;
             case 'bundle':
                 $price = $product->getPrice();
+                $finalPrice = $price;
+
                 if (empty($price) && !empty($product['min_price'])) {
                     $price = $product['min_price'];
+                    $finalPrice = $price;
                 }
 
                 if (!empty($product['special_price'])) {
-                    $specialPrice = round(($price * $product['special_price'] / 100), 2);
+                    $finalPrice = round(($price * $product['special_price'] / 100), 2);
                 }
 
                 break;
@@ -671,26 +696,31 @@ class Product extends AbstractHelper
                 $price = $product->getPrice();
                 $finalPrice = $product->getFinalPrice();
                 $specialPrice = $product->getSpecialPrice();
+                $rulePrice = $this->ruleFactory->create()->getRulePrice(
+                    $config['timestamp'],
+                    $config['website_id'],
+                    '',
+                    $product->getId()
+                );
+
+                if ($rulePrice !== null && $rulePrice !== false) {
+                    $finalPrice = min($finalPrice, $rulePrice);
+                }
         }
 
         $prices = [];
         $config = $config['price_config'];
-
-        $prices[$config['price']] = $this->formatPrice($price, $config);
+        $prices[$config['price']] = $this->formatPrice($product, $price, $config);
 
         if (isset($finalPrice) && !empty($config['final_price'])) {
-            $prices[$config['final_price']] = $this->formatPrice($finalPrice, $config);
+            $prices[$config['final_price']] = $this->formatPrice($product, $finalPrice, $config);
         }
 
         if (isset($finalPrice) && ($price > $finalPrice) && !empty($config['sales_price'])) {
-            $prices[$config['sales_price']] = $this->formatPrice($finalPrice, $config);
+            $prices[$config['sales_price']] = $this->formatPrice($product, $finalPrice, $config);
         }
 
-        if (isset($specialPrice) && ($price > $specialPrice) && !empty($config['sales_price'])) {
-            $prices[$config['sales_price']] = $this->formatPrice($specialPrice, $config);
-        }
-
-        if (isset($specialPrice) && ($specialPrice < $price) && !empty($config['sales_date_range'])) {
+        if (isset($specialPrice) && ($specialPrice == $finalPrice) && !empty($config['sales_date_range'])) {
             if ($product->getSpecialFromDate() && $product->getSpecialToDate()) {
                 $from = date('Y-m-d', strtotime($product->getSpecialFromDate()));
                 $to = date('Y-m-d', strtotime($product->getSpecialToDate()));
@@ -700,20 +730,28 @@ class Product extends AbstractHelper
 
         if ($price <= 0) {
             if (!empty($product['min_price'])) {
-                $prices[$config['price']] = $this->formatPrice($product['min_price'], $config);
+                $prices[$config['price']] = $this->formatPrice($product, $product['min_price'], $config);
             }
         }
 
         if (!empty($product['min_price']) && !empty($config['min_price'])) {
-            $prices[$config['min_price']] = $this->formatPrice($product['min_price'], $config);
+            if ($finalPrice < $product['min_price']) {
+                $prices[$config['min_price']] = $this->formatPrice($product, $finalPrice, $config);
+            } else {
+                $prices[$config['min_price']] = $this->formatPrice($product, $product['min_price'], $config);
+            }
         }
 
         if (!empty($product['max_price']) && !empty($config['max_price'])) {
-            $prices[$config['max_price']] = $this->formatPrice($product['max_price'], $config);
+            if ($price > $product['min_price']) {
+                $prices[$config['max_price']] = $this->formatPrice($product, $price, $config);
+            } else {
+                $prices[$config['max_price']] = $this->formatPrice($product, $product['max_price'], $config);
+            }
         }
 
         if (!empty($product['total_price']) && !empty($config['total_price'])) {
-            $prices[$config['total_price']] = $this->formatPrice($product['total_price'], $config);
+            $prices[$config['total_price']] = $this->formatPrice($product, $product['total_price'], $config);
         }
 
         if (!empty($config['discount_perc']) && isset($prices[$config['sales_price']])) {
@@ -730,8 +768,8 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $product
-     * @param $config
+     * @param \Magento\Catalog\Model\Product $product
+     * @param                                $config
      *
      * @return array|null
      */
@@ -763,15 +801,20 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $price
-     * @param $config
+     * @param \Magento\Catalog\Model\Product $product
+     * @param                                $price
+     * @param                                $config
      *
-     * @return string
+     * @return float|string
      */
-    public function formatPrice($price, $config)
+    public function formatPrice($product, $price, $config)
     {
         if (!empty($config['exchange_rate'])) {
             $price = $price * $config['exchange_rate'];
+        }
+
+        if (isset($config['incl_vat'])) {
+            $price = $this->catalogHelper->getTaxPrice($product, $price, $config['incl_vat']);
         }
 
         $decimal = isset($config['decimal_point']) ? $config['decimal_point'] : '.';
@@ -840,8 +883,8 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $products
-     * @param $config
+     * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $products
+     * @param                                                         $config
      *
      * @return array
      */

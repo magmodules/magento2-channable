@@ -117,8 +117,11 @@ class Item extends AbstractModel
 
         if (isset($row['price'])) {
             $data['price'] = preg_replace('/([^0-9\.,])/i', '', $row['price']);
-            $data['discount_price'] = (isset($row['sale_price']) ? preg_replace('/([^0-9\.,])/i', '',
-                $row['sale_price']) : '');
+            $data['discount_price'] = (isset($row['sale_price']) ? preg_replace(
+                '/([^0-9\.,])/i',
+                '',
+                $row['sale_price']
+            ) : '');
             $data['qty'] = (isset($row['qty']) ? $row['qty'] : '');
             $data['gtin'] = (isset($row['ean']) ? $row['ean'] : '');
 
@@ -271,13 +274,17 @@ class Item extends AbstractModel
         $productData = [];
         $productIds = $this->itemHelper->getProductIdsFromCollection($items);
         $products = $this->productModel->getCollection($config, '', $productIds);
-        $parents = $this->productModel->getParents($products, $config);
+        $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
+        $parents = $this->productModel->getParents($parentRelations, $config);
 
         foreach ($products as $product) {
+            /** @var \Magento\Catalog\Model\Product $product */
             $parent = null;
-            if (!empty($config['filters']['relations'])) {
-                if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
-                    $parent = $parents->getItemById($parentId);
+            if (!empty($parentRelations[$product->getEntityId()])) {
+                foreach ($parentRelations[$product->getEntityId()] as $parentId) {
+                    if ($parent = $parents->getItemById($parentId)) {
+                        continue;
+                    }
                 }
             }
             if ($dataRow = $this->productHelper->getDataRow($product, $parent, $config)) {
