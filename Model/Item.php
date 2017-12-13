@@ -117,10 +117,14 @@ class Item extends AbstractModel
 
         if (isset($row['price'])) {
             $data['price'] = preg_replace('/([^0-9\.,])/i', '', $row['price']);
-            $data['discount_price'] = (isset($row['sale_price']) ? preg_replace('/([^0-9\.,])/i', '',
-                $row['sale_price']) : '');
+            $data['discount_price'] = (isset($row['sale_price']) ? preg_replace(
+                '/([^0-9\.,])/i',
+                '',
+                $row['sale_price']
+            ) : '');
             $data['qty'] = (isset($row['qty']) ? $row['qty'] : '');
             $data['gtin'] = (isset($row['ean']) ? $row['ean'] : '');
+            $data['parent_id'] = (isset($row['item_group_id']) ? $row['item_group_id'] : 0);
 
             if (isset($row['availability']) && $row['availability'] == 'in stock') {
                 $data['is_in_stock'] = 1;
@@ -174,14 +178,18 @@ class Item extends AbstractModel
      */
     public function invalidateProduct($productId, $type)
     {
-        $items = $this->itemFactory->create()->getCollection()->addFieldToFilter('id', $productId);
+        $log = $this->itemHelper->isLoggingEnabled();
+        /** @var \Magmodules\Channable\Model\ResourceModel\Item\Collection $items */
+        $items = $this->itemFactory->create()
+            ->getCollection()
+            ->addFieldToFilter(['id', 'parent_id'], [['eq' => $productId], ['eq' => $productId]]);
+
         foreach ($items as $item) {
             $item->setNeedsUpdate('1')->save();
-        }
-
-        if ($this->itemHelper->isLoggingEnabled()) {
-            $msg = 'Product-id: ' . $productId . ' invalidated by ' . $type;
-            $this->addTolog('invalidate', $msg);
+            if ($log) {
+                $msg = 'Product-id: ' . $productId . ' invalidated by ' . $type;
+                $this->addTolog('invalidate', $msg);
+            }
         }
     }
 
@@ -271,13 +279,17 @@ class Item extends AbstractModel
         $productData = [];
         $productIds = $this->itemHelper->getProductIdsFromCollection($items);
         $products = $this->productModel->getCollection($config, '', $productIds);
-        $parents = $this->productModel->getParents($products, $config);
+        $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
+        $parents = $this->productModel->getParents($parentRelations, $config);
 
         foreach ($products as $product) {
+            /** @var \Magento\Catalog\Model\Product $product */
             $parent = null;
-            if (!empty($config['filters']['relations'])) {
-                if ($parentId = $this->productHelper->getParentId($product->getEntityId())) {
-                    $parent = $parents->getItemById($parentId);
+            if (!empty($parentRelations[$product->getEntityId()])) {
+                foreach ($parentRelations[$product->getEntityId()] as $parentId) {
+                    if ($parent = $parents->getItemById($parentId)) {
+                        continue;
+                    }
                 }
             }
             if ($dataRow = $this->productHelper->getDataRow($product, $parent, $config)) {

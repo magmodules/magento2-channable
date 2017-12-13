@@ -9,13 +9,13 @@ namespace Magmodules\Channable\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Config\Model\ResourceModel\Config as ConfigData;
-use Magento\Config\Model\ResourceModel\Config\Data\Collection as ConfigDataCollection;
 use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigDataCollectionFactory;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magmodules\Channable\Logger\ChannableLogger;
 
 /**
@@ -51,13 +51,17 @@ class General extends AbstractHelper
      */
     private $configDataCollectionFactory;
     /**
+     * @var ConfigData
+     */
+    private $coreDate;
+    /**
+     * @var TimezoneInterface
+     */
+    private $localeDate;
+    /**
      * @var ChannableLogger
      */
     private $logger;
-    /**
-     * @var DateTime
-     */
-    private $date;
 
     /**
      * General constructor.
@@ -66,27 +70,30 @@ class General extends AbstractHelper
      * @param StoreManagerInterface       $storeManager
      * @param ModuleListInterface         $moduleList
      * @param ProductMetadataInterface    $metadata
-     * @param ChannableLogger             $logger
-     * @param DateTime                    $date
      * @param ConfigDataCollectionFactory $configDataCollectionFactory
      * @param ConfigData                  $config
+     * @param DateTime                    $coreDate
+     * @param TimezoneInterface           $localeDate
+     * @param ChannableLogger             $logger
      */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
         ModuleListInterface $moduleList,
         ProductMetadataInterface $metadata,
-        ChannableLogger $logger,
-        DateTime $date,
         ConfigDataCollectionFactory $configDataCollectionFactory,
-        ConfigData $config
+        ConfigData $config,
+        DateTime $coreDate,
+        TimezoneInterface $localeDate,
+        ChannableLogger $logger
     ) {
         $this->storeManager = $storeManager;
         $this->moduleList = $moduleList;
         $this->metadata = $metadata;
-        $this->date = $date;
-        $this->config = $config;
         $this->configDataCollectionFactory = $configDataCollectionFactory;
+        $this->config = $config;
+        $this->coreDate = $coreDate;
+        $this->localeDate = $localeDate;
         $this->logger = $logger;
         parent::__construct($context);
     }
@@ -295,10 +302,29 @@ class General extends AbstractHelper
 
     /**
      * @return mixed
+     * @deprecated
      */
     public function getGmtDate()
     {
-        return $this->date->gmtDate();
+        return $this->getDateTime();
+    }
+
+    /**
+     * @return string
+     */
+    public function getDateTime()
+    {
+        return $this->coreDate->date("Y-m-d H:i:s");
+    }
+
+    /**
+     * @param $storeId
+     *
+     * @return mixed
+     */
+    public function getLocaleDate($storeId)
+    {
+        return $this->localeDate->scopeDate($storeId);
     }
 
     /**
@@ -306,7 +332,7 @@ class General extends AbstractHelper
      */
     public function getTimestamp()
     {
-        return $this->date->gmtTimestamp();
+        return $this->coreDate->gmtTimestamp();
     }
 
     /**

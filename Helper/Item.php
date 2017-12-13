@@ -111,7 +111,7 @@ class Item extends AbstractHelper
             return $date;
         }
 
-        $date = $this->generalHelper->getTimestamp();
+        $date = $this->generalHelper->getDateTime();
         return date('Y-m-d H:i:s', strtotime('-1 days', $date));
     }
 
@@ -120,7 +120,7 @@ class Item extends AbstractHelper
      */
     public function setLastRun()
     {
-        $date = $this->generalHelper->getGmtDate();
+        $date = $this->generalHelper->getDateTime();
         $this->generalHelper->setConfigData($date, self::XPATH_LAST_RUN);
     }
 
