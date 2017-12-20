@@ -15,6 +15,7 @@ use Magento\Framework\App\Config\ValueFactory;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\App\Config\ReinitableConfigInterface;
 
 /**
  * Class Cron
@@ -29,19 +30,24 @@ class Cron extends Value
      * @var ValueFactory
      */
     private $configValueFactory;
+    /**
+     * @var ReinitableConfigInterface
+     */
+    private $reinitConfig;
 
     /**
      * Cron constructor.
      *
-     * @param Context               $context
-     * @param Registry              $registry
-     * @param ScopeConfigInterface  $config
-     * @param TypeListInterface     $cacheTypeList
-     * @param ValueFactory          $configValueFactory
-     * @param AbstractResource|null $resource
-     * @param AbstractDb|null       $resourceCollection
-     * @param string                $runModelPath
-     * @param array                 $data
+     * @param Context                   $context
+     * @param Registry                  $registry
+     * @param ScopeConfigInterface      $config
+     * @param ReinitableConfigInterface $reinitConfig
+     * @param TypeListInterface         $cacheTypeList
+     * @param ValueFactory              $configValueFactory
+     * @param AbstractResource|null     $resource
+     * @param AbstractDb|null           $resourceCollection
+     * @param string                    $runModelPath
+     * @param array                     $data
      */
     public function __construct(
         Context $context,
@@ -49,11 +55,13 @@ class Cron extends Value
         ScopeConfigInterface $config,
         TypeListInterface $cacheTypeList,
         ValueFactory $configValueFactory,
+        ReinitableConfigInterface $reinitConfig,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         $runModelPath = '',
         array $data = []
     ) {
+        $this->reinitConfig = $reinitConfig;
         $this->configValueFactory = $configValueFactory;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
@@ -83,6 +91,7 @@ class Cron extends Value
             throw new LocalizedException(__('We can\'t save the cron expression.'));
         }
 
+        $this->reinitConfig->reinit();
         return parent::afterSave();
     }
 }

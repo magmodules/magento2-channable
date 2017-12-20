@@ -97,6 +97,6 @@ class ItemStores extends Field
         }
         $html .= '</table>';
 
-        return $html;/**/
+        return $html;
     }
 }

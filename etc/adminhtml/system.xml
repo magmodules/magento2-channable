@@ -463,12 +463,12 @@
                 <field id="shipping_method" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1"
                        showInStore="1">
                     <label>Default Shipping Method</label>
-                    <source_model>Magmodules\Channable\Model\System\Config\Source\ShippingMethods</source_model>
+                    <source_model>Magento\Shipping\Model\Config\Source\Allmethods</source_model>
                 </field>
                 <field id="shipping_method_fallback" translate="label" type="select" sortOrder="22" showInDefault="1" showInWebsite="1"
                        showInStore="1">
                     <label>Fallback for Shipping Method</label>
-                    <source_model>Magmodules\Channable\Model\System\Config\Source\ShippingMethods</source_model>
+                    <source_model>Magento\Shipping\Model\Config\Source\Allmethods</source_model>
                 </field>
                 <field id="heading_customer" translate="label comment" type="text" sortOrder="30" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -505,6 +505,11 @@
                     <label>Create invoice for order</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="channel_orderid" translate="label" type="select" sortOrder="43" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Use Channel Order ID</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Choose if you want to use the channel Order ID as Magento Increment Id.</comment>
+                </field>
                 <field id="heading_log" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0"
                        showInStore="0">
                     <label>Logging</label>
@@ -519,7 +524,7 @@
                 <field id="heading_item_stores" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Webhooks</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>Copy and paste the Webhook URL to configure your Magento Store in your Channable Marketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.</comment>
+                    <comment><![CDATA[Copy and paste the Webhook URL to configure your Magento Store in your Channable Marketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.<br><br>You can simulate a test order by adding /test/{productID} to the end of the Webhook.]]></comment>
                 </field>
                 <field id="item_stores" translate="label" type="text" sortOrder="61" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Stores</label>
@@ -579,7 +584,7 @@
                 </field>
                 <field id="limit" translate="label" type="text" sortOrder="24" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Products per run</label>
-                    <comment>Set a limit on the number of products for each update.</comment>
+                    <comment>Set a limit on the number of products for each update. Recommend value: 50</comment>
                 </field>
                 <field id="log" translate="label" type="select" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Log Calls</label>
@@ -594,6 +599,25 @@
                 <field id="item_stores" translate="label" type="text" sortOrder="41" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\ItemStores</frontend_model>
+                </field>
+            </group>
+        </section>
+        <section id="payment">
+            <group id="channable" translate="label" type="text" sortOrder="999" showInDefault="1">
+                <label>Channable</label>
+                <field id="title" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                </field>
+            </group>
+        </section>
+        <section id="carriers">
+            <group id="channable" translate="label" type="text" sortOrder="999" showInDefault="1">
+                <label>Channable</label>
+                <field id="name" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Name</label>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
                 </field>
             </group>
         </section>

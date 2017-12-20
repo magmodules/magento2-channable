@@ -49,11 +49,15 @@ class DeliveryTime extends AbstractFieldArray
     public function getCountryRenderer()
     {
         if (!$this->countryRenderer) {
-            $this->countryRenderer = $this->getLayout()->createBlock(
-                '\Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer\Countries',
-                '',
-                ['data' => ['is_render_to_js_template' => true]]
-            );
+            try {
+                $this->countryRenderer = $this->getLayout()->createBlock(
+                    '\Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer\Countries',
+                    '',
+                    ['data' => ['is_render_to_js_template' => true]]
+                );
+            } catch (\Exception $e) {
+                $this->countryRenderer = [];
+            }
         }
 
         return $this->countryRenderer;

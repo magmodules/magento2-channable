@@ -9,8 +9,6 @@ namespace Magmodules\Channable\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\Filesystem;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 
@@ -33,10 +31,6 @@ class Feed extends AbstractHelper
      */
     private $storeManager;
     /**
-     * @var Filesystem\Directory\WriteInterface
-     */
-    private $directory;
-    /**
      * @var DateTime
      */
     private $datetime;
@@ -46,21 +40,18 @@ class Feed extends AbstractHelper
      *
      * @param Context               $context
      * @param StoreManagerInterface $storeManager
-     * @param Filesystem            $filesystem
      * @param DateTime              $datetime
      * @param General               $generalHelper
      */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
-        Filesystem $filesystem,
         DateTime $datetime,
         GeneralHelper $generalHelper
     ) {
         $this->generalHelper = $generalHelper;
-        $this->storeManager = $storeManager;
-        $this->directory = $filesystem->getDirectoryWrite(DirectoryList::ROOT);
         $this->datetime = $datetime;
+        $this->storeManager = $storeManager;
         parent::__construct($context);
     }
 

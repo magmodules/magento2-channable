@@ -60,5 +60,7 @@ class ProductSaveAfter implements ObserverInterface
         } catch (\Exception $e) {
             $this->itemHelper->addTolog(self::OBSERVER_TYPE, $e->getMessage());
         }
+
+        return $this;
     }
 }

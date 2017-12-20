@@ -46,11 +46,15 @@ class ExtraFields extends AbstractFieldArray
     public function getAttributeRenderer()
     {
         if (!$this->attributeRenderer) {
-            $this->attributeRenderer = $this->getLayout()->createBlock(
-                '\Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer\Attributes',
-                '',
-                ['data' => ['is_render_to_js_template' => true]]
-            );
+            try {
+                $this->attributeRenderer = $this->getLayout()->createBlock(
+                    '\Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\Renderer\Attributes',
+                    '',
+                    ['data' => ['is_render_to_js_template' => true]]
+                );
+            } catch (\Exception $e) {
+                $this->attributeRenderer = [];
+            }
         }
 
         return $this->attributeRenderer;

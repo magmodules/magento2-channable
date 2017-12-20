@@ -94,6 +94,7 @@ class Products
      * @param $productIds
      *
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
+     * @throws \Magento\Framework\Exception\LocalizedException
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function getCollection($config, $page, $productIds)
@@ -212,6 +213,8 @@ class Products
      * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $collection
      * @param string                                                  $type
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function addFilters($filters, $collection, $type = 'simple')
     {
@@ -323,11 +326,14 @@ class Products
             if (!empty($filterExpr)) {
                 if ($productFilterType == 'parent') {
                     $filterExpr[] = ['attribute' => 'type_id', 'eq' => 'simple'];
+                    /** @noinspection PhpParamsInspection */
                     $collection->addAttributeToFilter($filterExpr, '', 'left');
                 } elseif ($productFilterType == 'simple') {
                     $filterExpr[] = ['attribute' => 'type_id', 'neq' => 'simple'];
+                    /** @noinspection PhpParamsInspection */
                     $collection->addAttributeToFilter($filterExpr, '', 'left');
                 } else {
+                    /** @noinspection PhpParamsInspection */
                     $collection->addAttributeToFilter($filterExpr);
                 }
             }
@@ -339,55 +345,58 @@ class Products
      * @param $config
      *
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getParents($parentRelations, $config)
     {
-        $filters = $config['filters'];
+        if (!empty($parentRelations)) {
+            $filters = $config['filters'];
 
-        if (!$config['flat']) {
-            $productFlatState = $this->productFlatState->create(['isAvailable' => false]);
-        } else {
-            $productFlatState = $this->productFlatState->create(['isAvailable' => true]);
-        }
-
-        $attributes = $this->getAttributes($config['attributes']);
-        $collection = $this->productCollectionFactory
-            ->create(['catalogProductFlatState' => $productFlatState])
-            ->addAttributeToFilter('entity_id', ['in' => array_values($parentRelations)])
-            ->addAttributeToSelect($attributes)
-            ->addMinimalPrice()
-            ->addUrlRewrite();
-
-        if (!empty($filters['category_ids'])) {
-            if (!empty($filters['category_type'])) {
-                $collection->addCategoriesFilter([$filters['category_type'] => $filters['category_ids']]);
+            if (!$config['flat']) {
+                $productFlatState = $this->productFlatState->create(['isAvailable' => false]);
+            } else {
+                $productFlatState = $this->productFlatState->create(['isAvailable' => true]);
             }
-        }
 
-        if (!empty($filters['visibility_parent'])) {
-            $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility_parent']]);
-        }
+            $attributes = $this->getAttributes($config['attributes']);
+            $collection = $this->productCollectionFactory
+                ->create(['catalogProductFlatState' => $productFlatState])
+                ->addAttributeToFilter('entity_id', ['in' => array_values($parentRelations)])
+                ->addAttributeToSelect($attributes)
+                ->addMinimalPrice()
+                ->addUrlRewrite();
 
-        $collection->joinTable(
-            'cataloginventory_stock_item',
-            'product_id=entity_id',
-            $config['inventory']['attributes']
-        );
-
-        if (!empty($filters['stock'])) {
-            $this->stockHelper->addInStockFilterToCollection($collection);
-            if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
-                $collection->setFlag('has_stock_status_filter', true);
+            if (!empty($filters['category_ids'])) {
+                if (!empty($filters['category_type'])) {
+                    $collection->addCategoriesFilter([$filters['category_type'] => $filters['category_ids']]);
+                }
             }
-        } else {
-            if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
-                $collection->setFlag('has_stock_status_filter', false);
-            }
-        }
 
-        $this->addFilters($filters, $collection, 'parent');
-        $collection->getSelect()->group('e.entity_id');
-        return $collection->load();
+            if (!empty($filters['visibility_parent'])) {
+                $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility_parent']]);
+            }
+
+            $collection->joinTable(
+                'cataloginventory_stock_item',
+                'product_id=entity_id',
+                $config['inventory']['attributes']
+            );
+
+            if (!empty($filters['stock'])) {
+                $this->stockHelper->addInStockFilterToCollection($collection);
+                if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
+                    $collection->setFlag('has_stock_status_filter', true);
+                }
+            } else {
+                if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
+                    $collection->setFlag('has_stock_status_filter', false);
+                }
+            }
+
+            $this->addFilters($filters, $collection, 'parent');
+            $collection->getSelect()->group('e.entity_id');
+            return $collection->load();
+        }
     }
 
     /**
