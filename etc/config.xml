@@ -43,6 +43,7 @@
                 <shipping_method>flatrate_flatrate</shipping_method>
                 <shipping_method_fallback>flatrate_flatrate</shipping_method_fallback>
                 <import_customer>0</import_customer>
+                <orderid_prefix>M-</orderid_prefix>
             </order>
             <item>
                 <enable>0</enable>
