@@ -314,7 +314,7 @@ class Order
             $order = $this->orderRepository->get($orderId);
 
             if ($this->orderHelper->getUseChannelOrderId($storeId)) {
-                $newIncrementId = $this->orderHelper->getUniqueIncrementId($data['channel_id']);
+                $newIncrementId = $this->orderHelper->getUniqueIncrementId($data['channel_id'], $storeId);
                 $order->setIncrementId($newIncrementId);
             }
 

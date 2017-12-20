@@ -506,9 +506,17 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="channel_orderid" translate="label" type="select" sortOrder="43" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Use Channel Order ID</label>
+                    <label>Use channel Order ID</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Choose if you want to use the channel Order ID as Magento Increment Id.</comment>
+                    <comment>Choose if you want to use the channel Order ID as Magento Increment ID.</comment>
+                </field>
+                <field id="orderid_prefix" translate="label" type="text" sortOrder="44" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Order ID Prefix</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[<strong>NOTE:</strong> As the Order Increment ID is a unique value, we strongly recommend to add a prefix to the Channable Order ID to make sure the order number is unique. Not setting a prefix can cause issues on creating normal orders. Suggestion; “M-“.]]></comment>
+                    <depends>
+                        <field id="channel_orderid">1</field>
+                    </depends>
                 </field>
                 <field id="heading_log" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0"
                        showInStore="0">

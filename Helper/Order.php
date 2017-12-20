@@ -28,6 +28,7 @@ class Order extends AbstractHelper
     const XPATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
     const XPATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
     const XPATH_USE_CHANNEL_ORDERID = 'magmodules_channable_marketplace/order/channel_orderid';
+    const XPATH_ORDERID_PREFIX = 'magmodules_channable_marketplace/order/orderid_prefix';
     const XPATH_LOG = 'magmodules_channable_marketplace/order/log';
     const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
     const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
@@ -185,13 +186,25 @@ class Order extends AbstractHelper
     }
 
     /**
-     * @param $channalId
+     * @param null $storeId
      *
-     * @return string
+     * @return mixed
      */
-    public function getUniqueIncrementId($channalId)
+    public function getOrderIdPrefix($storeId = null)
     {
-        $newIncrementId = preg_replace("/[^a-zA-Z0-9]+/", "", $channalId);
+        return $this->generalHelper->getStoreValue(self::XPATH_ORDERID_PREFIX, $storeId);
+    }
+
+    /**
+     * @param $channelId
+     * @param $storeId
+     *
+     * @return mixed|null|string|string[]
+     */
+    public function getUniqueIncrementId($channelId, $storeId)
+    {
+        $prefix = $this->getOrderIdPrefix($storeId);
+        $newIncrementId = $prefix . preg_replace("/[^a-zA-Z0-9]+/", "", $channelId);
         $orderCheck = $this->orderCollectionFactory->create()
             ->addFieldToFilter('increment_id', ['eq' => $newIncrementId])
             ->getSize();
