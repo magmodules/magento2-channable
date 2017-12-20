@@ -11,6 +11,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magento\Catalog\Model\ProductFactory;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 
 /**
  * Class Order
@@ -26,6 +27,7 @@ class Order extends AbstractHelper
     const XPATH_INVOICE_ORDER = 'magmodules_channable_marketplace/order/invoice_order';
     const XPATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
     const XPATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
+    const XPATH_USE_CHANNEL_ORDERID = 'magmodules_channable_marketplace/order/channel_orderid';
     const XPATH_LOG = 'magmodules_channable_marketplace/order/log';
     const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
     const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
@@ -42,24 +44,31 @@ class Order extends AbstractHelper
      * @var ProductFactory
      */
     private $product;
+    /**
+     * @var OrderCollectionFactory
+     */
+    private $orderCollectionFactory;
 
     /**
      * Order constructor.
      *
-     * @param Context               $context
-     * @param StoreManagerInterface $storeManager
-     * @param General               $generalHelper
-     * @param ProductFactory        $product
+     * @param Context                $context
+     * @param StoreManagerInterface  $storeManager
+     * @param General                $generalHelper
+     * @param ProductFactory         $product
+     * @param OrderCollectionFactory $orderCollectionFactory
      */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
         GeneralHelper $generalHelper,
-        ProductFactory $product
+        ProductFactory $product,
+        OrderCollectionFactory $orderCollectionFactory
     ) {
         $this->generalHelper = $generalHelper;
         $this->storeManager = $storeManager;
         $this->product = $product;
+        $this->orderCollectionFactory = $orderCollectionFactory;
         parent::__construct($context);
     }
 
@@ -88,7 +97,7 @@ class Order extends AbstractHelper
     {
         $product = $this->product->create()->load($productId);
         if ($product) {
-            $string = '{"channable_id": 112345, "channel_id": 12345678, "channel_name": "Bol", "extra": {"memo": "Channable Test", "comment": "Channable order id: 999999999"}, "price": {"total": ' . $product->getFinalPrice() . ', "currency": "EUR", "shipping": 0, "subtotal": ' . $product->getFinalPrice() . ', "commission": 2.50, "payment_method": "bol", "transaction_fee": 0}, "billing": { "city": "Amsterdam", "state": "", "email": "dontemail@me.net", "address_line_1": "Billing Line 1", "address_line_2": "Billing Line 2", "street": "Donkere Spaarne", "company": "Test company", "zip_code": "5000 ZZ", "last_name": "Channable", "first_name": "Test", "middle_name": "from", "country_code": "NL", "house_number": 100, "house_number_ext": "a", "address_supplement": "Address supplement" }, "customer": { "email": "dontemail@me.net", "phone": "054333333", "gender": "man", "mobile": "", "company": "Test company", "last_name": "From Channable", "first_name": "Test", "middle_name": "" }, "products": [{"id": "' . $product->getEntityId() . '", "ean": "000000000", "price": ' . $product->getFinalPrice() . ', "title": "' . $product->getName() . '", "quantity": 1, "shipping": 0, "commission": 2.50, "reference_code": "00000000", "delivery_period": "2016-07-12+02:00"}], "shipping": {  "city": "Amsterdam", "state": "", "email": "dontemail@me.net", "street": "Shipping Street", "company": "Magmodules", "zip_code": "1000 AA", "last_name": "from Channable", "first_name": "Test order", "middle_name": "", "country_code": "NL", "house_number": 21, "house_number_ext": "B", "address_supplement": "Address Supplement", "address_line_1": "Shipping Line 1", "address_line_2": "Shipping Line 2" }}';
+            $string = '{"channable_id": 123456, "channel_id": 56999, "channel_name": "Bol", "extra": {"memo": "Channable Test", "comment": "Channable order id: 999999999"}, "price": {"total": ' . $product->getFinalPrice() . ', "currency": "EUR", "shipping": 0, "subtotal": ' . $product->getFinalPrice() . ', "commission": 2.50, "payment_method": "bol", "transaction_fee": 0}, "billing": { "city": "Amsterdam", "state": "", "email": "dontemail@me.net", "address_line_1": "Billing Line 1", "address_line_2": "Billing Line 2", "street": "Donkere Spaarne", "company": "Test company", "zip_code": "5000 ZZ", "last_name": "Channable", "first_name": "Test", "middle_name": "from", "country_code": "NL", "house_number": 100, "house_number_ext": "a", "address_supplement": "Address supplement" }, "customer": { "email": "dontemail@me.net", "phone": "054333333", "gender": "man", "mobile": "", "company": "Test company", "last_name": "From Channable", "first_name": "Test", "middle_name": "" }, "products": [{"id": "' . $product->getEntityId() . '", "ean": "000000000", "price": ' . $product->getFinalPrice() . ', "title": "' . $product->getName() . '", "quantity": 1, "shipping": 0, "commission": 2.50, "reference_code": "00000000", "delivery_period": "2016-07-12+02:00"}], "shipping": {  "city": "Amsterdam", "state": "", "email": "dontemail@me.net", "street": "Shipping Street", "company": "Magmodules", "zip_code": "1000 AA", "last_name": "from Channable", "first_name": "Test order", "middle_name": "", "country_code": "NL", "house_number": 21, "house_number_ext": "B", "address_supplement": "Address Supplement", "address_line_1": "Shipping Line 1", "address_line_2": "Shipping Line 2" }}';
             return $string;
         }
         return false;
@@ -163,6 +172,46 @@ class Order extends AbstractHelper
     public function getCustomerGroupId($storeId = null)
     {
         return $this->generalHelper->getStoreValue(self::XPATH_CUSTOMER_GROUP_ID, $storeId);
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return mixed
+     */
+    public function getUseChannelOrderId($storeId = null)
+    {
+        return $this->generalHelper->getStoreValue(self::XPATH_USE_CHANNEL_ORDERID, $storeId);
+    }
+
+    /**
+     * @param $channalId
+     *
+     * @return string
+     */
+    public function getUniqueIncrementId($channalId)
+    {
+        $newIncrementId = preg_replace("/[^a-zA-Z0-9]+/", "", $channalId);
+        $orderCheck = $this->orderCollectionFactory->create()
+            ->addFieldToFilter('increment_id', ['eq' => $newIncrementId])
+            ->getSize();
+
+        if ($orderCheck) {
+            /** @var \Magento\Sales\Model\Order  $lastOrder */
+            $lastOrder = $this->orderCollectionFactory->create()
+                ->addFieldToFilter('increment_id', ['like' => $newIncrementId . '-%'])
+                ->getLastItem();
+
+            if ($lastOrder->getIncrementId()) {
+                $lastIncrement = explode('-', $lastOrder->getIncrementId());
+                $newIncrementId = str_replace('-' . end($lastIncrement), '', $lastOrder->getIncrementId());
+                $newIncrementId .= '-' . (end($lastIncrement) + 1);
+            } else {
+                $newIncrementId .= '-1';
+            }
+        }
+
+        return $newIncrementId;
     }
 
     /**

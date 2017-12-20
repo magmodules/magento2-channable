@@ -39,6 +39,15 @@
             <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\ResourceModel\Item</argument>
         </arguments>
     </virtualType>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="channable_id" xsi:type="string">sales_order.channable_id</item>
+                <item name="channel_id" xsi:type="string">sales_order.channel_id</item>
+                <item name="channel_name" xsi:type="string">sales_order.channel_name</item>
+            </argument>
+        </arguments>
+    </virtualType>
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">

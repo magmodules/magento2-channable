@@ -392,7 +392,7 @@ class Source extends AbstractHelper
             }
         }
 
-        $filters['limit'] = $this->generalHelper->getStoreValue(self::XPATH_LIMIT);
+        $filters['limit'] = preg_replace('/\D/', '', $this->generalHelper->getStoreValue(self::XPATH_LIMIT));
         $filters['stock'] = $this->generalHelper->getStoreValue(self::XPATH_STOCK);
 
         $categoryFilter = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_FILTER);
@@ -461,17 +461,20 @@ class Source extends AbstractHelper
             'label'  => 'visibility',
             'source' => 'visibility',
         ];
-
         $attributes['availability'] = [
             'label'     => 'availability',
-            'source'    => 'is_in_stock',
-            'condition' => [
-                '1:in stock',
-                '0:out of stock'
-            ]
+            'source'    => 'is_in_stock'
         ];
 
         if ($type != 'api') {
+            $attributes['availability'] = [
+                'label'     => 'availability',
+                'source'    => 'is_in_stock',
+                'condition' => [
+                    '1:in stock',
+                    '0:out of stock'
+                ]
+            ];
             $attributes['description'] = [
                 'label'  => 'description',
                 'source' => $this->generalHelper->getStoreValue(self::XPATH_DESCRIPTION_SOURCE),

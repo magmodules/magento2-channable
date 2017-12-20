@@ -107,15 +107,23 @@ class Preview extends Action
             $productId = null;
         }
 
-        if ($feed = $this->generateModel->generateByStore($storeId, $page, $productId)) {
-            $contents = $this->previewHelper->getPreviewData($feed, $storeId);
-            /** @var \Magento\Framework\Controller\Result\Raw $result */
-            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
-            $result->setHeader('content-type', 'text/html');
-            $result->setContents($contents);
-            return $result;
+        try {
+            if ($feed = $this->generateModel->generateByStore($storeId, $page, $productId)) {
+                $contents = $this->previewHelper->getPreviewData($feed, $storeId);
+                /** @var \Magento\Framework\Controller\Result\Raw $result */
+                $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+                $result->setHeader('content-type', 'text/html');
+                $result->setContents($contents);
+                return $result;
+            }
+        } catch (\Exception $e) {
+            $this->messageManager->addExceptionMessage(
+                $e,
+                __('We can\'t generate the feed right now, please check error log')
+            );
+            $this->generalHelper->addTolog('Generate', $e->getMessage());
         }
 
-        return false;
+        $this->_redirect('adminhtml/system_config/edit/section/magmodules_channable');
     }
 }

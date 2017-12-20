@@ -90,6 +90,7 @@ class Generate
      * @param string $type
      *
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function generateByStore($storeId, $page, $productIds = [], $type = 'feed')
     {

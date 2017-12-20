@@ -21,6 +21,7 @@ use Magento\Framework\Filter\FilterManager;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable as ConfigurableResource;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link as GroupedResource;
 use Magento\Bundle\Model\ResourceModel\Selection as BundleResource;
+use Magmodules\Channable\Logger\ChannableLogger;
 
 /**
  * Class Product
@@ -78,6 +79,10 @@ class Product extends AbstractHelper
      * @var CatalogPrice
      */
     private $commonPriceModel;
+    /**
+     * @var ChannableLogger
+     */
+    private $logger;
 
     /**
      * Product constructor.
@@ -95,6 +100,7 @@ class Product extends AbstractHelper
      * @param BundleResource                  $catalogProductTypeBundle
      * @param ConfigurableResource            $catalogProductTypeConfigurable
      * @param CatalogPrice                    $commonPriceModel
+     * @param ChannableLogger                 $logger
      */
     public function __construct(
         Context $context,
@@ -109,7 +115,8 @@ class Product extends AbstractHelper
         GroupedResource $catalogProductTypeGrouped,
         BundleResource $catalogProductTypeBundle,
         ConfigurableResource $catalogProductTypeConfigurable,
-        CatalogPrice $commonPriceModel
+        CatalogPrice $commonPriceModel,
+        ChannableLogger $logger
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
@@ -123,6 +130,7 @@ class Product extends AbstractHelper
         $this->catalogProductTypeGrouped = $catalogProductTypeGrouped;
         $this->catalogProductTypeBundle = $catalogProductTypeBundle;
         $this->commonPriceModel = $commonPriceModel;
+        $this->logger = $logger;
         parent::__construct($context);
     }
 
@@ -170,9 +178,11 @@ class Product extends AbstractHelper
             if (!empty($attribute['static'])) {
                 $value = $attribute['static'];
             }
+
             if (!empty($attribute['config'])) {
                 $value = $config[$attribute['config']];
             }
+
             if (!empty($attribute['condition'])) {
                 $value = $this->getCondition(
                     $attribute['condition'],
@@ -180,6 +190,7 @@ class Product extends AbstractHelper
                     $attribute
                 );
             }
+
             if (!empty($attribute['collection'])) {
                 if ($dataCollection = $this->getAttributeCollection($type, $config, $productData)) {
                     $dataRow = array_merge($dataRow, $dataCollection);
@@ -317,7 +328,7 @@ class Product extends AbstractHelper
             if ($product->getTypeId() == 'configurable') {
                 if (isset($config['filters']['link']['configurable'])) {
                     if ($config['filters']['link']['configurable'] == 2) {
-                        $options = $product->getTypeInstance(true)->getConfigurableAttributesAsArray($product);
+                        $options = $product->getTypeInstance()->getConfigurableAttributesAsArray($product);
                         foreach ($options as $option) {
                             if ($id = $simple->getResource()->getAttributeRawValue(
                                 $simple->getId(),
@@ -447,12 +458,18 @@ class Product extends AbstractHelper
     /**
      * @param \Magento\Catalog\Model\Product $product
      *
-     * @return mixed
+     * @return string
      */
     public function getAttributeSetName($product)
     {
-        $attributeSetRepository = $this->attributeSet->get($product->getAttributeSetId());
-        return $attributeSetRepository->getAttributeSetName();
+        try {
+            $attributeSetRepository = $this->attributeSet->get($product->getAttributeSetId());
+            return $attributeSetRepository->getAttributeSetName();
+        } catch (\Exception $e) {
+            $this->logger->add('getAttributeSetName', $e->getMessage());
+        }
+
+        return false;
     }
 
     /**
@@ -507,29 +524,33 @@ class Product extends AbstractHelper
      */
     public function getValue($attribute, $product)
     {
-        if ($attribute['type'] == 'media_image') {
-            if ($url = $product->getData($attribute['source'])) {
-                return $this->catalogProductMediaConfig->getMediaUrl($url);
-            }
-        }
-        if ($attribute['type'] == 'select') {
-            if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
-                $value = $product->getData($attribute['source']);
-                $data = $attr->getSource()->getOptionText($value);
-                if (!is_array($data)) {
-                    return (string)$data;
+        try {
+            if ($attribute['type'] == 'media_image') {
+                if ($url = $product->getData($attribute['source'])) {
+                    return $this->catalogProductMediaConfig->getMediaUrl($url);
                 }
             }
-        }
-        if ($attribute['type'] == 'multiselect') {
-            if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
-                $value_text = [];
-                $values = explode(',', $product->getData($attribute['source']));
-                foreach ($values as $value) {
-                    $value_text[] = $attr->getSource()->getOptionText($value);
+            if ($attribute['type'] == 'select') {
+                if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
+                    $value = $product->getData($attribute['source']);
+                    $data = $attr->getSource()->getOptionText($value);
+                    if (!is_array($data)) {
+                        return (string)$data;
+                    }
                 }
-                return implode('/', $value_text);
             }
+            if ($attribute['type'] == 'multiselect') {
+                if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
+                    $value_text = [];
+                    $values = explode(',', $product->getData($attribute['source']));
+                    foreach ($values as $value) {
+                        $value_text[] = $attr->getSource()->getOptionText($value);
+                    }
+                    return implode('/', $value_text);
+                }
+            }
+        } catch (\Exception $e) {
+            $this->logger->add('getValue', $e->getMessage());
         }
 
         return $product->getData($attribute['source']);
@@ -679,7 +700,7 @@ class Product extends AbstractHelper
 
                 break;
             case 'bundle':
-                $price = $product->getPrice();
+                $price = $product->getPriceInfo()->getPrice('final_price')->getValue();
                 $finalPrice = $price;
 
                 if (empty($price) && !empty($product['min_price'])) {
@@ -710,14 +731,14 @@ class Product extends AbstractHelper
 
         $prices = [];
         $config = $config['price_config'];
-        $prices[$config['price']] = $this->formatPrice($product, $price, $config);
+        $prices[$config['price']] = $this->processPrice($product, $price, $config);
 
         if (isset($finalPrice) && !empty($config['final_price'])) {
-            $prices[$config['final_price']] = $this->formatPrice($product, $finalPrice, $config);
+            $prices[$config['final_price']] = $this->processPrice($product, $finalPrice, $config);
         }
 
         if (isset($finalPrice) && ($price > $finalPrice) && !empty($config['sales_price'])) {
-            $prices[$config['sales_price']] = $this->formatPrice($product, $finalPrice, $config);
+            $prices[$config['sales_price']] = $this->processPrice($product, $finalPrice, $config);
         }
 
         if (isset($specialPrice) && ($specialPrice == $finalPrice) && !empty($config['sales_date_range'])) {
@@ -730,28 +751,28 @@ class Product extends AbstractHelper
 
         if ($price <= 0) {
             if (!empty($product['min_price'])) {
-                $prices[$config['price']] = $this->formatPrice($product, $product['min_price'], $config);
+                $prices[$config['price']] = $this->processPrice($product, $product['min_price'], $config);
             }
         }
 
         if (!empty($product['min_price']) && !empty($config['min_price'])) {
             if ($finalPrice < $product['min_price']) {
-                $prices[$config['min_price']] = $this->formatPrice($product, $finalPrice, $config);
+                $prices[$config['min_price']] = $this->processPrice($product, $finalPrice, $config);
             } else {
-                $prices[$config['min_price']] = $this->formatPrice($product, $product['min_price'], $config);
+                $prices[$config['min_price']] = $this->processPrice($product, $product['min_price'], $config);
             }
         }
 
         if (!empty($product['max_price']) && !empty($config['max_price'])) {
             if ($price > $product['min_price']) {
-                $prices[$config['max_price']] = $this->formatPrice($product, $price, $config);
+                $prices[$config['max_price']] = $this->processPrice($product, $price, $config);
             } else {
-                $prices[$config['max_price']] = $this->formatPrice($product, $product['max_price'], $config);
+                $prices[$config['max_price']] = $this->processPrice($product, $product['max_price'], $config);
             }
         }
 
         if (!empty($product['total_price']) && !empty($config['total_price'])) {
-            $prices[$config['total_price']] = $this->formatPrice($product, $product['total_price'], $config);
+            $prices[$config['total_price']] = $this->processPrice($product, $product['total_price'], $config);
         }
 
         if (!empty($config['discount_perc']) && isset($prices[$config['sales_price']])) {
@@ -807,7 +828,7 @@ class Product extends AbstractHelper
      *
      * @return float|string
      */
-    public function formatPrice($product, $price, $config)
+    public function processPrice($product, $price, $config)
     {
         if (!empty($config['exchange_rate'])) {
             $price = $price * $config['exchange_rate'];
@@ -817,6 +838,17 @@ class Product extends AbstractHelper
             $price = $this->catalogHelper->getTaxPrice($product, $price, $config['incl_vat']);
         }
 
+        return $this->formatPrice($price, $config);
+    }
+
+    /**
+     * @param $price
+     * @param $config
+     *
+     * @return string
+     */
+    public function formatPrice($price, $config)
+    {
         $decimal = isset($config['decimal_point']) ? $config['decimal_point'] : '.';
         $price = number_format(floatval(str_replace(',', '.', $price)), 2, $decimal, '');
         if (!empty($config['use_currency']) && ($price >= 0)) {
@@ -836,27 +868,32 @@ class Product extends AbstractHelper
     {
         foreach ($attributes as $key => $value) {
             if (!empty($value['source'])) {
-                if (!empty($value['multi'])) {
-                    $multipleSources = explode(',', $value['multi']);
-                    $sourcesArray = [];
-                    foreach ($multipleSources as $source) {
-                        if (strlen($source)) {
-                            $type = $this->eavConfig->getAttribute('catalog_product', $source)->getFrontendInput();
-                            $sourcesArray[] = ['type' => $type, 'source' => $source];
+                try {
+                    if (!empty($value['multi'])) {
+                        $multipleSources = explode(',', $value['multi']);
+                        $sourcesArray = [];
+                        foreach ($multipleSources as $source) {
+                            if (strlen($source)) {
+                                $type = $this->eavConfig->getAttribute('catalog_product', $source)->getFrontendInput();
+                                $sourcesArray[] = ['type' => $type, 'source' => $source];
+                            }
+                        }
+                        if (!empty($sourcesArray)) {
+                            $attributes[$key]['multi'] = $sourcesArray;
+                            if ($attributes[$key]['source'] == 'multi' || $attributes[$key]['source'] == 'conditional') {
+                                unset($attributes[$key]['source']);
+                            }
+                        } else {
+                            unset($attributes[$key]);
                         }
                     }
-                    if (!empty($sourcesArray)) {
-                        $attributes[$key]['multi'] = $sourcesArray;
-                        if ($attributes[$key]['source'] == 'multi' || $attributes[$key]['source'] == 'conditional') {
-                            unset($attributes[$key]['source']);
-                        }
-                    } else {
-                        unset($attributes[$key]);
+                    if (!empty($value['source'])) {
+                        $type = $this->eavConfig->getAttribute('catalog_product', $value['source'])->getFrontendInput();
+                        $attributes[$key]['type'] = $type;
                     }
-                }
-                if (!empty($value['source'])) {
-                    $type = $this->eavConfig->getAttribute('catalog_product', $value['source'])->getFrontendInput();
-                    $attributes[$key]['type'] = $type;
+                } catch (\Exception $e) {
+                    $this->logger->add('addAttributeData', $e->getMessage());
+                    unset($attributes[$key]);
                 }
             }
 
@@ -935,7 +972,7 @@ class Product extends AbstractHelper
         if (in_array('grouped', $filters['relations'])
             && (($visibility == Visibility::VISIBILITY_NOT_VISIBLE) || !in_array('grouped', $filters['nonvisible']))
         ) {
-            $typeId = \Magento\GroupedProduct\Model\ResourceModel\Product\Link::LINK_TYPE_GROUPED;
+            $typeId = GroupedResource::LINK_TYPE_GROUPED;
             $groupedIds = $this->catalogProductTypeGrouped->getParentIdsByChild($productId, $typeId);
             if (!empty($groupedIds)) {
                 $parentIds = array_merge($parentIds, $groupedIds);

@@ -147,7 +147,7 @@ class Item extends AbstractModel
     public function updateAll()
     {
         $this->runProductUpdateCheck();
-        $storeIds = $this->generalHelper->getAllStoreIds();
+        $storeIds = $this->itemHelper->getStoreIds();
         foreach ($storeIds as $storeId) {
             $this->updateByStore($storeId);
         }
@@ -232,6 +232,7 @@ class Item extends AbstractModel
         } else {
             $result = [
                 'status'   => 'error',
+                'msg'      => 'No webhook set for this store',
                 'store_id' => $storeId,
                 'qty'      => 0,
                 'date'     => $this->generalHelper->getGmtDate()
@@ -254,7 +255,7 @@ class Item extends AbstractModel
      *
      * @return array
      */
-    protected function updateCollection($items, $storeId, $config = '')
+    public function updateCollection($items, $storeId, $config = '')
     {
         if (empty($config)) {
             $config = $this->sourceHelper->getConfig($storeId, 'api');
@@ -274,29 +275,35 @@ class Item extends AbstractModel
      *
      * @return array
      */
-    protected function getProductData($items, $config)
+    public function getProductData($items, $config)
     {
         $productData = [];
-        $productIds = $this->itemHelper->getProductIdsFromCollection($items);
-        $products = $this->productModel->getCollection($config, '', $productIds);
-        $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
-        $parents = $this->productModel->getParents($parentRelations, $config);
 
-        foreach ($products as $product) {
-            /** @var \Magento\Catalog\Model\Product $product */
-            $parent = null;
-            if (!empty($parentRelations[$product->getEntityId()])) {
-                foreach ($parentRelations[$product->getEntityId()] as $parentId) {
-                    if ($parent = $parents->getItemById($parentId)) {
-                        continue;
+        try {
+            $productIds = $this->itemHelper->getProductIdsFromCollection($items);
+            $products = $this->productModel->getCollection($config, '', $productIds);
+            $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
+            $parents = $this->productModel->getParents($parentRelations, $config);
+
+            foreach ($products as $product) {
+                /** @var \Magento\Catalog\Model\Product $product */
+                $parent = null;
+                if (!empty($parentRelations[$product->getEntityId()])) {
+                    foreach ($parentRelations[$product->getEntityId()] as $parentId) {
+                        /** @var \Magento\Catalog\Model\Product $parent */
+                        if ($parent = $parents->getItemById($parentId)) {
+                            continue;
+                        }
+                    }
+                }
+                if ($dataRow = $this->productHelper->getDataRow($product, $parent, $config)) {
+                    if ($row = $this->sourceHelper->reformatData($dataRow, $product, $config)) {
+                        $productData[$product->getId()] = $row;
                     }
                 }
             }
-            if ($dataRow = $this->productHelper->getDataRow($product, $parent, $config)) {
-                if ($row = $this->sourceHelper->reformatData($dataRow, $product, $config)) {
-                    $productData[$product->getId()] = $row;
-                }
-            }
+        } catch (\Exception $e) {
+            $this->generalHelper->addTolog('getProductData', $e->getMessage());
         }
 
         return $productData;
@@ -308,7 +315,7 @@ class Item extends AbstractModel
      *
      * @return array
      */
-    protected function getPostData($items, $productData)
+    public function getPostData($items, $productData)
     {
         $postData = [];
         foreach ($items as $item) {
@@ -329,9 +336,9 @@ class Item extends AbstractModel
             $update['id'] = $id;
             $update['title'] = isset($product['title']) ? $product['title'] : $item->getTitle();
             $update['gtin'] = isset($product['ean']) ? $product['ean'] : $item->getGtin();
-            $update['stock'] = isset($product['qty']) ? round($product['qty']) : '0';
-            $update['availability'] = isset($product['is_in_stock']) ? $product['is_in_stock'] : '0';
-            $update['price'] = isset($product['price']) ? $product['price'] : $item->getPrice();
+            $update['stock'] = isset($product['qty']) ? round($product['qty']) : 0;
+            $update['availability'] = isset($product['availability']) ? $product['availability'] : 0;
+            $update['price'] = isset($product['price']) ? $product['price'] : number_format($item->getPrice(), 2);
             $update['discount_price'] = isset($product['discount_price']) ? $product['discount_price'] : '';
 
             $postData[] = $update;
@@ -346,9 +353,8 @@ class Item extends AbstractModel
      *
      * @return mixed
      */
-    protected function postData($postData, $config)
+    public function postData($postData, $config)
     {
-
         $results = [];
         $request = curl_init();
         $httpHeader = ['X-MAGMODULES-TOKEN: ' . $config['api']['token'], 'Content-Type:application/json'];
@@ -387,7 +393,7 @@ class Item extends AbstractModel
     /**
      * @param $postResult
      */
-    protected function updateData($postResult)
+    public function updateData($postResult)
     {
         $itemsResult = $postResult['result'];
         $postData = $postResult['post_data'];

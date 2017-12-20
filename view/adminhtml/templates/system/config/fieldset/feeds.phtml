@@ -7,11 +7,9 @@
 ?>
 <?php if ($feedData = $block->getFeedData()) { ?>
     <div class="mm-block-channable-feeds">
+		<span class="title">Feeds</span>
+		Each store view will have their own Channable feed. Use the auto connect link to connect the feed with your Channable account.
         <table class="mm-block-channable-feed-table">
-            <thead>
-            <span class="title">Feeds</span>
-				Each store view will have their own Channable feed. Use the auto connect link to connect the feed with your Channable account.
-            </thead>
             <tbody>
             <?php foreach ($feedData as $data) { ?>
                 <tr>

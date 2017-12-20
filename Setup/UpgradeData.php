@@ -68,6 +68,7 @@ class UpgradeData implements UpgradeDataInterface
     /**
      * @param ModuleDataSetupInterface $setup
      * @param ModuleContextInterface   $context
+     *
      * @throws \Zend_Db_Exception
      */
     public function upgrade(
@@ -269,6 +270,62 @@ class UpgradeData implements UpgradeDataInterface
             }
         }
 
+        if (version_compare($context->getVersion(), "1.0.12", "<")) {
+            $orderGridTable = $setup->getTable('sales_order_grid');
+            $setup->getConnection()
+                ->addColumn(
+                    $orderGridTable,
+                    'channable_id',
+                    [
+                        'type'     => Table::TYPE_INTEGER,
+                        'default'  => 0,
+                        'nullable' => false,
+                        'comment'  => 'Channable: Order ID'
+                    ]
+                );
+            $setup->getConnection()
+                ->addColumn(
+                    $orderGridTable,
+                    'channel_id',
+                    [
+                        'type'     => Table::TYPE_TEXT,
+                        'length'   => 255,
+                        'nullable' => true,
+                        'comment'  => 'Channable: Channel ID'
+                    ]
+                );
+            $setup->getConnection()
+                ->addColumn(
+                    $orderGridTable,
+                    'channel_name',
+                    [
+                        'type'     => Table::TYPE_TEXT,
+                        'length'   => 255,
+                        'nullable' => true,
+                        'comment'  => 'Channable: Channel Name'
+                    ]
+                );
+
+            $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
+            if ($setup->getConnection()->isTableExists($itemsTable)) {
+                if (!$setup->getConnection()->tableColumnExists($itemsTable, 'parent_id')) {
+                    $setup->getConnection()
+                        ->addColumn(
+                            $itemsTable,
+                            'parent_id',
+                            [
+                                'type'     => Table::TYPE_INTEGER,
+                                'default'  => 0,
+                                'nullable' => false,
+                                'comment'  => 'Parent Id',
+                                'after'    => 'id'
+                            ]
+                        );
+                }
+            }
+
+        }
+
         $setup->endSetup();
     }
 
@@ -330,10 +387,13 @@ class UpgradeData implements UpgradeDataInterface
     {
         $magentoVersion = $this->productMetadata->getVersion();
         if (version_compare($magentoVersion, '2.2.0', '>=')) {
+
+            /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
             $fieldDataConverter = $this->objectManager
                 ->create(\Magento\Framework\DB\FieldDataConverterFactory::class)
                 ->create(\Magento\Framework\DB\DataConverter\SerializedToJson::class);
 
+            /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
             $queryModifier = $this->objectManager
                 ->create(\Magento\Framework\DB\Select\QueryModifierFactory::class)
                 ->create(

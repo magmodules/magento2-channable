@@ -97,14 +97,14 @@
     color: #524a43 !important;
     font-size: 12px;
     text-align: right;
-    margin-right: 0px;
+    margin-right: 0;
     padding-right: 30px;
 }
 @media only screen and (max-width: 1070px) {
     .mm-comment-hover .readmore {
         width: 30px;
-        margin-right: 0px;
-        padding-right: 0px;
+        margin-right: 0;
+        padding-right: 0;
     }
     .mm-comment-hover:before {
         display: none;
@@ -201,27 +201,20 @@
     font-weight: bold;
 }
 #row_magmodules_channable_marketplace_item_item_stores td {
-    padding: 1.3rem 3.5rem 10px 0px;
+    padding: 1.3rem 3.5rem 10px 0;
 }
 #row_magmodules_channable_marketplace_order_item_stores tr {
     border-bottom: 1px solid #e3e3e3;
-    display: inherit;
 }
 #row_magmodules_channable_marketplace_order_item_stores tr:first-child {
     font-weight: bold;
 }
 #row_magmodules_channable_marketplace_order_item_stores td {
-    max-width: 285px;
-    padding: 5px 5px 10px 5px;
+    max-width: 375px;
+    padding-bottom: 10px;
+    padding-top: 10px;
     height: 30px;
-    overflow-wrap: break-word;
     word-wrap: break-word;
-    -ms-word-break: break-all;
-    word-break: break-all;
-    word-break: break-word;
-    -ms-hyphens: auto;
-    -moz-hyphens: auto;
-    -webkit-hyphens: auto;
     hyphens: auto;
     font-size: 12px;
 }

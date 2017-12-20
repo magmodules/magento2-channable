@@ -62,13 +62,13 @@ class MassQue extends Action
                 $item->setNeedsUpdate(1)->save();
             }
         } catch (\Exception $e) {
-            $this->messageManager->addSuccess(__('Something wrong while updating.'));
+            $this->messageManager->addSuccessMessage(__('Something wrong while updating.'));
             /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
             $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
             return $resultRedirect->setPath('*/*/');
         }
 
-        $this->messageManager->addSuccess(__('A total of %1 record(s) have been updated.', $collectionSize));
+        $this->messageManager->addSuccessMessage(__('A total of %1 record(s) have been updated.', $collectionSize));
         /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
         return $resultRedirect->setPath('*/*/');

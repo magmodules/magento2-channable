@@ -46,6 +46,7 @@
             </order>
             <item>
                 <enable>0</enable>
+                <limit>50</limit>
                 <cron>0</cron>
             </item>
         </magmodules_channable_marketplace>

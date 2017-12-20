@@ -15,20 +15,19 @@ use Magento\Quote\Model\QuoteFactory;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\AddressFactory;
-use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Sales\Model\Service\OrderService;
-use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\CartManagementInterface;
-use Magento\Framework\Exception\LocalizedException;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\GroupInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Model\Service\InvoiceService;
 use Magento\Framework\DB\Transaction;
 use Magento\Tax\Model\Calculation as TaxCalculationn;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 use Magento\Shipping\Model\ShippingFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Psr\Log\LoggerInterface;
 
 /**
  * Class Order
@@ -75,9 +74,9 @@ class Order
      */
     private $orderService;
     /**
-     * @var OrderInterface
+     * @var OrderRepositoryInterface
      */
-    private $order;
+    private $orderRepository;
     /**
      * @var InvoiceService
      */
@@ -119,9 +118,9 @@ class Order
      */
     private $checkoutSession;
     /**
-     * @var LoggerInterface
+     * @var SearchCriteriaBuilder
      */
-    private $logger;
+    private $searchCriteriaBuilder;
 
     /**
      * Order constructor.
@@ -135,18 +134,18 @@ class Order
      * @param AddressFactory              $addressFactory
      * @param CustomerRepositoryInterface $customerRepository
      * @param OrderService                $orderService
-     * @param OrderInterface              $order
+     * @param OrderRepositoryInterface    $orderRepository
      * @param InvoiceService              $invoiceService
      * @param Transaction                 $transaction
      * @param CartRepositoryInterface     $cartRepositoryInterface
      * @param CartManagementInterface     $cartManagementInterface
+     * @param SearchCriteriaBuilder       $searchCriteriaBuilder
      * @param TaxCalculationn             $taxCalculation
      * @param RateRequestFactory          $rateRequestFactory
      * @param ShippingFactory             $shippingFactory
      * @param GeneralHelper               $generalHelper
      * @param OrderlHelper                $orderHelper
      * @param CheckoutSession             $checkoutSession
-     * @param LoggerInterface             $logger
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -158,18 +157,18 @@ class Order
         AddressFactory $addressFactory,
         CustomerRepositoryInterface $customerRepository,
         OrderService $orderService,
-        OrderInterface $order,
+        OrderRepositoryInterface $orderRepository,
         InvoiceService $invoiceService,
         Transaction $transaction,
         CartRepositoryInterface $cartRepositoryInterface,
         CartManagementInterface $cartManagementInterface,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
         TaxCalculationn $taxCalculation,
         RateRequestFactory $rateRequestFactory,
         ShippingFactory $shippingFactory,
         GeneralHelper $generalHelper,
         OrderlHelper $orderHelper,
-        CheckoutSession $checkoutSession,
-        LoggerInterface $logger
+        CheckoutSession $checkoutSession
     ) {
         $this->storeManager = $storeManager;
         $this->product = $product;
@@ -180,18 +179,18 @@ class Order
         $this->addressFactory = $addressFactory;
         $this->customerRepository = $customerRepository;
         $this->orderService = $orderService;
-        $this->order = $order;
+        $this->orderRepository = $orderRepository;
         $this->invoiceService = $invoiceService;
         $this->transaction = $transaction;
         $this->cartRepositoryInterface = $cartRepositoryInterface;
         $this->cartManagementInterface = $cartManagementInterface;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->rateRequestFactory = $rateRequestFactory;
         $this->taxCalculation = $taxCalculation;
         $this->generalHelper = $generalHelper;
         $this->orderHelper = $orderHelper;
         $this->shippingFactory = $shippingFactory;
         $this->checkoutSession = $checkoutSession;
-        $this->logger = $logger;
     }
 
     /**
@@ -312,7 +311,12 @@ class Order
             $orderId = $this->cartManagementInterface->placeOrder($cart->getId());
 
             /** @var \Magento\Sales\Model\Order $order */
-            $order = $this->order->load($orderId);
+            $order = $this->orderRepository->get($orderId);
+
+            if ($this->orderHelper->getUseChannelOrderId($storeId)) {
+                $newIncrementId = $this->orderHelper->getUniqueIncrementId($data['channel_id']);
+                $order->setIncrementId($newIncrementId);
+            }
 
             if (!empty($data['channel_name'])) {
                 $orderComment = __(
@@ -323,7 +327,7 @@ class Order
                     $data['channel_id'],
                     $data['price']['commission']
                 );
-                $order->addStatusHistoryComment($orderComment, false);
+                $order->addStatusHistoryComment($orderComment);
                 $order->setChannableId($data['channable_id'])
                     ->setChannelId($data['channel_id'])
                     ->setChannelName($data['channel_name']);
@@ -331,13 +335,13 @@ class Order
                 $order->setChannableId($data['channable_id']);
             }
 
-            $order->save();
+            $this->orderRepository->save($order);
 
             if ($this->orderHelper->getInvoiceOrder($storeId)) {
                 $this->invoiceOrder($order);
             }
-        } catch (LocalizedException $e) {
-            $this->logger->debug($e);
+        } catch (\Exception $e) {
+            $this->generalHelper->addTolog('importOrder: ' . $data['channable_id'], $e->getMessage());
             return $this->jsonRepsonse($e->getMessage(), '', $data['channable_id']);
         }
 
@@ -356,6 +360,7 @@ class Order
     {
         $error = [];
         foreach ($items as $item) {
+            /** @var \Magento\Catalog\Model\Product $product */
             $product = $this->product->create()->load($item['id']);
             if (!$product->getId()) {
                 if (!empty($item['title']) && !empty($item['id'])) {
@@ -408,7 +413,7 @@ class Order
      */
     public function jsonRepsonse($errors = '', $orderId = '', $channableId = '')
     {
-        $response = $this->orderHelper->jsonResponse($errors, $orderId, $channableId);
+        $response = $this->orderHelper->jsonResponse($errors, $orderId);
         if ($this->orderHelper->isLoggingEnabled()) {
             $this->orderHelper->addTolog($channableId, $response);
         }
@@ -523,7 +528,6 @@ class Order
      */
     public function getShippingMethod($cart, $store, $orderTotal, $orderWeight, $itemCount)
     {
-
         $shippingMethod = $this->orderHelper->getShippingMethod($store->getId());
         $shippingMethodFallback = $this->orderHelper->getShippingMethodFallback($store->getId());
 
@@ -567,27 +571,35 @@ class Order
     public function invoiceOrder($order)
     {
         if ($order->canInvoice()) {
-            $invoice = $this->invoiceService->prepareInvoice($order);
-            $invoice->register();
-            $invoice->save();
-            $transactionSave = $this->transaction->addObject($invoice)->addObject($invoice->getOrder());
-            $transactionSave->save();
+            try {
+                $invoice = $this->invoiceService->prepareInvoice($order);
+                $invoice->register();
+                $invoice->save();
+                $transactionSave = $this->transaction->addObject($invoice)->addObject($invoice->getOrder());
+                $transactionSave->save();
 
-            $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING, true);
-            $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
-            $order->save();
+                $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
+                $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
+                $this->orderRepository->save($order);
+            } catch (\Exception $e) {
+                $this->generalHelper->addTolog('invoiceOrder: ' . $order->getIncrementId(), $e->getMessage());
+            }
         }
     }
 
     /**
-     * @param $id
+     * @param $incrementId
      *
      * @return array
      */
-    public function getOrderById($id)
+    public function getOrderById($incrementId)
     {
+        $searchCriteria = $this->searchCriteriaBuilder->addFilter('increment_id', $incrementId, 'eq')->create();
+        $orderList = $this->orderRepository->getList($searchCriteria);
+
         /** @var \Magento\Sales\Model\Order $order */
-        $order = $this->order->loadByIncrementId($id);
+        $order = $orderList->getFirstItem();
+
         if (!$order->getId()) {
             return $this->jsonRepsonse('No order found');
         }

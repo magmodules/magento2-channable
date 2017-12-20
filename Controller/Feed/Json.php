@@ -90,10 +90,17 @@ class Json extends Action
             $productId = null;
         }
 
-        if ($data = $this->generateModel->generateByStore($storeId, $page, $productId)) {
+        try {
+            if ($data = $this->generateModel->generateByStore($storeId, $page, $productId)) {
+                $result = $this->resultJsonFactory->create();
+                return $result->setData($data);
+            }
+        } catch (\Exception $e) {
+            $this->generalHelper->addTolog('Generate', $e->getMessage());
             $result = $this->resultJsonFactory->create();
-
-            return $result->setData($data);
+            return $result->setData(json_encode($e->getMessage()));
         }
+
+        return '';
     }
 }

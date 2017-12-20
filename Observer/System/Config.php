@@ -40,7 +40,7 @@ class Config implements ObserverInterface
     public function execute(Observer $observer)
     {
         $section = $observer->getRequest()->getParam('section');
-        if ($section == 'magmodules_cannable') {
+        if ($section == 'magmodules_channable') {
             $this->configHelper->run();
         }
     }

@@ -82,9 +82,7 @@ class Status extends Action
             $response = $this->orderHelper->jsonResponse('Extension not enabled!');
         }
 
-        if (!empty($response)) {
-            $result = $this->resultJsonFactory->create();
-            return $result->setData($response);
-        }
+        $result = $this->resultJsonFactory->create();
+        return $result->setData($response);
     }
 }
