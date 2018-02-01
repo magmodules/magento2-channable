@@ -40,7 +40,7 @@
                     <depends>
                         <field id="enable">1</field>
                     </depends>
-                    <comment>Limit the amount of product exported to Channable per page. This setting wil not limit the total products sent to Channable but will lower the load.</comment>
+                    <comment>Limit the amount of product exported to Channable per page. This setting will not limit the total products sent to Channable but will lower the load. The maximum allowed by Channable: 50.</comment>
                 </field>
             </group>
             <group id="data" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"

@@ -316,6 +316,8 @@ class Product extends AbstractHelper
         $url = null;
         if ($requestPath = $product->getRequestPath()) {
             $url = $config['base_url'] . $requestPath;
+        } else {
+            $url = $config['base_url'] . 'index.php/catalog/product/view/id/' . $product->getEntityId();
         }
         if (!empty($config['utm_code'])) {
             if ($config['utm_code'][0] != '?') {
@@ -345,10 +347,6 @@ class Product extends AbstractHelper
             if (!empty($urlExtra) && !empty($url)) {
                 $url = $url . '#' . implode('&', $urlExtra);
             }
-        }
-
-        if (empty($url)) {
-            $url = $config['base_url'] . 'index.php/catalog/product/view/id/' . $product->getEntityId();
         }
 
         return $url;
