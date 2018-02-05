@@ -698,16 +698,21 @@ class Product extends AbstractHelper
 
                 break;
             case 'bundle':
-                $price = $product->getPriceInfo()->getPrice('final_price')->getValue();
-                $finalPrice = $price;
-
-                if (empty($price) && !empty($product['min_price'])) {
-                    $price = $product['min_price'];
+                $price = $product->getFinalPrice();
+                if($price == '0.0000') {
+                    $product['min_price'] = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getBaseAmount();
+                    $product['max_price'] = $product->getPriceInfo()->getPrice('final_price')->getMaximalPrice()->getBaseAmount();
+                    $price = $product->getPriceInfo()->getPrice('regular_price')->getMinimalPrice()->getBaseAmount();
+                    $finalPrice = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getBaseAmount();
+                } else {
                     $finalPrice = $price;
-                }
-
-                if (!empty($product['special_price'])) {
-                    $finalPrice = round(($price * $product['special_price'] / 100), 2);
+                    if (empty($price) && !empty($product['min_price'])) {
+                        $price = $product['min_price'];
+                        $finalPrice = $price;
+                    }
+                    if (!empty($product['special_price'])) {
+                        $finalPrice = round(($price * $product['special_price'] / 100), 2);
+                    }
                 }
 
                 break;
@@ -754,7 +759,7 @@ class Product extends AbstractHelper
         }
 
         if (!empty($product['min_price']) && !empty($config['min_price'])) {
-            if ($finalPrice < $product['min_price']) {
+            if (($finalPrice > 0) && $finalPrice < $product['min_price']) {
                 $prices[$config['min_price']] = $this->processPrice($product, $finalPrice, $config);
             } else {
                 $prices[$config['min_price']] = $this->processPrice($product, $product['min_price'], $config);
@@ -762,11 +767,7 @@ class Product extends AbstractHelper
         }
 
         if (!empty($product['max_price']) && !empty($config['max_price'])) {
-            if ($price > $product['min_price']) {
-                $prices[$config['max_price']] = $this->processPrice($product, $price, $config);
-            } else {
-                $prices[$config['max_price']] = $this->processPrice($product, $product['max_price'], $config);
-            }
+            $prices[$config['max_price']] = $this->processPrice($product, $product['max_price'], $config);
         }
 
         if (!empty($product['total_price']) && !empty($config['total_price'])) {
