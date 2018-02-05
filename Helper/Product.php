@@ -281,6 +281,9 @@ class Product extends AbstractHelper
             case 'qty_increments':
                 $value = $this->getStockValue($type, $product, $config['inventory']);
                 break;
+            case 'availability':
+                $value = $this->getAvailability($attribute, $product);
+                break;
             default:
                 $value = $this->getValue($attribute, $product);
                 break;
@@ -301,6 +304,21 @@ class Product extends AbstractHelper
             }
         }
         return $value;
+    }
+
+    /**
+     * @param $attribute
+     * @param $product
+     *
+     * @return int|string
+     */
+    public function getAvailability($attribute, $product)
+    {
+        if ($product->getTypeId() == 'bundle') {
+            return (int)$product->getIsSalable();
+        }
+
+        return $this->getValue($attribute, $product);
     }
 
     /**
@@ -628,6 +646,9 @@ class Product extends AbstractHelper
     {
         $data = null;
         $value = $product->getData($attribute['source']);
+        if ($attribute['source'] == 'is_in_stock') {
+            $value = $this->getAvailability($attribute, $product);
+		}
 
         foreach ($conditions as $condition) {
             $ex = explode(':', $condition);
