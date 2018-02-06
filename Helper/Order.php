@@ -217,7 +217,7 @@ class Order extends AbstractHelper
 
             if ($lastOrder->getIncrementId()) {
                 $lastIncrement = explode('-', $lastOrder->getIncrementId());
-                $newIncrementId = str_replace('-' . end($lastIncrement), '', $lastOrder->getIncrementId());
+                $newIncrementId = substr($lastOrder->getIncrementId(), 0, -(strlen(end($lastIncrement)) + 1));
                 $newIncrementId .= '-' . (end($lastIncrement) + 1);
             } else {
                 $newIncrementId .= '-1';

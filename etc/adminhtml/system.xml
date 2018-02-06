@@ -40,7 +40,7 @@
                     <depends>
                         <field id="enable">1</field>
                     </depends>
-                    <comment>Limit the amount of product exported to Channable per page. This setting wil not limit the total products sent to Channable but will lower the load.</comment>
+                    <comment>Limits the amount of product Channable will import per run. This setting will not limit the total products sent to Channable but will lower the load.</comment>
                 </field>
             </group>
             <group id="data" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
@@ -57,7 +57,7 @@
                     <label>Name</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
                     <comment>Select the attribute associate with the product name. Suggested field: Product Name</comment>
-               </field>
+                </field>
                 <field id="description_attribute" translate="label comment" type="select" sortOrder="3" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Description</label>
@@ -391,7 +391,7 @@
                     <depends>
                         <field id="category_enabled">1</field>
                     </depends>
-                    <comment><![CDATA[Include or Exclude Products based on the Category.<br><strong><br>Note for Include:</strong><br>Simple products within a bundled, configurable or grouped product are treated as own entities; these should also be present in the included categories.<br><br><strong>Note for Exclude: </strong><br>Exclude the products from these categories. Products that are available within different categories need to be excluded from all of the categories they are assigned to.]]></comment>
+                    <comment><![CDATA[Include or Exclude products based on the category.<br><strong><br>Note for Include:</strong><br>Simple products within a bundled, configurable or grouped product are treated as own entities, so these should also be present in the included categories. Check the &quot;Products in category&quot; tab in the category manager to make sure the category contains the products which you want to be included.<br><br><strong>Note for Exclude: </strong><br>Exclude the products from these categories. Products that are available within different categories need to be excluded from all of the categories they are assigned to. Check the &quot;Products in category&quot; tab in the category manager to make sure the category contains the products which you want to be excluded.]]></comment>
                 </field>
                 <field id="heading_stock" translate="label comment" type="text" sortOrder="20" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -592,12 +592,12 @@
                 </field>
                 <field id="limit" translate="label" type="text" sortOrder="24" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Products per run</label>
-                    <comment>Set a limit on the number of products for each update. Recommend value: 50</comment>
+                    <comment><![CDATA[Set a limit on the number of products for each update with a maximum value of <strong>50</strong.>]]></comment>
                 </field>
                 <field id="log" translate="label" type="select" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Log Calls</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Write all the calls and updates to the Channable log file located in /var/log/channable.log</comment>
+                    <comment>Write all the calls and updates to the Channable log file located in /var/log/channable.log.</comment>
                 </field>
                 <field id="heading_item_stores" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enabled Stores</label>

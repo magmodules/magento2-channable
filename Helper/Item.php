@@ -154,8 +154,8 @@ class Item extends AbstractHelper
         $config['webhook'] = $this->generalHelper->getStoreValue(self::XPATH_WEBHOOK, $storeId);
         $config['log'] = $this->isLoggingEnabled();
 
-        if ($config['limit'] > 500 || empty($config['limit'])) {
-            $config['limit'] = 500;
+        if ($config['limit'] > 50 || empty($config['limit'])) {
+            $config['limit'] = 50;
         }
 
         return $config;
