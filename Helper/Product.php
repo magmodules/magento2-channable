@@ -307,21 +307,6 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $attribute
-     * @param $product
-     *
-     * @return int|string
-     */
-    public function getAvailability($attribute, $product)
-    {
-        if ($product->getTypeId() == 'bundle') {
-            return (int)$product->getIsSalable();
-        }
-
-        return $this->getValue($attribute, $product);
-    }
-
-    /**
      * @param \Magento\Catalog\Model\Product $product
      * @param \Magento\Catalog\Model\Product $simple
      * @param                                $config
@@ -533,6 +518,21 @@ class Product extends AbstractHelper
     }
 
     /**
+     * @param $attribute
+     * @param $product
+     *
+     * @return int|string
+     */
+    public function getAvailability($attribute, $product)
+    {
+        if ($product->getTypeId() == 'bundle') {
+            return (int)$product->getIsSalable();
+        }
+
+        return $this->getValue($attribute, $product);
+    }
+
+    /**
      * @param                                $attribute
      * @param \Magento\Catalog\Model\Product $product
      *
@@ -648,7 +648,7 @@ class Product extends AbstractHelper
         $value = $product->getData($attribute['source']);
         if ($attribute['source'] == 'is_in_stock') {
             $value = $this->getAvailability($attribute, $product);
-		}
+        }
 
         foreach ($conditions as $condition) {
             $ex = explode(':', $condition);
@@ -719,14 +719,14 @@ class Product extends AbstractHelper
 
                 break;
             case 'bundle':
-                $price = $product->getFinalPrice();
-                if($price == '0.0000') {
+                $finalPrice = $product->getFinalPrice();
+                if ($finalPrice == '0.0000') {
                     $product['min_price'] = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getBaseAmount();
                     $product['max_price'] = $product->getPriceInfo()->getPrice('final_price')->getMaximalPrice()->getBaseAmount();
                     $price = $product->getPriceInfo()->getPrice('regular_price')->getMinimalPrice()->getBaseAmount();
                     $finalPrice = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getBaseAmount();
                 } else {
-                    $finalPrice = $price;
+                    $price = isset($product['price']) ? $product['price'] : null;
                     if (empty($price) && !empty($product['min_price'])) {
                         $price = $product['min_price'];
                         $finalPrice = $price;
@@ -735,7 +735,6 @@ class Product extends AbstractHelper
                         $finalPrice = round(($price * $product['special_price'] / 100), 2);
                     }
                 }
-
                 break;
             default:
                 $price = $product->getPrice();
@@ -979,9 +978,9 @@ class Product extends AbstractHelper
 
         if (in_array('configurable', $filters['relations'])
             && (($visibility == Visibility::VISIBILITY_NOT_VISIBLE) || !in_array(
-                'configurable',
-                $filters['nonvisible']
-            ))
+                    'configurable',
+                    $filters['nonvisible']
+                ))
         ) {
             $configurableIds = $this->catalogProductTypeConfigurable->getParentIdsByChild($productId);
             if (!empty($configurableIds)) {
