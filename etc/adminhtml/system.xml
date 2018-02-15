@@ -236,7 +236,7 @@
                        showInStore="1">
                     <label>Use Grouped Products</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\Option</source_model>
-                    <comment><![CDATA[<strong>Recommended:</strong> Recommended: Only Grouped Product. Selecting this option will export the bundle product by itself to Channable.]]></comment>
+                    <comment><![CDATA[<strong>Recommended:</strong> Only Grouped Product. Selecting this option will export the bundle product by itself to Channable.]]></comment>
                 </field>
                 <field id="grouped_link" translate="label comment" type="select" sortOrder="42" showInDefault="1" showInWebsite="1"
                        showInStore="1">
