@@ -633,32 +633,32 @@ class Source extends AbstractHelper
     {
         $invAtt = [];
         $enabled = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY);
-        if (!$enabled) {
-            $invAtt['attributes'][] = 'is_in_stock';
-            return $invAtt;
-        }
-        if ($fields = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY_DATA)) {
-            $invAtt['attributes'] = explode(',', $fields);
-            $invAtt['attributes'][] = 'is_in_stock';
-            if (in_array('manage_stock', $invAtt['attributes'])) {
-                $invAtt['attributes'][] = 'use_config_manage_stock';
-                $invAtt['config_manage_stock'] = $this->generalHelper->getStoreValue(self::XPATH_MANAGE_STOCK);
-            }
-            if (in_array('qty_increments', $invAtt['attributes'])) {
-                $invAtt['attributes'][] = 'use_config_qty_increments';
-                $invAtt['attributes'][] = 'enable_qty_increments';
-                $invAtt['attributes'][] = 'use_config_enable_qty_inc';
-                $invAtt['config_qty_increments'] = $this->generalHelper->getStoreValue(self::XPATH_QTY_INCREMENTS);
-                $invAtt['config_enable_qty_inc'] = $this->generalHelper->getStoreValue(self::XPATH_QTY_INC_ENABLED);
-            }
-            if (in_array('min_sale_qty', $invAtt['attributes'])) {
-                $invAtt['attributes'][] = 'use_config_min_sale_qty';
-                $invAtt['config_min_sale_qty'] = $this->generalHelper->getStoreValue(self::XPATH_MIN_SALES_QTY);
-            }
+        $fields = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY_DATA);
 
+        if (!$enabled || empty($fields)) {
+            $invAtt['attributes'][] = 'is_in_stock';
             return $invAtt;
         }
-        return [];
+
+        $invAtt['attributes'] = explode(',', $fields);
+        $invAtt['attributes'][] = 'is_in_stock';
+        if (in_array('manage_stock', $invAtt['attributes'])) {
+            $invAtt['attributes'][] = 'use_config_manage_stock';
+            $invAtt['config_manage_stock'] = $this->generalHelper->getStoreValue(self::XPATH_MANAGE_STOCK);
+        }
+        if (in_array('qty_increments', $invAtt['attributes'])) {
+            $invAtt['attributes'][] = 'use_config_qty_increments';
+            $invAtt['attributes'][] = 'enable_qty_increments';
+            $invAtt['attributes'][] = 'use_config_enable_qty_inc';
+            $invAtt['config_qty_increments'] = $this->generalHelper->getStoreValue(self::XPATH_QTY_INCREMENTS);
+            $invAtt['config_enable_qty_inc'] = $this->generalHelper->getStoreValue(self::XPATH_QTY_INC_ENABLED);
+        }
+        if (in_array('min_sale_qty', $invAtt['attributes'])) {
+            $invAtt['attributes'][] = 'use_config_min_sale_qty';
+            $invAtt['config_min_sale_qty'] = $this->generalHelper->getStoreValue(self::XPATH_MIN_SALES_QTY);
+        }
+
+        return $invAtt;
     }
 
     /**
