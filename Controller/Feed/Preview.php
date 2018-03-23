@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2017 Magmodules.eu. All rights reserved.
+ * Copyright © 2018 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -117,13 +117,11 @@ class Preview extends Action
                 return $result;
             }
         } catch (\Exception $e) {
-            $this->messageManager->addExceptionMessage(
-                $e,
-                __('We can\'t generate the feed right now, please check error log')
-            );
             $this->generalHelper->addTolog('Generate', $e->getMessage());
+            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+            $result->setHeader('content-type', 'text/html');
+            $result->setContents('We can\'t generate the feed right now, please check error log');
+            return $result;
         }
-
-        $this->_redirect('adminhtml/system_config/edit/section/magmodules_channable');
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2017 Magmodules.eu. All rights reserved.
+ * Copyright © 2018 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -138,11 +138,13 @@ class Products
             }
         }
 
-        $collection->joinTable(
-            'cataloginventory_stock_item',
-            'product_id=entity_id',
-            $config['inventory']['attributes']
-        );
+        if (!empty($config['inventory']['attributes'])) {
+            $collection->joinTable(
+                'cataloginventory_stock_item',
+                'product_id=entity_id',
+                $config['inventory']['attributes']
+            );
+        }
 
         if (!empty($filters['stock'])) {
             $this->stockHelper->addInStockFilterToCollection($collection);
@@ -376,11 +378,13 @@ class Products
                 $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility_parent']]);
             }
 
-            $collection->joinTable(
-                'cataloginventory_stock_item',
-                'product_id=entity_id',
-                $config['inventory']['attributes']
-            );
+            if (!empty($config['inventory']['attributes'])) {
+                $collection->joinTable(
+                    'cataloginventory_stock_item',
+                    'product_id=entity_id',
+                    $config['inventory']['attributes']
+                );
+            }
 
             if (!empty($filters['stock'])) {
                 $this->stockHelper->addInStockFilterToCollection($collection);
