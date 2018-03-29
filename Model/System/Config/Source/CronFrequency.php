@@ -51,6 +51,18 @@ class CronFrequency implements ArrayInterface
                     'label' => __('Every hour')
                 ],
                 [
+                    'value' => '*/30 * * * *',
+                    'label' => __('Every 30 minutes')
+                ],
+                [
+                    'value' => '*/15 * * * *',
+                    'label' => __('Every 15 minutes')
+                ],
+                [
+                    'value' => '*/5 * * * *',
+                    'label' => __('Every 5 minutes')
+                ],
+                [
                     'value' => 'custom',
                     'label' => __('Custom')
                 ],

@@ -25,6 +25,7 @@ class Order extends AbstractHelper
     const XPATH_IMPORT_CUSTOMER = 'magmodules_channable_marketplace/order/import_customer';
     const XPATH_CUSTOMER_GROUP_ID = 'magmodules_channable_marketplace/order/customers_group';
     const XPATH_INVOICE_ORDER = 'magmodules_channable_marketplace/order/invoice_order';
+    const XPATH_SEPERATE_HOUSENUMBER = 'magmodules_channable_marketplace/order/seperate_housenumber';
     const XPATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
     const XPATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
     const XPATH_USE_CHANNEL_ORDERID = 'magmodules_channable_marketplace/order/channel_orderid';
@@ -33,6 +34,7 @@ class Order extends AbstractHelper
     const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
     const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
     const XPATH_SHIPPING_TAX_CLASS = 'tax/classes/shipping_tax_class';
+    const XPATH_CUSTOMER_STREET_LINES = 'customer/address/street_lines';
     /**
      * @var General
      */
@@ -193,6 +195,26 @@ class Order extends AbstractHelper
     public function getOrderIdPrefix($storeId = null)
     {
         return $this->generalHelper->getStoreValue(self::XPATH_ORDERID_PREFIX, $storeId);
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return int
+     */
+    public function getSeperateHousenumber($storeId = null)
+    {
+        $seprate = $this->generalHelper->getStoreValue(self::XPATH_SEPERATE_HOUSENUMBER, $storeId);
+        if (!$seprate) {
+            return 0;
+        }
+
+        $streetLines = $this->generalHelper->getStoreValue(self::XPATH_CUSTOMER_STREET_LINES, $storeId);
+        if ($streetLines > 2) {
+            return 2;
+        }
+
+        return 1;
     }
 
     /**
