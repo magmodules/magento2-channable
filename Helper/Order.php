@@ -209,8 +209,8 @@ class Order extends AbstractHelper
             return 0;
         }
 
-        $streeLines = $this->generalHelper->getStoreValue(self::XPATH_CUSTOMER_STREET_LINES, $storeId);
-        if ($streeLines > 2) {
+        $streetLines = $this->generalHelper->getStoreValue(self::XPATH_CUSTOMER_STREET_LINES, $storeId);
+        if ($streetLines > 2) {
             return 2;
         }
 
