@@ -204,6 +204,7 @@ class Order
         $store = $this->storeManager->getStore($storeId);
         $websiteId = $store->getWebsiteId();
         $importCustomer = $this->orderHelper->getImportCustomer($storeId);
+        $seprateHousenumber = $this->orderHelper->getSeperateHousenumber($storeId);
 
         if ($errors = $this->checkItems($data['products'])) {
             return $this->jsonRepsonse($errors, '', $data['channable_id']);
@@ -245,14 +246,14 @@ class Order
                     ->setCustomerGroupId(GroupInterface::NOT_LOGGED_IN_ID);
             }
 
-            $billingAddress = $this->getAddressData('billing', $data, $customerId, $importCustomer);
+            $billingAddress = $this->getAddressData('billing', $data, $customerId, $importCustomer, $seprateHousenumber);
             if (!empty($billingAddress['errors'])) {
                 return $this->jsonRepsonse($billingAddress['errors'], '', $data['channable_id']);
             } else {
                 $cart->getBillingAddress()->addData($billingAddress);
             }
 
-            $shippingAddress = $this->getAddressData('shipping', $data, $customerId, $importCustomer);
+            $shippingAddress = $this->getAddressData('shipping', $data, $customerId, $importCustomer, $seprateHousenumber);
             if (!empty($shippingAddress['errors'])) {
                 return $this->jsonRepsonse($shippingAddress['errors'], '', $data['channable_id']);
             } else {
@@ -426,13 +427,12 @@ class Order
      * @param        $order
      * @param string $customerId
      * @param bool   $importCustomer
+     * @param int    $seprateHousenumber
      *
      * @return array
      */
-    public function getAddressData($type, $order, $customerId = '', $importCustomer = false)
+    public function getAddressData($type, $order, $customerId = '', $importCustomer = false, $seprateHousenumber = 0)
     {
-        $seprate = 0;
-
         if ($type == 'billing') {
             $address = $order['billing'];
         } else {
@@ -447,15 +447,13 @@ class Order
             $telephone = $order['customer']['mobile'];
         }
 
-        $street = $this->getStreet($address, $seprate);
-
         $addressData = [
             'customer_id' => $customerId,
             'company'     => $address['company'],
             'firstname'   => $address['first_name'],
             'middlename'  => $address['middle_name'],
             'lastname'    => $address['last_name'],
-            'street'      => $street,
+            'street'      => $this->getStreet($address, $seprateHousenumber),
             'city'        => $address['city'],
             'country_id'  => $address['country_code'],
             'postcode'    => $address['zip_code'],
@@ -502,7 +500,12 @@ class Order
         $street = [];
         if (!empty($seperateHousnumber)) {
             $street[] = $address['street'];
-            $street[] = trim($address['house_number'] . ' ' . $address['house_number_ext']);
+            if ($seperateHousnumber == 1) {
+                $street[] = trim($address['house_number'] . ' ' . $address['house_number_ext']);
+            } else {
+                $street[] = $address['house_number'];
+                $street[] = $address['house_number_ext'];
+            }
             $street = implode("\n", $street);
         } else {
             if (!empty($address['address_line_1'])) {
