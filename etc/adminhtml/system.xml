@@ -283,65 +283,7 @@
                     </depends>
                 </field>
             </group>
-            <group id="advanced" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1"
-                   showInStore="1">
-                <label>Advanced Options</label>
-                <comment>We recommend adding as many attributes as possible to Channable as this will improve the quality of your data. In this section you can add extra fields, set the right inventory data and configure the fallback on your configurable &amp; grouped and bundled products.</comment>
-                <field id="heading_extra" translate="label comment" type="text" sortOrder="1" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Extra Fields</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>You can add custom fields with your attributes to enrich your data in Channable. Click the Add button to add an attribute with a custom fieldname as reference.</comment>
-                </field>
-                <field id="extra_fields" translate="label" type="select" sortOrder="2" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Extra Fields</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\ExtraFields</frontend_model>
-                    <backend_model>Magmodules\Channable\Model\Config\Backend\Serialized\ExtraFields</backend_model>
-                </field>
-                <field id="heading_stock" translate="label comment" type="text" sortOrder="3" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Inventory Data</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>Select the inventory data that you want to export to Channable using the multi-select below.</comment>
-                </field>
-                <field id="inventory" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1"
-                       showInStore="1">
-                    <label>Enabled</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="inventory_fields" translate="label" type="multiselect" sortOrder="5" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Fields</label>
-                    <source_model>Magmodules\Channable\Model\System\Config\Source\Inventory</source_model>
-                    <depends>
-                        <field id="inventory">1</field>
-                    </depends>
-                </field>
-                <field id="heading_delivery" translate="label comment" type="text" sortOrder="30" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Delivery Time</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>Set the delivery time for your products using the table below or use your own attribute in the extra field table.</comment>
-                </field>
-                <field id="delivery_time" translate="label" type="select" sortOrder="31" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Delivery Time</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\DeliveryTime</frontend_model>
-                    <backend_model>Magmodules\Channable\Model\Config\Backend\Serialized\DeliveryTime</backend_model>
-                </field>
-                <field id="heading_tax" translate="label comment" type="text" sortOrder="40" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Tax</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                </field>
-                <field id="tax" translate="label" type="select" sortOrder="41" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Tax calculation</label>
-                    <source_model>Magmodules\Channable\Model\System\Config\Source\Tax</source_model>
-                </field>
-            </group>
-            <group id="filter" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1"
+            <group id="filter" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1"
                    showInStore="1">
                 <label>Filter Options</label>
                 <comment>This option allows you to include/exclude products from the Channable feed based on the product visibility or stock information.</comment>
@@ -424,7 +366,80 @@
                     </depends>
                 </field>
             </group>
-            <group id="feeds" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1"
+            <group id="advanced" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Advanced Options</label>
+                <comment>We recommend adding as many attributes as possible to Channable as this will improve the quality of your data. In this section you can add extra fields, set the right inventory data and configure the fallback on your configurable &amp; grouped and bundled products.</comment>
+                <field id="heading_extra" translate="label comment" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Extra Fields</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment>You can add custom fields with your attributes to enrich your data in Channable. Click the Add button to add an attribute with a custom fieldname as reference.</comment>
+                </field>
+                <field id="extra_fields" translate="label" type="select" sortOrder="2" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Extra Fields</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\ExtraFields</frontend_model>
+                    <backend_model>Magmodules\Channable\Model\Config\Backend\Serialized\ExtraFields</backend_model>
+                </field>
+                <field id="heading_stock" translate="label comment" type="text" sortOrder="3" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Inventory Data</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment>Select the inventory data that you want to export to Channable using the multi-select below.</comment>
+                </field>
+                <field id="inventory" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="inventory_fields" translate="label" type="multiselect" sortOrder="5" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Fields</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Inventory</source_model>
+                    <depends>
+                        <field id="inventory">1</field>
+                    </depends>
+                </field>
+                <field id="heading_delivery" translate="label comment" type="text" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Delivery Time</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment>Set the delivery time for your products using the table below or use your own attribute in the extra field table.</comment>
+                </field>
+                <field id="delivery_time" translate="label" type="select" sortOrder="31" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Delivery Time</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\DeliveryTime</frontend_model>
+                    <backend_model>Magmodules\Channable\Model\Config\Backend\Serialized\DeliveryTime</backend_model>
+                </field>
+                <field id="heading_tax" translate="label comment" type="text" sortOrder="40" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Tax</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                </field>
+                <field id="tax" translate="label" type="select" sortOrder="41" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Tax calculation</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\Tax</source_model>
+                </field>
+                <field id="heading_selftest" translate="label comment" type="text" sortOrder="42" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Selftest</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment>Perform a self test to check your setup on errors.</comment>
+                </field>
+                <field id="selftest_checker" translate="label" type="button" sortOrder="43" showInDefault="1"
+                       showInWebsite="0" showInStore="1">
+                    <label>Test</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Feed</frontend_model>
+                </field>
+                <field id="selftest_result" translate="label" type="text" sortOrder="44" showInDefault="1"
+                       showInWebsite="0" showInStore="1">
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Result</frontend_model>
+                </field>
+            </group>
+            <group id="feeds" translate="label" type="text" sortOrder="45" showInDefault="1" showInWebsite="1"
                    showInStore="1">
                 <label>Channable - Feeds</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Feeds</frontend_model>
@@ -607,6 +622,19 @@
                 <field id="item_stores" translate="label" type="text" sortOrder="41" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\ItemStores</frontend_model>
+                </field>
+            </group>
+            <group id="selftest" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Selftest</label>
+                <comment>Perform a self test to check your setup on errors.</comment>
+                <field id="selftest_checker" translate="label" type="button" sortOrder="1" showInDefault="1"
+                       showInWebsite="0" showInStore="1">
+                    <label>Test</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Api</frontend_model>
+                </field>
+                <field id="selftest_result" translate="label" type="text" sortOrder="2" showInDefault="1"
+                       showInWebsite="0" showInStore="1">
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Result</frontend_model>
                 </field>
             </group>
         </section>

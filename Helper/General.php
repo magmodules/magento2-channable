@@ -328,6 +328,14 @@ class General extends AbstractHelper
     }
 
     /**
+     * @return string
+     */
+    public function getLocalDateTime()
+    {
+       return $this->localeDate->date()->format('Y-m-d H:i:s');
+    }
+
+    /**
      * @return int
      */
     public function getTimestamp()

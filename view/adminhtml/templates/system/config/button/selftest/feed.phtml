@@ -1,0 +1,41 @@
+<?php
+/**
+ * Copyright © 2018 Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ *
+ * @var $block Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Feed
+ */
+?>
+    <script>
+        require([
+            'jquery',
+            'prototype'
+        ], function (jQuery) {
+            var resultSpan = jQuery('#result');
+            jQuery('#selftest_button').click(function () {
+                new Ajax.Request('<?php echo $block->getAjaxUrl() ?>', {
+                    loaderArea: false,
+                    asynchronous: true,
+                    onCreate: function () {
+                        resultSpan.find('.selftest_loading').show();
+                        resultSpan.find('#selftest_result').hide();
+                    },
+                    onSuccess: function (response) {
+                        resultSpan.find('.selftest_loading').hide();
+                        var resultText = '';
+                        if (response.status > 200) {
+                            resultText = response.statusText;
+                        } else {
+                            var json = response.responseJSON;
+                            if (typeof json.msg != 'undefined') {
+                                resultText = json.msg;
+                            }
+                        }
+                        resultSpan.find('#selftest_result').show();
+                        jQuery('#selftest_result').html(resultText);
+                    }
+                });
+            });
+        });
+    </script>
+<?php echo $block->getButtonHtml() ?>

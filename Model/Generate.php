@@ -89,7 +89,7 @@ class Generate
      * @param array  $productIds
      * @param string $type
      *
-     * @return array
+     * @return array|int
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function generateByStore($storeId, $page, $productIds = [], $type = 'feed')
@@ -103,6 +103,7 @@ class Generate
         $config = $this->sourceHelper->getConfig($storeId, $type);
         $productCollection = $this->productModel->getCollection($config, $page, $productIds);
         $size = $this->productModel->getCollectionCountWithFilters($productCollection);
+
 
         if (($config['filters']['limit'] > 0) && empty($productId)) {
             $productCollection->setPage($page, $config['filters']['limit'])->getCurPage();
@@ -162,6 +163,26 @@ class Generate
         $this->appEmulation->stopEnvironmentEmulation();
 
         return $feed;
+    }
+
+    /**
+     * @param $storeId
+     *
+     * @return int
+     */
+    public function getSize($storeId) {
+        try {
+            $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
+            $config = $this->sourceHelper->getConfig($storeId, 'szie');
+            $productCollection = $this->productModel->getCollection($config, 1, []);
+            $size = $this->productModel->getCollectionCountWithFilters($productCollection);
+            $this->appEmulation->stopEnvironmentEmulation();
+        } catch (\Exception $e) {
+            $this->generalHelper->addTolog('getSize', $e->getMessage());
+            $size = -1;
+        }
+
+        return $size;
     }
 
     /**

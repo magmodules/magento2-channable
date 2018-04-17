@@ -127,7 +127,7 @@ class Order extends AbstractHelper
         }
         return $data;
     }
-
+    
     /**
      * @param string $errors
      * @param string $orderId

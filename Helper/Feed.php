@@ -21,7 +21,9 @@ class Feed extends AbstractHelper
 {
 
     const XPATH_ENABLE = 'magmodules_channable/general/enable';
+    const XPATH_LAST_FETCHED = 'magmodules_channable/results/last_fetched';
     const CONNECT_URL = 'https://app.channable.com/connect/magento.html?store_id=%s&url=%s&token=%s&version=v2';
+
     /**
      * @var General
      */
@@ -65,14 +67,15 @@ class Feed extends AbstractHelper
         foreach ($stores as $store) {
             $storeId = $store->getStoreId();
             $feedData[$storeId] = [
-                'store_id'    => $storeId,
-                'code'        => $store->getCode(),
-                'name'        => $store->getName(),
-                'is_active'   => $store->getIsActive(),
-                'status'      => $this->generalHelper->getStoreValue(self::XPATH_ENABLE, $storeId),
-                'preview_url' => $this->getPreviewUrl($storeId),
-                'json_url'    => $this->getJsonUrl($storeId),
-                'connect_url' => $this->getConnectUrl($storeId),
+                'store_id'     => $storeId,
+                'code'         => $store->getCode(),
+                'name'         => $store->getName(),
+                'is_active'    => $store->getIsActive(),
+                'status'       => $this->generalHelper->getStoreValue(self::XPATH_ENABLE, $storeId),
+                'preview_url'  => $this->getPreviewUrl($storeId),
+                'json_url'     => $this->getJsonUrl($storeId),
+                'connect_url'  => $this->getConnectUrl($storeId),
+                'last_fetched' => $this->getLastFetched($storeId)
             ];
         }
         return $feedData;
@@ -116,6 +119,16 @@ class Feed extends AbstractHelper
     }
 
     /**
+     * @param $storeId
+     *
+     * @return mixed
+     */
+    public function getLastFetched($storeId)
+    {
+        return $this->generalHelper->getUncachedStoreValue(self::XPATH_LAST_FETCHED, $storeId);
+    }
+
+    /**
      * @param     $timeStart
      * @param int $count
      * @param int $limit
@@ -145,5 +158,16 @@ class Feed extends AbstractHelper
         $summary['time'] = number_format((microtime(true) - $timeStart), 2) . ' sec';
         $summary['date'] = $this->datetime->gmtDate();
         return $summary;
+    }
+
+    /**
+     * @param $storeId
+     * @param $ip
+     */
+    public function setLastFetched($storeId, $ip)
+    {
+        $date = $this->generalHelper->getLocalDateTime();
+        $msg = sprintf('%s (IP: %s)', $date, $ip);
+        $this->generalHelper->setConfigData($msg, self::XPATH_LAST_FETCHED, $storeId);
     }
 }
