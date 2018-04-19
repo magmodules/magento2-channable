@@ -42,6 +42,15 @@
                     </depends>
                     <comment>Limits the amount of product Channable will import per run. This setting will not limit the total products sent to Channable but will lower the load.</comment>
                 </field>
+                <field id="selftest_checker" translate="label" type="button" sortOrder="13" showInDefault="1"
+                       showInWebsite="0" showInStore="1">
+                    <label>Perform a Selftest</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Feed</frontend_model>
+                </field>
+                <field id="selftest_result" translate="label" type="text" sortOrder="14" showInDefault="1"
+                       showInWebsite="0" showInStore="1">
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Result</frontend_model>
+                </field>
             </group>
             <group id="data" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
                    showInStore="1">
@@ -423,21 +432,6 @@
                     <label>Tax calculation</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Tax</source_model>
                 </field>
-                <field id="heading_selftest" translate="label comment" type="text" sortOrder="42" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Selftest</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
-                    <comment>Perform a self test to check your setup on errors.</comment>
-                </field>
-                <field id="selftest_checker" translate="label" type="button" sortOrder="43" showInDefault="1"
-                       showInWebsite="0" showInStore="1">
-                    <label>Test</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Feed</frontend_model>
-                </field>
-                <field id="selftest_result" translate="label" type="text" sortOrder="44" showInDefault="1"
-                       showInWebsite="0" showInStore="1">
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Result</frontend_model>
-                </field>
             </group>
             <group id="feeds" translate="label" type="text" sortOrder="45" showInDefault="1" showInWebsite="1"
                    showInStore="1">
@@ -457,13 +451,22 @@
             <group id="general" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>General</label>
                 <comment>Connect your store with Channable Marketplaces using the Channable Marketplace API, you can configure the Order Import settings and the Item Update settings per Store View.</comment>
-                <field id="version" translate="label" type="note" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="version" translate="label" type="note" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Version</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Version</frontend_model>
                 </field>
-                <field id="enable" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="enable" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="selftest_checker" translate="label" type="button" sortOrder="8" showInDefault="1"
+                       showInWebsite="0" showInStore="1">
+                    <label>Perform a Selftest</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Api</frontend_model>
+                </field>
+                <field id="selftest_result" translate="label" type="text" sortOrder="10" showInDefault="1"
+                       showInWebsite="0" showInStore="1">
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Result</frontend_model>
                 </field>
             </group>
             <group id="order" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -519,6 +522,7 @@
                 <field id="invoice_order" translate="label" type="select" sortOrder="42" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Create invoice for order</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enable if you want to automatically create an invoice on the order import and set the order state to <strong>Processing</strong> (default invoice order state) instead of <strong>Pending.</strong>]]></comment>
                 </field>
                 <field id="channel_orderid" translate="label" type="select" sortOrder="43" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Use channel Order ID</label>
@@ -622,19 +626,6 @@
                 <field id="item_stores" translate="label" type="text" sortOrder="41" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\ItemStores</frontend_model>
-                </field>
-            </group>
-            <group id="selftest" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>Selftest</label>
-                <comment>Perform a self test to check your setup on errors.</comment>
-                <field id="selftest_checker" translate="label" type="button" sortOrder="1" showInDefault="1"
-                       showInWebsite="0" showInStore="1">
-                    <label>Test</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Api</frontend_model>
-                </field>
-                <field id="selftest_result" translate="label" type="text" sortOrder="2" showInDefault="1"
-                       showInWebsite="0" showInStore="1">
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Result</frontend_model>
                 </field>
             </group>
         </section>

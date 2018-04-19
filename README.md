@@ -9,7 +9,7 @@ Before you start up the installation process, we recommend that you make a backu
 
 There are 2 different methods to install the Magento® 2 extension.
 1.	Install by using Composer 
-2.	Install by using the Magento® Marketplace (not yet available)
+2.	Install by using the Magento® Marketplace
    
 ### Installation using Composer ###
 Magento® 2 use the Composer to manage the module package and the library. Composer is a dependency manager for PHP. Composer declare the libraries your project depends on and it will manage (install/update) them for you.
@@ -39,15 +39,16 @@ php bin/magento setup:static-content:deploy
 ```
 6.  After the installation: Go to your Magento® admin portal and open ‘Stores’ > ‘Configuration’ > ‘Magmodules’ > ‘Channable’.
    
-### Installation using the Magento® Marketplace (not yet available) ###
+### Installation using the [Magento® Marketplace](https://marketplace.magento.com/magmodules-magento2-channable.html) ###
 Get your authentication keys
 Overview of Magento® authentication
 The repo.magento.com repository, where Magento® 2 and third-party component Composer packages are stored, requires authentication. To provide secure authentication, we enable you to generate a pair 32-¬¬character authentication tokens you can use to access the repository. You generate, access, and can also delete or regenerate your keys using Magento® Marketplace.
    
 To get your authentication keys:
    
-1. Go to Magento® Marketplace.
-2. Click Sign In and enter your login credentials. If you don’t have a free account, click Create an Account.   
+1. Go to [Channable Connect extension on the Magento® Marketplace.](https://marketplace.magento.com/magmodules-magento2-channable.html)
+2. Proceed the purchase (0,00)
+2. Sign In and enter your login credentials. If you don’t have a free account, click Create an Account.   
 3. After you log in, click My Access Keys.
 4. Get your secure access keys on Magento® Marketplace
 5. If you already have keys, use the Public Key as your user name and the Private Key as your password.

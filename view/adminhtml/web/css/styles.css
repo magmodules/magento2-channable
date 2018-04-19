@@ -250,7 +250,7 @@
     border: 2px solid #373330;
     border-radius: 2px;
     padding-left: 10px;
-
+    font-size: 12px;
 }
 .channable-notice:before {
     font-family: 'Admin Icons';
