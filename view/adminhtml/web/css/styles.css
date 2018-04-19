@@ -5,16 +5,16 @@
     color: #666;
     text-align: left;
     border: 1px solid rgba(229, 229, 229, 0.27);
-    border-left: 2px solid #ea4c00;
+    border-left: 2px solid #EA4C00;
     font-size: 14px;
     margin: 20px 0 0;
     padding: 5px 5px 5px 10px;
-    background: #f8f8f8;
+    background: #F8F8F8;
 }
 .mm-block-channable {
-    background: #f8f8f8 no-repeat 8px;
-    border: 1px solid #e5e5e5;
-    border-left: 2px solid #ea4c00;
+    background: #F8F8F8 no-repeat 8px;
+    border: 1px solid #E5E5E5;
+    border-left: 2px solid #EA4C00;
     font-size: 12px;
     color: #303030;
     margin-bottom: 0;
@@ -45,13 +45,13 @@
     margin-left: 9px;
 }
 .mm-block-channable tr a {
-    color: #6d6761;
+    color: #6D6761;
 }
 .mm-block-channable tr td {
     padding: 5px 25px 0 0;
 }
 .mm-block-channable .helpbutton {
-    color: #fff;
+    color: #FFF;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
     padding: 20px 10px;
     font-weight: 700;
@@ -60,12 +60,12 @@
 }
 @media only screen and (min-width: 1375px) {
     .mm-block-channable .helpbutton {
-        color: #fff;
+        color: #FFF;
         text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
         padding: 20px 20px 20px 50px;
         font-weight: 700;
         float: right;
-        background: url(../images/icons.png) no-repeat scroll 7px -84px #514943;
+        background: url(../images/icons.png) no-repeat scroll 7px -108px #514943;
         background-size: 35px;
     }
 }
@@ -74,14 +74,21 @@
     text-decoration: none;
 }
 .mm-block-channable .icon1 {
-    background: url(../images/icons.png) no-repeat scroll 2px -3px;
+    background: url(../images/icons.png) no-repeat scroll 2px -51px;
     background-size: 30px;
     width: 35px;
     height: 27px;
     float: left;
 }
 .mm-block-channable .icon2 {
-    background: url(../images/icons.png) no-repeat scroll 2px -31px;
+    background: url(../images/icons.png) no-repeat scroll 3px -27px;
+    background-size: 31px;
+    width: 35px;
+    height: 25px;
+    float: left;
+}
+.mm-block-channable .icon3 {
+    background: url(../images/icons.png) no-repeat scroll 4px -4px;
     background-size: 31px;
     width: 35px;
     height: 25px;
@@ -94,7 +101,7 @@
     border: 0;
     background-color: transparent !important;
     opacity: 1 !important;
-    color: #524a43 !important;
+    color: #524A43 !important;
     font-size: 12px;
     text-align: right;
     margin-right: 0;
@@ -131,7 +138,7 @@
 .mm-block-channable-feeds {}
 .mm-block-channable-feeds .title {
     clear: both;
-    color: #0a0a0a;
+    color: #0A0A0A;
     cursor: pointer;
     display: block;
     font-size: 1.7rem;
@@ -148,20 +155,20 @@
     color: #666;
     text-align: left;
     border-right: 1px solid rgb(223, 222, 221);
-    border-left: 2px solid #ea4c00;
+    border-left: 2px solid #EA4C00;
     font-size: 14px;
     margin: 20px 0 0;
     padding: 20px;
-    background: #f8f8f8;
+    background: #F8F8F8;
 }
 .mm-block-channable-feed-table tr {
-    border-bottom: 1px solid #dfdedd;
+    border-bottom: 1px solid #DFDEDD;
 }
 .mm-block-channable-feed-table tr td {
     padding: 10px;
 }
 .mm-block-channable-feed-table a.connect {
-    color: #eb5202;
+    color: #EB5202;
     line-height: 2em;
 }
 .mm-block-channable-feed-table a.connect:before {
@@ -172,7 +179,7 @@
     float: left;
 }
 .mm-block-channable-feed-table a.preview {
-    color: #185b00;
+    color: #185B00;
     line-height: 2em;
 }
 .mm-block-channable-feed-table a.preview:before {
@@ -195,7 +202,7 @@
     line-height: 2em;
 }
 #row_magmodules_channable_marketplace_item_item_stores tr {
-    border-bottom: 1px solid #e3e3e3;
+    border-bottom: 1px solid #E3E3E3;
 }
 #row_magmodules_channable_marketplace_item_item_stores tr:first-child {
     font-weight: bold;
@@ -204,7 +211,7 @@
     padding: 1.3rem 3.5rem 10px 0;
 }
 #row_magmodules_channable_marketplace_order_item_stores tr {
-    border-bottom: 1px solid #e3e3e3;
+    border-bottom: 1px solid #E3E3E3;
 }
 #row_magmodules_channable_marketplace_order_item_stores tr:first-child {
     font-weight: bold;
@@ -217,4 +224,59 @@
     word-wrap: break-word;
     hyphens: auto;
     font-size: 12px;
+}
+.channable-success {
+    display: block;
+    line-height: 30px;
+    background: white;
+    border: 2px solid #119a4a;
+    border-radius: 2px;
+    font-size: 12px;
+    padding-left: 10px;
+}
+.channable-success:before {
+    font-family: 'Admin Icons';
+    font-style: normal;
+    font-weight: 400;
+    padding: 5px;
+    color: #119a4a;
+    content: '\e62d';
+    font-size: 12px;
+}
+.channable-notice {
+    display: block;
+    line-height: 25px;
+    background: white;
+    border: 2px solid #373330;
+    border-radius: 2px;
+    padding-left: 10px;
+    font-size: 12px;
+}
+.channable-notice:before {
+    font-family: 'Admin Icons';
+    font-style: normal;
+    font-weight: 400;
+    padding: 5px;
+    color: #373330;
+    content: '\e607';
+}
+.channable-error {
+    display: block;
+    line-height: 30px;
+    background: white;
+    border: 2px solid #cd2026;
+    border-radius: 2px;
+    padding-left: 10px;
+    font-size: 12px;
+}
+.channable-error:before {
+    color: #cd2026;
+    content: '\e623';
+    font-family: 'Admin Icons';
+    font-style: normal;
+    font-weight: 400;
+    padding: 5px;
+}
+#magmodules_channable_marketplace_general_version {
+    padding-top: 0px
 }

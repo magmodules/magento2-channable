@@ -132,7 +132,7 @@ class Config extends AbstractHelper
 
             $fieldDataConverter->convert(
                 $connection,
-                $connection->getTableName('core_config_data'),
+                $this->resource->getTableName('core_config_data'),
                 'config_id',
                 'value',
                 $queryModifier

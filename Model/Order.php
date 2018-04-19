@@ -264,6 +264,7 @@ class Order
             $orderWeight = 0;
             $itemCount = 0;
             $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $storeId);
+
             foreach ($data['products'] as $item) {
                 $product = $this->product->create()->load($item['id']);
                 if (!empty($taxCalculation)) {
@@ -275,7 +276,7 @@ class Order
                     $percent = $this->taxCalculation->getRate($request->setProductClassId($taxClassId));
                     $price = ($item['price'] / (100 + $percent) * 100);
                 }
-                $product->setPrice($price);
+                $product->setPrice($price)->setFinalPrice($price);
                 $cart->addProduct($product, intval($item['quantity']));
                 $orderTotal += $price;
                 $orderWeight += ($product->getWeight() * $item['quantity']);

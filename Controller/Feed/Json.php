@@ -9,6 +9,7 @@ namespace Magmodules\Channable\Controller\Feed;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magmodules\Channable\Model\Generate as GenerateModel;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
@@ -37,6 +38,10 @@ class Json extends Action
      * @var JsonFactory
      */
     private $resultJsonFactory;
+    /**
+     * @var RemoteAddress
+     */
+    private $remoteAddress;
 
     /**
      * Json constructor.
@@ -46,18 +51,21 @@ class Json extends Action
      * @param GenerateModel $generateModel
      * @param FeedHelper    $feedHelper
      * @param JsonFactory   $resultJsonFactory
+     * @param RemoteAddress $remoteAddress
      */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
         GenerateModel $generateModel,
         FeedHelper $feedHelper,
-        JsonFactory $resultJsonFactory
+        JsonFactory $resultJsonFactory,
+        RemoteAddress $remoteAddress
     ) {
         $this->generateModel = $generateModel;
         $this->generalHelper = $generalHelper;
         $this->feedHelper = $feedHelper;
         $this->resultJsonFactory = $resultJsonFactory;
+        $this->remoteAddress = $remoteAddress;
         parent::__construct($context);
     }
 
@@ -89,6 +97,9 @@ class Json extends Action
         } else {
             $productId = null;
         }
+
+        $ip = $this->remoteAddress->getRemoteAddress();
+        $this->feedHelper->setLastFetched($storeId, $ip);
 
         try {
             if ($data = $this->generateModel->generateByStore($storeId, $page, $productId)) {
