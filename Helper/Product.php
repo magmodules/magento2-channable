@@ -704,6 +704,7 @@ class Product extends AbstractHelper
 
                 $groupedPrices = $this->getGroupedPrices($product, $config);
                 $price = $groupedPrices['min_price'];
+                $finalPrice = $groupedPrices['min_price'];
                 $product['min_price'] = $groupedPrices['min_price'];
                 $product['max_price'] = $groupedPrices['max_price'];
                 $product['total_price'] = $groupedPrices['total_price'];
