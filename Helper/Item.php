@@ -111,8 +111,8 @@ class Item extends AbstractHelper
             return $date;
         }
 
-        $date = $this->generalHelper->getLocalDateTime();
-        return date('Y-m-d H:i:s', strtotime('-1 days', $date));
+        $minusOneDay = ($this->generalHelper->getTimestamp() - 864000);
+        return date('Y-m-d H:i:s', $minusOneDay);
     }
 
     /**
