@@ -704,17 +704,18 @@ class Product extends AbstractHelper
 
                 $groupedPrices = $this->getGroupedPrices($product, $config);
                 $price = $groupedPrices['min_price'];
-                $finalPrice = $price;
                 $product['min_price'] = $groupedPrices['min_price'];
                 $product['max_price'] = $groupedPrices['max_price'];
                 $product['total_price'] = $groupedPrices['total_price'];
 
                 if ($groupedPriceType == 'max') {
                     $price = $groupedPrices['max_price'];
+                    $finalPrice = $price;
                 }
 
                 if ($groupedPriceType == 'total') {
                     $price = $groupedPrices['total_price'];
+                    $finalPrice = $price;
                 }
 
                 break;
@@ -833,7 +834,11 @@ class Product extends AbstractHelper
                     $maxPrice = $this->commonPriceModel->getCatalogPrice($subProduct);
                     $product->setTaxClassId($subProduct->getTaxClassId());
                 }
-                $totalPrice += $price;
+                if ($subProduct->getQty() > 0) {
+                    $totalPrice += $price * $subProduct->getQty();
+                } else {
+                    $totalPrice += $price;
+                }
             }
         }
 
