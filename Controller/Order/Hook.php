@@ -66,33 +66,25 @@ class Hook extends Action
      */
     public function execute()
     {
-        $storeId = $this->getRequest()->getParam('store');
-        $orderEnabled = $this->orderHelper->getEnabled($storeId);
-        $token = $this->generalHelper->getToken();
-        $code = $this->getRequest()->getParam('code');
-        $test = (int)$this->getRequest()->getParam('test');
+        $orderData = null;
+        $request = $this->getRequest();
+        $storeId = $request->getParam('store');
+        $response = $this->orderHelper->validateRequestData($request, 'order');
 
-        if ($orderEnabled && $token && $code) {
-            if ($code == $token) {
-                if (!empty($test)) {
-                    $data = $this->orderHelper->getTestJsonData($test);
-                } else {
-                    $data = file_get_contents('php://input');
-                }
-                if (!empty($data)) {
-                    if ($data = $this->orderHelper->validateJsonOrderData($data)) {
-                        $response = $this->orderModel->importOrder($data, $storeId);
-                    } else {
-                        $response = $this->orderHelper->jsonResponse('No validated data');
-                    }
-                } else {
-                    $response = $this->orderHelper->jsonResponse('Empty Data');
-                }
-            } else {
-                $response = $this->orderHelper->jsonResponse('Unknown Token');
+        if (empty($response['errors'])) {
+            $data = file_get_contents('php://input');
+            $orderData = $this->orderHelper->validateJsonOrderData($data, $request);
+            if (!empty($orderData['errors'])) {
+                $response = $orderData;
             }
-        } else {
-            $response = $this->orderHelper->jsonResponse('Extension not enabled');
+        }
+
+        if (empty($response['errors'])) {
+            try {
+                $response = $this->orderModel->importOrder($orderData, $storeId);
+            } catch (\Exception $e) {
+                $response = $this->orderHelper->jsonResponse($e->getMessage());
+            }
         }
 
         $result = $this->resultJsonFactory->create();

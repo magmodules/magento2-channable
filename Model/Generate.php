@@ -195,7 +195,7 @@ class Generate
     public function getDataRow($product, $parent, $config)
     {
         if ($dataRow = $this->productHelper->getDataRow($product, $parent, $config)) {
-            if ($row = $this->sourceHelper->reformatData($dataRow, $product, $config)) {
+            if ($row = $this->sourceHelper->reformatData($dataRow, $product, $parent, $config)) {
                 return $row;
             }
         }
