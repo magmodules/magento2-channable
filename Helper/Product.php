@@ -166,6 +166,8 @@ class Product extends AbstractHelper
                 continue;
             }
 
+            $value = null;
+
             if (!empty($attribute['source']) || ($type == 'image_link')) {
                 $value = $this->getAttributeValue(
                     $type,
@@ -197,21 +199,17 @@ class Product extends AbstractHelper
                 }
             }
 
-            if (!empty($value)) {
-                if (!empty($dataRow[$attribute['label']])) {
-                    if (is_array($dataRow[$attribute['label']])) {
-                        $dataRow[$attribute['label']][] = $value;
-                    } else {
-                        $data = [$dataRow[$attribute['label']], $value];
-                        unset($dataRow[$attribute['label']]);
-                        $dataRow[$attribute['label']] = $data;
-                    }
+            if (!empty($dataRow[$attribute['label']])) {
+                if (is_array($dataRow[$attribute['label']])) {
+                    $dataRow[$attribute['label']][] = $value;
                 } else {
-                    $dataRow[$attribute['label']] = $value;
+                    $data = [$dataRow[$attribute['label']], $value];
+                    unset($dataRow[$attribute['label']]);
+                    $dataRow[$attribute['label']] = $data;
                 }
+            } else {
+                $dataRow[$attribute['label']] = $value;
             }
-
-            $value = null;
         }
 
         return $dataRow;
