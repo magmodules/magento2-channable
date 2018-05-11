@@ -537,23 +537,54 @@
                         <field id="channel_orderid">1</field>
                     </depends>
                 </field>
-                <field id="heading_log" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0"
+                <field id="heading_order_advanced" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Advanced</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment><![CDATA[Advanced options]]></comment>
+                </field>
+                <field id="backorders" translate="label" type="select" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable order for out of stock items</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>By default orders with out of stock items are not importable in Magento, this funtion will enable backorders for these items.</comment>
+                </field>
+                <field id="lvb" translate="label" type="select" sortOrder="52" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Accept FBB/LVB Orders</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enable the option to enable the Fulfilment by BOL/Logistiek via BOL functionality.]]></comment>
+                </field>
+                <field id="lvb_stock" translate="label" type="select" sortOrder="53" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Disregard stock for FBB/LVB Orders</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enable this option to add the required stock just before importing the order to prevent stock changes.]]></comment>
+                    <depends>
+                        <field id="lvb">1</field>
+                    </depends>
+                </field>
+                <field id="lvb_ship" translate="label" type="select" sortOrder="54" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Auto Ship FBB/LVB Orders</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enable this option to instantly Ship the FBB/LVB orders, in combination with the option "Create invoice for order" on Yes your order will have the status: Complete.]]></comment>
+                    <depends>
+                        <field id="lvb">1</field>
+                    </depends>
+                </field>
+                <field id="heading_log" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0"
                        showInStore="0">
                     <label>Logging</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Enable the Order Logging option to log all the incoming orders from the connected Marketplaces.</comment>
                 </field>
-                <field id="log" translate="label" type="select" sortOrder="51" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="log" translate="label" type="select" sortOrder="61" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Write errors and orders to the Channable log file located in /var/log/channable.log</comment>
                 </field>
-                <field id="heading_item_stores" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="heading_order_stores" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Webhooks</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment><![CDATA[Copy and paste the Webhook URL to configure your Magento Store in your Channable Marketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.<br><br>You can simulate a test order by adding /test/{productID} to the end of the Webhook.]]></comment>
                 </field>
-                <field id="item_stores" translate="label" type="text" sortOrder="61" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="order_stores" translate="label" type="text" sortOrder="71" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\OrderStores</frontend_model>
                 </field>

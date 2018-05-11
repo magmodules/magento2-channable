@@ -19,10 +19,13 @@ use Magento\Sales\Model\Service\OrderService;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\CartManagementInterface;
+use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Model\Service\InvoiceService;
+use Magento\Sales\Api\ShipmentRepositoryInterface;
+use Magento\Sales\Model\Convert\Order as OrderConverter;
 use Magento\Framework\DB\Transaction;
 use Magento\Tax\Model\Calculation as TaxCalculationn;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
@@ -36,6 +39,9 @@ use Magento\Checkout\Model\Session as CheckoutSession;
  */
 class Order
 {
+
+    public $weight = 0;
+    public $total = 0;
 
     /**
      * @var StoreManagerInterface
@@ -78,9 +84,21 @@ class Order
      */
     private $orderRepository;
     /**
+     * @var StockRegistryInterface
+     */
+    private $stockRegistry;
+    /**
      * @var InvoiceService
      */
     private $invoiceService;
+    /**
+     * @var OrderConverter
+     */
+    private $orderConverter;
+    /**
+     * @var ShipmentRepositoryInterface
+     */
+    private $shipmentRepository;
     /**
      * @var Transaction
      */
@@ -135,7 +153,10 @@ class Order
      * @param CustomerRepositoryInterface $customerRepository
      * @param OrderService                $orderService
      * @param OrderRepositoryInterface    $orderRepository
+     * @param StockRegistryInterface      $stockRegistry
      * @param InvoiceService              $invoiceService
+     * @param OrderConverter              $orderConverter
+     * @param ShipmentRepositoryInterface $shipmentRepository
      * @param Transaction                 $transaction
      * @param CartRepositoryInterface     $cartRepositoryInterface
      * @param CartManagementInterface     $cartManagementInterface
@@ -158,7 +179,10 @@ class Order
         CustomerRepositoryInterface $customerRepository,
         OrderService $orderService,
         OrderRepositoryInterface $orderRepository,
+        StockRegistryInterface $stockRegistry,
         InvoiceService $invoiceService,
+        OrderConverter $orderConverter,
+        ShipmentRepositoryInterface $shipmentRepository,
         Transaction $transaction,
         CartRepositoryInterface $cartRepositoryInterface,
         CartManagementInterface $cartManagementInterface,
@@ -180,7 +204,10 @@ class Order
         $this->customerRepository = $customerRepository;
         $this->orderService = $orderService;
         $this->orderRepository = $orderRepository;
+        $this->stockRegistry = $stockRegistry;
         $this->invoiceService = $invoiceService;
+        $this->orderConverter = $orderConverter;
+        $this->shipmentRepository = $shipmentRepository;
         $this->transaction = $transaction;
         $this->cartRepositoryInterface = $cartRepositoryInterface;
         $this->cartManagementInterface = $cartManagementInterface;
@@ -202,102 +229,41 @@ class Order
     public function importOrder($data, $storeId)
     {
         $store = $this->storeManager->getStore($storeId);
-        $websiteId = $store->getWebsiteId();
         $importCustomer = $this->orderHelper->getImportCustomer($storeId);
-        $seprateHousenumber = $this->orderHelper->getSeperateHousenumber($storeId);
+        $sepHousNo = $this->orderHelper->getSeperateHousenumber($storeId);
+        $backorders = $this->orderHelper->getEnableBackorders($storeId);
+        $lvb = ($data['order_status'] == 'shipped') ? true : false;
 
-        if ($errors = $this->checkItems($data['products'])) {
+        if ($errors = $this->checkItems($data['products'], $lvb, $backorders)) {
             return $this->jsonRepsonse($errors, '', $data['channable_id']);
         }
 
         try {
             $cartId = $this->cartManagementInterface->createEmptyCart();
-            $cart = $this->cartRepositoryInterface->get($cartId);
-            $cart->setStore($store);
-            $cart->setCurrency();
+            $cart = $this->cartRepositoryInterface->get($cartId)->setStore($store)->setCurrency()->setIsSuperMode(true);
+            $customerId = $this->setCustomerCart($cart, $store, $data, $importCustomer);
 
-            if ($importCustomer) {
-                $customerGroupId = $this->orderHelper->getCustomerGroupId($storeId);
-                $customer = $this->customerFactory->create();
-                $customer->setWebsiteId($websiteId);
-                $customer->loadByEmail($data['customer']['email']);
-                if (!$customerId = $customer->getEntityId()) {
-                    $customer->setWebsiteId($websiteId)
-                        ->setStore($store)
-                        ->setFirstname($data['customer']['first_name'])
-                        ->setMiddlename($data['customer']['middle_name'])
-                        ->setLastname($data['customer']['last_name'])
-                        ->setEmail($data['customer']['email'])
-                        ->setPassword($data['customer']['email'])
-                        ->setGroupId($customerGroupId)
-                        ->save();
-                    $customerId = $customer->getId();
-                }
-                $customer = $this->customerRepository->getById($customerId);
-                $cart->assignCustomer($customer);
-            } else {
-                $customerId = 0;
-                $cart->setCustomerId($customerId)
-                    ->setCustomerEmail($data['customer']['email'])
-                    ->setCustomerFirstname($data['customer']['first_name'])
-                    ->setCustomerMiddlename($data['customer']['middle_name'])
-                    ->setCustomerLastname($data['customer']['last_name'])
-                    ->setCustomerIsGuest(true)
-                    ->setCustomerGroupId(GroupInterface::NOT_LOGGED_IN_ID);
-            }
-
-            $billingAddress = $this->getAddressData('billing', $data, $customerId, $importCustomer, $seprateHousenumber);
+            $billingAddress = $this->getAddressData('billing', $data, $customerId, $importCustomer, $sepHousNo);
             if (!empty($billingAddress['errors'])) {
                 return $this->jsonRepsonse($billingAddress['errors'], '', $data['channable_id']);
             } else {
                 $cart->getBillingAddress()->addData($billingAddress);
             }
 
-            $shippingAddress = $this->getAddressData('shipping', $data, $customerId, $importCustomer, $seprateHousenumber);
+            $shippingAddress = $this->getAddressData('shipping', $data, $customerId, $importCustomer, $sepHousNo);
             if (!empty($shippingAddress['errors'])) {
                 return $this->jsonRepsonse($shippingAddress['errors'], '', $data['channable_id']);
             } else {
                 $cart->getShippingAddress()->addData($shippingAddress);
             }
 
-            $orderTotal = 0;
-            $orderWeight = 0;
-            $itemCount = 0;
-            $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $storeId);
-
-            foreach ($data['products'] as $item) {
-                $product = $this->product->create()->load($item['id']);
-                if (!empty($taxCalculation)) {
-                    $price = $item['price'];
-                } else {
-                    $request = $this->taxCalculation
-                        ->getRateRequest($cart->getShippingAddress(), $cart->getBillingAddress(), null, $store);
-                    $taxClassId = $product->getData('tax_class_id');
-                    $percent = $this->taxCalculation->getRate($request->setProductClassId($taxClassId));
-                    $price = ($item['price'] / (100 + $percent) * 100);
-                }
-                $product->setPrice($price)->setFinalPrice($price);
-                $cart->addProduct($product, intval($item['quantity']));
-                $orderTotal += $price;
-                $orderWeight += ($product->getWeight() * $item['quantity']);
-                $itemCount += $item['quantity'];
-            }
-
-            $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('shipping', $storeId);
-            if (!empty($taxCalculation)) {
-                $shippingPriceCal = $data['price']['shipping'];
-            } else {
-                $request = $this->taxCalculation
-                    ->getRateRequest($cart->getShippingAddress(), $cart->getBillingAddress(), null, $store);
-                $taxRateId = $this->orderHelper->getTaxClassShipping($storeId);
-                $percent = $this->taxCalculation->getRate($request->setProductClassId($taxRateId));
-                $shippingPriceCal = ($data['price']['shipping'] / (100 + $percent) * 100);
-            }
+            $itemCount = $this->addProductsToQuote($cart, $data, $store, $lvb);
+            $shippingPriceCal = $this->getShippingPrice($cart, $data, $store);
 
             $this->checkoutSession->setChannableEnabled(1);
             $this->checkoutSession->setChannableShipping($shippingPriceCal);
-            $shippingMethod = $this->getShippingMethod($cart, $store, $orderTotal, $orderWeight, $itemCount);
 
+            $shippingMethod = $this->getShippingMethod($cart, $store, $this->total, $this->weight, $itemCount);
             $shippingAddress = $cart->getShippingAddress();
             $shippingAddress->setCollectShippingRates(true)
                 ->collectShippingRates()
@@ -308,13 +274,12 @@ class Order
             $cart->getPayment()->importData(['method' => 'channable']);
             $cart->collectTotals();
             $cart->save();
-            $cart = $this->cartRepositoryInterface->get($cart->getId());
 
+            $cart = $this->cartRepositoryInterface->get($cart->getId());
             $orderId = $this->cartManagementInterface->placeOrder($cart->getId());
 
             /** @var \Magento\Sales\Model\Order $order */
             $order = $this->orderRepository->get($orderId);
-
             if ($this->orderHelper->getUseChannelOrderId($storeId)) {
                 $newIncrementId = $this->orderHelper->getUniqueIncrementId($data['channel_id'], $storeId);
                 $order->setIncrementId($newIncrementId);
@@ -342,6 +307,11 @@ class Order
             if ($this->orderHelper->getInvoiceOrder($storeId)) {
                 $this->invoiceOrder($order);
             }
+
+            if ($lvb && $this->orderHelper->getLvbAutoShip($storeId)) {
+                $this->shipOrder($order);
+            }
+
         } catch (\Exception $e) {
             $this->generalHelper->addTolog('importOrder: ' . $data['channable_id'], $e->getMessage());
             return $this->jsonRepsonse($e->getMessage(), '', $data['channable_id']);
@@ -354,11 +324,13 @@ class Order
     }
 
     /**
-     * @param $items
+     * @param      $items
+     * @param bool $lvb
+     * @param bool $backorders
      *
      * @return array|bool
      */
-    public function checkItems($items)
+    public function checkItems($items, $lvb = false, $backorders = false)
     {
         $error = [];
         foreach ($items as $item) {
@@ -382,7 +354,7 @@ class Order
                         $product->getEntityId()
                     );
                 }
-                if (!$product->isSalable()) {
+                if (!$product->isSalable() && !$lvb && !$backorders) {
                     $error[] = __(
                         'Product "%1" not available in requested quantity (ID: %2)',
                         $product->getName(),
@@ -421,6 +393,54 @@ class Order
         }
 
         return $response;
+    }
+
+    /**
+     * @param $cart
+     * @param $store
+     * @param $data
+     * @param $importCustomer
+     *
+     * @return int|mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function setCustomerCart($cart, $store, $data, $importCustomer)
+    {
+        $storeId = $store->getId();
+        $websiteId = $store->getWebsiteId();
+
+        if ($importCustomer) {
+            $customerGroupId = $this->orderHelper->getCustomerGroupId($storeId);
+            $customer = $this->customerFactory->create();
+            $customer->setWebsiteId($websiteId);
+            $customer->loadByEmail($data['customer']['email']);
+            if (!$customerId = $customer->getEntityId()) {
+                $customer->setWebsiteId($websiteId)
+                    ->setStore($store)
+                    ->setFirstname($data['customer']['first_name'])
+                    ->setMiddlename($data['customer']['middle_name'])
+                    ->setLastname($data['customer']['last_name'])
+                    ->setEmail($data['customer']['email'])
+                    ->setPassword($data['customer']['email'])
+                    ->setGroupId($customerGroupId)
+                    ->save();
+                $customerId = $customer->getId();
+            }
+            $customer = $this->customerRepository->getById($customerId);
+            $cart->assignCustomer($customer);
+        } else {
+            $customerId = 0;
+            $cart->setCustomerId($customerId)
+                ->setCustomerEmail($data['customer']['email'])
+                ->setCustomerFirstname($data['customer']['first_name'])
+                ->setCustomerMiddlename($data['customer']['middle_name'])
+                ->setCustomerLastname($data['customer']['last_name'])
+                ->setCustomerIsGuest(true)
+                ->setCustomerGroupId(GroupInterface::NOT_LOGGED_IN_ID);
+        }
+
+        return $customerId;
     }
 
     /**
@@ -522,6 +542,79 @@ class Order
     }
 
     /**
+     * @param      $cart
+     * @param      $data
+     * @param      $store
+     * @param bool $lvb
+     *
+     * @return int
+     */
+    public function addProductsToQuote($cart, $data, $store, $lvb = false)
+    {
+        $qty = 0;
+        $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $store->getId());
+        $shippingAddressId = $cart->getShippingAddress();
+        $billingAddressId = $cart->getBillingAddress();
+        $skipStock = $this->orderHelper->getLvbSkipStock($store->getId());
+
+        foreach ($data['products'] as $item) {
+            $product = $this->product->create()->load($item['id']);
+            $stockItem = $this->stockRegistry->getStockItem($item['id']);
+            $price = $item['price'];
+
+            if (empty($taxCalculation)) {
+                $taxClassId = $product->getData('tax_class_id');
+                $request = $this->taxCalculation->getRateRequest($shippingAddressId, $billingAddressId, null, $store);
+                $percent = $this->taxCalculation->getRate($request->setProductClassId($taxClassId));
+                $price = ($item['price'] / (100 + $percent) * 100);
+            }
+
+            $product->setPrice($price)->setFinalPrice($price);
+
+            if ($lvb && $skipStock) {
+                $stockItem->setUseConfigManageStock(false)->setManageStock(false);
+                $product->setData('is_salable', true)->setData('stock_data', $stockItem);
+            }
+
+            if ($this->orderHelper->getEnableBackorders($store->getId())) {
+                $stockItem->setUseConfigBackorders(false)->setBackorders(true);
+                $product->setData('is_salable', true)->setData('stock_data', $stockItem);
+            }
+
+            $this->total += $price;
+            $this->weight += ($product->getWeight() * intval($item['quantity']));
+            $qty += intval($item['quantity']);
+            $cart->addProduct($product, intval($item['quantity']));
+        }
+
+        return $qty;
+    }
+
+    /**
+     * @param $cart
+     * @param $data
+     * @param $store
+     *
+     * @return float|int
+     */
+    public function getShippingPrice($cart, $data, $store)
+    {
+        $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $store->getId());
+        $shippingPriceCal = $data['price']['shipping'];
+
+        if ($taxCalculation) {
+            $shippingAddressId = $cart->getShippingAddress();
+            $billingAddressId = $cart->getBillingAddress();
+            $taxRateId = $this->orderHelper->getTaxClassShipping($store->getId());
+            $request = $this->taxCalculation->getRateRequest($shippingAddressId, $billingAddressId, null, $store);
+            $percent = $this->taxCalculation->getRate($request->setProductClassId($taxRateId));
+            $shippingPriceCal = ($data['price']['shipping'] / (100 + $percent) * 100);
+        }
+
+        return $shippingPriceCal;
+    }
+
+    /**
      * @param $cart
      * @param $store
      * @param $orderTotal
@@ -585,8 +678,41 @@ class Order
                 $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
                 $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
                 $this->orderRepository->save($order);
+
             } catch (\Exception $e) {
                 $this->generalHelper->addTolog('invoiceOrder: ' . $order->getIncrementId(), $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     */
+    public function shipOrder($order)
+    {
+        if ($order->canShip()) {
+            try {
+                $shipment = $this->orderConverter->toShipment($order);
+                foreach ($order->getAllItems() as $orderItem) {
+                    if (!$orderItem->getQtyToShip() || $orderItem->getIsVirtual()) {
+                        continue;
+                    }
+                    $qtyShipped = $orderItem->getQtyToShip();
+                    $shipmentItem = $this->orderConverter->itemToShipmentItem($orderItem)->setQty($qtyShipped);
+                    $shipment->addItem($shipmentItem);
+                }
+
+                $shipment->register();
+                $shipment->getOrder()->setIsInProcess(true);
+                $this->shipmentRepository->save($shipment);
+                $this->orderRepository->save($shipment->getOrder());
+
+                $orderComment = __('LVB Order, Automaticly Shipped');
+                $order->addStatusHistoryComment($orderComment);
+                $this->orderRepository->save($order);
+
+            } catch (\Exception $e) {
+                $this->generalHelper->addTolog('shipOrder: ' . $order->getIncrementId(), $e->getMessage());
             }
         }
     }

@@ -80,7 +80,7 @@ class OrderStores extends Field
         foreach ($stores as $store) {
             $html .= '<tr>';
             $html .= '  <td>' . $store['name'] . '</td>';
-            $html .= '  <td>' . $store['webhook_url'] . '</td>';
+            $html .= '  <td style="word-break: break-word;">' . $store['webhook_url'] . '</td>';
             $html .= '</tr>';
         }
         $html .= '</table>';

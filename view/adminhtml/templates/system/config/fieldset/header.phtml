@@ -2,17 +2,17 @@
 /**
  * Copyright © 2018 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
+ *
  * @var $block Magmodules\Channable\Block\Adminhtml\Magmodules\Header
  */
 ?>
-<div class="mm-block-channable"
-     style="background-image: url(<?php echo $block->escapeUrl($block->getImage()); ?>)">
+<div class="mm-block-channable" style="background-image: url(<?php echo $block->escapeUrl($block->getImage()); ?>)">
     <a class="helpbutton" href="<?php echo $block->escapeUrl($block->getSupportLink()); ?>" target="_blank">
-        Extension Manual
+        <?php echo __('Extension Manual'); ?>
     </a>
     <p>
-        <strong>Developed by Magmodules.</strong>
-        A Magento only eCommerce Agency located in the Netherlands.
+        <strong><?php echo __('Developed by Magmodules.'); ?></strong>
+        <?php echo __('A Magento only eCommerce Agency located in the Netherlands.'); ?>
     </p>
     <table>
         <tbody>
@@ -23,11 +23,15 @@
                 </td>
                 <td>
                     <div class="icon1"></div>
-                    <a href="<?php echo $block->escapeUrl($block->getContactLink()); ?>" target="_blank">Contact</a>
+                    <a href="<?php echo $block->escapeUrl($block->getContactLink()); ?>" target="_blank">
+                        <?php echo __('Contact.'); ?>
+                    </a>
                 </td>
                 <td>
                     <div class="icon3"></div>
-                    <a href="https://support.channable.com/hc/en-us" target="_blank">Channable Support</a>
+                    <a href="https://support.channable.com/hc/en-us" target="_blank">
+                        <?php echo __('Channable Support'); ?>
+                    </a>
                 </td>
             </tr>
         </tbody>

@@ -264,7 +264,7 @@ class Item extends AbstractModel
         $productData = $this->getProductData($items, $config);
         $postData = $this->getPostData($items, $productData);
         $postResult = $this->postData($postData, $config);
-        $updateResult = $this->updateData($postResult);
+        $this->updateData($postResult);
 
         return $postResult;
     }
@@ -297,7 +297,7 @@ class Item extends AbstractModel
                     }
                 }
                 if ($dataRow = $this->productHelper->getDataRow($product, $parent, $config)) {
-                    if ($row = $this->sourceHelper->reformatData($dataRow, $product, $config)) {
+                    if ($row = $this->sourceHelper->reformatData($dataRow, $product, $parent, $config)) {
                         $productData[$product->getId()] = $row;
                     }
                 }

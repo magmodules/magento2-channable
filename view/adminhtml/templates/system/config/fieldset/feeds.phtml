@@ -2,35 +2,48 @@
 /**
  * Copyright © 2018 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
+ *
  * @var $block Magmodules\Channable\Block\Adminhtml\System\Config\Form\Feeds
  */
 ?>
-<?php if ($feedData = $block->getFeedData()) { ?>
+<?php if ($feedData = $block->getFeedData()): ?>
     <div class="mm-block-channable-feeds">
-		<span class="title">Feeds</span>
-		Each store view will have their own Channable feed. Use the auto connect link to connect the feed with your Channable account.
+        <span class="title"><?php echo __('Feeds'); ?></span>
+        <?php echo __('Each store view will have their own Channable feed. Use the auto connect link to connect the feed with your Channable account.'); ?>
         <table class="mm-block-channable-feed-table">
             <tbody>
-            <?php foreach ($feedData as $data) { ?>
-                <tr>
-                    <td style="width: 25%;">
-                        <p><?php echo $data['name']; ?></p>
-                        <p>
-                            <small><?php echo $data['code']; ?></small>
-                        </p>
-                    </td>
-					<td style="width: 35%;">
-                        <?php if (!empty($data['preview_url'])) { ?>
-                            <p><a class="preview" href="<?php echo $data['preview_url']; ?>" target="_blank">Preview</a></p>
-                            <p><a class="json" href="<?php echo $data['json_url']; ?>" target="_blank">JSON</a></p>
-                        <?php } ?>
-                    </td>
-                   <td>
-						<p><a class="connect" href="<?php echo $data['connect_url']; ?>" target="_blank">Auto Connect with Channable</a></p>
-                    </td>
-                </tr>
-            <?php } ?>
+                <?php foreach ($feedData as $data): ?>
+                    <tr>
+                        <td style="width: 25%;">
+                            <p><?php echo $data['name']; ?></p>
+                            <p>
+                                <small><?php echo $data['code']; ?></small>
+                            </p>
+                        </td>
+                        <td style="width: 35%;">
+                            <?php if (!empty($data['preview_url'])): ?>
+                                <p>
+                                    <a class="preview" href="<?php echo $data['preview_url']; ?>" target="_blank">
+                                        <?php echo __('Preview'); ?>
+                                    </a>
+                                </p>
+                                <p>
+                                    <a class="json" href="<?php echo $data['json_url']; ?>" target="_blank">
+                                        <?php echo __('JSON'); ?>
+                                    </a>
+                                </p>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <p>
+                                <a class="connect" href="<?php echo $data['connect_url']; ?>" target="_blank">
+                                    <?php echo __('Auto Connect with Channable'); ?>
+                                </a>
+                            </p>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>
-<?php } ?>
+<?php endif; ?>

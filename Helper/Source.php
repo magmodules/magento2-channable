@@ -141,7 +141,8 @@ class Source extends AbstractHelper
         if ($type == 'feed') {
             $config['base_url'] = $this->storeManager->getStore()->getBaseUrl();
             $config['weight_unit'] = ' ' . $this->generalHelper->getStoreValue(self::XPATH_WEIGHT_UNIT, $storeId);
-            $config['categories'] = $this->categoryHelper->getCollection($storeId, '', '', 'channable_cat_disable_export');
+            $config['categories'] = $this->categoryHelper->getCollection($storeId, '', '',
+                'channable_cat_disable_export');
             $config['item_updates'] = $this->itemHelper->isEnabled();
             $config['delivery'] = $this->generalHelper->getStoreValue(self::XPATH_DELIVERY_TIME);
         }
@@ -462,8 +463,8 @@ class Source extends AbstractHelper
             'source' => 'visibility',
         ];
         $attributes['availability'] = [
-            'label'     => 'availability',
-            'source'    => 'is_in_stock'
+            'label'  => 'availability',
+            'source' => 'is_in_stock'
         ];
 
         if ($type != 'api') {
@@ -664,14 +665,15 @@ class Source extends AbstractHelper
     /**
      * @param                                $dataRow
      * @param \Magento\Catalog\Model\Product $product
+     * @param \Magento\Catalog\Model\Product $parent
      * @param                                $config
      *
      * @return string
      */
-    public function reformatData($dataRow, $product, $config)
+    public function reformatData($dataRow, $product, $parent, $config)
     {
         if (!empty($config['categories'])) {
-            if ($categoryData = $this->getCategoryData($product, $config['categories'])) {
+            if ($categoryData = $this->getCategoryData($product, $parent, $config['categories'])) {
                 $dataRow = array_merge($dataRow, $categoryData);
             }
         }
@@ -689,14 +691,22 @@ class Source extends AbstractHelper
 
     /**
      * @param \Magento\Catalog\Model\Product $product
+     * @param \Magento\Catalog\Model\Product $parent
      * @param                                $categories
      *
      * @return array
      */
-    public function getCategoryData($product, $categories)
+    public function getCategoryData($product, $parent, $categories)
     {
         $path = [];
-        foreach ($product->getCategoryIds() as $catId) {
+
+        if ($parent) {
+            $catgoryIds = $parent->getCategoryIds();
+        } else {
+            $catgoryIds = $product->getCategoryIds();
+        }
+
+        foreach ($catgoryIds as $catId) {
             if (!empty($categories[$catId])) {
                 $category = $categories[$catId];
                 if (!empty($category['path'])) {
