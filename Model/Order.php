@@ -19,6 +19,7 @@ use Magento\Sales\Model\Service\OrderService;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\CartManagementInterface;
+use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -82,6 +83,10 @@ class Order
      * @var OrderRepositoryInterface
      */
     private $orderRepository;
+    /**
+     * @var StockRegistryInterface
+     */
+    private $stockRegistry;
     /**
      * @var InvoiceService
      */
@@ -148,6 +153,7 @@ class Order
      * @param CustomerRepositoryInterface $customerRepository
      * @param OrderService                $orderService
      * @param OrderRepositoryInterface    $orderRepository
+     * @param StockRegistryInterface      $stockRegistry
      * @param InvoiceService              $invoiceService
      * @param OrderConverter              $orderConverter
      * @param ShipmentRepositoryInterface $shipmentRepository
@@ -173,6 +179,7 @@ class Order
         CustomerRepositoryInterface $customerRepository,
         OrderService $orderService,
         OrderRepositoryInterface $orderRepository,
+        StockRegistryInterface $stockRegistry,
         InvoiceService $invoiceService,
         OrderConverter $orderConverter,
         ShipmentRepositoryInterface $shipmentRepository,
@@ -197,6 +204,7 @@ class Order
         $this->customerRepository = $customerRepository;
         $this->orderService = $orderService;
         $this->orderRepository = $orderRepository;
+        $this->stockRegistry = $stockRegistry;
         $this->invoiceService = $invoiceService;
         $this->orderConverter = $orderConverter;
         $this->shipmentRepository = $shipmentRepository;
@@ -223,15 +231,16 @@ class Order
         $store = $this->storeManager->getStore($storeId);
         $importCustomer = $this->orderHelper->getImportCustomer($storeId);
         $sepHousNo = $this->orderHelper->getSeperateHousenumber($storeId);
+        $backorders = $this->orderHelper->getEnableBackorders($storeId);
         $lvb = ($data['order_status'] == 'shipped') ? true : false;
 
-        if ($errors = $this->checkItems($data['products'], $lvb)) {
+        if ($errors = $this->checkItems($data['products'], $lvb, $backorders)) {
             return $this->jsonRepsonse($errors, '', $data['channable_id']);
         }
 
         try {
             $cartId = $this->cartManagementInterface->createEmptyCart();
-            $cart = $this->cartRepositoryInterface->get($cartId)->setStore($store)->setCurrency();
+            $cart = $this->cartRepositoryInterface->get($cartId)->setStore($store)->setCurrency()->setIsSuperMode(true);
             $customerId = $this->setCustomerCart($cart, $store, $data, $importCustomer);
 
             $billingAddress = $this->getAddressData('billing', $data, $customerId, $importCustomer, $sepHousNo);
@@ -315,12 +324,13 @@ class Order
     }
 
     /**
-     * @param $items
-     * @param $lvb
+     * @param      $items
+     * @param bool $lvb
+     * @param bool $backorders
      *
      * @return array|bool
      */
-    public function checkItems($items, $lvb = false)
+    public function checkItems($items, $lvb = false, $backorders = false)
     {
         $error = [];
         foreach ($items as $item) {
@@ -344,7 +354,7 @@ class Order
                         $product->getEntityId()
                     );
                 }
-                if (!$product->isSalable() && !$lvb) {
+                if (!$product->isSalable() && !$lvb && !$backorders) {
                     $error[] = __(
                         'Product "%1" not available in requested quantity (ID: %2)',
                         $product->getName(),
@@ -545,9 +555,11 @@ class Order
         $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $store->getId());
         $shippingAddressId = $cart->getShippingAddress();
         $billingAddressId = $cart->getBillingAddress();
+        $skipStock = $this->orderHelper->getLvbSkipStock($store->getId());
 
         foreach ($data['products'] as $item) {
             $product = $this->product->create()->load($item['id']);
+            $stockItem = $this->stockRegistry->getStockItem($item['id']);
             $price = $item['price'];
 
             if (empty($taxCalculation)) {
@@ -559,12 +571,15 @@ class Order
 
             $product->setPrice($price)->setFinalPrice($price);
 
-            /*
-            if ($lvb && $this->orderHelper->getLvbSkipStock($store->getId())) {
-                $product->getStockItem()->setUseConfigManageStock(false);
-                $product->getStockItem()->setManageStock(false);
+            if ($lvb && $skipStock) {
+                $stockItem->setUseConfigManageStock(false)->setManageStock(false);
+                $product->setData('is_salable', true)->setData('stock_data', $stockItem);
             }
-            */
+
+            if ($this->orderHelper->getEnableBackorders($store->getId())) {
+                $stockItem->setUseConfigBackorders(false)->setBackorders(true);
+                $product->setData('is_salable', true)->setData('stock_data', $stockItem);
+            }
 
             $this->total += $price;
             $this->weight += ($product->getWeight() * intval($item['quantity']));

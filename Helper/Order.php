@@ -29,6 +29,7 @@ class Order extends AbstractHelper
     const XPATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
     const XPATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
     const XPATH_USE_CHANNEL_ORDERID = 'magmodules_channable_marketplace/order/channel_orderid';
+    const XPATH_ENABLE_BACKORDERS = 'magmodules_channable_marketplace/order/backorders';
     const XPATH_LVB_ENABLED = 'magmodules_channable_marketplace/order/lvb';
     const XPATH_LVB_SKIP_STOCK = 'magmodules_channable_marketplace/order/lvb_stock';
     const XPATH_LVB_AUTO_SHIP = 'magmodules_channable_marketplace/order/lvb_ship';
@@ -298,10 +299,19 @@ class Order extends AbstractHelper
      *
      * @return mixed
      */
+    public function getEnableBackorders($storeId = null)
+    {
+        return $this->generalHelper->getStoreValue(self::XPATH_ENABLE_BACKORDERS, $storeId);
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return mixed
+     */
     public function getLvbSkipStock($storeId = null)
     {
-        //$skipStock = $this->generalHelper->getStoreValue(self::XPATH_LVB_SKIP_STOCK, $storeId);
-        return false;
+        return $this->generalHelper->getStoreValue(self::XPATH_LVB_SKIP_STOCK, $storeId);
     }
 
     /**
