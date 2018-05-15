@@ -33,6 +33,8 @@ class Image implements ArrayInterface
                 ['value' => '0', 'label' => __('No')],
                 ['value' => '1', 'label' => __('Yes')],
                 ['value' => '2', 'label' => __('Only if Empty (Recommended)')],
+                ['value' => '3', 'label' => __('Combine, simple images first')],
+                ['value' => '4', 'label' => __('Combine, parent images first')]
             ];
         }
         return $this->options;

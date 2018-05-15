@@ -166,6 +166,10 @@ class Product extends AbstractHelper
                 continue;
             }
 
+            if (empty($attribute['label'])) {
+                continue;
+            }
+
             $value = null;
 
             if (!empty($attribute['source']) || ($type == 'image_link')) {
@@ -261,17 +265,7 @@ class Product extends AbstractHelper
                 $value = $this->getProductUrl($product, $simple, $config);
                 break;
             case 'image_link':
-                $value = $this->getImage($attribute, $config, $product);
-                if (($product->getTypeId() == 'configurable') && $simple != null) {
-                    if (isset($config['filters']['image']['configurable'])) {
-                        if ($config['filters']['image']['configurable'] == 2) {
-                            $imageSimple = $this->getImage($attribute, $config, $simple);
-                            if (!empty($imageSimple)) {
-                                $value = $imageSimple;
-                            }
-                        }
-                    }
-                }
+                $value = $this->getImage($attribute, $config, $product, $simple);
                 break;
             case 'attribute_set_id':
                 $value = $this->getAttributeSetName($product);
@@ -354,16 +348,87 @@ class Product extends AbstractHelper
 
         return $url;
     }
+    /**
+     * @param                                $attribute
+     * @param                                $config
+     * @param \Magento\Catalog\Model\Product $product
+     * @param \Magento\Catalog\Model\Product $simple
+     *
+     * @return string|array
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
+    public function getImage($attribute, $config, $product, $simple)
+    {
+        if ($simple != null) {
+            $typeId = $product->getTypeId();
+            if (in_array($product->getTypeId(), ['configurable', 'bundle', 'grouped'])) {
+
+                if ($config['filters']['image'][$typeId] == 2) {
+                    $imageSimple = $this->getImageData($attribute, $config, $simple);
+                    if (!empty($imageSimple)) {
+                        return $imageSimple;
+                    }
+                }
+
+                if ($config['filters']['image'][$typeId] == 3) {
+                    $imageSimple = $this->getImageData($attribute, $config, $simple);
+                    $imageParent = $this->getImageData($attribute, $config, $product);
+
+                    $images = [];
+                    if (is_array($imageSimple)) {
+                        $images = $imageSimple;
+                    } else {
+                        if (!empty($imageSimple)) {
+                            $images[] = $imageSimple;
+                        }
+                    }
+                    if (is_array($imageParent)) {
+                        $images = array_merge($images, $imageParent);
+                    } else {
+                        if (!empty($imageParent)) {
+                            $images[] = $imageParent;
+                        }
+                    }
+
+                    return array_unique($images);
+                }
+                if ($config['filters']['image'][$typeId] == 4) {
+                    $imageParent = $this->getImageData($attribute, $config, $product);
+                    $imageSimple = $this->getImageData($attribute, $config, $simple);
+
+                    $images = [];
+                    if (is_array($imageParent)) {
+                        $images = $imageParent;
+                    } else {
+                        if (!empty($imageParent)) {
+                            $images[] = $imageParent;
+                        }
+                    }
+                    if (is_array($imageSimple)) {
+                        $images = array_merge($images, $imageSimple);
+                    } else {
+                        if (!empty($imageSimple)) {
+                            $images[] = $imageSimple;
+                        }
+                    }
+
+                    return array_unique($images);
+                }
+            }
+        }
+
+        return $this->getImageData($attribute, $config, $product);
+    }
 
     /**
      * @param                                $attribute
      * @param                                $config
      * @param \Magento\Catalog\Model\Product $product
      *
-     * @return string
+     * @return string|array
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public function getImage($attribute, $config, $product)
+    public function getImageData($attribute, $config, $product)
     {
         if (empty($attribute['source']) || ($attribute['source'] == 'all')) {
             $images = [];
