@@ -31,6 +31,7 @@ use Magento\Tax\Model\Calculation as TaxCalculationn;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 use Magento\Shipping\Model\ShippingFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\CatalogInventory\Observer\ItemsForReindex;
 
 /**
  * Class Order
@@ -139,6 +140,10 @@ class Order
      * @var SearchCriteriaBuilder
      */
     private $searchCriteriaBuilder;
+    /**
+     * @var ItemsForReindex
+     */
+    private $itemsForReindex;
 
     /**
      * Order constructor.
@@ -167,6 +172,7 @@ class Order
      * @param GeneralHelper               $generalHelper
      * @param OrderlHelper                $orderHelper
      * @param CheckoutSession             $checkoutSession
+     * @param ItemsForReindex             $itemsForReindex
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -192,7 +198,8 @@ class Order
         ShippingFactory $shippingFactory,
         GeneralHelper $generalHelper,
         OrderlHelper $orderHelper,
-        CheckoutSession $checkoutSession
+        CheckoutSession $checkoutSession,
+        ItemsForReindex $itemsForReindex
     ) {
         $this->storeManager = $storeManager;
         $this->product = $product;
@@ -218,6 +225,7 @@ class Order
         $this->orderHelper = $orderHelper;
         $this->shippingFactory = $shippingFactory;
         $this->checkoutSession = $checkoutSession;
+        $this->itemsForReindex = $itemsForReindex;
     }
 
     /**
@@ -257,7 +265,7 @@ class Order
                 $cart->getShippingAddress()->addData($shippingAddress);
             }
 
-            $itemCount = $this->addProductsToQuote($cart, $data, $store, $lvb);
+            $itemCount = $this->addProductsToQuote($cart, $data, $store);
             $shippingPriceCal = $this->getShippingPrice($cart, $data, $store);
 
             $this->checkoutSession->setChannableEnabled(1);
@@ -276,6 +284,12 @@ class Order
             $cart->save();
 
             $cart = $this->cartRepositoryInterface->get($cart->getId());
+
+            if ($lvb && $this->orderHelper->getLvbSkipStock($store->getId())) {
+                $cart->setInventoryProcessed(true);
+                $this->itemsForReindex->clear();
+            }
+
             $orderId = $this->cartManagementInterface->placeOrder($cart->getId());
 
             /** @var \Magento\Sales\Model\Order $order */
@@ -545,17 +559,15 @@ class Order
      * @param      $cart
      * @param      $data
      * @param      $store
-     * @param bool $lvb
      *
      * @return int
      */
-    public function addProductsToQuote($cart, $data, $store, $lvb = false)
+    public function addProductsToQuote($cart, $data, $store)
     {
         $qty = 0;
         $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $store->getId());
         $shippingAddressId = $cart->getShippingAddress();
         $billingAddressId = $cart->getBillingAddress();
-        $skipStock = $this->orderHelper->getLvbSkipStock($store->getId());
 
         foreach ($data['products'] as $item) {
             $product = $this->product->create()->load($item['id']);
@@ -570,12 +582,6 @@ class Order
             }
 
             $product->setPrice($price)->setFinalPrice($price);
-
-            if ($lvb && $skipStock) {
-                $stockItem->setUseConfigManageStock(false)->setManageStock(false);
-                $product->setData('is_salable', true)->setData('stock_data', $stockItem);
-            }
-
             if ($this->orderHelper->getEnableBackorders($store->getId())) {
                 $stockItem->setUseConfigBackorders(false)->setBackorders(true);
                 $product->setData('is_salable', true)->setData('stock_data', $stockItem);
