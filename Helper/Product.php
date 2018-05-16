@@ -260,6 +260,11 @@ class Product extends AbstractHelper
      */
     public function getAttributeValue($type, $attribute, $config, $product, $simple)
     {
+
+        if (!empty($attribute['source']) && ($attribute['source'] == 'attribute_set_name')) {
+            $type = 'attribute_set_name';
+        }
+
         switch ($type) {
             case 'link':
                 $value = $this->getProductUrl($product, $simple, $config);
@@ -267,7 +272,7 @@ class Product extends AbstractHelper
             case 'image_link':
                 $value = $this->getImage($attribute, $config, $product, $simple);
                 break;
-            case 'attribute_set_id':
+            case 'attribute_set_name':
                 $value = $this->getAttributeSetName($product);
                 break;
             case 'manage_stock':
