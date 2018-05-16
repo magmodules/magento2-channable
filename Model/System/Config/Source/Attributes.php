@@ -65,7 +65,8 @@ class Attributes implements ArrayInterface
     public function getAttributesArray()
     {
         $attributes = [];
-        $attributes[] = ['value' => 'attribute_set_id', 'label' => __('Attribute Set')];
+        $attributes[] = ['value' => 'attribute_set_id', 'label' => __('Attribute Set ID')];
+        $attributes[] = ['value' => 'attribute_set_name', 'label' => __('Attribute Set Name')];
         $attributes[] = ['value' => 'type_id', 'label' => __('Product Type')];
         $attributes[] = ['value' => 'entity_id', 'label' => __('Product Id')];
 
