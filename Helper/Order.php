@@ -25,6 +25,8 @@ class Order extends AbstractHelper
     const XPATH_IMPORT_CUSTOMER = 'magmodules_channable_marketplace/order/import_customer';
     const XPATH_CUSTOMER_GROUP_ID = 'magmodules_channable_marketplace/order/customers_group';
     const XPATH_INVOICE_ORDER = 'magmodules_channable_marketplace/order/invoice_order';
+    const XPATH_USE_CUSTOM_STATUS = 'magmodules_channable_marketplace/order/use_custom_status';
+    const XPATH_CUSTOM_STATUS = 'magmodules_channable_marketplace/order/custom_status';
     const XPATH_SEPERATE_HOUSENUMBER = 'magmodules_channable_marketplace/order/seperate_housenumber';
     const XPATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
     const XPATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
@@ -272,6 +274,21 @@ class Order extends AbstractHelper
     public function getInvoiceOrder($storeId = null)
     {
         return $this->generalHelper->getStoreValue(self::XPATH_INVOICE_ORDER, $storeId);
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return mixed
+     */
+    public function getProcessingStatus($storeId = null)
+    {
+        $useCustomStatus = $this->generalHelper->getStoreValue(self::XPATH_USE_CUSTOM_STATUS, $storeId);
+        if (!$useCustomStatus) {
+            return null;
+        }
+
+        return $this->generalHelper->getStoreValue(self::XPATH_CUSTOM_STATUS, $storeId);
     }
 
     /**

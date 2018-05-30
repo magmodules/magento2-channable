@@ -53,6 +53,10 @@ class Attributes implements ArrayInterface
         if (!$this->options) {
             $options[] = ['value' => '', 'label' => __('None / Do not use')];
             $options[] = $this->getAttributesArray();
+            $relations = $this->getRelations();
+            if (!empty($relations)) {
+                $options[] = $relations;
+            }
             $this->options = $options;
         }
 
@@ -105,5 +109,22 @@ class Attributes implements ArrayInterface
     public function getLabel($attribute)
     {
         return str_replace("'", '', $attribute->getFrontendLabel());
+    }
+
+    /**
+     * @return array
+     */
+    public function getRelations()
+    {
+        $optionArray = [];
+        $optionArray[] = ['label' => __('Related Skus'), 'value' => 'related_skus'];
+        $optionArray[] = ['label' => __('Upsell Skus'), 'value' => 'upsell_skus'];
+        $optionArray[] = ['label' => __('Crosssell Skus'), 'value' => 'crosssell_skus'];
+
+        return [
+            'label'         => __('Product Relations'),
+            'value'         => $optionArray,
+            'optgroup-name' => __('Product Relations')
+        ];
     }
 }
