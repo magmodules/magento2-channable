@@ -328,11 +328,17 @@ class General extends AbstractHelper
     }
 
     /**
+     * @param null $date
+     *
      * @return string
      */
-    public function getLocalDateTime()
+    public function getLocalDateTime($date = null)
     {
-       return $this->localeDate->date()->format('Y-m-d H:i:s');
+        if ($date !== null) {
+            return $this->localeDate->date($date)->format('Y-m-d H:i:s');
+        }
+
+        return $this->localeDate->date()->format('Y-m-d H:i:s');
     }
 
     /**

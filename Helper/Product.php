@@ -264,6 +264,15 @@ class Product extends AbstractHelper
         if (!empty($attribute['source']) && ($attribute['source'] == 'attribute_set_name')) {
             $type = 'attribute_set_name';
         }
+        if (!empty($attribute['source']) && ($attribute['source'] == 'related_skus')) {
+            $type = 'related_skus';
+        }
+        if (!empty($attribute['source']) && ($attribute['source'] == 'upsell_skus')) {
+            $type = 'upsell_skus';
+        }
+        if (!empty($attribute['source']) && ($attribute['source'] == 'crosssell_skus')) {
+            $type = 'crosssell_skus';
+        }
 
         switch ($type) {
             case 'link':
@@ -282,6 +291,11 @@ class Product extends AbstractHelper
                 break;
             case 'availability':
                 $value = $this->getAvailability($attribute, $product);
+                break;
+            case 'related_skus':
+            case 'upsell_skus':
+            case 'crosssell_skus':
+                $value = $this->getProductRelations($type, $product);
                 break;
             default:
                 $value = $this->getValue($attribute, $product);
@@ -353,6 +367,7 @@ class Product extends AbstractHelper
 
         return $url;
     }
+
     /**
      * @param                                $attribute
      * @param                                $config
@@ -643,6 +658,33 @@ class Product extends AbstractHelper
     }
 
     /**
+     * @param \Magento\Catalog\Model\Product $product
+     * @param                                $type
+     *
+     * @return string
+     */
+    public function getProductRelations($type, $product)
+    {
+        $products = [];
+        if ($type == 'related_skus') {
+            $products = $product->getRelatedProducts();
+        }
+        if ($type == 'upsell_skus') {
+            $products = $product->getUpSellProducts();
+        }
+        if ($type == 'crosssell_skus') {
+            $products = $product->getCrossSellProducts();
+        }
+
+        $skus = [];
+        foreach ($products as $product) {
+            $skus[] = $product->getSku();
+        }
+
+        return implode(',', $skus);
+    }
+
+    /**
      * @param $value
      * @param $attribute
      *
@@ -790,28 +832,18 @@ class Product extends AbstractHelper
                 }
 
                 break;
-            case 'bundle':
-                $finalPrice = $product->getFinalPrice();
-                if ($finalPrice == '0.0000') {
+            default:
+                if (floatval($product->getFinalPrice()) !== 0) {
+                    $price = $this->processPrice($product, $product->getPrice(), $config);
+                    $finalPrice = $this->processPrice($product, $product->getFinalPrice(), $config);
+                    $specialPrice = $this->processPrice($product, $product->getSpecialPrice(), $config);
+                } else {
+                    $finalPrice = $product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue();
+                    $price = $product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue();
                     $product['min_price'] = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getBaseAmount();
                     $product['max_price'] = $product->getPriceInfo()->getPrice('final_price')->getMaximalPrice()->getBaseAmount();
-                    $price = $product->getPriceInfo()->getPrice('regular_price')->getMinimalPrice()->getBaseAmount();
-                    $finalPrice = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getBaseAmount();
-                } else {
-                    $price = isset($product['price']) ? $product['price'] : null;
-                    if (empty($price) && !empty($product['min_price'])) {
-                        $price = $product['min_price'];
-                        $finalPrice = $price;
-                    }
-                    if (!empty($product['special_price'])) {
-                        $finalPrice = round(($price * $product['special_price'] / 100), 2);
-                    }
                 }
-                break;
-            default:
-                $price = $product->getPrice();
-                $finalPrice = $product->getFinalPrice();
-                $specialPrice = $product->getSpecialPrice();
+
                 $rulePrice = $this->ruleFactory->create()->getRulePrice(
                     $config['timestamp'],
                     $config['website_id'],
@@ -822,6 +854,8 @@ class Product extends AbstractHelper
                 if ($rulePrice !== null && $rulePrice !== false) {
                     $finalPrice = min($finalPrice, $rulePrice);
                 }
+
+                break;
         }
 
         $prices = [];

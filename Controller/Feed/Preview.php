@@ -120,7 +120,7 @@ class Preview extends Action
             $this->generalHelper->addTolog('Generate', $e->getMessage());
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/html');
-            $result->setContents('We can\'t generate the feed right now, please check error log');
+            $result->setContents('We can\'t generate the feed right now, please check error log (var/log/channable.log)');
             return $result;
         }
     }

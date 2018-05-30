@@ -524,12 +524,29 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Enable if you want to automatically create an invoice on the order import and set the order state to <strong>Processing</strong> (default invoice order state) instead of <strong>Pending.</strong>]]></comment>
                 </field>
-                <field id="channel_orderid" translate="label" type="select" sortOrder="43" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="use_custom_status" translate="label" type="select" sortOrder="43" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Use non-default order status</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Choose if you want to update the status of the order with a non-default order status.</comment>
+                    <depends>
+                        <field id="invoice_order">1</field>
+                    </depends>
+                </field>
+                <field id="custom_status" translate="label comment" type="select" sortOrder="44"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Status Processing</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status\Processing</source_model>
+                    <depends>
+                        <field id="invoice_order">1</field>
+                        <field id="use_custom_status">1</field>
+                    </depends>
+                </field>
+                <field id="channel_orderid" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Use channel Order ID</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Choose if you want to use the channel Order ID as Magento Increment ID.</comment>
                 </field>
-                <field id="orderid_prefix" translate="label" type="text" sortOrder="44" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="orderid_prefix" translate="label" type="text" sortOrder="46" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Order ID Prefix</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[<strong>NOTE:</strong> As the Order Increment ID is a unique value, we strongly recommend to add a prefix to the Channable Order ID to make sure the order number is unique. Not setting a prefix can cause issues on creating normal orders. Suggestion; “M-“.]]></comment>

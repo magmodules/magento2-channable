@@ -30,6 +30,7 @@ use Magento\Framework\DB\Transaction;
 use Magento\Tax\Model\Calculation as TaxCalculationn;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 use Magento\Shipping\Model\ShippingFactory;
+use Magento\Sales\Model\ResourceModel\Order\Shipment\CollectionFactory as ShipmentCollectionFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\CatalogInventory\Observer\ItemsForReindex;
 
@@ -133,6 +134,10 @@ class Order
      */
     private $shippingFactory;
     /**
+     * @var ShipmentCollectionFactory
+     */
+    private $shipmentCollectionFactory;
+    /**
      * @var CheckoutSession
      */
     private $checkoutSession;
@@ -169,6 +174,7 @@ class Order
      * @param TaxCalculationn             $taxCalculation
      * @param RateRequestFactory          $rateRequestFactory
      * @param ShippingFactory             $shippingFactory
+     * @param ShipmentCollectionFactory   $shipmentCollectionFactory
      * @param GeneralHelper               $generalHelper
      * @param OrderlHelper                $orderHelper
      * @param CheckoutSession             $checkoutSession
@@ -196,6 +202,7 @@ class Order
         TaxCalculationn $taxCalculation,
         RateRequestFactory $rateRequestFactory,
         ShippingFactory $shippingFactory,
+        ShipmentCollectionFactory $shipmentCollectionFactory,
         GeneralHelper $generalHelper,
         OrderlHelper $orderHelper,
         CheckoutSession $checkoutSession,
@@ -224,6 +231,7 @@ class Order
         $this->generalHelper = $generalHelper;
         $this->orderHelper = $orderHelper;
         $this->shippingFactory = $shippingFactory;
+        $this->shipmentCollectionFactory = $shipmentCollectionFactory;
         $this->checkoutSession = $checkoutSession;
         $this->itemsForReindex = $itemsForReindex;
     }
@@ -682,7 +690,12 @@ class Order
                 $transactionSave->save();
 
                 $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
-                $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
+                if ($status = $this->orderHelper->getProcessingStatus($order->getStore())) {
+                    $order->setStatus($status);
+                } else {
+                    $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
+                }
+
                 $this->orderRepository->save($order);
 
             } catch (\Exception $e) {
@@ -779,5 +792,46 @@ class Order
         } else {
             return false;
         }
+    }
+
+    /**
+     * @param $timespan
+     *
+     * @return array
+     */
+    public function getShipments($timespan)
+    {
+        $response = [];
+        $expression = sprintf('- %s hours', $timespan);
+        $gmtDate = $this->generalHelper->getDateTime();
+        $date = date('Y-m-d H:i:s', strtotime($expression, strtotime($gmtDate)));
+
+        $shipments = $this->shipmentCollectionFactory->create()
+            ->addFieldToFilter('main_table.created_at', ['gteq' => $date])
+            ->join(
+                array('order' => 'sales_order'),
+                'main_table.order_id=order.entity_id',
+                array(
+                    'order_increment_id' => 'order.increment_id',
+                    'channable_id'       => 'order.channable_id',
+                    'status'             => 'order.status'
+                )
+            )->addFieldToFilter('channable_id', ['gt' => 0]);
+
+        foreach ($shipments as $shipment) {
+            $data['id'] = $shipment->getOrderIncrementId();
+            $data['status'] = $shipment->getStatus();
+            $data['date'] = $this->generalHelper->getLocalDateTime($shipment->getCreatedAt());
+            foreach ($shipment->getAllTracks() as $tracknum) {
+                $data['fulfillment']['tracking_code'][] = $tracknum->getNumber();
+                $data['fulfillment']['title'][] = $tracknum->getTitle();
+                $data['fulfillment']['carrier_code'][] = $tracknum->getCarrierCode();
+            }
+
+            $response[] = $data;
+            unset($data);
+        }
+
+        return $response;
     }
 }
