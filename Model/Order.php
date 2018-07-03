@@ -591,8 +591,14 @@ class Order
 
             $product->setPrice($price)->setFinalPrice($price);
             if ($this->orderHelper->getEnableBackorders($store->getId())) {
-                $stockItem->setUseConfigBackorders(false)->setBackorders(true);
-                $product->setData('is_salable', true)->setData('stock_data', $stockItem);
+                $stockItem->setUseConfigBackorders(false)->setBackorders(true)->setIsInStock(true);
+                $productData = $product->getData();
+                $productData['quantity_and_stock_status']['is_in_stock'] = true;
+                $productData['is_in_stock'] = true;
+                $productData['is_salable'] = true;
+                $productData['stock_data'] = $stockItem;
+                $product->setData($productData);
+                $this->generalHelper->addTolog('Product', $product->getData());
             }
 
             $this->total += $price;
