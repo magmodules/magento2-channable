@@ -598,7 +598,6 @@ class Order
                 $productData['is_salable'] = true;
                 $productData['stock_data'] = $stockItem;
                 $product->setData($productData);
-                $this->generalHelper->addTolog('Product', $product->getData());
             }
 
             $this->total += $price;
