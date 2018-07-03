@@ -217,8 +217,8 @@ class Item extends AbstractModel
             $items = $this->itemFactory->create()->getCollection()
                 ->addFieldToFilter('store_id', $storeId)
                 ->addFieldToFilter('needs_update', 1)
-                ->setOrder('last_call', 'ASC')
                 ->setPageSize($config['api']['limit']);
+            $items->getSelect()->order('last_call', 'ASC');
             if (!$items->getSize()) {
                 $result = [
                     'status'   => 'success',
