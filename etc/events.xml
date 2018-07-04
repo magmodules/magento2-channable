@@ -9,4 +9,7 @@
     <event name="checkout_submit_all_after">
         <observer name="channable_checkout_submit_all_after" instance="Magmodules\Channable\Observer\Checkout\AllSubmitAfter" />
     </event>
+    <event name="sales_order_place_after">
+        <observer name="channable_sales_order_place_after" instance="Magmodules\Channable\Observer\Sales\OrderPlaceAfter" />
+    </event>
 </config>

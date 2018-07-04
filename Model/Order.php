@@ -33,6 +33,7 @@ use Magento\Shipping\Model\ShippingFactory;
 use Magento\Sales\Model\ResourceModel\Order\Shipment\CollectionFactory as ShipmentCollectionFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\CatalogInventory\Observer\ItemsForReindex;
+use Magento\Framework\Registry;
 
 /**
  * Class Order
@@ -149,6 +150,10 @@ class Order
      * @var ItemsForReindex
      */
     private $itemsForReindex;
+    /**
+     * @var Registry
+     */
+    private $registry;
 
     /**
      * Order constructor.
@@ -179,6 +184,7 @@ class Order
      * @param OrderlHelper                $orderHelper
      * @param CheckoutSession             $checkoutSession
      * @param ItemsForReindex             $itemsForReindex
+     * @param Registry                    $registry
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -206,7 +212,8 @@ class Order
         GeneralHelper $generalHelper,
         OrderlHelper $orderHelper,
         CheckoutSession $checkoutSession,
-        ItemsForReindex $itemsForReindex
+        ItemsForReindex $itemsForReindex,
+        Registry $registry
     ) {
         $this->storeManager = $storeManager;
         $this->product = $product;
@@ -234,6 +241,7 @@ class Order
         $this->shipmentCollectionFactory = $shipmentCollectionFactory;
         $this->checkoutSession = $checkoutSession;
         $this->itemsForReindex = $itemsForReindex;
+        $this->registry = $registry;
     }
 
     /**
@@ -591,14 +599,23 @@ class Order
 
             $product->setPrice($price)->setFinalPrice($price);
             if ($this->orderHelper->getEnableBackorders($store->getId())) {
-                $stockItem->setUseConfigBackorders(false)->setBackorders(true);
-                $product->setData('is_salable', true)->setData('stock_data', $stockItem);
+                $stockItem->setUseConfigBackorders(false)->setBackorders(true)->setIsInStock(true);
+                $productData = $product->getData();
+                $productData['quantity_and_stock_status']['is_in_stock'] = true;
+                $productData['is_in_stock'] = true;
+                $productData['is_salable'] = true;
+                $productData['stock_data'] = $stockItem;
+                $product->setData($productData);
             }
 
             $this->total += $price;
             $this->weight += ($product->getWeight() * intval($item['quantity']));
             $qty += intval($item['quantity']);
             $cart->addProduct($product, intval($item['quantity']));
+        }
+
+        if ($this->orderHelper->getEnableBackorders($store->getId())) {
+            $this->registry->register('channable_skip_qty_check', true);
         }
 
         return $qty;
