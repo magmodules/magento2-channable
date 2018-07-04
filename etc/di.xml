@@ -63,4 +63,7 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\CatalogInventory\Model\StockState">
+        <plugin name="channable_skip_qty_check" type="Magmodules\Channable\Plugin\AfterCheckQty"/>
+    </type>
 </config>
