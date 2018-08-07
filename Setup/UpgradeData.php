@@ -271,40 +271,38 @@ class UpgradeData implements UpgradeDataInterface
         }
 
         if (version_compare($context->getVersion(), "1.0.12", "<")) {
+            $salesConnection = $setup->getConnection('sales');
             $orderGridTable = $setup->getTable('sales_order_grid');
-            $setup->getConnection()
-                ->addColumn(
-                    $orderGridTable,
-                    'channable_id',
-                    [
-                        'type'     => Table::TYPE_INTEGER,
-                        'default'  => 0,
-                        'nullable' => false,
-                        'comment'  => 'Channable: Order ID'
-                    ]
-                );
-            $setup->getConnection()
-                ->addColumn(
-                    $orderGridTable,
-                    'channel_id',
-                    [
-                        'type'     => Table::TYPE_TEXT,
-                        'length'   => 255,
-                        'nullable' => true,
-                        'comment'  => 'Channable: Channel ID'
-                    ]
-                );
-            $setup->getConnection()
-                ->addColumn(
-                    $orderGridTable,
-                    'channel_name',
-                    [
-                        'type'     => Table::TYPE_TEXT,
-                        'length'   => 255,
-                        'nullable' => true,
-                        'comment'  => 'Channable: Channel Name'
-                    ]
-                );
+            $salesConnection->addColumn(
+                $orderGridTable,
+                'channable_id',
+                [
+                    'type' => Table::TYPE_INTEGER,
+                    'default' => 0,
+                    'nullable' => false,
+                    'comment' => 'Channable: Order ID'
+                ]
+            );
+            $salesConnection->addColumn(
+                $orderGridTable,
+                'channel_id',
+                [
+                    'type' => Table::TYPE_TEXT,
+                    'length' => 255,
+                    'nullable' => true,
+                    'comment' => 'Channable: Channel ID'
+                ]
+            );
+            $salesConnection->addColumn(
+                $orderGridTable,
+                'channel_name',
+                [
+                    'type' => Table::TYPE_TEXT,
+                    'length' => 255,
+                    'nullable' => true,
+                    'comment' => 'Channable: Channel Name'
+                ]
+            );
 
             $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
             if ($setup->getConnection()->isTableExists($itemsTable)) {
