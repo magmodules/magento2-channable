@@ -405,16 +405,8 @@ class Item extends AbstractModel
                 $key = array_search($item['id'], array_column($postData, 'id'));
                 $postData[$key]['call_result'] = $item['message'];
                 $postData[$key]['status'] = ucfirst($item['status']);
-                $postData[$key]['needs_update'] = ($item['status'] == 'success') ? 0 : 1;
+                $postData[$key]['needs_update'] = 0;
                 $postData[$key]['last_call'] = $this->generalHelper->getGmtDate();
-
-                if ($item['status'] == 'error') {
-                    $oldStatus = $this->itemFactory->create()->load($postData[$key]['item_id'])->getStatus();
-                    if ($oldStatus == 'Error') {
-                        $postData[$key]['status'] = 'Not Found';
-                        $postData[$key]['needs_update'] = 0;
-                    }
-                }
             }
         }
 
