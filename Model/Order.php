@@ -316,15 +316,17 @@ class Order
             }
 
             if (!empty($data['channel_name'])) {
-                $orderComment = __(
-                    '<b>%1 order</b><br/>Channable id: %2<br>%3 id: %4<br/>Commission: %5',
-                    ucfirst($data['channel_name']),
-                    $data['channable_id'],
-                    ucfirst($data['channel_name']),
-                    $data['channel_id'],
-                    $data['price']['commission']
-                );
-                $order->addStatusHistoryComment($orderComment);
+
+                $payment = $order->getPayment();
+                $payment->setAdditionalInformation('channable_id', $data['channable_id']);
+                $payment->setAdditionalInformation('channel_id', ucfirst($data['channel_id']));
+                $payment->setAdditionalInformation('commission', $data['price']['commission']);
+                if ($lvb) {
+                    $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']) . ' LVB');
+                } else {
+                    $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']));
+                }
+
                 $order->setChannableId($data['channable_id'])
                     ->setChannelId($data['channel_id'])
                     ->setChannelName($data['channel_name']);
