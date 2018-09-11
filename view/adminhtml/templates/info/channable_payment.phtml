@@ -1,0 +1,32 @@
+<br/>
+<div class="admin__page-section-item-title">
+    <?php echo __('Channable Payment'); ?>
+</div>
+<table class="admin__table-secondary channable-information-table">
+    <tbody>
+        <?php if ($channelName = $this->getInfo()->getAdditionalInformation('channel_name')): ?>
+            <tr>
+                <th><?= __('Channel Name'); ?></th>
+                <td><?= $channelName; ?></td>
+            </tr>
+        <?php endif; ?>
+        <?php if ($channelId = $this->getInfo()->getAdditionalInformation('channel_id')): ?>
+            <tr>
+                <th><?= __('Channel ID'); ?></th>
+                <td><?= $channelId; ?></td>
+            </tr>
+        <?php endif; ?>
+        <?php if ($channableId = $this->getInfo()->getAdditionalInformation('channable_id')): ?>
+            <tr>
+                <th><?= __('Channable ID'); ?></th>
+                <td><?= $channableId; ?></td>
+            </tr>
+        <?php endif; ?>
+        <?php if ($commission = $this->getInfo()->getAdditionalInformation('commission')): ?>
+            <tr>
+                <th><?= __('Commission'); ?></th>
+                <td><?= $commission; ?></td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
