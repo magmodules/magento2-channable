@@ -65,7 +65,7 @@ class Item extends AbstractHelper
      */
     public function invalidateByObserver()
     {
-        if (!$this->isEnabled()) {
+        if (!$this->generalHelper->getMarketplaceEnabled()) {
             return false;
         }
 
@@ -78,14 +78,16 @@ class Item extends AbstractHelper
     }
 
     /**
-     * @return mixed
+     * @param null $storeId
+     *
+     * @return bool|mixed
      */
-    public function isEnabled()
+    public function isEnabled($storeId = null)
     {
         if (!$this->generalHelper->getMarketplaceEnabled()) {
             return false;
         }
-        return $this->generalHelper->getStoreValue(self::XPATH_ENABLE);
+        return $this->generalHelper->getStoreValue(self::XPATH_ENABLE, $storeId);
     }
 
     /**
