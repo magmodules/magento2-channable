@@ -1,8 +1,18 @@
-<br/>
-<div class="admin__page-section-item-title">
-    <?php echo __('Channable Payment'); ?>
-</div>
-<table class="admin__table-secondary channable-information-table">
+<?php
+/**
+ * Copyright © 2018 Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+/**
+ * @var \Magmodules\Channable\Block\Info\Channable $block
+ * @see \Magmodules\Channable\Block\Info\Channable
+ */
+$specificInfo = $block->getSpecificInformation();
+?>
+<?php echo $block->escapeHtml($block->getMethod()->getTitle()); ?>
+<table class="data-table admin__table-secondary">
     <tbody>
         <?php if ($channelName = $this->getInfo()->getAdditionalInformation('channel_name')): ?>
             <tr>
@@ -30,3 +40,4 @@
         <?php endif; ?>
     </tbody>
 </table>
+<?php echo $block->getChildHtml() ?>
