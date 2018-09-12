@@ -1,0 +1,23 @@
+<?php
+/**
+ * Copyright © 2018 Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+/**
+ * @var \Magmodules\Channable\Block\Info\Channable $block
+ * @see \Magmodules\Channable\Block\Info\Channable
+ */
+?>
+<?php echo $block->escapeHtml($block->getMethod()->getTitle()); ?>{{pdf_row_separator}}
+
+<?php if ($specificInfo = $block->getSpecificInformation()):?>
+    <?php foreach ($specificInfo as $label => $value):?>
+        <?php echo $block->escapeHtml($label) ?>:
+        <?php echo $block->escapeHtml(implode(' ', $block->getValueAsArray($value)));?>
+        {{pdf_row_separator}}
+    <?php endforeach; ?>
+<?php endif;?>
+
+<?php echo $block->escapeHtml(implode('{{pdf_row_separator}}', $block->getChildPdfAsArray())); ?>

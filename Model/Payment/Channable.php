@@ -34,6 +34,10 @@ class Channable extends AbstractMethod
      * @var bool
      */
     protected $_canUseInternal = true;
+    /**
+     * @var string
+     */
+    protected $_infoBlockType = 'Magmodules\Channable\Block\Info\Channable';
 
     /**
      * @param CartInterface|null $quote
