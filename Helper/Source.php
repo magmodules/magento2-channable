@@ -229,9 +229,9 @@ class Source extends AbstractHelper
                 if ($image = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_IMAGE)) {
                     $filters['image']['configurable'] = $image;
                     if (isset($filters['parent_attributes']['configurable'])) {
-                        array_push($filters['parent_attributes']['configurable'], 'image_url');
+                        array_push($filters['parent_attributes']['configurable'], 'image_link');
                     } else {
-                        $filters['parent_attributes']['configurable'] = ['image_url'];
+                        $filters['parent_attributes']['configurable'] = ['image_link'];
                     }
                 }
 
