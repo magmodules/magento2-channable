@@ -326,3 +326,29 @@
 #magmodules_channable_marketplace_general_version {
     padding-top: 0px
 }
+
+a.channable-tooltip span {
+    display: none;
+    padding: 2px 3px;
+    margin-left: 8px;
+    width: auto;
+}
+
+a.channable-tooltip:hover span {
+    display: block;
+    position: absolute;
+    background: #FFFFFF;
+    border: 1px solid #CCCCCC;
+    color: #6C6C6C;
+    width: auto;
+    margin-right: 20px;
+}
+
+.order-payment-method .channable td {
+    text-align: left !important;
+}
+
+.order-payment-method .channable {
+    margin-bottom: 20px;
+    border: 1px solid #E3E3E3;
+}

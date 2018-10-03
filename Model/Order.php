@@ -315,26 +315,7 @@ class Order
                 $order->setIncrementId($newIncrementId);
             }
 
-            if (!empty($data['channel_name'])) {
-
-                $payment = $order->getPayment();
-                $payment->setAdditionalInformation('channable_id', $data['channable_id']);
-                $payment->setAdditionalInformation('channel_id', ucfirst($data['channel_id']));
-                $payment->setAdditionalInformation('commission', $data['price']['commission']);
-                if ($lvb) {
-                    $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']) . ' LVB');
-                } else {
-                    $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']));
-                }
-
-                $order->setChannableId($data['channable_id'])
-                    ->setChannelId($data['channel_id'])
-                    ->setChannelName($data['channel_name']);
-            } elseif (!empty($data['channable_id'])) {
-                $order->setChannableId($data['channable_id']);
-            }
-
-            $this->orderRepository->save($order);
+            $this->addPaymentData($order, $data, $lvb);
 
             if ($this->orderHelper->getInvoiceOrder($storeId)) {
                 $this->invoiceOrder($order);
@@ -693,6 +674,50 @@ class Order
         }
 
         return $shippingMethodFallback;
+    }
+
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @param                            $data
+     * @param                            $lvb
+     */
+    public function addPaymentData($order, $data, $lvb)
+    {
+        $payment = $order->getPayment();
+        if (isset($data['channable_id']) && !empty($data['channable_id'])) {
+            $payment->setAdditionalInformation('channable_id', $data['channable_id']);
+            $order->setChannableId($data['channable_id']);
+        }
+
+        if (isset($data['channel_id']) && !empty($data['channel_id'])) {
+            $payment->setAdditionalInformation('channel_id', ucfirst($data['channel_id']));
+            $order->setChannelId($data['channel_id']);
+        }
+
+        if (isset($data['price']['commission']) && !empty($data['price']['commission'])) {
+            $commission = $data['price']['currency'] . ' ' . $data['price']['commission'];
+            $payment->setAdditionalInformation('commission', $commission);
+        }
+
+        if (isset($data['channel_name']) && !empty($data['channel_name'])) {
+            if ($lvb) {
+                $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']) . ' LVB');
+            } else {
+                $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']));
+            }
+            $order->setChannelName($data['channel_name']);
+        }
+
+        $itemRows = array();
+        foreach ($data['products'] as $product) {
+            $itemRows[] = array(
+                'title'           => $product['title'],
+                'ean'             => $product['ean'],
+                'delivery_period' => $product['delivery_period']
+            );
+        }
+        $payment->setAdditionalInformation('delivery', $itemRows);
+        $this->orderRepository->save($order);
     }
 
     /**
