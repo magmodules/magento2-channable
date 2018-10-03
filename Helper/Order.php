@@ -458,7 +458,7 @@ class Order extends AbstractHelper
     public function getNeedsTaxCalulcation($type, $storeId = null)
     {
         if ($type == 'shipping') {
-            return $this->generalHelper->getStoreValue(self::XPATH_TAX_PRICE, $storeId);
+            return $this->generalHelper->getStoreValue(self::XPATH_TAX_SHIPPING, $storeId);
         } else {
             return $this->generalHelper->getStoreValue(self::XPATH_TAX_PRICE, $storeId);
         }

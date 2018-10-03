@@ -632,10 +632,10 @@ class Order
      */
     public function getShippingPrice($cart, $data, $store)
     {
-        $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $store->getId());
+        $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('shipping', $store->getId());
         $shippingPriceCal = $data['price']['shipping'];
 
-        if ($taxCalculation) {
+        if (empty($taxCalculation)) {
             $shippingAddressId = $cart->getShippingAddress();
             $billingAddressId = $cart->getBillingAddress();
             $taxRateId = $this->orderHelper->getTaxClassShipping($store->getId());
