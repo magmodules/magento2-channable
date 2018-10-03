@@ -12,7 +12,7 @@
 $specificInfo = $block->getSpecificInformation();
 ?>
 <?php echo $block->escapeHtml($block->getMethod()->getTitle()); ?>
-<table class="data-table admin__table-secondary">
+<table class="data-table admin__table-secondary channable">
     <tbody>
         <?php if ($channelName = $this->getInfo()->getAdditionalInformation('channel_name')): ?>
             <tr>
@@ -36,6 +36,26 @@ $specificInfo = $block->getSpecificInformation();
             <tr>
                 <th><?= __('Commission'); ?></th>
                 <td><?= $commission; ?></td>
+            </tr>
+        <?php endif; ?>
+        <?php if ($delivery = $this->getInfo()->getAdditionalInformation('delivery')): ?>
+            <tr>
+                <th><?= __('Delivery'); ?></th>
+                <td>
+                    <a href="#" class="channable-tooltip"><?= __('Show Delivery Periods'); ?>
+                        <span>
+						<table class="channable-delivery-info-table">
+							<?php foreach ($delivery as $item): ?>
+                <tr>
+									<td><?= $item['title']; ?></td>
+									<td><?= $item['ean']; ?></td>
+									<td><?= $item['delivery_period']; ?></td>
+								</tr>
+              <?php endforeach; ?>
+						</table>
+					    </span>
+                    </a>
+                </td>
             </tr>
         <?php endif; ?>
     </tbody>
