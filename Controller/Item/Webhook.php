@@ -4,21 +4,20 @@
  * See COPYING.txt for license details.
  */
 
-namespace Magmodules\Channable\Controller\Order;
+namespace Magmodules\Channable\Controller\Item;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magmodules\Channable\Helper\Order as OrderHelper;
-use Magmodules\Channable\Model\Order as OrderModel;
+use Magmodules\Channable\Helper\Item as ItemHelper;
 
 /**
- * Class Hook
+ * Class Webhook
  *
- * @package Magmodules\Channable\Controller\Order
+ * @package Magmodules\Channable\Controller\Item
  */
-class Hook extends Action
+class Webhook extends Action
 {
 
     /**
@@ -26,37 +25,30 @@ class Hook extends Action
      */
     private $generalHelper;
     /**
-     * @var OrderHelper
+     * @var ItemHelper
      */
-    private $orderHelper;
-    /**
-     * @var OrderModel
-     */
-    private $orderModel;
+    private $itemHelper;
     /**
      * @var JsonFactory
      */
     private $resultJsonFactory;
 
     /**
-     * Hook constructor.
+     * Webhook constructor.
      *
      * @param Context       $context
      * @param GeneralHelper $generalHelper
-     * @param OrderHelper   $orderHelper
-     * @param OrderModel    $orderModel
+     * @param ItemHelper    $itemHelper
      * @param JsonFactory   $resultJsonFactory
      */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
-        OrderHelper $orderHelper,
-        OrderModel $orderModel,
+        ItemHelper $itemHelper,
         JsonFactory $resultJsonFactory
     ) {
         $this->generalHelper = $generalHelper;
-        $this->orderHelper = $orderHelper;
-        $this->orderModel = $orderModel;
+        $this->itemHelper = $itemHelper;
         $this->resultJsonFactory = $resultJsonFactory;
         parent::__construct($context);
     }
@@ -66,24 +58,24 @@ class Hook extends Action
      */
     public function execute()
     {
-        $orderData = null;
+        $webhookData = null;
         $request = $this->getRequest();
         $storeId = $request->getParam('store');
-        $response = $this->orderHelper->validateRequestData($request);
+        $response = $this->itemHelper->validateRequestData($request);
 
         if (empty($response['errors'])) {
             $data = file_get_contents('php://input');
-            $orderData = $this->orderHelper->validateJsonData($data, $request);
-            if (!empty($orderData['errors'])) {
-                $response = $orderData;
+            $webhookData = $this->itemHelper->validateJsonData($data);
+            if (!empty($webhookData['errors'])) {
+                $response = $webhookData;
             }
         }
 
         if (empty($response['errors'])) {
             try {
-                $response = $this->orderModel->importOrder($orderData, $storeId);
+                $response = $this->itemHelper->setWebhook($webhookData, $storeId);
             } catch (\Exception $e) {
-                $response = $this->orderHelper->jsonResponse($e->getMessage());
+                $response = $this->itemHelper->jsonResponse($e->getMessage());
             }
         }
 

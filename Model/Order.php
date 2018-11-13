@@ -324,7 +324,6 @@ class Order
             if ($lvb && $this->orderHelper->getLvbAutoShip($storeId)) {
                 $this->shipOrder($order);
             }
-
         } catch (\Exception $e) {
             $this->generalHelper->addTolog('importOrder: ' . $data['channable_id'], $e->getMessage());
             return $this->jsonRepsonse($e->getMessage(), '', $data['channable_id']);
@@ -580,7 +579,7 @@ class Order
                 $price = ($item['price'] / (100 + $percent) * 100);
             }
 
-            $product->setPrice($price)->setFinalPrice($price);
+            $product->setPrice($price)->setFinalPrice($price)->setSpecialPrice($price);
             if ($this->orderHelper->getEnableBackorders($store->getId())) {
                 $stockItem->setUseConfigBackorders(false)->setBackorders(true)->setIsInStock(true);
                 $productData = $product->getData();
@@ -708,13 +707,13 @@ class Order
             $order->setChannelName($data['channel_name']);
         }
 
-        $itemRows = array();
+        $itemRows = [];
         foreach ($data['products'] as $product) {
-            $itemRows[] = array(
+            $itemRows[] = [
                 'title'           => $product['title'],
                 'ean'             => $product['ean'],
                 'delivery_period' => $product['delivery_period']
-            );
+            ];
         }
         $payment->setAdditionalInformation('delivery', $itemRows);
         $this->orderRepository->save($order);
@@ -741,7 +740,6 @@ class Order
                 }
 
                 $this->orderRepository->save($order);
-
             } catch (\Exception $e) {
                 $this->generalHelper->addTolog('invoiceOrder: ' . $order->getIncrementId(), $e->getMessage());
             }
@@ -773,7 +771,6 @@ class Order
                 $orderComment = __('LVB Order, Automaticly Shipped');
                 $order->addStatusHistoryComment($orderComment);
                 $this->orderRepository->save($order);
-
             } catch (\Exception $e) {
                 $this->generalHelper->addTolog('shipOrder: ' . $order->getIncrementId(), $e->getMessage());
             }
@@ -853,13 +850,13 @@ class Order
         $shipments = $this->shipmentCollectionFactory->create()
             ->addFieldToFilter('main_table.created_at', ['gteq' => $date])
             ->join(
-                array('order' => 'sales_order'),
+                ['order' => 'sales_order'],
                 'main_table.order_id=order.entity_id',
-                array(
+                [
                     'order_increment_id' => 'order.increment_id',
                     'channable_id'       => 'order.channable_id',
                     'status'             => 'order.status'
-                )
+                ]
             )->addFieldToFilter('channable_id', ['gt' => 0]);
 
         foreach ($shipments as $shipment) {

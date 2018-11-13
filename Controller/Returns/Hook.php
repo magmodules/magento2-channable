@@ -4,19 +4,19 @@
  * See COPYING.txt for license details.
  */
 
-namespace Magmodules\Channable\Controller\Order;
+namespace Magmodules\Channable\Controller\Returns;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magmodules\Channable\Helper\Order as OrderHelper;
-use Magmodules\Channable\Model\Order as OrderModel;
+use Magmodules\Channable\Helper\Returns as ReturnsHelper;
+use Magmodules\Channable\Model\Returns as ReturnsModel;
 
 /**
  * Class Hook
  *
- * @package Magmodules\Channable\Controller\Order
+ * @package Magmodules\Channable\Controller\Returns
  */
 class Hook extends Action
 {
@@ -26,37 +26,37 @@ class Hook extends Action
      */
     private $generalHelper;
     /**
-     * @var OrderHelper
+     * @var ReturnsHelper
      */
-    private $orderHelper;
+    private $returnsHelper;
     /**
-     * @var OrderModel
+     * @var ReturnsModel
      */
-    private $orderModel;
+    private $returnsModel;
     /**
      * @var JsonFactory
      */
     private $resultJsonFactory;
 
     /**
-     * Hook constructor.
+     * Status constructor.
      *
      * @param Context       $context
      * @param GeneralHelper $generalHelper
-     * @param OrderHelper   $orderHelper
-     * @param OrderModel    $orderModel
+     * @param ReturnsHelper $returnsHelper
+     * @param ReturnsModel  $returnsModel
      * @param JsonFactory   $resultJsonFactory
      */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
-        OrderHelper $orderHelper,
-        OrderModel $orderModel,
+        ReturnsHelper $returnsHelper,
+        ReturnsModel $returnsModel,
         JsonFactory $resultJsonFactory
     ) {
         $this->generalHelper = $generalHelper;
-        $this->orderHelper = $orderHelper;
-        $this->orderModel = $orderModel;
+        $this->returnsHelper = $returnsHelper;
+        $this->returnsModel = $returnsModel;
         $this->resultJsonFactory = $resultJsonFactory;
         parent::__construct($context);
     }
@@ -66,24 +66,24 @@ class Hook extends Action
      */
     public function execute()
     {
-        $orderData = null;
+        $returnData = null;
         $request = $this->getRequest();
         $storeId = $request->getParam('store');
-        $response = $this->orderHelper->validateRequestData($request);
+        $response = $this->returnsHelper->validateRequestData($request);
 
         if (empty($response['errors'])) {
             $data = file_get_contents('php://input');
-            $orderData = $this->orderHelper->validateJsonData($data, $request);
-            if (!empty($orderData['errors'])) {
-                $response = $orderData;
+            $returnData = $this->returnsHelper->validateJsonData($data, $request);
+            if (!empty($returnData['errors'])) {
+                $response = $returnData;
             }
         }
 
         if (empty($response['errors'])) {
             try {
-                $response = $this->orderModel->importOrder($orderData, $storeId);
+                $response = $this->returnsModel->importReturn($returnData, $storeId);
             } catch (\Exception $e) {
-                $response = $this->orderHelper->jsonResponse($e->getMessage());
+                $response = $this->returnsHelper->jsonResponse($e->getMessage());
             }
         }
 

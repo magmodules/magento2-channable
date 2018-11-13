@@ -382,7 +382,6 @@ class Product extends AbstractHelper
         if ($simple != null) {
             $typeId = $product->getTypeId();
             if (in_array($product->getTypeId(), ['configurable', 'bundle', 'grouped'])) {
-
                 if ($config['filters']['image'][$typeId] == 2) {
                     $imageSimple = $this->getImageData($attribute, $config, $simple);
                     if (!empty($imageSimple)) {
@@ -1088,9 +1087,9 @@ class Product extends AbstractHelper
 
         if (in_array('configurable', $filters['relations'])
             && (($visibility == Visibility::VISIBILITY_NOT_VISIBLE) || !in_array(
-                    'configurable',
-                    $filters['nonvisible']
-                ))
+                'configurable',
+                $filters['nonvisible']
+            ))
         ) {
             $configurableIds = $this->catalogProductTypeConfigurable->getParentIdsByChild($productId);
             if (!empty($configurableIds)) {

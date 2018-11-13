@@ -100,7 +100,6 @@ class Selftest extends AbstractHelper
         }
 
         if (!empty($stores)) {
-
             $msg = __('Enabled Storeviews(s): %1', implode(', ', $names));
             $results[] = $this->getPass($msg);
 
@@ -124,7 +123,6 @@ class Selftest extends AbstractHelper
                     $results[] = $this->getNotice($msg);
                 }
             }
-
         } else {
             $msg = __('No Storeviews(s) Enabled');
             $results[] = $this->getFail($msg, '#feed-enable');
@@ -235,8 +233,11 @@ class Selftest extends AbstractHelper
 
         if ($format) {
             if ($link) {
-                $format = str_replace('</span>', ' <span class="more"><a href="%s">More Info</a></span></span>',
-                    $format);
+                $format = str_replace(
+                    '</span>',
+                    ' <span class="more"><a href="%s">More Info</a></span></span>',
+                    $format
+                );
                 return sprintf($format, $msg, self::SUPPORT_URL . $link);
             } else {
                 return sprintf($format, $msg);

@@ -15,5 +15,4 @@ class Channable extends Info
      * @var string
      */
     protected $_template = 'Magmodules_Channable::info/channable_payment.phtml';
-
 }

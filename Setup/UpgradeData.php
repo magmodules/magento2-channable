@@ -17,10 +17,14 @@ use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\App\Config\ValueInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 
+/**
+ * Class UpgradeData
+ *
+ * @package Magmodules\Channable\Setup
+ */
 class UpgradeData implements UpgradeDataInterface
 {
 
-    const TABLE_NAME_ITEMS = 'channable_items';
     /**
      * @var SalesSetupFactory
      */
@@ -68,8 +72,6 @@ class UpgradeData implements UpgradeDataInterface
     /**
      * @param ModuleDataSetupInterface $setup
      * @param ModuleContextInterface   $context
-     *
-     * @throws \Zend_Db_Exception
      */
     public function upgrade(
         ModuleDataSetupInterface $setup,
@@ -78,170 +80,7 @@ class UpgradeData implements UpgradeDataInterface
         $setup->startSetup();
 
         if (version_compare($context->getVersion(), "0.9.6", "<")) {
-
-            /** @var SalesSetup $salesSetup */
-            $salesSetup = $this->salesSetupFactory->create(['setup' => $setup]);
-
-            $channableId = [
-                'type'     => 'int',
-                'visible'  => false,
-                'required' => false,
-                'label'    => 'Channable: Order ID'
-            ];
-            $salesSetup->addAttribute('order', 'channable_id', $channableId);
-
-            $channelId = [
-                'type'     => 'varchar',
-                'visible'  => false,
-                'required' => false,
-                'label'    => 'Channable: Channel ID'
-            ];
-            $salesSetup->addAttribute('order', 'channel_id', $channelId);
-
-            $channelName = [
-                'type'     => 'varchar',
-                'visible'  => false,
-                'required' => false,
-                'label'    => 'Channable: Channel Name'
-            ];
-            $salesSetup->addAttribute('order', 'channel_name', $channelName);
-        }
-
-        if (version_compare($context->getVersion(), "0.9.7", "<")) {
-            $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
-            if ($setup->getConnection()->isTableExists($itemsTable) != true) {
-                $itemsTable = $setup->getConnection()
-                    ->newTable($itemsTable)
-                    ->addColumn(
-                        'item_id',
-                        Table::TYPE_BIGINT,
-                        null,
-                        [
-                            'identity' => false,
-                            'unsigned' => true,
-                            'nullable' => false,
-                            'primary'  => true
-                        ],
-                        'Item id'
-                    )
-                    ->addColumn(
-                        'store_id',
-                        Table::TYPE_SMALLINT,
-                        null,
-                        ['nullable' => false, 'default' => '0'],
-                        'Store id'
-                    )
-                    ->addColumn(
-                        'id',
-                        Table::TYPE_INTEGER,
-                        null,
-                        ['nullable' => false, 'default' => '0'],
-                        'Product id'
-                    )
-                    ->addColumn(
-                        'title',
-                        Table::TYPE_TEXT,
-                        255,
-                        ['nullable' => false],
-                        'Product Title'
-                    )
-                    ->addColumn(
-                        'price',
-                        Table::TYPE_DECIMAL,
-                        '12,4',
-                        ['nullable' => false],
-                        'Product Price'
-                    )
-                    ->addColumn(
-                        'discount_price',
-                        Table::TYPE_DECIMAL,
-                        '12,4',
-                        ['nullable' => true],
-                        'Product Discount Price'
-                    )
-                    ->addColumn(
-                        'qty',
-                        Table::TYPE_DECIMAL,
-                        '12,4',
-                        ['default' => '0.0000'],
-                        'Product Discount Price'
-                    )
-                    ->addColumn(
-                        'is_in_stock',
-                        Table::TYPE_SMALLINT,
-                        null,
-                        ['nullable' => false, 'default' => '0'],
-                        'Stock Status'
-                    )
-                    ->addColumn(
-                        'created_at',
-                        Table::TYPE_TIMESTAMP,
-                        null,
-                        ['nullable' => false, 'default' => Table::TIMESTAMP_INIT],
-                        'Created At'
-                    )
-                    ->addColumn(
-                        'updated_at',
-                        Table::TYPE_TIMESTAMP,
-                        null,
-                        ['nullable' => false, 'default' => Table::TIMESTAMP_INIT_UPDATE],
-                        'Updated At'
-                    )
-                    ->addColumn(
-                        'last_call',
-                        Table::TYPE_TIMESTAMP,
-                        null,
-                        ['nullable' => true, 'default' => ''],
-                        'Last Call'
-                    )
-                    ->addColumn(
-                        'call_result',
-                        Table::TYPE_TEXT,
-                        255,
-                        ['nullable' => true],
-                        'Call Result'
-                    )
-                    ->addColumn(
-                        'status',
-                        Table::TYPE_TEXT,
-                        255,
-                        ['nullable' => true],
-                        'Status'
-                    )
-                    ->addColumn(
-                        'needs_update',
-                        Table::TYPE_SMALLINT,
-                        null,
-                        ['nullable' => false, 'default' => '0'],
-                        'Needs Update'
-                    )
-                    ->setComment("Channable Items Table")
-                    ->setOption('type', 'InnoDB')
-                    ->setOption('charset', 'utf8');
-                $setup->getConnection()->createTable($itemsTable);
-            }
-        }
-
-        if (version_compare($context->getVersion(), "0.9.9", "<")) {
-            $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
-            if ($setup->getConnection()->isTableExists($itemsTable)) {
-                $setup->getConnection()
-                    ->addColumn(
-                        $itemsTable,
-                        'gtin',
-                        [
-                            'type'     => Table::TYPE_TEXT,
-                            'length'   => 255,
-                            'nullable' => false,
-                            'comment'  => 'Product GTIN',
-                            'after'    => 'title'
-                        ]
-                    );
-            }
-        }
-
-        if (version_compare($context->getVersion(), "1.0.3", "<")) {
-            $this->addIndexes($setup);
+            $this->addSalesOrderFields($setup);
         }
 
         if (version_compare($context->getVersion(), "1.0.5", "<")) {
@@ -252,128 +91,14 @@ class UpgradeData implements UpgradeDataInterface
             $this->changeConfigPaths();
         }
 
-        if (version_compare($context->getVersion(), "1.0.11", "<")) {
-            $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
-            if ($setup->getConnection()->isTableExists($itemsTable)) {
-                $setup->getConnection()
-                    ->addColumn(
-                        $itemsTable,
-                        'parent_id',
-                        [
-                            'type'     => Table::TYPE_INTEGER,
-                            'default'  => 0,
-                            'nullable' => false,
-                            'comment'  => 'Parent Id',
-                            'after'    => 'id'
-                        ]
-                    );
-            }
-        }
-
         if (version_compare($context->getVersion(), "1.0.12", "<")) {
-            $salesConnection = $setup->getConnection('sales');
-            $orderGridTable = $setup->getTable('sales_order_grid');
-            $salesConnection->addColumn(
-                $orderGridTable,
-                'channable_id',
-                [
-                    'type' => Table::TYPE_INTEGER,
-                    'default' => 0,
-                    'nullable' => false,
-                    'comment' => 'Channable: Order ID'
-                ]
-            );
-            $salesConnection->addColumn(
-                $orderGridTable,
-                'channel_id',
-                [
-                    'type' => Table::TYPE_TEXT,
-                    'length' => 255,
-                    'nullable' => true,
-                    'comment' => 'Channable: Channel ID'
-                ]
-            );
-            $salesConnection->addColumn(
-                $orderGridTable,
-                'channel_name',
-                [
-                    'type' => Table::TYPE_TEXT,
-                    'length' => 255,
-                    'nullable' => true,
-                    'comment' => 'Channable: Channel Name'
-                ]
-            );
-
-            $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
-            if ($setup->getConnection()->isTableExists($itemsTable)) {
-                if (!$setup->getConnection()->tableColumnExists($itemsTable, 'parent_id')) {
-                    $setup->getConnection()
-                        ->addColumn(
-                            $itemsTable,
-                            'parent_id',
-                            [
-                                'type'     => Table::TYPE_INTEGER,
-                                'default'  => 0,
-                                'nullable' => false,
-                                'comment'  => 'Parent Id',
-                                'after'    => 'id'
-                            ]
-                        );
-                }
-            }
-
+            $this->addSalesOrderGridFields($setup);
         }
 
         $setup->endSetup();
     }
 
-    /**
-     * Add Indexes to Items Table.
-     *
-     * @param ModuleDataSetupInterface $setup
-     */
-    public function addIndexes(ModuleDataSetupInterface $setup)
-    {
-        $itemsTable = $setup->getTable(self::TABLE_NAME_ITEMS);
-        if ($setup->getConnection()->isTableExists($itemsTable)) {
-            $setup->getConnection()->addIndex(
-                $itemsTable,
-                $setup->getConnection()->getIndexName(
-                    $itemsTable,
-                    'store_id',
-                    'store_id'
-                ),
-                'store_id'
-            );
-            $setup->getConnection()->addIndex(
-                $itemsTable,
-                $setup->getConnection()->getIndexName(
-                    $itemsTable,
-                    'id',
-                    'id'
-                ),
-                'id'
-            );
-            $setup->getConnection()->addIndex(
-                $itemsTable,
-                $setup->getConnection()->getIndexName(
-                    $itemsTable,
-                    'needs_update',
-                    'needs_update'
-                ),
-                'needs_update'
-            );
-            $setup->getConnection()->addIndex(
-                $itemsTable,
-                $setup->getConnection()->getIndexName(
-                    $itemsTable,
-                    'updated_at',
-                    'updated_at'
-                ),
-                'updated_at'
-            );
-        }
-    }
+
 
     /**
      * Convert Serialzed Data fields to Json for Magento 2.2
@@ -459,5 +184,77 @@ class UpgradeData implements UpgradeDataInterface
                 $config->getScopeId()
             );
         }
+    }
+
+    /**
+     * @param ModuleDataSetupInterface $setup
+     */
+    public function addSalesOrderFields(ModuleDataSetupInterface $setup)
+    {
+        /** @var SalesSetup $salesSetup */
+        $salesSetup = $this->salesSetupFactory->create(['setup' => $setup]);
+
+        $channableId = [
+            'type'     => 'int',
+            'visible'  => false,
+            'required' => false,
+            'label'    => 'Channable: Order ID'
+        ];
+        $salesSetup->addAttribute('order', 'channable_id', $channableId);
+
+        $channelId = [
+            'type'     => 'varchar',
+            'visible'  => false,
+            'required' => false,
+            'label'    => 'Channable: Channel ID'
+        ];
+        $salesSetup->addAttribute('order', 'channel_id', $channelId);
+
+        $channelName = [
+            'type'     => 'varchar',
+            'visible'  => false,
+            'required' => false,
+            'label'    => 'Channable: Channel Name'
+        ];
+        $salesSetup->addAttribute('order', 'channel_name', $channelName);
+    }
+
+    /**
+     * @param ModuleDataSetupInterface $setup
+     */
+    public function addSalesOrderGridFields(ModuleDataSetupInterface $setup)
+    {
+        $salesConnection = $setup->getConnection('sales');
+        $orderGridTable = $setup->getTable('sales_order_grid');
+        $salesConnection->addColumn(
+            $orderGridTable,
+            'channable_id',
+            [
+                'type'     => Table::TYPE_INTEGER,
+                'default'  => 0,
+                'nullable' => false,
+                'comment'  => 'Channable: Order ID'
+            ]
+        );
+        $salesConnection->addColumn(
+            $orderGridTable,
+            'channel_id',
+            [
+                'type'     => Table::TYPE_TEXT,
+                'length'   => 255,
+                'nullable' => true,
+                'comment'  => 'Channable: Channel ID'
+            ]
+        );
+        $salesConnection->addColumn(
+            $orderGridTable,
+            'channel_name',
+            [
+                'type'     => Table::TYPE_TEXT,
+                'length'   => 255,
+                'nullable' => true,
+                'comment'  => 'Channable: Channel Name'
+            ]
+        );
     }
 }

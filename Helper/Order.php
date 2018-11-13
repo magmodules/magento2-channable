@@ -83,11 +83,10 @@ class Order extends AbstractHelper
 
     /**
      * @param \Magento\Framework\App\RequestInterface $request
-     * @param string                                  $type
      *
      * @return bool|mixed
      */
-    public function validateRequestData($request, $type = 'order')
+    public function validateRequestData($request)
     {
         $storeId = $request->getParam('store');
         if (empty($storeId)) {
@@ -99,11 +98,9 @@ class Order extends AbstractHelper
             return $this->jsonResponse('Extension not enabled');
         }
 
-        if ($type == 'order') {
-            $order = $this->getEnabled($storeId);
-            if (empty($order)) {
-                return $this->jsonResponse('Order import not enabled');
-            }
+        $order = $this->getEnabled($storeId);
+        if (empty($order)) {
+            return $this->jsonResponse('Order import not enabled');
         }
 
         $token = $this->generalHelper->getToken();
@@ -111,7 +108,7 @@ class Order extends AbstractHelper
             return $this->jsonResponse('Token not set in admin');
         }
 
-        $code = $request->getParam('code');
+        $code = trim(preg_replace('/\s+/', '', $request->getParam('code')));
         if (empty($code)) {
             return $this->jsonResponse('Token param missing in request');
         }
@@ -166,7 +163,7 @@ class Order extends AbstractHelper
      *
      * @return bool|mixed
      */
-    public function validateJsonOrderData($orderData, $request)
+    public function validateJsonData($orderData, $request)
     {
         $data = null;
         $test = $request->getParam('test');
@@ -222,7 +219,7 @@ class Order extends AbstractHelper
             $data = '{"channable_id": 112345, "channel_id": 123456, "channel_name": "Bol", 
               "order_status": "' . $orderStatus . '", "extra": {"memo": "Channable Test", 
               "comment": "Channable order id: 999999999"}, "price": {"total": "' . $product->getFinalPrice() . '", 
-              "currency": "EUR", "shipping": 0, "subtotal": "' . $product->getFinalPrice() . '",
+              "currency": "EUR", "shipping": 0, "subtotal": "100.00",,
               "commission": 2.50, "payment_method": "bol", "transaction_fee": 0},
               "billing": { "city": "Amsterdam", "state": "", "email": "dontemail@me.net",
               "address_line_1": "Billing Line 1", "address_line_2": "Billing Line 2", "street": "Donkere Spaarne", 
@@ -231,8 +228,8 @@ class Order extends AbstractHelper
               "address_supplement": "Address supplement" }, "customer": { "email": "dontemail@me.net", 
               "phone": "054333333", "gender": "man", "mobile": "", "company": "Test company", "last_name":
               "From Channable", "first_name": "Test", "middle_name": "" },
-              "products": [{"id": "' . $product->getEntityId() . '", "ean": "000000000", 
-              "price": "' . $product->getFinalPrice() . '", "title": "' . htmlentities($product->getName()) . '", 
+              "products": [{"id": "1", "ean": "000000000", 
+              "price": "100.00", "title": "' . htmlentities($product->getName()) . '", 
               "quantity": 1, "shipping": 0, "commission": 2.50, "reference_code": "00000000", 
               "delivery_period": "2016-07-12+02:00"}], "shipping": {  "city": "Amsterdam", "state": "", 
               "email": "dontemail@me.net", "street": "Shipping Street", "company": "Magmodules",

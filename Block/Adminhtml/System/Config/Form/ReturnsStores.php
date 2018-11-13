@@ -8,33 +8,33 @@ namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form;
 
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
-use Magmodules\Channable\Helper\Order as OrderHelper;
+use Magmodules\Channable\Helper\Returns as ReturnsHelper;
 use Magento\Backend\Block\Template\Context;
 
 /**
- * Class OrderStores
+ * Class ReturnsStores
  *
  * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form
  */
-class OrderStores extends Field
+class ReturnsStores extends Field
 {
 
     /**
-     * @var OrderHelper
+     * @var ReturnsHelper
      */
-    private $orderHelper;
+    private $returnsHelper;
 
     /**
-     * OrderStores constructor.
+     * ReturnsStores constructor.
      *
      * @param Context     $context
-     * @param OrderHelper $orderHelper
+     * @param ReturnsHelper $returnsHelper
      */
     public function __construct(
         Context $context,
-        OrderHelper $orderHelper
+        ReturnsHelper $returnsHelper
     ) {
-        $this->orderHelper = $orderHelper;
+        $this->returnsHelper = $returnsHelper;
         parent::__construct($context);
     }
 
@@ -47,7 +47,7 @@ class OrderStores extends Field
     }
 
     /**
-     * Display ItemStores in config
+     * Display ReturnStores in config
      *
      * @param AbstractElement $element
      *
@@ -76,7 +76,7 @@ class OrderStores extends Field
         $html .= '  <td>' . __('Webhook') . '</td>';
         $html .= ' </tr>';
 
-        $stores = $this->orderHelper->getConfigData();
+        $stores = $this->returnsHelper->getConfigData();
         foreach ($stores as $store) {
             $html .= '<tr>';
             $html .= '  <td>' . $store['name'] . '</td>';

@@ -170,7 +170,8 @@ class Generate
      *
      * @return int
      */
-    public function getSize($storeId) {
+    public function getSize($storeId)
+    {
         try {
             $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
             $config = $this->sourceHelper->getConfig($storeId, 'szie');

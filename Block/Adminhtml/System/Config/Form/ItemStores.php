@@ -47,7 +47,7 @@ class ItemStores extends Field
     }
 
     /**
-     * Version display in config
+     * Display ItemStores in config
      *
      * @param AbstractElement $element
      *

@@ -67,7 +67,8 @@
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
                     <comment>Select the attribute associate with the product name. Suggested field: Product Name</comment>
                 </field>
-                <field id="description_attribute" translate="label comment" type="select" sortOrder="3" showInDefault="1"
+                <field id="description_attribute" translate="label comment" type="select" sortOrder="3"
+                       showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Description</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
@@ -96,7 +97,8 @@
                     <label>Source</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\ImageSource</source_model>
                 </field>
-                <field id="hidden_images" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1"
+                <field id="hidden_images" translate="label" type="select" sortOrder="8" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Include Hidden Images</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -136,7 +138,8 @@
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Attributes</source_model>
                 </field>
             </group>
-            <group id="types" translate="label comment" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="types" translate="label comment" type="text" sortOrder="4" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
                 <label>Product Types</label>
                 <comment><![CDATA[Configure the three different product types to make sure that you are using the right attribute values for the different product types.]]></comment>
                 <field id="heading_configurable" translate="label comment" type="text" sortOrder="20" showInDefault="1"
@@ -145,13 +148,15 @@
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment><![CDATA[For configurable products, we recommend to only add the simple products to the configuration as a ‘configurable product’ by itself cannot be purchased. Choose the attribute(s) that you want to use from the parent relation configurable product.]]></comment>
                 </field>
-                <field id="configurable" translate="label comment" type="select" sortOrder="21" showInDefault="1" showInWebsite="1"
+                <field id="configurable" translate="label comment" type="select" sortOrder="21" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Configurable/Simple Products</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Configurable\Option</source_model>
                     <comment><![CDATA[<strong>Recommended:</strong> Only Linked Simple Products. Selecting this option will export linked simple products that are part of a configurable product. This option is recommended so that the unique product variants are exported to Channable.]]></comment>
                 </field>
-                <field id="configurable_link" translate="label comment" type="select" sortOrder="22" showInDefault="1" showInWebsite="1"
+                <field id="configurable_link" translate="label comment" type="select" sortOrder="22" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Parent URL for Simples</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Configurable\Link</source_model>
@@ -160,7 +165,8 @@
                     </depends>
                     <comment><![CDATA[<strong>Recommended:</strong> Yes, with Auto-Link. In this way the URL will be automatically link to the correct simple product on the configurable product landing page.]]></comment>
                 </field>
-                <field id="configurable_image" translate="label" type="select" sortOrder="23" showInDefault="1" showInWebsite="1"
+                <field id="configurable_image" translate="label" type="select" sortOrder="23" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Parent Image for Simples</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Configurable\Image</source_model>
@@ -169,7 +175,8 @@
                     </depends>
                     <comment><![CDATA[<strong>Recommended:</strong> Only if Empty. In this way the parent image will only be used when there isn't a image available on the simple product.]]></comment>
                 </field>
-                <field id="configurable_parent_atts" translate="label" type="multiselect" sortOrder="24" showInDefault="1"
+                <field id="configurable_parent_atts" translate="label" type="multiselect" sortOrder="24"
+                       showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Use Parent Data for Simples</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Configurable\ParentAttributes</source_model>
@@ -178,7 +185,8 @@
                     </depends>
                     <comment><![CDATA[Select the attributes that you want to use from the parent configurable product. It is not recommended to select the attributes that need to be unique for the simples, such as GTIN and Color.]]></comment>
                 </field>
-                <field id="configurable_nonvisible" translate="label comment" type="select" sortOrder="25" showInDefault="1"
+                <field id="configurable_nonvisible" translate="label comment" type="select" sortOrder="25"
+                       showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Use Fallback only on Non Visible Simples</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -193,13 +201,15 @@
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment><![CDATA[For Bundle Products, we recommend to only add the Bundle product by itself as this is the item that can be purchased.<br>]]></comment>
                 </field>
-                <field id="bundle" translate="label comment" type="select" sortOrder="31" showInDefault="1" showInWebsite="1"
+                <field id="bundle" translate="label comment" type="select" sortOrder="31" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Bundle Products</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Bundle\Option</source_model>
                     <comment><![CDATA[<strong>Recommended:</strong> Only Bundle Product. Selecting this option will export the bundle product by itself to Channable.]]></comment>
                 </field>
-                <field id="bundle_link" translate="label comment" type="select" sortOrder="32" showInDefault="1" showInWebsite="1"
+                <field id="bundle_link" translate="label comment" type="select" sortOrder="32" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Parent URL for Simples</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Bundle\Link</source_model>
@@ -208,7 +218,8 @@
                     </depends>
                     <comment><![CDATA[<strong>Recommended:</strong> Yes. Selecting this option will export the URL that links directly to the Bundle Product.]]></comment>
                 </field>
-                <field id="bundle_image" translate="label comment" type="select" sortOrder="33" showInDefault="1" showInWebsite="1"
+                <field id="bundle_image" translate="label comment" type="select" sortOrder="33" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Parent Image for Simples</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Bundle\Image</source_model>
@@ -217,7 +228,8 @@
                     </depends>
                     <comment><![CDATA[<strong>Recommended:</strong> Only if empty. Selecting this option will export the parent image which will be used if there is no image available for a simple product]]></comment>
                 </field>
-                <field id="bundle_parent_atts" translate="label comment" type="multiselect" sortOrder="34" showInDefault="1"
+                <field id="bundle_parent_atts" translate="label comment" type="multiselect" sortOrder="34"
+                       showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Use Parent Data for Simples</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Bundle\ParentAttributes</source_model>
@@ -241,13 +253,15 @@
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment><![CDATA[For Group Products, we recommend to only add the Grouped Product by itself as that is the product that can be purchased. <br>]]></comment>
                 </field>
-                <field id="grouped" translate="label comment" type="select" sortOrder="41" showInDefault="1" showInWebsite="1"
+                <field id="grouped" translate="label comment" type="select" sortOrder="41" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Grouped Products</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\Option</source_model>
                     <comment><![CDATA[<strong>Recommended:</strong> Only Grouped Product. Selecting this option will export the bundle product by itself to Channable.]]></comment>
                 </field>
-                <field id="grouped_link" translate="label comment" type="select" sortOrder="42" showInDefault="1" showInWebsite="1"
+                <field id="grouped_link" translate="label comment" type="select" sortOrder="42" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Parent URL for Simples</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\Link</source_model>
@@ -256,7 +270,8 @@
                     </depends>
                     <comment><![CDATA[<strong>Recommended:</strong> Yes. Selecting this option will export the URL that links directly to the Grouped Product.]]></comment>
                 </field>
-                <field id="grouped_image" translate="label comment" type="select" sortOrder="43" showInDefault="1" showInWebsite="1"
+                <field id="grouped_image" translate="label comment" type="select" sortOrder="43" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Parent Image for Simples</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\Image</source_model>
@@ -265,7 +280,8 @@
                     </depends>
                     <comment><![CDATA[<strong>Recommended:</strong> Only if Empty. Selecting this option will export the parent image which will be used if there is no image available for a simple product.]]></comment>
                 </field>
-                <field id="grouped_parent_price" translate="label" type="select" sortOrder="44" showInDefault="1" showInWebsite="1"
+                <field id="grouped_parent_price" translate="label" type="select" sortOrder="44" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Parent Price</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\Price</source_model>
@@ -273,7 +289,8 @@
                         <field id="grouped" separator=",">parent,both</field>
                     </depends>
                 </field>
-                <field id="grouped_parent_atts" translate="label comment" type="multiselect" sortOrder="45" showInDefault="1"
+                <field id="grouped_parent_atts" translate="label comment" type="multiselect" sortOrder="45"
+                       showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Use Parent Data for Simples</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Grouped\ParentAttributes</source_model>
@@ -439,8 +456,9 @@
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Feeds</frontend_model>
             </group>
         </section>
-        <section id="magmodules_channable_marketplace" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Channable: Orders &amp; Items</label>
+        <section id="magmodules_channable_marketplace" translate="label" type="text" sortOrder="101" showInDefault="1"
+                 showInWebsite="1" showInStore="1">
+            <label>Channable: Orders, Items &amp; Returns</label>
             <tab>magmodules</tab>
             <resource>Magmodules_Channable::marketplace</resource>
             <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1"
@@ -448,14 +466,17 @@
                 <label>Branding</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Header</frontend_model>
             </group>
-            <group id="general" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
+            <group id="general" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0"
+                   showInStore="0">
                 <label>General</label>
                 <comment>Connect your store with Channable Marketplaces using the Channable Marketplace API, you can configure the Order Import settings and the Item Update settings per Store View.</comment>
-                <field id="version" translate="label" type="note" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="version" translate="label" type="note" sortOrder="3" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
                     <label>Version</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Version</frontend_model>
                 </field>
-                <field id="enable" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="enable" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
@@ -469,21 +490,24 @@
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest\Result</frontend_model>
                 </field>
             </group>
-            <group id="order" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="order" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
                 <label>Order Import</label>
-                <comment>Configure the settings on how to import the orders from the Channable Marketplaces into your Magento store. </comment>
+                <comment>Configure the settings on how to import the orders from the Channable Marketplaces into your Magento store.</comment>
                 <field id="heading_shipment" translate="label comment" type="text" sortOrder="20" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Shipping Method</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Select the shipping method that you want to use on the order import.</comment>
                 </field>
-                <field id="shipping_method" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1"
+                <field id="shipping_method" translate="label" type="select" sortOrder="21" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Default Shipping Method</label>
                     <source_model>Magento\Shipping\Model\Config\Source\Allmethods</source_model>
                 </field>
-                <field id="shipping_method_fallback" translate="label" type="select" sortOrder="22" showInDefault="1" showInWebsite="1"
+                <field id="shipping_method_fallback" translate="label" type="select" sortOrder="22" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Fallback for Shipping Method</label>
                     <source_model>Magento\Shipping\Model\Config\Source\Allmethods</source_model>
@@ -494,12 +518,14 @@
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Select if you want to add customers to your Magento store.</comment>
                 </field>
-                <field id="import_customer" translate="label" type="select" sortOrder="31" showInDefault="1" showInWebsite="1"
+                <field id="import_customer" translate="label" type="select" sortOrder="31" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Import Customers</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="customers_group" translate="label" type="select" sortOrder="32" showInDefault="1" showInWebsite="1"
+                <field id="customers_group" translate="label" type="select" sortOrder="32" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Customer Group</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\CustomerGroups</source_model>
@@ -507,24 +533,28 @@
                         <field id="import_customer">1</field>
                     </depends>
                 </field>
-                <field id="heading_customer_address" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1"
+                <field id="heading_customer_address" translate="label" type="text" sortOrder="40" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Address &amp; Invoice</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Configure the way the addresses and invoices are handled in the order import.</comment>
                 </field>
-                <field id="seperate_housenumber" translate="label" type="select" sortOrder="41" showInDefault="1" showInWebsite="1"
+                <field id="seperate_housenumber" translate="label" type="select" sortOrder="41" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Separate housenumber</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[If you use the second 'street' field as a separate house-number field, enable this option.]]></comment>
                 </field>
-                <field id="invoice_order" translate="label" type="select" sortOrder="42" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="invoice_order" translate="label" type="select" sortOrder="42" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
                     <label>Create invoice for order</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Enable if you want to automatically create an invoice on the order import and set the order state to <strong>Processing</strong> (default invoice order state) instead of <strong>Pending.</strong>]]></comment>
                 </field>
-                <field id="use_custom_status" translate="label" type="select" sortOrder="43" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="use_custom_status" translate="label" type="select" sortOrder="43" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
                     <label>Use non-default order status</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Choose if you want to update the status of the order with a non-default order status.</comment>
@@ -541,12 +571,14 @@
                         <field id="use_custom_status">1</field>
                     </depends>
                 </field>
-                <field id="channel_orderid" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="channel_orderid" translate="label" type="select" sortOrder="45" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
                     <label>Use channel Order ID</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Choose if you want to use the channel Order ID as Magento Increment ID.</comment>
                 </field>
-                <field id="orderid_prefix" translate="label" type="text" sortOrder="46" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="orderid_prefix" translate="label" type="text" sortOrder="46" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
                     <label>Order ID Prefix</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[<strong>NOTE:</strong> As the Order Increment ID is a unique value, we strongly recommend to add a prefix to the Channable Order ID to make sure the order number is unique. Not setting a prefix can cause issues on creating normal orders. Suggestion; “M-“.]]></comment>
@@ -554,22 +586,26 @@
                         <field id="channel_orderid">1</field>
                     </depends>
                 </field>
-                <field id="heading_order_advanced" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="heading_order_advanced" translate="label comment" type="text" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Advanced</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment><![CDATA[Advanced options]]></comment>
                 </field>
-                <field id="backorders" translate="label" type="select" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="backorders" translate="label" type="select" sortOrder="51" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
                     <label>Enable order for out of stock items</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>By default orders with out of stock items are not importable in Magento, this funtion will enable backorders for these items.</comment>
                 </field>
-                <field id="lvb" translate="label" type="select" sortOrder="52" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="lvb" translate="label" type="select" sortOrder="52" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Accept FBB/LVB Orders</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Enable the option to enable the Fulfilment by BOL/Logistiek via BOL functionality.]]></comment>
                 </field>
-                <field id="lvb_stock" translate="label" type="select" sortOrder="53" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="lvb_stock" translate="label" type="select" sortOrder="53" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Disregard stock for FBB/LVB Orders</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Enable this option to add the required stock just before importing the order to prevent stock changes.]]></comment>
@@ -577,7 +613,8 @@
                         <field id="lvb">1</field>
                     </depends>
                 </field>
-                <field id="lvb_ship" translate="label" type="select" sortOrder="54" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="lvb_ship" translate="label" type="select" sortOrder="54" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Auto Ship FBB/LVB Orders</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Enable this option to instantly Ship the FBB/LVB orders, in combination with the option "Create invoice for order" on Yes your order will have the status: Complete.]]></comment>
@@ -591,32 +628,39 @@
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Enable the Order Logging option to log all the incoming orders from the connected Marketplaces.</comment>
                 </field>
-                <field id="log" translate="label" type="select" sortOrder="61" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="log" translate="label" type="select" sortOrder="61" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Write errors and orders to the Channable log file located in /var/log/channable.log</comment>
                 </field>
-                <field id="heading_order_stores" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="heading_order_stores" translate="label comment" type="text" sortOrder="70" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
                     <label>Webhooks</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment><![CDATA[Copy and paste the Webhook URL to configure your Magento Store in your Channable Marketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.<br><br>You can simulate a test order by adding /test/{productID} to the end of the Webhook.]]></comment>
                 </field>
-                <field id="order_stores" translate="label" type="text" sortOrder="71" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="order_stores" translate="label" type="text" sortOrder="71" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
                     <label>Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\OrderStores</frontend_model>
                 </field>
             </group>
-            <group id="item" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="item" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
                 <label>Item Update</label>
                 <comment>In order to use the Channable Item API, you have to set the API settings on the store level where you want to import the orders from Channable. The settings are only visible when you have the right store-view selected through the store switcher on the top left.</comment>
-                <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="0" showInWebsite="0" showInStore="1">
+                <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="0" showInWebsite="0"
+                       showInStore="1">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="webhook" translate="label" type="text" sortOrder="2" showInDefault="0" showInWebsite="0" showInStore="1">
+                <field id="webhook" translate="label" type="text" sortOrder="2" showInDefault="0" showInWebsite="0"
+                       showInStore="1">
                     <label>Webhook</label>
                 </field>
-                <field id="heading_invalidation" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0"
+                <field id="heading_invalidation" translate="label" type="text" sortOrder="10" showInDefault="1"
+                       showInWebsite="0"
                        showInStore="0">
                     <label>Invalidation Type</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
@@ -624,7 +668,8 @@
                         <field id="enable">1</field>
                     </depends>
                 </field>
-                <field id="invalidation_modus" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="0"
+                <field id="invalidation_modus" translate="label" type="select" sortOrder="11" showInDefault="1"
+                       showInWebsite="0"
                        showInStore="0">
                     <label>Modus</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\InvalidationModus</source_model>
@@ -633,16 +678,19 @@
                     </depends>
                     <comment>Log Product movements using Observer or Cron.</comment>
                 </field>
-                <field id="heading_settings" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="heading_settings" translate="label comment" type="text" sortOrder="20" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
                     <label>Cron</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Configure the Item update with the values below, we highly recommend to check your Magento cron job functionality to make sure all your items are updated frequently.</comment>
                 </field>
-                <field id="cron" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="cron" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="cron_frequency" translate="label" type="select" sortOrder="22" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="cron_frequency" translate="label" type="select" sortOrder="22" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
                     <label>Frequency</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\CronFrequency</source_model>
                     <backend_model>Magmodules\Channable\Model\Config\Backend\Cron</backend_model>
@@ -650,30 +698,56 @@
                         <field id="cron">1</field>
                     </depends>
                 </field>
-                <field id="custom_frequency" translate="label" type="text" sortOrder="23" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="custom_frequency" translate="label" type="text" sortOrder="23" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
                     <label>Custom Frequency</label>
                     <depends>
                         <field id="cron">1</field>
                         <field id="cron_frequency">custom</field>
                     </depends>
                 </field>
-                <field id="limit" translate="label" type="text" sortOrder="24" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="limit" translate="label" type="text" sortOrder="24" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
                     <label>Products per run</label>
                     <comment><![CDATA[Set a limit on the number of products for each update with a maximum value of <strong>50</strong.>]]></comment>
                 </field>
-                <field id="log" translate="label" type="select" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="log" translate="label" type="select" sortOrder="25" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
                     <label>Log Calls</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Write all the calls and updates to the Channable log file located in /var/log/channable.log.</comment>
                 </field>
-                <field id="heading_item_stores" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="heading_item_stores" translate="label comment" type="text" sortOrder="40" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
                     <label>Enabled Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>You can only activate and or set the Webhook per specific Store View. You can select the Store Views using the dropdown on the top of the left.</comment>
                 </field>
-                <field id="item_stores" translate="label" type="text" sortOrder="41" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="item_stores" translate="label" type="text" sortOrder="41" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
                     <label>Stores</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\ItemStores</frontend_model>
+                </field>
+            </group>
+            <group id="returns" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Returns</label>
+                <comment>In order to use the Channable Item API, you have to set the API settings on the store level where you want to import the orders from Channable. The settings are only visible when you have the right store-view selected through the store switcher on the top left.</comment>
+                <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="heading_returns_stores" translate="label comment" type="text" sortOrder="70" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Webhooks</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment><![CDATA[Copy and paste the Webhook URL to configure your Magento Store in your Channable Marketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.]]></comment>
+                </field>
+                <field id="order_stores" translate="label" type="text" sortOrder="71" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Stores</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\ReturnsStores</frontend_model>
                 </field>
             </group>
         </section>
@@ -686,7 +760,8 @@
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Title</label>
                 </field>
             </group>
@@ -694,10 +769,12 @@
         <section id="carriers">
             <group id="channable" translate="label" type="text" sortOrder="999" showInDefault="1">
                 <label>Channable</label>
-                <field id="name" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="name" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Name</label>
                 </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Title</label>
                 </field>
             </group>
