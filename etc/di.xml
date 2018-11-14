@@ -39,6 +39,40 @@
             <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\ResourceModel\Item</argument>
         </arguments>
     </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="channable_item_grid_data_source" xsi:type="string">Magmodules\Channable\Model\ResourceModel\Item\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="ReturnsGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ReturnsGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Magmodules\Channable\Model\ResourceModel\Returns\Collection</argument>
+            <argument name="filterPool" xsi:type="object" shared="false">ReturnsGridFilterPool</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Magmodules\Channable\Model\ResourceModel\Returns\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">channable_returns</argument>
+            <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\ResourceModel\Returns</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="channable_returns_grid_data_source" xsi:type="string">Magmodules\Channable\Model\ResourceModel\Returns\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
     <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
         <arguments>
             <argument name="columns" xsi:type="array">
@@ -48,13 +82,6 @@
             </argument>
         </arguments>
     </virtualType>
-    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
-        <arguments>
-            <argument name="collections" xsi:type="array">
-                <item name="channable_item_grid_data_source" xsi:type="string">Magmodules\Channable\Model\ResourceModel\Item\Grid\Collection</item>
-            </argument>
-        </arguments>
-    </type>
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">

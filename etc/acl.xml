@@ -11,6 +11,7 @@
             <resource id="Magento_Backend::admin">
                 <resource id="Magmodules_Channable::general" title="Channable" sortOrder="50">
                     <resource id="Magmodules_Channable::general_item" title="Item Updates" sortOrder="1"/>
+                    <resource id="Magmodules_Channable::general_returns" title="Returns" sortOrder="1"/>
                 </resource>
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">

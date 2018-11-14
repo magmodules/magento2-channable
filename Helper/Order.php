@@ -83,11 +83,10 @@ class Order extends AbstractHelper
 
     /**
      * @param \Magento\Framework\App\RequestInterface $request
-     * @param string                                  $type
      *
      * @return bool|mixed
      */
-    public function validateRequestData($request, $type = 'order')
+    public function validateRequestData($request)
     {
         $storeId = $request->getParam('store');
         if (empty($storeId)) {
@@ -99,11 +98,9 @@ class Order extends AbstractHelper
             return $this->jsonResponse('Extension not enabled');
         }
 
-        if ($type == 'order') {
-            $order = $this->getEnabled($storeId);
-            if (empty($order)) {
-                return $this->jsonResponse('Order import not enabled');
-            }
+        $order = $this->getEnabled($storeId);
+        if (empty($order)) {
+            return $this->jsonResponse('Order import not enabled');
         }
 
         $token = $this->generalHelper->getToken();
@@ -111,7 +108,7 @@ class Order extends AbstractHelper
             return $this->jsonResponse('Token not set in admin');
         }
 
-        $code = $request->getParam('code');
+        $code = trim(preg_replace('/\s+/', '', $request->getParam('code')));
         if (empty($code)) {
             return $this->jsonResponse('Token param missing in request');
         }
@@ -166,7 +163,7 @@ class Order extends AbstractHelper
      *
      * @return bool|mixed
      */
-    public function validateJsonOrderData($orderData, $request)
+    public function validateJsonData($orderData, $request)
     {
         $data = null;
         $test = $request->getParam('test');
@@ -217,6 +214,7 @@ class Order extends AbstractHelper
     public function getTestJsonData($productId, $lvb = false)
     {
         $orderStatus = $lvb ? 'shipped' : 'not_shipped';
+        /** @var \Magento\Catalog\Model\Product $product */
         $product = $this->product->create()->load($productId);
         if ($product) {
             $data = '{"channable_id": 112345, "channel_id": 123456, "channel_name": "Bol", 
@@ -239,10 +237,8 @@ class Order extends AbstractHelper
               "zip_code": "1000 AA", "last_name": "from Channable", "first_name": "Test order", "middle_name": "",
               "country_code": "NL", "house_number": 21, "house_number_ext": "B", "address_supplement": 
               "Address Supplement", "address_line_1": "Shipping Line 1", "address_line_2": "Shipping Line 2" }}';
-
             return json_decode($data, true);
         }
-
         return false;
     }
 

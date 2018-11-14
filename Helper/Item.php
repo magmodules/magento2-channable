@@ -9,6 +9,7 @@ namespace Magmodules\Channable\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\App\Cache\TypeListInterface as CacheTypeListInterface;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Model\ItemFactory as ItemFactory;
 
@@ -27,6 +28,9 @@ class Item extends AbstractHelper
     const XPATH_CRON = 'magmodules_channable_marketplace/item/cron';
     const XPATH_INVALIDATE_MODUS = 'magmodules_channable_marketplace/item/invalidation_modus';
     const XPATH_LAST_RUN = 'magmodules_channable_marketplace/item/last_run';
+    const XPATH_WEBHOOK_ITEM = 'magmodules_channable_marketplace/item/webhook';
+    const XPATH_ITEM_ENABLED = 'magmodules_channable_marketplace/item/enable';
+
     /**
      * @var StoreManagerInterface
      */
@@ -39,24 +43,31 @@ class Item extends AbstractHelper
      * @var ItemFactory
      */
     private $itemFactory;
+    /**
+     * @var CacheTypeListInterface
+     */
+    private $cacheTypeList;
 
     /**
      * Item constructor.
      *
-     * @param Context               $context
-     * @param General               $generalHelper
-     * @param ItemFactory           $itemFactory
-     * @param StoreManagerInterface $storeManager
+     * @param Context                $context
+     * @param General                $generalHelper
+     * @param ItemFactory            $itemFactory
+     * @param StoreManagerInterface  $storeManager
+     * @param CacheTypeListInterface $cacheTypeList
      */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
         ItemFactory $itemFactory,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        CacheTypeListInterface $cacheTypeList
     ) {
         $this->storeManager = $storeManager;
         $this->generalHelper = $generalHelper;
         $this->itemFactory = $itemFactory;
+        $this->cacheTypeList= $cacheTypeList;
         parent::__construct($context);
     }
 
@@ -224,5 +235,104 @@ class Item extends AbstractHelper
     {
         $items = $this->itemFactory->create()->getCollection()->addFieldToFilter('store_id', $storeId);
         return $items->getSize();
+    }
+
+    /**
+     * @param \Magento\Framework\App\RequestInterface $request
+     *
+     * @return bool|mixed
+     */
+    public function validateRequestData($request)
+    {
+        $storeId = $request->getParam('store');
+        if (empty($storeId)) {
+            return $this->jsonResponse('Store param missing in request');
+        }
+
+        $enabled = $this->generalHelper->getEnabled($storeId);
+        if (empty($enabled)) {
+            return $this->jsonResponse('Extension not enabled');
+        }
+
+        $token = $this->generalHelper->getToken();
+        if (empty($token)) {
+            return $this->jsonResponse('Token not set in admin');
+        }
+
+        $code = trim(preg_replace('/\s+/', '', $request->getParam('code')));
+        if (empty($code)) {
+            return $this->jsonResponse('Token param missing in request');
+        }
+
+        if ($code != $token) {
+            return $this->jsonResponse('Invalid token');
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $data
+     *
+     * @return mixed|string
+     */
+    public function validateJsonData($data)
+    {
+        $data = json_decode($data, true);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            return $this->jsonResponse('Post not valid JSON-Data: ' . json_last_error_msg());
+        }
+
+        if (empty($data)) {
+            return $this->jsonResponse('No data in post');
+        }
+
+        if (!isset($data['webhook'])) {
+            return $this->jsonResponse('Post missing webhook');
+        }
+
+        return $data['webhook'];
+    }
+
+    /**
+     * @param string $errors
+     *
+     * @return array
+     */
+    public function jsonResponse($errors = null)
+    {
+        $response = [];
+        if ($errors) {
+            $response['validated'] = 'false';
+            $response['errors'] = $errors;
+        } else {
+            $response['validated'] = 'true';
+        }
+        return $response;
+    }
+
+    /**
+     * @param $url
+     * @param $storeId
+     *
+     * @return array
+     */
+    public function setWebhook($url, $storeId)
+    {
+        $response = [];
+        $response['validated'] = 'true';
+
+        if (empty($url)) {
+            $this->generalHelper->setConfigData('', self::XPATH_WEBHOOK_ITEM, $storeId);
+            $this->generalHelper->setConfigData(0, self::XPATH_ITEM_ENABLED, $storeId);
+            $response['msg'] = sprintf('Removed webhook and disabled update', $url);
+        } else {
+            $this->generalHelper->setConfigData($url, self::XPATH_WEBHOOK_ITEM, $storeId);
+            $this->generalHelper->setConfigData(1, self::XPATH_ITEM_ENABLED, $storeId);
+            $response['msg'] = sprintf('Webhook set to %s', $url);
+        }
+
+        $this->cacheTypeList->cleanType('config');
+        return $response;
     }
 }

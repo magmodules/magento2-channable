@@ -141,8 +141,12 @@ class Source extends AbstractHelper
         if ($type == 'feed') {
             $config['base_url'] = $this->storeManager->getStore()->getBaseUrl();
             $config['weight_unit'] = ' ' . $this->generalHelper->getStoreValue(self::XPATH_WEIGHT_UNIT, $storeId);
-            $config['categories'] = $this->categoryHelper->getCollection($storeId, '', '',
-                'channable_cat_disable_export');
+            $config['categories'] = $this->categoryHelper->getCollection(
+                $storeId,
+                '',
+                '',
+                'channable_cat_disable_export'
+            );
             $config['item_updates'] = $this->itemHelper->isEnabled();
             $config['delivery'] = $this->generalHelper->getStoreValue(self::XPATH_DELIVERY_TIME);
         }

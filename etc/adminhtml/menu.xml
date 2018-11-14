@@ -23,5 +23,13 @@
              resource="Magmodules_Channable::general_item"
              action="channable/item/index"
         />
+        <add id="Magmodules_Channable::channable_returns"
+             title="Returns"
+             module="Magmodules_Channable"
+             sortOrder="3"
+             parent="Magmodules_Channable::channable"
+             resource="Magmodules_Channable::general_returns"
+             action="channable/returns/index"
+        />
     </menu>
 </config>
