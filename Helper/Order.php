@@ -214,12 +214,13 @@ class Order extends AbstractHelper
     public function getTestJsonData($productId, $lvb = false)
     {
         $orderStatus = $lvb ? 'shipped' : 'not_shipped';
+        /** @var \Magento\Catalog\Model\Product $product */
         $product = $this->product->create()->load($productId);
         if ($product) {
             $data = '{"channable_id": 112345, "channel_id": 123456, "channel_name": "Bol", 
               "order_status": "' . $orderStatus . '", "extra": {"memo": "Channable Test", 
               "comment": "Channable order id: 999999999"}, "price": {"total": "' . $product->getFinalPrice() . '", 
-              "currency": "EUR", "shipping": 0, "subtotal": "100.00",,
+              "currency": "EUR", "shipping": 0, "subtotal": "' . $product->getFinalPrice() . '",
               "commission": 2.50, "payment_method": "bol", "transaction_fee": 0},
               "billing": { "city": "Amsterdam", "state": "", "email": "dontemail@me.net",
               "address_line_1": "Billing Line 1", "address_line_2": "Billing Line 2", "street": "Donkere Spaarne", 
@@ -228,18 +229,16 @@ class Order extends AbstractHelper
               "address_supplement": "Address supplement" }, "customer": { "email": "dontemail@me.net", 
               "phone": "054333333", "gender": "man", "mobile": "", "company": "Test company", "last_name":
               "From Channable", "first_name": "Test", "middle_name": "" },
-              "products": [{"id": "1", "ean": "000000000", 
-              "price": "100.00", "title": "' . htmlentities($product->getName()) . '", 
+              "products": [{"id": "' . $product->getEntityId() . '", "ean": "000000000", 
+              "price": "' . $product->getFinalPrice() . '", "title": "' . htmlentities($product->getName()) . '", 
               "quantity": 1, "shipping": 0, "commission": 2.50, "reference_code": "00000000", 
               "delivery_period": "2016-07-12+02:00"}], "shipping": {  "city": "Amsterdam", "state": "", 
               "email": "dontemail@me.net", "street": "Shipping Street", "company": "Magmodules",
               "zip_code": "1000 AA", "last_name": "from Channable", "first_name": "Test order", "middle_name": "",
               "country_code": "NL", "house_number": 21, "house_number_ext": "B", "address_supplement": 
               "Address Supplement", "address_line_1": "Shipping Line 1", "address_line_2": "Shipping Line 2" }}';
-
             return json_decode($data, true);
         }
-
         return false;
     }
 
