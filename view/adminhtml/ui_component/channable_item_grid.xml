@@ -12,6 +12,14 @@
             <item name="deps" xsi:type="string">channable_item_grid.channable_item_grid_data_source</item>
         </item>
         <item name="spinner" xsi:type="string">channable_item_columns</item>
+        <item name="buttons" xsi:type="array">
+            <item name="add" xsi:type="array">
+                <item name="name" xsi:type="string">add</item>
+                <item name="label" xsi:type="string">Run Manual</item>
+                <item name="class" xsi:type="string">primary</item>
+                <item name="url" xsi:type="string">*/*/runQue</item>
+            </item>
+        </item>
     </argument>
     <dataSource name="channable_item_grid_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
