@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2018 Magmodules.eu. All rights reserved.
+ * Copyright © 2019 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -132,10 +132,10 @@ class Source extends AbstractHelper
         $config['website_id'] = $this->storeManager->getStore()->getWebsiteId();
         $config['timestamp'] = $this->generalHelper->getLocaleDate($storeId);
         $config['date_time'] = $this->generalHelper->getDateTime();
-        $config['filters'] = $this->getProductFilters();
+        $config['filters'] = $this->getProductFilters($type);
         $config['attributes'] = $this->getAttributes($type, $config['filters']);
         $config['price_config'] = $this->getPriceConfig($type);
-        $config['inventory'] = $this->getInventoryData();
+        $config['inventory'] = $this->getInventoryData($type);
         $config['inc_hidden_image'] = $this->generalHelper->getStoreValue(self::XPATH_IMAGE_INC_HIDDEN);
 
         if ($type == 'feed') {
@@ -159,10 +159,11 @@ class Source extends AbstractHelper
     }
 
     /**
+     * @param $type
+     *
      * @return array
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public function getProductFilters()
+    public function getProductFilters($type)
     {
         $filters = [];
         $filters['type_id'] = ['simple', 'downloadable', 'virtual'];
@@ -398,6 +399,10 @@ class Source extends AbstractHelper
         }
 
         $filters['limit'] = preg_replace('/\D/', '', $this->generalHelper->getStoreValue(self::XPATH_LIMIT));
+        if ($type == 'api') {
+            $filters['limit'] = 0;
+        }
+
         $filters['stock'] = $this->generalHelper->getStoreValue(self::XPATH_STOCK);
 
         $categoryFilter = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_FILTER);
@@ -553,7 +558,7 @@ class Source extends AbstractHelper
             ];
         }
 
-        if ($inventory) {
+        if ($inventory || $type == 'api') {
             $attributes['manage_stock'] = [
                 'label'     => 'manage_stock',
                 'source'    => 'manage_stock',
@@ -632,9 +637,11 @@ class Source extends AbstractHelper
     }
 
     /**
+     * @param $type
+     *
      * @return array
      */
-    public function getInventoryData()
+    public function getInventoryData($type)
     {
         $invAtt = [];
         $enabled = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY);
@@ -642,11 +649,15 @@ class Source extends AbstractHelper
 
         if (!$enabled || empty($fields)) {
             $invAtt['attributes'][] = 'is_in_stock';
+            if ($type == 'api') {
+                $invAtt['attributes'][] = 'qty';
+            }
             return $invAtt;
         }
 
         $invAtt['attributes'] = explode(',', $fields);
         $invAtt['attributes'][] = 'is_in_stock';
+        $invAtt['attributes'][] = 'qty';
         if (in_array('manage_stock', $invAtt['attributes'])) {
             $invAtt['attributes'][] = 'use_config_manage_stock';
             $invAtt['config_manage_stock'] = $this->generalHelper->getStoreValue(self::XPATH_MANAGE_STOCK);

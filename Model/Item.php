@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2018 Magmodules.eu. All rights reserved.
+ * Copyright © 2019 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -146,11 +146,15 @@ class Item extends AbstractModel
      */
     public function updateAll()
     {
+        $result = [];
+
         $this->runProductUpdateCheck();
         $storeIds = $this->itemHelper->getStoreIds();
         foreach ($storeIds as $storeId) {
-            $this->updateByStore($storeId);
+            $result[$storeId] = $this->updateByStore($storeId);
         }
+
+        return $result;
     }
 
     /**
@@ -217,6 +221,7 @@ class Item extends AbstractModel
             $items = $this->itemFactory->create()->getCollection()
                 ->addFieldToFilter('store_id', $storeId)
                 ->addFieldToFilter('needs_update', 1)
+                ->setOrder('updated_at', 'ASC')
                 ->setPageSize($config['api']['limit']);
             $items->getSelect()->order('last_call', 'ASC');
             if (!$items->getSize()) {
@@ -224,7 +229,7 @@ class Item extends AbstractModel
                     'status'   => 'success',
                     'store_id' => $storeId,
                     'qty'      => 0,
-                    'date'     => $this->generalHelper->getGmtDate()
+                    'date'     => $this->generalHelper->getDateTime()
                 ];
             } else {
                 $result = $this->updateCollection($items, $storeId, $config);
@@ -235,7 +240,7 @@ class Item extends AbstractModel
                 'msg'      => 'No webhook set for this store',
                 'store_id' => $storeId,
                 'qty'      => 0,
-                'date'     => $this->generalHelper->getGmtDate()
+                'date'     => $this->generalHelper->getDateTime()
             ];
         }
 
@@ -385,6 +390,7 @@ class Item extends AbstractModel
             $results['post_data'] = $postData;
             $results['needs_update'] = 1;
             $results['date'] = $this->generalHelper->getGmtDate();
+            $results['msg'] = sprintf('Webhook "%s" returned header: "%s"', $config['api']['webhook'], $header);
         }
 
         return $results;

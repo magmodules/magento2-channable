@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2018 Magmodules.eu. All rights reserved.
+ * Copyright © 2019 Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -62,7 +62,7 @@ class MassQue extends Action
                 $item->setNeedsUpdate(1)->save();
             }
         } catch (\Exception $e) {
-            $this->messageManager->addSuccessMessage(__('Something wrong while updating.'));
+            $this->messageManager->addErrorMessage(__('Something wrong while updating.'));
             /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
             $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
             return $resultRedirect->setPath('*/*/');
