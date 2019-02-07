@@ -430,7 +430,7 @@ class Order extends AbstractHelper
     {
         $url = $this->storeManager->getStore($storeId)->getBaseUrl();
         $token = $this->generalHelper->getToken();
-        return $url . sprintf('channable/order/hook/store/%s/code/%s', $storeId, $token);
+        return $url . sprintf('channable/order/hook/store/%s/code/%s/ajax/true', $storeId, $token);
     }
 
     /**
