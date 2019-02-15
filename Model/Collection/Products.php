@@ -360,13 +360,16 @@ class Products
                 $productFlatState = $this->productFlatState->create(['isAvailable' => true]);
             }
 
+            $entityField = $this->generalHelper->isCommerce() ? 'row_id' : 'entity_id';
             $attributes = $this->getAttributes($config['attributes']);
+
             $collection = $this->productCollectionFactory
                 ->create(['catalogProductFlatState' => $productFlatState])
-                ->addAttributeToFilter('entity_id', ['in' => array_values($parentRelations)])
+                ->addAttributeToFilter($entityField, ['in' => array_values($parentRelations)])
                 ->addAttributeToSelect($attributes)
                 ->addMinimalPrice()
-                ->addUrlRewrite();
+                ->addUrlRewrite()
+                ->setRowIdFieldName($entityField);
 
             if (!empty($filters['category_ids'])) {
                 if (!empty($filters['category_type'])) {

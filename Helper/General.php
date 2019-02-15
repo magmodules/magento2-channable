@@ -17,6 +17,7 @@ use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigDa
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magmodules\Channable\Logger\ChannableLogger;
+use Magento\Framework\App\ProductMetadata;
 
 /**
  * Class General
@@ -356,5 +357,13 @@ class General extends AbstractHelper
     public function addTolog($type, $data)
     {
         $this->logger->add($type, $data);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCommerce()
+    {
+        return $this->metadata->getEdition() !== ProductMetadata::EDITION_NAME;
     }
 }
