@@ -360,7 +360,7 @@ class Products
                 $productFlatState = $this->productFlatState->create(['isAvailable' => true]);
             }
 
-            $entityField = $this->generalHelper->isCommerce() ? 'row_id' : 'entity_id';
+            $entityField = $this->generalHelper->getLinkField();
             $attributes = $this->getAttributes($config['attributes']);
 
             $collection = $this->productCollectionFactory

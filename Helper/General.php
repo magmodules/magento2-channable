@@ -31,6 +31,8 @@ class General extends AbstractHelper
     const XPATH_EXTENSION_ENABLED = 'magmodules_channable/general/enable';
     const XPATH_MARKETPLACE_ENABLE = 'magmodules_channable_marketplace/general/enable';
     const XPATH_TOKEN = 'magmodules_channable/general/token';
+    const XPATH_USE_ROW_ID = 'magmodules_channable/advanced/use_row_id';
+
     /**
      * @var ModuleListInterface
      */
@@ -360,10 +362,23 @@ class General extends AbstractHelper
     }
 
     /**
+     * @return string
+     */
+    public function getLinkField()
+    {
+        if ($this->isCommerce() && $this->getStoreValue(self::XPATH_USE_ROW_ID)) {
+            return 'row_id';
+        }
+
+        return 'entity_id';
+    }
+
+    /**
      * @return bool
      */
     public function isCommerce()
     {
         return $this->metadata->getEdition() !== ProductMetadata::EDITION_NAME;
     }
+
 }
