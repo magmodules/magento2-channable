@@ -247,6 +247,16 @@ class General extends AbstractHelper
     }
 
     /**
+     * Returns current version of Magento
+     *
+     * @return string
+     */
+    public function getMagentoEdition()
+    {
+        return $this->metadata->getEdition();
+    }
+
+    /**
      * @param $path
      *
      * @return array

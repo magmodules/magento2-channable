@@ -145,6 +145,7 @@ class Feed extends AbstractHelper
         $summary['extension'] = 'Magmodules_Channable';
         $summary['version'] = $this->generalHelper->getExtensionVersion();
         $summary['magento_version'] = $this->generalHelper->getMagentoVersion();
+        $summary['magento_edition'] = $this->generalHelper->getMagentoEdition();
         $summary['products_total'] = $count;
         $summary['products_limit'] = $limit;
         $summary['products_output'] = $productQty;
