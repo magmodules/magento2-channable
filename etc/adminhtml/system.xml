@@ -634,6 +634,12 @@
                         <field id="lvb">1</field>
                     </depends>
                 </field>
+                <field id="mark_completed_as_shipped" translate="label" type="select" sortOrder="55" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Mark completed orders without shipment as shipped orders</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Only enable this option if shipments are created outside of Magento and not available for export. Default: No]]></comment>
+                </field>
                 <field id="heading_log" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0"
                        showInStore="0">
                     <label>Logging</label>

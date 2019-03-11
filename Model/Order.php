@@ -31,6 +31,7 @@ use Magento\Tax\Model\Calculation as TaxCalculationn;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 use Magento\Shipping\Model\ShippingFactory;
 use Magento\Sales\Model\ResourceModel\Order\Shipment\CollectionFactory as ShipmentCollectionFactory;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\CatalogInventory\Observer\ItemsForReindex;
 use Magento\Framework\Registry;
@@ -139,6 +140,10 @@ class Order
      */
     private $shipmentCollectionFactory;
     /**
+     * @var OrderCollectionFactory
+     */
+    private $orderCollectionFactory;
+    /**
      * @var CheckoutSession
      */
     private $checkoutSession;
@@ -180,6 +185,7 @@ class Order
      * @param RateRequestFactory          $rateRequestFactory
      * @param ShippingFactory             $shippingFactory
      * @param ShipmentCollectionFactory   $shipmentCollectionFactory
+     * @param OrderCollectionFactory      $orderCollectionFactory
      * @param GeneralHelper               $generalHelper
      * @param OrderlHelper                $orderHelper
      * @param CheckoutSession             $checkoutSession
@@ -209,6 +215,7 @@ class Order
         RateRequestFactory $rateRequestFactory,
         ShippingFactory $shippingFactory,
         ShipmentCollectionFactory $shipmentCollectionFactory,
+        OrderCollectionFactory $orderCollectionFactory,
         GeneralHelper $generalHelper,
         OrderlHelper $orderHelper,
         CheckoutSession $checkoutSession,
@@ -239,6 +246,7 @@ class Order
         $this->orderHelper = $orderHelper;
         $this->shippingFactory = $shippingFactory;
         $this->shipmentCollectionFactory = $shipmentCollectionFactory;
+        $this->orderCollectionFactory = $orderCollectionFactory;
         $this->checkoutSession = $checkoutSession;
         $this->itemsForReindex = $itemsForReindex;
         $this->registry = $registry;
@@ -843,6 +851,8 @@ class Order
     public function getShipments($timespan)
     {
         $response = [];
+        $orderIncrements = [];
+
         $expression = sprintf('- %s hours', $timespan);
         $gmtDate = $this->generalHelper->getDateTime();
         $date = date('Y-m-d H:i:s', strtotime($expression, strtotime($gmtDate)));
@@ -870,7 +880,27 @@ class Order
             }
 
             $response[] = $data;
+            $orderIncrements[] = $shipment->getOrderIncrementId();
             unset($data);
+        }
+
+        if ($this->orderHelper->getMarkCompletedAsShipped()) {
+            $orders = $this->orderCollectionFactory->create()
+                ->addFieldToFilter('updated_at', ['gteq' => $date])
+                ->addFieldToFilter('state', \Magento\Sales\Model\Order::STATE_COMPLETE)
+                ->addFieldToFilter('channable_id', ['gt' => 0]);
+
+            if (!empty($orderIncrements)) {
+                $orders->addFieldToFilter('increment_id', ['nin' => $orderIncrements]);
+            }
+
+            foreach ($orders as $order) {
+                $data['id'] = $order->getIncrementId();
+                $data['status'] = $order->getStatus();
+                $data['date'] = $this->generalHelper->getLocalDateTime($order->getUpdatedAt());
+                $response[] = $data;
+                unset($data);
+            }
         }
 
         return $response;
