@@ -609,7 +609,7 @@ class Product extends AbstractHelper
      */
     public function getAvailability($attribute, $product)
     {
-        if ($product->getTypeId() == 'bundle') {
+        if ($product->getTypeId() != 'simple') {
             return (int)$product->getIsSalable();
         }
 
