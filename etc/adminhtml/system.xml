@@ -516,9 +516,17 @@
                        showInWebsite="1"
                        showInStore="1">
                     <label>Default Shipping Method</label>
-                    <source_model>Magento\Shipping\Model\Config\Source\Allmethods</source_model>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\ShippingMethods</source_model>
                 </field>
-                <field id="shipping_method_fallback" translate="label" type="select" sortOrder="22" showInDefault="1"
+                <field id="shipping_method_custom" translate="label" type="text" sortOrder="22" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Custom Shipping method</label>
+                    <comment><![CDATA[Use custom carrier codes logic, seprated by semicolumn. Eg. paazl_AVG;paazl_EPS_C]]></comment>
+                    <depends>
+                        <field id="shipping_method">channable_custom</field>
+                    </depends>
+                </field>
+                <field id="shipping_method_fallback" translate="label" type="select" sortOrder="23" showInDefault="1"
                        showInWebsite="1"
                        showInStore="1">
                     <label>Fallback for Shipping Method</label>

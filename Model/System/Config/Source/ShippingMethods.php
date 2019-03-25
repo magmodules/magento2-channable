@@ -6,59 +6,32 @@
 
 namespace Magmodules\Channable\Model\System\Config\Source;
 
-use Magento\Framework\Option\ArrayInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Shipping\Model\Config as ShippingConfig;
+use Magento\Shipping\Model\Config\Source\AllMethods;
 
 /**
  * Class ShippingMethods
  *
  * @package Magmodules\Channable\Model\System\Config\Source
  */
-class ShippingMethods implements ArrayInterface
+class ShippingMethods extends AllMethods
 {
 
     /**
-     * @var ShippingConfig
-     */
-    private $shipconfig;
-    /**
-     * @var ScopeConfigInterface
-     */
-    private $scopeConfig;
-
-    /**
-     * ShippingMethods constructor.
+     * Return array of carriers.
+     * If $isActiveOnlyFlag is set to true, will return only active carriers
      *
-     * @param ShippingConfig       $shipconfig
-     * @param ScopeConfigInterface $scopeConfig
-     */
-    public function __construct(
-        ShippingConfig $shipconfig,
-        ScopeConfigInterface $scopeConfig
-    ) {
-        $this->shipconfig = $shipconfig;
-        $this->scopeConfig = $scopeConfig;
-    }
-
-    /**
+     * @param bool $isActiveOnlyFlag
+     *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray($isActiveOnlyFlag = false)
     {
-        $methods = [];
-        $activeCarriers = $this->shipconfig->getActiveCarriers();
-        foreach ($activeCarriers as $carrierCode => $carrierModel) {
-            $options = [];
-            $carrierTitle = '';
-            if ($carrierMethods = $carrierModel->getAllowedMethods()) {
-                foreach ($carrierMethods as $methodCode => $method) {
-                    $code = $carrierCode . '_' . $methodCode;
-                    $options[] = ['value' => $code, 'label' => $method];
-                }
-                $carrierTitle = $this->scopeConfig->getValue('carriers/' . $carrierCode . '/title');
-            }
-            $methods[] = ['value' => $options, 'label' => $carrierTitle];
+        $methods = parent::toOptionArray();
+        if (isset($methods['channable']['value'])) {
+            $methods['channable']['value'][] = [
+                'value' => 'channable_custom',
+                'label' => '[channable] Use Custom Logic'
+            ];
         }
         return $methods;
     }
