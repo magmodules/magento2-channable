@@ -6,14 +6,14 @@
 
 namespace Magmodules\Channable\Model\System\Config\Source;
 
-use Magento\Shipping\Model\Config\Source\AllMethods;
+use Magento\Shipping\Model\Config\Source\Allmethods;
 
 /**
  * Class ShippingMethods
  *
  * @package Magmodules\Channable\Model\System\Config\Source
  */
-class ShippingMethods extends AllMethods
+class ShippingMethods extends Allmethods
 {
 
     /**
