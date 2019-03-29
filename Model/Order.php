@@ -686,7 +686,7 @@ class Order
                 foreach ($shippingRates as $shippingRate) {
                     $method = $shippingRate->getCarrier() . '_' . $shippingRate->getMethod();
                     if (isset($prioritizedMethods[$method]) && $priority < $prioritizedMethods[$method]) {
-                        $customCarrier = $shippingRate;
+                        $customCarrier = $method;
                         $priority = $prioritizedMethods[$method];
                     }
                 }
