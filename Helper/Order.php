@@ -36,7 +36,6 @@ class Order extends AbstractHelper
     const XPATH_LVB_SKIP_STOCK = 'magmodules_channable_marketplace/order/lvb_stock';
     const XPATH_LVB_AUTO_SHIP = 'magmodules_channable_marketplace/order/lvb_ship';
     const XPATH_ORDERID_PREFIX = 'magmodules_channable_marketplace/order/orderid_prefix';
-    const XPATH_MARK_COMPLETED_AS_SHIPPED = 'magmodules_channable_marketplace/order/mark_completed_as_shipped';
     const XPATH_LOG = 'magmodules_channable_marketplace/order/log';
     const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
     const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
@@ -511,14 +510,4 @@ class Order extends AbstractHelper
         return $this->generalHelper->getStoreValue(self::XPATH_LOG);
     }
 
-
-    /**
-     * @param null $storeId
-     *
-     * @return mixed
-     */
-    public function getMarkCompletedAsShipped($storeId = null)
-    {
-        return $this->generalHelper->getStoreValue(self::XPATH_MARK_COMPLETED_AS_SHIPPED, $storeId);
-    }
 }

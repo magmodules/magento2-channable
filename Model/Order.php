@@ -13,6 +13,7 @@ use Magento\Catalog\Model\ProductFactory;
 use Magento\Framework\Data\Form\FormKey;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Quote\Model\QuoteManagement;
+use Magento\Sales\Model\Order as OrderModel;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\AddressFactory;
 use Magento\Sales\Model\Service\OrderService;
@@ -871,6 +872,7 @@ class Order
 
         foreach ($shipments as $shipment) {
             $data['id'] = $shipment->getOrderIncrementId();
+            $data['type'] = 'shipment';
             $data['status'] = $shipment->getStatus();
             $data['date'] = $this->generalHelper->getLocalDateTime($shipment->getCreatedAt());
             foreach ($shipment->getAllTracks() as $tracknum) {
@@ -884,23 +886,29 @@ class Order
             unset($data);
         }
 
-        if ($this->orderHelper->getMarkCompletedAsShipped()) {
-            $orders = $this->orderCollectionFactory->create()
-                ->addFieldToFilter('updated_at', ['gteq' => $date])
-                ->addFieldToFilter('state', \Magento\Sales\Model\Order::STATE_COMPLETE)
-                ->addFieldToFilter('channable_id', ['gt' => 0]);
+        $orders = $this->orderCollectionFactory->create()
+            ->addFieldToFilter('updated_at', ['gteq' => $date])
+            ->addFieldToFilter('state', [
+                    'in' => [
+                        OrderModel::STATE_COMPLETE,
+                        OrderModel::STATE_CLOSED,
+                        OrderModel::STATE_CANCELED
+                    ]
+                ]
+            )
+            ->addFieldToFilter('channable_id', ['gt' => 0]);
 
-            if (!empty($orderIncrements)) {
-                $orders->addFieldToFilter('increment_id', ['nin' => $orderIncrements]);
-            }
+        if (!empty($orderIncrements)) {
+            $orders->addFieldToFilter('increment_id', ['nin' => $orderIncrements]);
+        }
 
-            foreach ($orders as $order) {
-                $data['id'] = $order->getIncrementId();
-                $data['status'] = $order->getStatus();
-                $data['date'] = $this->generalHelper->getLocalDateTime($order->getUpdatedAt());
-                $response[] = $data;
-                unset($data);
-            }
+        foreach ($orders as $order) {
+            $data['id'] = $order->getIncrementId();
+            $data['type'] = 'order';
+            $data['status'] = $order->getState() == OrderModel::STATE_COMPLETE ? 'complete' : 'canceled';
+            $data['date'] = $this->generalHelper->getLocalDateTime($order->getUpdatedAt());
+            $response[] = $data;
+            unset($data);
         }
 
         return $response;
