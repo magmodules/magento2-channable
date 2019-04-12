@@ -692,28 +692,33 @@ class Order
     public function addPaymentData($order, $data, $lvb)
     {
         $payment = $order->getPayment();
-        if (isset($data['channable_id']) && !empty($data['channable_id'])) {
+        if (!empty($data['channable_id'])) {
             $payment->setAdditionalInformation('channable_id', $data['channable_id']);
             $order->setChannableId($data['channable_id']);
         }
 
-        if (isset($data['channel_id']) && !empty($data['channel_id'])) {
-            $payment->setAdditionalInformation('channel_id', ucfirst($data['channel_id']));
+        if (!empty($data['channel_id'])) {
+            $payment->setAdditionalInformation('channel_id', $data['channel_id']);
             $order->setChannelId($data['channel_id']);
         }
 
-        if (isset($data['price']['commission']) && !empty($data['price']['commission'])) {
+        if (!empty($data['price']['commission'])) {
             $commission = $data['price']['currency'] . ' ' . $data['price']['commission'];
             $payment->setAdditionalInformation('commission', $commission);
         }
 
-        if (isset($data['channel_name']) && !empty($data['channel_name'])) {
+        if (!empty($data['channel_name'])) {
             if ($lvb) {
                 $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']) . ' LVB');
             } else {
                 $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']));
             }
             $order->setChannelName($data['channel_name']);
+        }
+
+        if (!empty($data['channable_channel_label'])) {
+            $payment->setAdditionalInformation('channel_label', $data['channable_channel_label']);
+            $order->setChannelLabel($data['channable_channel_label']);
         }
 
         $itemRows = [];

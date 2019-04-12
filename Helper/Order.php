@@ -217,8 +217,8 @@ class Order extends AbstractHelper
         /** @var \Magento\Catalog\Model\Product $product */
         $product = $this->product->create()->load($productId);
         if ($product) {
-            $data = '{"channable_id": 112345, "channel_id": 123456, "channel_name": "Bol", 
-              "order_status": "' . $orderStatus . '", "extra": {"memo": "Channable Test", 
+            $data = '{"channable_id": 112345, "channable_channel_label": "Bol NL", "channel_id": 123456, 
+              "channel_name": "Bol", "order_status": "' . $orderStatus . '", "extra": {"memo": "Channable Test", 
               "comment": "Channable order id: 999999999"}, "price": {"total": "' . $product->getFinalPrice() . '", 
               "currency": "EUR", "shipping": 0, "subtotal": "' . $product->getFinalPrice() . '",
               "commission": 2.50, "payment_method": "bol", "transaction_fee": 0},
