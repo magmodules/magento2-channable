@@ -97,7 +97,16 @@
                     <label>Source</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\ImageSource</source_model>
                 </field>
-                <field id="hidden_images" translate="label" type="select" sortOrder="8" showInDefault="1"
+                <field id="main_image" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Main Image</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\MainImage</source_model>
+                    <depends>
+                        <field id="image">all</field>
+                    </depends>
+                    <comment>Select the source for the main image, other images will be exported as additional image(s).</comment>
+                </field>
+                <field id="hidden_images" translate="label" type="select" sortOrder="9" showInDefault="1"
                        showInWebsite="1"
                        showInStore="1">
                     <label>Include Hidden Images</label>
