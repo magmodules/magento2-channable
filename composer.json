@@ -12,7 +12,7 @@
   "autoload": {
     "files": [ "registration.php" ],
     "psr-4": {
-      "Magmodules\\Channable\\": "",
+      "Magmodules\\Channable\\": ""
     }
   }
 }
