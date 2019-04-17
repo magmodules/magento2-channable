@@ -11,6 +11,7 @@ use Magento\Framework\Registry;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\HTTP\Adapter\CurlFactory;
 use Magmodules\Channable\Model\ItemFactory;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Source as SourceHelper;
@@ -29,6 +30,8 @@ class Item extends AbstractModel
 {
 
     const OUT_OF_STOCK_MSG = 'out of stock';
+    const CURL_TIMEOUT = 15;
+
     /**
      * @var \Magmodules\Channable\Model\ItemFactory
      */
@@ -58,9 +61,9 @@ class Item extends AbstractModel
      */
     private $appEmulation;
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var CurlFactory
      */
-    private $logger;
+    private $curlFactory;
 
     /**
      * Item constructor.
@@ -72,6 +75,7 @@ class Item extends AbstractModel
      * @param ItemHelper                              $itemHelper
      * @param SourceHelper                            $sourceHelper
      * @param Emulation                               $appEmulation
+     * @param CurlFactory                             $curlFactory
      * @param Context                                 $context
      * @param Registry                                $registry
      * @param AbstractResource|null                   $resource
@@ -86,6 +90,7 @@ class Item extends AbstractModel
         ItemHelper $itemHelper,
         SourceHelper $sourceHelper,
         Emulation $appEmulation,
+        CurlFactory $curlFactory,
         Context $context,
         Registry $registry,
         AbstractResource $resource = null,
@@ -99,7 +104,7 @@ class Item extends AbstractModel
         $this->sourceHelper = $sourceHelper;
         $this->itemHelper = $itemHelper;
         $this->appEmulation = $appEmulation;
-        $this->logger = $context->getLogger();
+        $this->curlFactory = $curlFactory;
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
 
@@ -135,8 +140,7 @@ class Item extends AbstractModel
             try {
                 $item->save();
             } catch (\Exception $e) {
-                $this->logger->critical($e);
-                $this->logger->debug('exception');
+                $this->generalHelper->addTolog('Item add', $e->getMessage());
             }
         }
     }
@@ -360,38 +364,47 @@ class Item extends AbstractModel
      */
     public function postData($postData, $config)
     {
-        $results = [];
-        $request = curl_init();
-        $httpHeader = ['X-MAGMODULES-TOKEN: ' . $config['api']['token'], 'Content-Type:application/json'];
-        curl_setopt($request, CURLOPT_URL, $config['api']['webhook']);
-        curl_setopt($request, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($request, CURLOPT_POSTFIELDS, json_encode($postData));
-        curl_setopt($request, CURLOPT_HTTPHEADER, $httpHeader);
-        curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($request);
-        $header = curl_getinfo($request, CURLINFO_HTTP_CODE);
-        curl_close($request);
+        $httpHeader = [
+            'X-MAGMODULES-TOKEN: ' . $config['api']['token'],
+            'Content-Type:application/json'
+        ];
 
-        if ($header == '200') {
-            $results['status'] = 'success';
-            $results['store_id'] = $config['store_id'];
-            $results['webhook'] = $config['api']['webhook'];
-            $results['qty'] = count($postData);
-            $results['result'] = json_decode($result, true);
-            $results['post_data'] = $postData;
-            $results['needs_update'] = 0;
-            $results['date'] = $this->generalHelper->getGmtDate();
-        } else {
-            $results['status'] = 'error';
-            $results['store_id'] = $config['store_id'];
-            $results['webhook'] = $config['api']['webhook'];
-            $results['qty'] = count($postData);
-            $results['result'] = json_decode($result, true);
-            $results['post_data'] = $postData;
-            $results['needs_update'] = 1;
-            $results['date'] = $this->generalHelper->getGmtDate();
-            $results['msg'] = sprintf('Webhook "%s" returned header: "%s"', $config['api']['webhook'], $header);
+        try {
+            /** @var \Magento\Framework\HTTP\Adapter\Curl $curl */
+            $curl = $this->curlFactory->create();
+            $curl->setConfig(['timeout' => self::CURL_TIMEOUT]);
+            $curl->write(
+                \Zend_Http_Client::POST,
+                $config['api']['webhook'],
+                '1.1',
+                $httpHeader,
+                json_encode($postData)
+            );
+
+            $response = $curl->read();
+            $responseCode = \Zend_Http_Response::extractCode($response);
+            $responseBody = \Zend_Http_Response::extractBody($response);
+            $result = json_decode($responseBody, true);
+            $results['status'] = isset($result['status']) ? $result['status'] : 'error';
+            $results['result'] = $result;
+            $results['message'] = isset($result['message']) ? $result['message'] : null;
+
+            if (!isset($result['message']) && $responseCode == '401') {
+                $results['message'] = __('401 Unauthorized Webhook')->render();
+                $results['status'] = 'unauthorized';
+            }
+        } catch (\Exception $e) {
+            $results['status'] = 'exception';
+            $results['message'] = $e->getMessage();
+            $results['result'] = [];
         }
+
+        $results['store_id'] = $config['store_id'];
+        $results['webhook'] = $config['api']['webhook'];
+        $results['qty'] = count($postData);
+        $results['post_data'] = $postData;
+        $results['date'] = $this->generalHelper->getGmtDate();
+        $results['needs_update'] = isset($responseCode) && $responseCode >= 500 ? 1 : 0;
 
         return $results;
     }
@@ -403,16 +416,22 @@ class Item extends AbstractModel
     {
         $itemsResult = $postResult['result'];
         $postData = $postResult['post_data'];
-        $items = isset($itemsResult['content']) ? $itemsResult['content'] : [];
-        $status = isset($postResult['status']) ? $postResult['status'] : '';
+        $gtmDate = $this->generalHelper->getGmtDate();
 
-        if ($status == 'success') {
-            foreach ($items as $item) {
+        if (!empty($itemsResult['content']) && is_array($itemsResult['content'])) {
+            foreach ($itemsResult['content'] as $item) {
                 $key = array_search($item['id'], array_column($postData, 'id'));
                 $postData[$key]['call_result'] = $item['message'];
                 $postData[$key]['status'] = ucfirst($item['status']);
                 $postData[$key]['needs_update'] = 0;
-                $postData[$key]['last_call'] = $this->generalHelper->getGmtDate();
+                $postData[$key]['last_call'] = $gtmDate;
+            }
+        } else {
+            foreach ($postData as &$item) {
+                $item['call_result'] = $postResult['message'];
+                $item['status'] = $postResult['status'];
+                $item['needs_update'] = $postResult['needs_update'];
+                $item['last_call'] = $gtmDate;
             }
         }
 
@@ -422,8 +441,7 @@ class Item extends AbstractModel
             try {
                 $item->save();
             } catch (\Exception $e) {
-                $this->logger->critical($e);
-                $this->logger->debug('exception');
+                $this->generalHelper->addTolog('Item updateData', $e->getMessage());
             }
         }
     }
