@@ -15,6 +15,9 @@
     <event name="sales_order_item_cancel">
         <observer name="channable_sales_order_item_cancel" instance="Magmodules\Channable\Observer\Sales\OrderItemCancel" />
     </event>
+    <event name="cataloginventory_stock_item_save_after">
+        <observer name="channable_cataloginventory_stock_item_save_after" instance="Magmodules\Channable\Observer\CatalogInventory\StockItemSaveAfter" />
+    </event>
     <event name="controller_action_predispatch_adminhtml_system_config_edit">
         <observer name="channable_system_config_observer" instance="Magmodules\Channable\Observer\System\Config" />
     </event>
