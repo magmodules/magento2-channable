@@ -20,6 +20,12 @@ $specificInfo = $block->getSpecificInformation();
                 <td><?= $channelName; ?></td>
             </tr>
         <?php endif; ?>
+        <?php if ($channelLabel = $this->getInfo()->getAdditionalInformation('channel_label')): ?>
+            <tr>
+                <th><?= __('Channel Label'); ?></th>
+                <td><?= $channelLabel; ?></td>
+            </tr>
+        <?php endif; ?>
         <?php if ($channelId = $this->getInfo()->getAdditionalInformation('channel_id')): ?>
             <tr>
                 <th><?= __('Channel ID'); ?></th>

@@ -44,6 +44,7 @@
                 <shipping_method_fallback>flatrate_flatrate</shipping_method_fallback>
                 <import_customer>0</import_customer>
                 <orderid_prefix>M-</orderid_prefix>
+                <orderid_alphanumeric>1</orderid_alphanumeric>
             </order>
             <item>
                 <enable>0</enable>

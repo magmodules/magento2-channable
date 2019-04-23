@@ -233,7 +233,7 @@ class Product extends AbstractHelper
         $filters = $config['filters'];
         if (!empty($parent)) {
             if (!empty($filters['stock'])) {
-                if ($parent->getIsInStock() == 0) {
+                if ($parent->getIsSalable() && $parent->getIsInStock()) {
                     return false;
                 }
             }
@@ -290,7 +290,7 @@ class Product extends AbstractHelper
                 $value = $this->getStockValue($type, $product, $config['inventory']);
                 break;
             case 'availability':
-                $value = $this->getAvailability($attribute, $product);
+                $value = $this->getAvailability($product);
                 break;
             case 'related_skus':
             case 'upsell_skus':
@@ -602,18 +602,44 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param $attribute
-     * @param $product
+     * @param \Magento\Catalog\Model\Product $product
      *
-     * @return int|string
+     * @return int
      */
-    public function getAvailability($attribute, $product)
+    public function getAvailability($product)
     {
-        if ($product->getTypeId() != 'simple') {
-            return (int)$product->getIsSalable();
+        if ($product->getIsSalable() && $product->getIsInStock()) {
+            return 1;
         }
 
-        return $this->getValue($attribute, $product);
+        return 0;
+    }
+
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     * @param                                $type
+     *
+     * @return string
+     */
+    public function getProductRelations($type, $product)
+    {
+        $products = [];
+        if ($type == 'related_skus') {
+            $products = $product->getRelatedProducts();
+        }
+        if ($type == 'upsell_skus') {
+            $products = $product->getUpSellProducts();
+        }
+        if ($type == 'crosssell_skus') {
+            $products = $product->getCrossSellProducts();
+        }
+
+        $skus = [];
+        foreach ($products as $product) {
+            $skus[] = $product->getSku();
+        }
+
+        return implode(',', $skus);
     }
 
     /**
@@ -654,33 +680,6 @@ class Product extends AbstractHelper
         }
 
         return $product->getData($attribute['source']);
-    }
-
-    /**
-     * @param \Magento\Catalog\Model\Product $product
-     * @param                                $type
-     *
-     * @return string
-     */
-    public function getProductRelations($type, $product)
-    {
-        $products = [];
-        if ($type == 'related_skus') {
-            $products = $product->getRelatedProducts();
-        }
-        if ($type == 'upsell_skus') {
-            $products = $product->getUpSellProducts();
-        }
-        if ($type == 'crosssell_skus') {
-            $products = $product->getCrossSellProducts();
-        }
-
-        $skus = [];
-        foreach ($products as $product) {
-            $skus[] = $product->getSku();
-        }
-
-        return implode(',', $skus);
     }
 
     /**
@@ -758,7 +757,7 @@ class Product extends AbstractHelper
         $data = null;
         $value = $product->getData($attribute['source']);
         if ($attribute['source'] == 'is_in_stock') {
-            $value = $this->getAvailability($attribute, $product);
+            $value = $this->getAvailability($product);
         }
 
         foreach ($conditions as $condition) {
@@ -807,6 +806,22 @@ class Product extends AbstractHelper
     public function getPriceCollection($config, $product)
     {
         switch ($product->getTypeId()) {
+            case 'configurable':
+                /**
+                 * Check if config has a final_price (data catalog_product_index_price)
+                 * If final_price === null product is not salable (out of stock)
+                 */
+                if ($product->getData('final_price') === null) {
+                    $price = 0;
+                    $finalPrice = 0;
+                } else {
+                    $price = $product->getData('price');
+                    $finalPrice = $product->getData('final_price');
+                    $specialPrice = $product->getSpecialPrice();
+                    $product['min_price'] = $product['min_price'] >= 0 ? $product['min_price'] : null;
+                    $product['max_price'] = $product['max_price'] >= 0 ? $product['max_price'] : null;
+                }
+                break;
             case 'grouped':
                 $groupedPriceType = null;
                 if (!empty($config['price_config']['grouped_price_type'])) {
@@ -1087,9 +1102,9 @@ class Product extends AbstractHelper
 
         if (in_array('configurable', $filters['relations'])
             && (($visibility == Visibility::VISIBILITY_NOT_VISIBLE) || !in_array(
-                'configurable',
-                $filters['nonvisible']
-            ))
+                    'configurable',
+                    $filters['nonvisible']
+                ))
         ) {
             $configurableIds = $this->catalogProductTypeConfigurable->getParentIdsByChild($productId);
             if (!empty($configurableIds)) {

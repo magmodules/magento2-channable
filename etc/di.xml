@@ -79,6 +79,7 @@
                 <item name="channable_id" xsi:type="string">sales_order.channable_id</item>
                 <item name="channel_id" xsi:type="string">sales_order.channel_id</item>
                 <item name="channel_name" xsi:type="string">sales_order.channel_name</item>
+                <item name="channel_label" xsi:type="string">sales_order.channel_label</item>
             </argument>
         </arguments>
     </virtualType>

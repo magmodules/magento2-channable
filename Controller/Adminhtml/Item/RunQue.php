@@ -64,24 +64,24 @@ class RunQue extends Action
             if (isset($result['status']) && $result['status'] == 'success') {
                 if (empty($result['qty'])) {
                     $this->messageManager->addNoticeMessage(
-                        __('Store ID %1: No items available for update',
+                        __('Store ID %1: No items available for update.',
                             $storeId
                         )
                     );
                 } else {
                     $this->messageManager->addSuccessMessage(
-                        __('Store ID %1: Updated %2 item(s)',
+                        __('Store ID %1: Pushed %2 itemupdate(s), see grid for update result(s).',
                             $storeId,
                             $result['qty']
                         )
                     );
                 }
             } else {
-                if (isset($result['msg'])) {
+                if (isset($result['message'])) {
                     $this->messageManager->addErrorMessage(
                         __('Store ID %1: %2',
                             $storeId,
-                            $result['msg']
+                            $result['message']
                         )
                     );
                 } else {
