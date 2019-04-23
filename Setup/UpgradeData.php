@@ -95,10 +95,46 @@ class UpgradeData implements UpgradeDataInterface
             $this->addSalesOrderGridFields($setup);
         }
 
+        if (version_compare($context->getVersion(), "1.4.6", "<")) {
+            $this->addChannelLabelToOrder($setup);
+            $this->addChannelLabelToOrderGrid($setup);
+        }
+
         $setup->endSetup();
     }
 
+    /**
+     * @param ModuleDataSetupInterface $setup
+     */
+    public function addSalesOrderFields(ModuleDataSetupInterface $setup)
+    {
+        /** @var SalesSetup $salesSetup */
+        $salesSetup = $this->salesSetupFactory->create(['setup' => $setup]);
 
+        $channableId = [
+            'type'     => 'int',
+            'visible'  => false,
+            'required' => false,
+            'label'    => 'Channable: Order ID'
+        ];
+        $salesSetup->addAttribute('order', 'channable_id', $channableId);
+
+        $channelId = [
+            'type'     => 'varchar',
+            'visible'  => false,
+            'required' => false,
+            'label'    => 'Channable: Channel ID'
+        ];
+        $salesSetup->addAttribute('order', 'channel_id', $channelId);
+
+        $channelName = [
+            'type'     => 'varchar',
+            'visible'  => false,
+            'required' => false,
+            'label'    => 'Channable: Channel Name'
+        ];
+        $salesSetup->addAttribute('order', 'channel_name', $channelName);
+    }
 
     /**
      * Convert Serialzed Data fields to Json for Magento 2.2
@@ -189,39 +225,6 @@ class UpgradeData implements UpgradeDataInterface
     /**
      * @param ModuleDataSetupInterface $setup
      */
-    public function addSalesOrderFields(ModuleDataSetupInterface $setup)
-    {
-        /** @var SalesSetup $salesSetup */
-        $salesSetup = $this->salesSetupFactory->create(['setup' => $setup]);
-
-        $channableId = [
-            'type'     => 'int',
-            'visible'  => false,
-            'required' => false,
-            'label'    => 'Channable: Order ID'
-        ];
-        $salesSetup->addAttribute('order', 'channable_id', $channableId);
-
-        $channelId = [
-            'type'     => 'varchar',
-            'visible'  => false,
-            'required' => false,
-            'label'    => 'Channable: Channel ID'
-        ];
-        $salesSetup->addAttribute('order', 'channel_id', $channelId);
-
-        $channelName = [
-            'type'     => 'varchar',
-            'visible'  => false,
-            'required' => false,
-            'label'    => 'Channable: Channel Name'
-        ];
-        $salesSetup->addAttribute('order', 'channel_name', $channelName);
-    }
-
-    /**
-     * @param ModuleDataSetupInterface $setup
-     */
     public function addSalesOrderGridFields(ModuleDataSetupInterface $setup)
     {
         $salesConnection = $setup->getConnection('sales');
@@ -254,6 +257,42 @@ class UpgradeData implements UpgradeDataInterface
                 'length'   => 255,
                 'nullable' => true,
                 'comment'  => 'Channable: Channel Name'
+            ]
+        );
+    }
+
+    /**
+     * @param ModuleDataSetupInterface $setup
+     */
+    private function addChannelLabelToOrder(ModuleDataSetupInterface $setup)
+    {
+        /** @var SalesSetup $salesSetup */
+        $salesSetup = $this->salesSetupFactory->create(['setup' => $setup]);
+        $channelName = [
+            'type'     => 'varchar',
+            'visible'  => false,
+            'required' => false,
+            'label'    => 'Channable: Channel Label'
+        ];
+        $salesSetup->addAttribute('order', 'channel_label', $channelName);
+
+    }
+
+    /**
+     * @param ModuleDataSetupInterface $setup
+     */
+    private function addChannelLabelToOrderGrid(ModuleDataSetupInterface $setup)
+    {
+        $salesConnection = $setup->getConnection('sales');
+        $orderGridTable = $setup->getTable('sales_order_grid');
+        $salesConnection->addColumn(
+            $orderGridTable,
+            'channel_label',
+            [
+                'type'     => Table::TYPE_TEXT,
+                'length'   => 255,
+                'nullable' => true,
+                'comment'  => 'Channable: Channel Label'
             ]
         );
     }

@@ -29,6 +29,7 @@ class Source extends AbstractHelper
     const XPATH_BRAND_SOURCE = 'magmodules_channable/data/brand_attribute';
     const XPATH_EAN_SOURCE = 'magmodules_channable/data/ean_attribute';
     const XPATH_IMAGE_SOURCE = 'magmodules_channable/data/image';
+    const XPATH_IMAGE_MAIN = 'magmodules_channable/data/main_image';
     const XPATH_IMAGE_INC_HIDDEN = 'magmodules_channable/data/hidden_images';
     const XPATH_SKU_SOURCE = 'magmodules_channable/data/sku_attribute';
     const XPATH_SIZE_SOURCE = 'magmodules_channable/data/size_attribute';
@@ -496,6 +497,7 @@ class Source extends AbstractHelper
             $attributes['image_link'] = [
                 'label'  => 'image_link',
                 'source' => $this->generalHelper->getStoreValue(self::XPATH_IMAGE_SOURCE),
+                'main'   => $this->generalHelper->getStoreValue(self::XPATH_IMAGE_MAIN),
             ];
             $attributes['brand'] = [
                 'label'  => 'brand',

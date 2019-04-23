@@ -13,6 +13,7 @@ use Magento\Catalog\Model\ProductFactory;
 use Magento\Framework\Data\Form\FormKey;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Quote\Model\QuoteManagement;
+use Magento\Sales\Model\Order as OrderModel;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\AddressFactory;
 use Magento\Sales\Model\Service\OrderService;
@@ -707,28 +708,33 @@ class Order
     public function addPaymentData($order, $data, $lvb)
     {
         $payment = $order->getPayment();
-        if (isset($data['channable_id']) && !empty($data['channable_id'])) {
+        if (!empty($data['channable_id'])) {
             $payment->setAdditionalInformation('channable_id', $data['channable_id']);
             $order->setChannableId($data['channable_id']);
         }
 
-        if (isset($data['channel_id']) && !empty($data['channel_id'])) {
-            $payment->setAdditionalInformation('channel_id', ucfirst($data['channel_id']));
+        if (!empty($data['channel_id'])) {
+            $payment->setAdditionalInformation('channel_id', $data['channel_id']);
             $order->setChannelId($data['channel_id']);
         }
 
-        if (isset($data['price']['commission']) && !empty($data['price']['commission'])) {
+        if (!empty($data['price']['commission'])) {
             $commission = $data['price']['currency'] . ' ' . $data['price']['commission'];
             $payment->setAdditionalInformation('commission', $commission);
         }
 
-        if (isset($data['channel_name']) && !empty($data['channel_name'])) {
+        if (!empty($data['channel_name'])) {
             if ($lvb) {
                 $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']) . ' LVB');
             } else {
                 $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']));
             }
             $order->setChannelName($data['channel_name']);
+        }
+
+        if (!empty($data['channable_channel_label'])) {
+            $payment->setAdditionalInformation('channel_label', $data['channable_channel_label']);
+            $order->setChannelLabel($data['channable_channel_label']);
         }
 
         $itemRows = [];
@@ -887,6 +893,7 @@ class Order
 
         foreach ($shipments as $shipment) {
             $data['id'] = $shipment->getOrderIncrementId();
+            $data['type'] = 'shipment';
             $data['status'] = $shipment->getStatus();
             $data['date'] = $this->generalHelper->getLocalDateTime($shipment->getCreatedAt());
             foreach ($shipment->getAllTracks() as $tracknum) {
@@ -900,23 +907,29 @@ class Order
             unset($data);
         }
 
-        if ($this->orderHelper->getMarkCompletedAsShipped()) {
-            $orders = $this->orderCollectionFactory->create()
-                ->addFieldToFilter('updated_at', ['gteq' => $date])
-                ->addFieldToFilter('state', \Magento\Sales\Model\Order::STATE_COMPLETE)
-                ->addFieldToFilter('channable_id', ['gt' => 0]);
+        $orders = $this->orderCollectionFactory->create()
+            ->addFieldToFilter('updated_at', ['gteq' => $date])
+            ->addFieldToFilter('state', [
+                    'in' => [
+                        OrderModel::STATE_COMPLETE,
+                        OrderModel::STATE_CLOSED,
+                        OrderModel::STATE_CANCELED
+                    ]
+                ]
+            )
+            ->addFieldToFilter('channable_id', ['gt' => 0]);
 
-            if (!empty($orderIncrements)) {
-                $orders->addFieldToFilter('increment_id', ['nin' => $orderIncrements]);
-            }
+        if (!empty($orderIncrements)) {
+            $orders->addFieldToFilter('increment_id', ['nin' => $orderIncrements]);
+        }
 
-            foreach ($orders as $order) {
-                $data['id'] = $order->getIncrementId();
-                $data['status'] = $order->getStatus();
-                $data['date'] = $this->generalHelper->getLocalDateTime($order->getUpdatedAt());
-                $response[] = $data;
-                unset($data);
-            }
+        foreach ($orders as $order) {
+            $data['id'] = $order->getIncrementId();
+            $data['type'] = 'order';
+            $data['status'] = $order->getState() == OrderModel::STATE_COMPLETE ? 'complete' : 'canceled';
+            $data['date'] = $this->generalHelper->getLocalDateTime($order->getUpdatedAt());
+            $response[] = $data;
+            unset($data);
         }
 
         return $response;

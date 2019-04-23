@@ -97,7 +97,16 @@
                     <label>Source</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\ImageSource</source_model>
                 </field>
-                <field id="hidden_images" translate="label" type="select" sortOrder="8" showInDefault="1"
+                <field id="main_image" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Main Image</label>
+                    <source_model>Magmodules\Channable\Model\System\Config\Source\MainImage</source_model>
+                    <depends>
+                        <field id="image">all</field>
+                    </depends>
+                    <comment>Select the source for the main image, other images will be exported as additional image(s).</comment>
+                </field>
+                <field id="hidden_images" translate="label" type="select" sortOrder="9" showInDefault="1"
                        showInWebsite="1"
                        showInStore="1">
                     <label>Include Hidden Images</label>
@@ -449,13 +458,15 @@
                     <label>Tax calculation</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\Tax</source_model>
                 </field>
-                <field id="heading_content_staging" translate="label comment" type="text" sortOrder="50" showInDefault="1"
+                <field id="heading_content_staging" translate="label comment" type="text" sortOrder="50"
+                       showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Content Staging</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Content Staging gives the ability to easily create, preview, and schedule a wide range of content updates. This is available in Magento Commerce only.</comment>
                 </field>
-                <field id="use_row_id" translate="label" type="select" sortOrder="51" showInDefault="1" showInWebsite="1"
+                <field id="use_row_id" translate="label" type="select" sortOrder="51" showInDefault="1"
+                       showInWebsite="1"
                        showInStore="1">
                     <label>Use Row ID for Simple/Parent relations</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -606,6 +617,15 @@
                         <field id="channel_orderid">1</field>
                     </depends>
                 </field>
+                <field id="orderid_alphanumeric" translate="label" type="select" sortOrder="47" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
+                    <label>Alphanumeric Order ID</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Strip out non alphanumeric characters from channel Order ID (recommend).</comment>
+                    <depends>
+                        <field id="channel_orderid">1</field>
+                    </depends>
+                </field>
                 <field id="heading_order_advanced" translate="label comment" type="text" sortOrder="50"
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Advanced</label>
@@ -641,12 +661,6 @@
                     <depends>
                         <field id="lvb">1</field>
                     </depends>
-                </field>
-                <field id="mark_completed_as_shipped" translate="label" type="select" sortOrder="55" showInDefault="1" showInWebsite="1"
-                       showInStore="1">
-                    <label>Mark completed orders without shipment as shipped orders</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Only enable this option if shipments are created outside of Magento and not available for export. Default: No]]></comment>
                 </field>
                 <field id="heading_log" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0"
                        showInStore="0">
@@ -764,7 +778,8 @@
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="heading_returns_stores" translate="label comment" type="text" sortOrder="70" showInDefault="1"
+                <field id="heading_returns_stores" translate="label comment" type="text" sortOrder="70"
+                       showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Webhooks</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>

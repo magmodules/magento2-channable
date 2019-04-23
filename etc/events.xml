@@ -12,4 +12,7 @@
     <event name="sales_order_place_after">
         <observer name="channable_sales_order_place_after" instance="Magmodules\Channable\Observer\Sales\OrderPlaceAfter" />
     </event>
+    <event name="cataloginventory_stock_item_save_after">
+        <observer name="channable_cataloginventory_stock_item_save_after" instance="Magmodules\Channable\Observer\CatalogInventory\StockItemSaveAfter" />
+    </event>
 </config>

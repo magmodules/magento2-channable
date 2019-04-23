@@ -112,9 +112,8 @@ class Products
         $collection = $this->productCollectionFactory
             ->create(['catalogProductFlatState' => $productFlatState])
             ->addAttributeToSelect($attributes)
-            ->addMinimalPrice()
             ->addUrlRewrite()
-            ->addFinalPrice();
+            ->setOrder('entity_id', 'ASC');
 
         if (!empty($filters['visibility'])) {
             $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
@@ -139,26 +138,15 @@ class Products
         }
 
         if (!empty($config['inventory']['attributes'])) {
-            $collection->joinTable(
-                'cataloginventory_stock_item',
-                'product_id=entity_id',
-                $config['inventory']['attributes']
-            );
+            $this->joinCatalogInventoryLeft($collection, $config);
         }
 
-        if (!empty($filters['stock'])) {
-            $this->stockHelper->addInStockFilterToCollection($collection);
-            if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
-                $collection->setFlag('has_stock_status_filter', true);
-            }
-        } else {
-            if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
-                $collection->setFlag('has_stock_status_filter', false);
-            }
+        if (empty($filters['stock'])) {
+            $collection->setFlag('has_stock_status_filter', false);
         }
 
         $this->addFilters($filters, $collection);
-        //$collection->getSelect()->group('e.entity_id');
+        $this->joinPriceIndexLeft($collection, $config['website_id']);
 
         return $collection;
     }
@@ -208,6 +196,20 @@ class Products
             'product_has_weight',
             'quantity_and_stock_status'
         ];
+    }
+
+    /**
+     * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $collection
+     * @param array                                                   $config
+     */
+    public function joinCatalogInventoryLeft($collection, $config)
+    {
+        $joinCond = join(
+            ' AND ',
+            ['cataloginventory.product_id = e.entity_id']
+        );
+        $tableName = ['cataloginventory' => $collection->getTable('cataloginventory_stock_item')];
+        $collection->getSelect()->joinLeft($tableName, $joinCond, $config['inventory']['attributes']);
     }
 
     /**
@@ -343,6 +345,25 @@ class Products
     }
 
     /**
+     * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $collection
+     * @param                                                         $websiteId
+     */
+    public function joinPriceIndexLeft($collection, $websiteId)
+    {
+        $joinCond = join(
+            ' AND ',
+            [
+                'price_index.entity_id = e.entity_id',
+                'price_index.website_id = ' . $websiteId,
+                'price_index.customer_group_id = 0'
+            ]
+        );
+        $colls = ['final_price', 'min_price', 'max_price'];
+        $tableName = ['price_index' => $collection->getTable('catalog_product_index_price')];
+        $collection->getSelect()->joinLeft($tableName, $joinCond, $colls);
+    }
+
+    /**
      * @param $parentRelations
      * @param $config
      *
@@ -367,7 +388,6 @@ class Products
                 ->create(['catalogProductFlatState' => $productFlatState])
                 ->addAttributeToFilter($entityField, ['in' => array_values($parentRelations)])
                 ->addAttributeToSelect($attributes)
-                ->addMinimalPrice()
                 ->addUrlRewrite()
                 ->setRowIdFieldName($entityField);
 
@@ -382,26 +402,15 @@ class Products
             }
 
             if (!empty($config['inventory']['attributes'])) {
-                $collection->joinTable(
-                    'cataloginventory_stock_item',
-                    'product_id=entity_id',
-                    $config['inventory']['attributes']
-                );
+                $this->joinCatalogInventoryLeft($collection, $config);
             }
 
-            if (!empty($filters['stock'])) {
-                $this->stockHelper->addInStockFilterToCollection($collection);
-                if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
-                    $collection->setFlag('has_stock_status_filter', true);
-                }
-            } else {
-                if (version_compare($this->generalHelper->getMagentoVersion(), "2.2.0", ">=")) {
-                    $collection->setFlag('has_stock_status_filter', false);
-                }
+            if (empty($filters['stock'])) {
+                $collection->setFlag('has_stock_status_filter', false);
             }
 
             $this->addFilters($filters, $collection, 'parent');
-            //$collection->getSelect()->group('e.entity_id');
+            $this->joinPriceIndexLeft($collection, $config['website_id']);
             return $collection->load();
         }
     }

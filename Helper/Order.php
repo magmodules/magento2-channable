@@ -37,7 +37,7 @@ class Order extends AbstractHelper
     const XPATH_LVB_SKIP_STOCK = 'magmodules_channable_marketplace/order/lvb_stock';
     const XPATH_LVB_AUTO_SHIP = 'magmodules_channable_marketplace/order/lvb_ship';
     const XPATH_ORDERID_PREFIX = 'magmodules_channable_marketplace/order/orderid_prefix';
-    const XPATH_MARK_COMPLETED_AS_SHIPPED = 'magmodules_channable_marketplace/order/mark_completed_as_shipped';
+    const XPATH_ORDERID_ALPHANUMERIC = 'magmodules_channable_marketplace/order/orderid_alphanumeric';
     const XPATH_LOG = 'magmodules_channable_marketplace/order/log';
     const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
     const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
@@ -219,8 +219,8 @@ class Order extends AbstractHelper
         /** @var \Magento\Catalog\Model\Product $product */
         $product = $this->product->create()->load($productId);
         if ($product) {
-            $data = '{"channable_id": 112345, "channel_id": 123456, "channel_name": "Bol", 
-              "order_status": "' . $orderStatus . '", "extra": {"memo": "Channable Test", 
+            $data = '{"channable_id": 112345, "channable_channel_label": "Bol NL", "channel_id": 123456, 
+              "channel_name": "Bol", "order_status": "' . $orderStatus . '", "extra": {"memo": "Channable Test", 
               "comment": "Channable order id: 999999999"}, "price": {"total": "' . $product->getFinalPrice() . '", 
               "currency": "EUR", "shipping": 0, "subtotal": "' . $product->getFinalPrice() . '",
               "commission": 2.50, "payment_method": "bol", "transaction_fee": 0},
@@ -368,7 +368,12 @@ class Order extends AbstractHelper
     public function getUniqueIncrementId($channelId, $storeId)
     {
         $prefix = $this->getOrderIdPrefix($storeId);
-        $newIncrementId = $prefix . preg_replace("/[^a-zA-Z0-9]+/", "", $channelId);
+        if ($this->getUseAlphanumericOrderId($storeId)) {
+            $newIncrementId = $prefix . preg_replace('/[^a-zA-Z0-9]+/', '', $channelId);
+        } else {
+            $newIncrementId = $prefix . preg_replace('/\s+/', '', $channelId);
+        }
+
         $orderCheck = $this->orderCollectionFactory->create()
             ->addFieldToFilter('increment_id', ['eq' => $newIncrementId])
             ->getSize();
@@ -399,6 +404,16 @@ class Order extends AbstractHelper
     public function getOrderIdPrefix($storeId = null)
     {
         return $this->generalHelper->getStoreValue(self::XPATH_ORDERID_PREFIX, $storeId);
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return mixed
+     */
+    public function getUseAlphanumericOrderId($storeId = null)
+    {
+        return $this->generalHelper->getStoreValue(self::XPATH_ORDERID_ALPHANUMERIC, $storeId);
     }
 
     /**
@@ -525,13 +540,4 @@ class Order extends AbstractHelper
         return $this->generalHelper->getStoreValue(self::XPATH_LOG);
     }
 
-    /**
-     * @param null $storeId
-     *
-     * @return mixed
-     */
-    public function getMarkCompletedAsShipped($storeId = null)
-    {
-        return $this->generalHelper->getStoreValue(self::XPATH_MARK_COMPLETED_AS_SHIPPED, $storeId);
-    }
 }
