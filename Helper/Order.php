@@ -29,6 +29,7 @@ class Order extends AbstractHelper
     const XPATH_CUSTOM_STATUS = 'magmodules_channable_marketplace/order/custom_status';
     const XPATH_SEPERATE_HOUSENUMBER = 'magmodules_channable_marketplace/order/seperate_housenumber';
     const XPATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
+    const XPATH_SHIPPING_CUSTOM = 'magmodules_channable_marketplace/order/shipping_method_custom';
     const XPATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
     const XPATH_USE_CHANNEL_ORDERID = 'magmodules_channable_marketplace/order/channel_orderid';
     const XPATH_ENABLE_BACKORDERS = 'magmodules_channable_marketplace/order/backorders';
@@ -494,6 +495,19 @@ class Order extends AbstractHelper
     public function getShippingMethod($storeId = null)
     {
         return $this->generalHelper->getStoreValue(self::XPATH_SHIPPING_METHOD, $storeId);
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return array
+     */
+    public function getShippingCustomShippingMethods($storeId = null)
+    {
+        $shippingMethodCustom = $this->generalHelper->getStoreValue(self::XPATH_SHIPPING_CUSTOM, $storeId);
+        $shippingMethodCustom = preg_replace('/\s+/', '', $shippingMethodCustom);
+        $prioritizedMethods = array_flip(array_reverse(explode(';', $shippingMethodCustom)));
+        return $prioritizedMethods;
     }
 
     /**

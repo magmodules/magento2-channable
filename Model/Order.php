@@ -673,10 +673,26 @@ class Order
 
         if ($result) {
             $shippingRates = $result->getAllRates();
-            foreach ($shippingRates as $shippingRate) {
-                $method = $shippingRate->getCarrier() . '_' . $shippingRate->getMethod();
-                if ($method == $shippingMethod) {
-                    return $shippingMethod;
+            if ($shippingMethod != 'channable_custom') {
+                foreach ($shippingRates as $shippingRate) {
+                    $method = $shippingRate->getCarrier() . '_' . $shippingRate->getMethod();
+                    if ($method == $shippingMethod) {
+                        return $shippingMethod;
+                    }
+                }
+            } else {
+                $priority = -1;
+                $customCarrier = null;
+                $prioritizedMethods = $this->orderHelper->getShippingCustomShippingMethods($store->getId());
+                foreach ($shippingRates as $shippingRate) {
+                    $method = $shippingRate->getCarrier() . '_' . $shippingRate->getMethod();
+                    if (isset($prioritizedMethods[$method]) && $priority < $prioritizedMethods[$method]) {
+                        $customCarrier = $method;
+                        $priority = $prioritizedMethods[$method];
+                    }
+                }
+                if ($customCarrier !== null) {
+                    return $customCarrier;
                 }
             }
         }
