@@ -111,6 +111,7 @@ class Products
 
         $collection = $this->productCollectionFactory
             ->create(['catalogProductFlatState' => $productFlatState])
+            ->addStoreFilter($config['store_id'])
             ->addAttributeToSelect($attributes)
             ->addUrlRewrite()
             ->setOrder('entity_id', 'ASC');
@@ -386,6 +387,7 @@ class Products
 
             $collection = $this->productCollectionFactory
                 ->create(['catalogProductFlatState' => $productFlatState])
+                ->addStoreFilter($config['store_id'])
                 ->addAttributeToFilter($entityField, ['in' => array_values($parentRelations)])
                 ->addAttributeToSelect($attributes)
                 ->addUrlRewrite()
