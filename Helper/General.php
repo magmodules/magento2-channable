@@ -18,6 +18,7 @@ use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magmodules\Channable\Logger\ChannableLogger;
 use Magento\Framework\App\ProductMetadata;
+use Magento\Framework\Unserialize\Unserialize;
 
 /**
  * Class General
@@ -65,6 +66,10 @@ class General extends AbstractHelper
      * @var ChannableLogger
      */
     private $logger;
+    /**
+     * @var Unserialize
+     */
+    private $unserialize;
 
     /**
      * General constructor.
@@ -78,6 +83,7 @@ class General extends AbstractHelper
      * @param DateTime                    $coreDate
      * @param TimezoneInterface           $localeDate
      * @param ChannableLogger             $logger
+     * @param Unserialize                 $unserialize
      */
     public function __construct(
         Context $context,
@@ -88,7 +94,8 @@ class General extends AbstractHelper
         ConfigData $config,
         DateTime $coreDate,
         TimezoneInterface $localeDate,
-        ChannableLogger $logger
+        ChannableLogger $logger,
+        Unserialize $unserialize
     ) {
         $this->storeManager = $storeManager;
         $this->moduleList = $moduleList;
@@ -98,6 +105,7 @@ class General extends AbstractHelper
         $this->coreDate = $coreDate;
         $this->localeDate = $localeDate;
         $this->logger = $logger;
+        $this->unserialize = $unserialize;
         parent::__construct($context);
     }
 
@@ -172,56 +180,57 @@ class General extends AbstractHelper
 
     /**
      * Get Configuration Array data.
-     * Pre Magento 2.2.x => Unserialize
-     * Magento 2.2.x and up => Json Decode
      *
      * @param      $path
      * @param null $storeId
      * @param null $scope
      *
-     * @return array|mixed
+     * @return array
      */
     public function getStoreValueArray($path, $storeId = null, $scope = null)
     {
         $value = $this->getStoreValue($path, $storeId, $scope);
+        return $this->getValueArray($value);
+    }
+
+    /**
+     * Pre Magento 2.2.x => Unserialize
+     * Magento 2.2.x and up => Json Decode
+     *
+     * @param $value
+     *
+     * @return array
+     */
+    public function getValueArray($value)
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        if ($this->isSerialized($value)) {
+            return $this->unserialize->unserialize($value);
+        }
 
         $result = json_decode($value, true);
         if (json_last_error() == JSON_ERROR_NONE) {
             if (is_array($result)) {
                 return $result;
             }
-            return [];
-        }
-
-        $value = @unserialize($value);
-        if (is_array($value)) {
-            return $value;
         }
 
         return [];
     }
 
     /**
-     * @param $value
+     * Check if value is a serialized string
      *
-     * @return array|mixed
+     * @param string $value
+     *
+     * @return boolean
      */
-    public function getValueArray($value)
+    private function isSerialized($value)
     {
-        $result = json_decode($value, true);
-        if (json_last_error() == JSON_ERROR_NONE) {
-            if (is_array($result)) {
-                return $result;
-            }
-            return [];
-        }
-
-        $value = @unserialize($value);
-        if (is_array($value)) {
-            return $value;
-        }
-
-        return [];
+        return (boolean)preg_match('/^((s|i|d|b|a|O|C):|N;)/', $value);
     }
 
     /**
