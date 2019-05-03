@@ -142,10 +142,6 @@ class Products
             $this->joinCatalogInventoryLeft($collection, $config);
         }
 
-        if (empty($filters['stock'])) {
-            $collection->setFlag('has_stock_status_filter', false);
-        }
-
         $this->addFilters($filters, $collection);
         $this->joinPriceIndexLeft($collection, $config['website_id']);
 
@@ -343,6 +339,13 @@ class Products
                 }
             }
         }
+
+        if (!empty($filters['stock'])) {
+            $this->stockHelper->addInStockFilterToCollection($collection);
+            $collection->setFlag('has_stock_status_filter', true);
+        } else {
+            $collection->setFlag('has_stock_status_filter', false);
+        }
     }
 
     /**
@@ -405,10 +408,6 @@ class Products
 
             if (!empty($config['inventory']['attributes'])) {
                 $this->joinCatalogInventoryLeft($collection, $config);
-            }
-
-            if (empty($filters['stock'])) {
-                $collection->setFlag('has_stock_status_filter', false);
             }
 
             $this->addFilters($filters, $collection, 'parent');
