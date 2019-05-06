@@ -111,6 +111,7 @@ class Products
 
         $collection = $this->productCollectionFactory
             ->create(['catalogProductFlatState' => $productFlatState])
+            ->addStoreFilter($config['store_id'])
             ->addAttributeToSelect($attributes)
             ->addUrlRewrite()
             ->setOrder('entity_id', 'ASC');
@@ -139,10 +140,6 @@ class Products
 
         if (!empty($config['inventory']['attributes'])) {
             $this->joinCatalogInventoryLeft($collection, $config);
-        }
-
-        if (empty($filters['stock'])) {
-            $collection->setFlag('has_stock_status_filter', false);
         }
 
         $this->addFilters($filters, $collection);
@@ -342,6 +339,13 @@ class Products
                 }
             }
         }
+
+        if (!empty($filters['stock'])) {
+            $this->stockHelper->addInStockFilterToCollection($collection);
+            $collection->setFlag('has_stock_status_filter', true);
+        } else {
+            $collection->setFlag('has_stock_status_filter', false);
+        }
     }
 
     /**
@@ -386,6 +390,7 @@ class Products
 
             $collection = $this->productCollectionFactory
                 ->create(['catalogProductFlatState' => $productFlatState])
+                ->addStoreFilter($config['store_id'])
                 ->addAttributeToFilter($entityField, ['in' => array_values($parentRelations)])
                 ->addAttributeToSelect($attributes)
                 ->addUrlRewrite()
@@ -403,10 +408,6 @@ class Products
 
             if (!empty($config['inventory']['attributes'])) {
                 $this->joinCatalogInventoryLeft($collection, $config);
-            }
-
-            if (empty($filters['stock'])) {
-                $collection->setFlag('has_stock_status_filter', false);
             }
 
             $this->addFilters($filters, $collection, 'parent');
