@@ -47,6 +47,12 @@ class Order
 
     public $weight = 0;
     public $total = 0;
+    public $storeId = null;
+    public $importCustomer = false;
+    public $seperateHousenumber = 1;
+    public $numberOfStreetLines = 1;
+    public $backorders = false;
+    public $lvb = false;
 
     /**
      * @var StoreManagerInterface
@@ -261,29 +267,32 @@ class Order
      */
     public function importOrder($data, $storeId)
     {
-        $store = $this->storeManager->getStore($storeId);
-        $importCustomer = $this->orderHelper->getImportCustomer($storeId);
-        $sepHousNo = $this->orderHelper->getSeperateHousenumber($storeId);
-        $backorders = $this->orderHelper->getEnableBackorders($storeId);
-        $lvb = ($data['order_status'] == 'shipped') ? true : false;
 
-        if ($errors = $this->checkItems($data['products'], $lvb, $backorders)) {
+        $this->storeId = $storeId;
+        $this->importCustomer = $this->orderHelper->getImportCustomer($storeId);
+        $this->seperateHousenumber = $this->orderHelper->getSeperateHousenumber($storeId);
+        $this->numberOfStreetLines = $this->orderHelper->getCustomerStreetLines($storeId);
+        $this->backorders = $this->orderHelper->getEnableBackorders($storeId);
+        $this->lvb = ($data['order_status'] == 'shipped') ? true : false;
+
+        if ($errors = $this->checkItems($data['products'])) {
             return $this->jsonRepsonse($errors, '', $data['channable_id']);
         }
 
         try {
+            $store = $this->storeManager->getStore($storeId);
             $cartId = $this->cartManagementInterface->createEmptyCart();
             $cart = $this->cartRepositoryInterface->get($cartId)->setStore($store)->setCurrency()->setIsSuperMode(true);
-            $customerId = $this->setCustomerCart($cart, $store, $data, $importCustomer);
+            $customerId = $this->setCustomerCart($cart, $store, $data);
 
-            $billingAddress = $this->getAddressData('billing', $data, $customerId, $importCustomer, $sepHousNo);
+            $billingAddress = $this->getAddressData('billing', $data, $customerId);
             if (!empty($billingAddress['errors'])) {
                 return $this->jsonRepsonse($billingAddress['errors'], '', $data['channable_id']);
             } else {
                 $cart->getBillingAddress()->addData($billingAddress);
             }
 
-            $shippingAddress = $this->getAddressData('shipping', $data, $customerId, $importCustomer, $sepHousNo);
+            $shippingAddress = $this->getAddressData('shipping', $data, $customerId);
             if (!empty($shippingAddress['errors'])) {
                 return $this->jsonRepsonse($shippingAddress['errors'], '', $data['channable_id']);
             } else {
@@ -296,7 +305,7 @@ class Order
             $this->checkoutSession->setChannableEnabled(1);
             $this->checkoutSession->setChannableShipping($shippingPriceCal);
 
-            $shippingMethod = $this->getShippingMethod($cart, $store, $this->total, $this->weight, $itemCount);
+            $shippingMethod = $this->getShippingMethod($cart, $store, $itemCount);
             $shippingAddress = $cart->getShippingAddress();
             $shippingAddress->setCollectShippingRates(true)
                 ->collectShippingRates()
@@ -310,7 +319,7 @@ class Order
 
             $cart = $this->cartRepositoryInterface->get($cart->getId());
 
-            if ($lvb && $this->orderHelper->getLvbSkipStock($store->getId())) {
+            if ($this->lvb && $this->orderHelper->getLvbSkipStock($store->getId())) {
                 $cart->setInventoryProcessed(true);
                 $this->itemsForReindex->clear();
             }
@@ -324,13 +333,13 @@ class Order
                 $order->setIncrementId($newIncrementId);
             }
 
-            $this->addPaymentData($order, $data, $lvb);
+            $this->addPaymentData($order, $data);
 
             if ($this->orderHelper->getInvoiceOrder($storeId)) {
                 $this->invoiceOrder($order);
             }
 
-            if ($lvb && $this->orderHelper->getLvbAutoShip($storeId)) {
+            if ($this->lvb && $this->orderHelper->getLvbAutoShip($storeId)) {
                 $this->shipOrder($order);
             }
         } catch (\Exception $e) {
@@ -345,13 +354,11 @@ class Order
     }
 
     /**
-     * @param      $items
-     * @param bool $lvb
-     * @param bool $backorders
+     * @param  array $items
      *
      * @return array|bool
      */
-    public function checkItems($items, $lvb = false, $backorders = false)
+    private function checkItems($items)
     {
         $error = [];
         foreach ($items as $item) {
@@ -375,7 +382,7 @@ class Order
                         $product->getEntityId()
                     );
                 }
-                if (!$product->isSalable() && !$lvb && !$backorders) {
+                if (!$product->isSalable() && !$this->lvb && !$this->backorders) {
                     $error[] = __(
                         'Product "%1" not available in requested quantity (ID: %2)',
                         $product->getName(),
@@ -406,7 +413,7 @@ class Order
      *
      * @return array
      */
-    public function jsonRepsonse($errors = '', $orderId = '', $channableId = '')
+    private function jsonRepsonse($errors = '', $orderId = '', $channableId = '')
     {
         $response = $this->orderHelper->jsonResponse($errors, $orderId);
         if ($this->orderHelper->isLoggingEnabled()) {
@@ -417,21 +424,20 @@ class Order
     }
 
     /**
-     * @param $cart
-     * @param $store
-     * @param $data
-     * @param $importCustomer
+     * @param CartRepositoryInterface $cart
+     * @param StoreManagerInterface   $store
+     * @param array                   $data
      *
      * @return int|mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function setCustomerCart($cart, $store, $data, $importCustomer)
+    private function setCustomerCart($cart, $store, $data)
     {
         $storeId = $store->getId();
         $websiteId = $store->getWebsiteId();
 
-        if ($importCustomer) {
+        if ($this->importCustomer) {
             $customerGroupId = $this->orderHelper->getCustomerGroupId($storeId);
             $customer = $this->customerFactory->create();
             $customer->setWebsiteId($websiteId);
@@ -466,14 +472,12 @@ class Order
 
     /**
      * @param        $type
-     * @param        $order
+     * @param array  $order
      * @param string $customerId
-     * @param bool   $importCustomer
-     * @param int    $seprateHousenumber
      *
      * @return array
      */
-    public function getAddressData($type, $order, $customerId = '', $importCustomer = false, $seprateHousenumber = 0)
+    public function getAddressData($type, $order, $customerId = null)
     {
         if ($type == 'billing') {
             $address = $order['billing'];
@@ -495,14 +499,14 @@ class Order
             'firstname'   => $address['first_name'],
             'middlename'  => $address['middle_name'],
             'lastname'    => $address['last_name'],
-            'street'      => $this->getStreet($address, $seprateHousenumber),
+            'street'      => $this->getStreet($address),
             'city'        => $address['city'],
             'country_id'  => $address['country_code'],
             'postcode'    => $address['zip_code'],
             'telephone'   => $telephone
         ];
 
-        if ($importCustomer) {
+        if ($this->importCustomer) {
             $newAddress = $this->addressFactory->create();
             $newAddress->setCustomerId($customerId)
                 ->setCompany($addressData['company'])
@@ -532,44 +536,41 @@ class Order
     }
 
     /**
-     * @param $address
-     * @param $seperateHousnumber
+     * @param array $address
      *
-     * @return array|string
+     * @return string
      */
-    public function getStreet($address, $seperateHousnumber)
+    private function getStreet($address)
     {
-        $street = [];
-        if (!empty($seperateHousnumber)) {
+        if ($this->seperateHousenumber || empty($address['address_line_1'])) {
             $street[] = $address['street'];
-            if ($seperateHousnumber == 1) {
-                $street[] = trim($address['house_number'] . ' ' . $address['house_number_ext']);
-            } else {
-                $street[] = $address['house_number'];
-                $street[] = $address['house_number_ext'];
-            }
-            $street = implode("\n", $street);
+            $street[] = $address['house_number'];
+            $street[] = $address['house_number_ext'];
         } else {
-            if (!empty($address['address_line_1'])) {
-                $street[] = $address['address_line_1'];
-                $street[] = $address['address_line_2'];
-                $street = implode("\n", $street);
-            } else {
-                $street = $address['street'] . ' ';
-                $street .= trim($address['house_number'] . ' ' . $address['house_number_ext']);
-            }
+            $street[] = $address['address_line_1'];
+            $street[] = $address['address_line_2'];
+            $street[] = null;
         }
-        return $street;
+
+        if ($this->numberOfStreetLines == 1) {
+            return trim(implode(' ', $street));
+        }
+
+        if ($this->numberOfStreetLines == 2) {
+            $street = [$street[0], trim($street[1] . ' ' . $street[2])];
+        }
+
+        return implode("\n", $street);
     }
 
     /**
-     * @param      $cart
-     * @param      $data
-     * @param      $store
+     * @param CartRepositoryInterface $cart
+     * @param array                   $data
+     * @param StoreManagerInterface   $store
      *
      * @return int
      */
-    public function addProductsToQuote($cart, $data, $store)
+    private function addProductsToQuote($cart, $data, $store)
     {
         $qty = 0;
         $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $store->getId());
@@ -613,13 +614,13 @@ class Order
     }
 
     /**
-     * @param $cart
-     * @param $data
-     * @param $store
+     * @param CartRepositoryInterface $cart
+     * @param                         $data
+     * @param StoreManagerInterface   $store
      *
      * @return float|int
      */
-    public function getShippingPrice($cart, $data, $store)
+    private function getShippingPrice($cart, $data, $store)
     {
         $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('shipping', $store->getId());
         $shippingPriceCal = $data['price']['shipping'];
@@ -637,15 +638,13 @@ class Order
     }
 
     /**
-     * @param $cart
-     * @param $store
-     * @param $orderTotal
-     * @param $orderWeight
-     * @param $itemCount
+     * @param CartRepositoryInterface $cart
+     * @param StoreManagerInterface   $store
+     * @param                         $itemCount
      *
-     * @return mixed|string
+     * @return mixed|null|string
      */
-    public function getShippingMethod($cart, $store, $orderTotal, $orderWeight, $itemCount)
+    private function getShippingMethod($cart, $store, $itemCount)
     {
         $shippingMethod = $this->orderHelper->getShippingMethod($store->getId());
         $shippingMethodFallback = $this->orderHelper->getShippingMethodFallback($store->getId());
@@ -658,16 +657,16 @@ class Order
         $request->setAllItems($cart->getAllItems());
         $request->setDestCountryId($destCountryId);
         $request->setDestPostcode($destPostcode);
-        $request->setPackageValue($orderTotal);
-        $request->setPackageValueWithDiscount($orderTotal);
-        $request->setPackageWeight($orderWeight);
+        $request->setPackageValue($this->total);
+        $request->setPackageValueWithDiscount($this->total);
+        $request->setPackageWeight($this->weight);
         $request->setPackageQty($itemCount);
         $request->setStoreId($store->getId());
         $request->setWebsiteId($store->getWebsiteId());
         $request->setBaseCurrency($store->getBaseCurrency());
         $request->setPackageCurrency($store->getCurrentCurrency());
         $request->setLimitCarrier('');
-        $request->setBaseSubtotalInclTax($orderTotal);
+        $request->setBaseSubtotalInclTax($this->total);
         $shipping = $this->shippingFactory->create();
         $result = $shipping->collectRates($request)->getResult();
 
@@ -701,11 +700,10 @@ class Order
     }
 
     /**
-     * @param \Magento\Sales\Model\Order $order
-     * @param                            $data
-     * @param                            $lvb
+     * @param OrderModel $order
+     * @param array      $data
      */
-    public function addPaymentData($order, $data, $lvb)
+    private function addPaymentData($order, $data)
     {
         $payment = $order->getPayment();
         if (!empty($data['channable_id'])) {
@@ -724,7 +722,7 @@ class Order
         }
 
         if (!empty($data['channel_name'])) {
-            if ($lvb) {
+            if ($this->lvb) {
                 $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']) . ' LVB');
             } else {
                 $payment->setAdditionalInformation('channel_name', ucfirst($data['channel_name']));
@@ -750,9 +748,9 @@ class Order
     }
 
     /**
-     * @param \Magento\Sales\Model\Order $order
+     * @param OrderModel $order
      */
-    public function invoiceOrder($order)
+    private function invoiceOrder($order)
     {
         if ($order->canInvoice()) {
             try {
@@ -762,11 +760,11 @@ class Order
                 $transactionSave = $this->transaction->addObject($invoice)->addObject($invoice->getOrder());
                 $transactionSave->save();
 
-                $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
+                $order->setState(OrderModel::STATE_PROCESSING);
                 if ($status = $this->orderHelper->getProcessingStatus($order->getStore())) {
                     $order->setStatus($status);
                 } else {
-                    $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
+                    $order->setStatus(OrderModel::STATE_PROCESSING);
                 }
 
                 $this->orderRepository->save($order);
@@ -777,9 +775,9 @@ class Order
     }
 
     /**
-     * @param \Magento\Sales\Model\Order $order
+     * @param OrderModel $order
      */
-    public function shipOrder($order)
+    private function shipOrder($order)
     {
         if ($order->canShip()) {
             try {
@@ -841,11 +839,11 @@ class Order
     }
 
     /**
-     * @param \Magento\Sales\Model\Order $order
+     * @param OrderModel $order
      *
      * @return array|bool
      */
-    public function getTracking($order)
+    private function getTracking($order)
     {
         $tracking = [];
         $shipmentCollection = $order->getShipmentsCollection();

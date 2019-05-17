@@ -346,17 +346,17 @@ class Order extends AbstractHelper
      */
     public function getSeperateHousenumber($storeId = null)
     {
-        $seprate = $this->generalHelper->getStoreValue(self::XPATH_SEPERATE_HOUSENUMBER, $storeId);
-        if (!$seprate) {
-            return 0;
-        }
+        return $this->generalHelper->getStoreValue(self::XPATH_SEPERATE_HOUSENUMBER, $storeId);
+    }
 
-        $streetLines = $this->generalHelper->getStoreValue(self::XPATH_CUSTOMER_STREET_LINES, $storeId);
-        if ($streetLines > 2) {
-            return 2;
-        }
-
-        return 1;
+    /**
+     * @param $storeId
+     *
+     * @return int
+     */
+    public function getCustomerStreetLines($storeId)
+    {
+        return (int) $this->generalHelper->getStoreValue(self::XPATH_CUSTOMER_STREET_LINES, $storeId);
     }
 
     /**
