@@ -110,36 +110,37 @@ class Generate
             $pages = ceil($size / $config['filters']['limit']);
         }
 
-        $products = $productCollection->load();
-        $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
-        $parents = $this->productModel->getParents($parentRelations, $config);
+        if (($page <= $pages) || $pages == 0) {
 
-        foreach ($products as $product) {
-            /** @var \Magento\Catalog\Model\Product $product */
-            $parent = null;
-            if (!empty($parentRelations[$product->getEntityId()])) {
-                foreach ($parentRelations[$product->getEntityId()] as $parentId) {
-                    if ($parent = $parents->getItemById($parentId)) {
-                        continue;
+            $products = $productCollection->load();
+            $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
+            $parents = $this->productModel->getParents($parentRelations, $config);
+
+            foreach ($products as $product) {
+                /** @var \Magento\Catalog\Model\Product $product */
+                $parent = null;
+                if (!empty($parentRelations[$product->getEntityId()])) {
+                    foreach ($parentRelations[$product->getEntityId()] as $parentId) {
+                        if ($parent = $parents->getItemById($parentId)) {
+                            continue;
+                        }
                     }
                 }
-            }
-            if (!empty($productIds)) {
-                $feed['product_source'] = $product->getData();
-                if (!empty($parent)) {
-                    $feed['parent_source'] = $parent->getData();
+                if (!empty($productIds)) {
+                    $feed['product_source'] = $product->getData();
+                    if (!empty($parent)) {
+                        $feed['parent_source'] = $parent->getData();
+                    }
+                }
+                if ($dataRow = $this->getDataRow($product, $parent, $config)) {
+                    $feed[] = $dataRow;
+                }
+
+                if (!empty($config['item_updates'])) {
+                    $this->itemModel->add($dataRow, $storeId);
                 }
             }
-            if ($dataRow = $this->getDataRow($product, $parent, $config)) {
-                $feed[] = $dataRow;
-            }
 
-            if (!empty($config['item_updates'])) {
-                $this->itemModel->add($dataRow, $storeId);
-            }
-        }
-
-        if (($page <= $pages) || $pages == 0) {
             $return = [];
             if (empty($productId)) {
                 $limit = $config['filters']['limit'];
