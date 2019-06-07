@@ -199,14 +199,18 @@ class Products
      * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $collection
      * @param array                                                   $config
      */
-    public function joinCatalogInventoryLeft($collection, $config)
+    private function joinCatalogInventoryLeft($collection, $config)
     {
         $joinCond = join(
             ' AND ',
-            ['cataloginventory.product_id = e.entity_id']
+            ['cataloginventory.product_id = e.entity_id', 'cataloginventory.website_id = 0']
         );
         $tableName = ['cataloginventory' => $collection->getTable('cataloginventory_stock_item')];
-        $collection->getSelect()->joinLeft($tableName, $joinCond, $config['inventory']['attributes']);
+        $collection->getSelect()->joinLeft(
+            $tableName,
+            $joinCond,
+            array_combine($config['inventory']['attributes'], $config['inventory']['attributes'])
+        );
     }
 
     /**
