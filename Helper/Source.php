@@ -576,7 +576,7 @@ class Source extends AbstractHelper
             $attributes['qty'] = [
                 'label'   => 'qty',
                 'source'  => 'qty',
-                'actions' => $type == 'api' ? ['round'] : ['number'],
+                'actions' => $type == 'api' ? ['round'] : [],
             ];
         }
 
