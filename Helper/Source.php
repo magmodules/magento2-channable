@@ -558,6 +558,10 @@ class Source extends AbstractHelper
                 ],
                 'parent_selection_disabled' => 1,
             ];
+
+            if ($extraFields = $this->getExtraFields()) {
+                $attributes = array_merge($attributes, $extraFields);
+            }
         }
 
         if ($inventory || $type == 'api') {
@@ -574,10 +578,6 @@ class Source extends AbstractHelper
                 'source'  => 'qty',
                 'actions' => $type == 'api' ? ['round'] : ['number'],
             ];
-        }
-
-        if ($extraFields = $this->getExtraFields()) {
-            $attributes = array_merge($attributes, $extraFields);
         }
 
         if ($type == 'parent') {
