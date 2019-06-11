@@ -436,6 +436,15 @@
                         <field id="inventory">1</field>
                     </depends>
                 </field>
+                <field id="use_salable_qty" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Use Salable QTY</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="inventory">1</field>
+                    </depends>
+                    <comment>Use salable QTY instead of QTY as available stock (experimental function)</comment>
+                </field>
                 <field id="heading_delivery" translate="label comment" type="text" sortOrder="30" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Delivery Time</label>

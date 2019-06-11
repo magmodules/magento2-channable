@@ -45,7 +45,7 @@ class Item extends AbstractDb
     }
 
     /**
-     *
+     * Initialize table
      */
     protected function _construct()
     {
@@ -60,6 +60,15 @@ class Item extends AbstractDb
     protected function _beforeSave(AbstractModel $object)
     {
         $object->setUpdatedAt($this->date->gmtDate());
+
+        if (($stock = $object->getData('stock')) && !$object->getData('qty')) {
+            $object->setQty($stock);
+        }
+
+        if ($availability = $object->getData('availability') && !($object->getData('is_in_stock'))) {
+            $object->setIsInStock($availability);
+        }
+
         return parent::_beforeSave($object);
     }
 }

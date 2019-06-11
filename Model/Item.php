@@ -360,7 +360,7 @@ class Item extends AbstractModel
             $update['stock'] = isset($product['qty']) ? round($product['qty']) : 0;
             $update['availability'] = isset($product['availability']) ? $product['availability'] : 0;
             $update['price'] = isset($product['price']) ? $product['price'] : number_format($item->getPrice(), 2);
-            $update['discount_price'] = isset($product['discount_price']) ? $product['discount_price'] : '';
+            $update['discount_price'] = isset($product['sale_price']) ? $product['sale_price'] : '';
 
             $postData[] = $update;
         }
@@ -440,14 +440,10 @@ class Item extends AbstractModel
             }
         } else {
             foreach ($postData as &$item) {
-                $item['qty'] = $item['stock'];
-                $item['is_in_stock'] = $item['availability'];
                 $item['call_result'] = $postResult['message'];
                 $item['status'] = $postResult['status'];
                 $item['needs_update'] = $postResult['needs_update'];
                 $item['last_call'] = $gtmDate;
-                unset($item['stock']);
-                unset($item['availability']);
             }
         }
 

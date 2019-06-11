@@ -64,6 +64,10 @@ class Product extends AbstractHelper
      */
     private $productImageHelper;
     /**
+     * @var Inventory
+     */
+    private $inventoryHelper;
+    /**
      * @var GalleryReadHandler
      */
     private $galleryReadHandler;
@@ -92,6 +96,7 @@ class Product extends AbstractHelper
      * @param CatalogProductMediaConfig       $catalogProductMediaConfig
      * @param CatalogHelper                   $catalogHelper
      * @param ProductImageHelper              $productImageHelper
+     * @param Inventory                       $inventoryHelper
      * @param RuleFactory                     $ruleFactory
      * @param EavConfig                       $eavConfig
      * @param FilterManager                   $filter
@@ -108,6 +113,7 @@ class Product extends AbstractHelper
         CatalogProductMediaConfig $catalogProductMediaConfig,
         CatalogHelper $catalogHelper,
         ProductImageHelper $productImageHelper,
+        Inventory $inventoryHelper,
         RuleFactory $ruleFactory,
         EavConfig $eavConfig,
         FilterManager $filter,
@@ -122,6 +128,7 @@ class Product extends AbstractHelper
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
         $this->catalogHelper = $catalogHelper;
         $this->productImageHelper = $productImageHelper;
+        $this->inventoryHelper = $inventoryHelper;
         $this->ruleFactory = $ruleFactory;
         $this->eavConfig = $eavConfig;
         $this->filter = $filter;
@@ -284,10 +291,17 @@ class Product extends AbstractHelper
             case 'attribute_set_name':
                 $value = $this->getAttributeSetName($product);
                 break;
+            case 'qty':
+                $value = $this->getQtyValue($product, $config['inventory']);
+                break;
             case 'manage_stock':
+                $value = $this->getManageStockValue($product, $config['inventory']);
+                break;
             case 'min_sale_qty':
+                $value = $this->getMinSaleQtyValue($product, $config['inventory']);
+                break;
             case 'qty_increments':
-                $value = $this->getStockValue($type, $product, $config['inventory']);
+                $value = $this->getQtyIncrementsValue($product, $config['inventory']);
                 break;
             case 'availability':
                 $value = $this->getAvailability($product);
@@ -558,47 +572,74 @@ class Product extends AbstractHelper
     }
 
     /**
-     * @param                                $attribute
-     * @param \Magento\Catalog\Model\Product $product
-     * @param                                $inventory
+     * Get QTY from inventory with support for reservations (if enabled)
      *
-     * @return bool
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @param \Magento\Catalog\Model\Product $product
+     * @param [] $inventory
+     *
+     * @return float
      */
-    public function getStockValue($attribute, $product, $inventory)
+    private function getQtyValue($product, $inventory)
     {
-        if ($attribute == 'manage_stock') {
-            if ($product->getData('use_config_manage_stock')) {
-                return $inventory['config_manage_stock'];
-            } else {
-                return $product->getData('manage_stock');
-            }
+        $qty = $product->getQty();
+        if (!empty($inventory['use_salable_qty']) && !empty($inventory['stock_id'])) {
+            $qty -= $this->inventoryHelper->getReservations($product->getSku(), $inventory['stock_id']);
         }
-        if ($attribute == 'min_sale_qty') {
-            if ($product->getData('use_config_min_sale_qty')) {
-                return $inventory['config_min_sale_qty'];
-            } else {
-                return $product->getData('min_sale_qty');
-            }
-        }
-        if ($attribute == 'qty_increments') {
-            if ($product->getData('use_config_enable_qty_inc')) {
-                if (!$inventory['config_enable_qty_inc']) {
-                    return false;
-                }
-            } else {
-                if (!$product->getData('enable_qty_inc')) {
-                    return false;
-                }
-            }
-            if ($product->getData('use_config_qty_increments')) {
-                return $inventory['config_qty_increments'];
-            } else {
-                return $product->getData('qty_increments');
-            }
-        }
+        return $qty;
+    }
 
-        return '';
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     * @param [] $inventory
+     *
+     * @return boolean
+     */
+    private function getManageStockValue($product, $inventory)
+    {
+        if ($product->getData('use_config_manage_stock')) {
+            return $inventory['config_manage_stock'];
+        }
+        return $product->getData('manage_stock');
+    }
+
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     * @param [] $inventory
+     *
+     * @return boolean
+     */
+    private function getMinSaleQtyValue($product, $inventory)
+    {
+        if ($product->getData('use_config_min_sale_qty')) {
+            if (is_numeric($inventory['config_min_sale_qty'])) {
+                return $inventory['config_min_sale_qty'];
+            }
+        }
+        return $product->getData('min_sale_qty');
+    }
+
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     * @param [] $inventory
+     *
+     * @return mixed
+     */
+    private function getQtyIncrementsValue($product, $inventory)
+    {
+        if ($product->getData('use_config_enable_qty_inc')) {
+            if (!$inventory['config_enable_qty_inc']) {
+                return false;
+            }
+        } else {
+            if (!$product->getData('enable_qty_inc')) {
+                return false;
+            }
+        }
+        if ($product->getData('use_config_qty_increments')) {
+            return $inventory['config_qty_increments'];
+        } else {
+            return $product->getData('qty_increments');
+        }
     }
 
     /**

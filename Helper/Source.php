@@ -10,10 +10,7 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\Product\Visibility;
-use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magmodules\Channable\Helper\Product as ProductHelper;
-use Magmodules\Channable\Helper\Item as ItemHelper;
-use Magmodules\Channable\Helper\Category as CategoryHelper;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class Source
@@ -44,6 +41,7 @@ class Source extends AbstractHelper
     const XPATH_DELIVERY_TIME = 'magmodules_channable/advanced/delivery_time';
     const XPATH_INVENTORY = 'magmodules_channable/advanced/inventory';
     const XPATH_INVENTORY_DATA = 'magmodules_channable/advanced/inventory_fields';
+    const XPATH_INVENTORY_SALABLE = 'magmodules_channable/advanced/use_salable_qty';
     const XPATH_TAX = 'magmodules_channable/advanced/tax';
     const XPATH_MANAGE_STOCK = 'cataloginventory/item_options/manage_stock';
     const XPATH_MIN_SALES_QTY = 'cataloginventory/item_options/min_sale_qty';
@@ -91,6 +89,11 @@ class Source extends AbstractHelper
      * @var StoreManagerInterface
      */
     private $storeManager;
+    /**
+     * @var Inventory
+     */
+    private $inventoryHelper;
+
 
     /**
      * Source constructor.
@@ -101,20 +104,23 @@ class Source extends AbstractHelper
      * @param Category              $categoryHelper
      * @param Product               $productHelper
      * @param Item                  $itemHelper
+     * @param Inventory             $inventoryHelper
      */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
-        GeneralHelper $generalHelper,
-        CategoryHelper $categoryHelper,
-        ProductHelper $productHelper,
-        ItemHelper $itemHelper
+        General $generalHelper,
+        Category $categoryHelper,
+        Product $productHelper,
+        Item $itemHelper,
+        Inventory $inventoryHelper
     ) {
         $this->generalHelper = $generalHelper;
         $this->productHelper = $productHelper;
         $this->itemHelper = $itemHelper;
         $this->categoryHelper = $categoryHelper;
         $this->storeManager = $storeManager;
+        $this->inventoryHelper = $inventoryHelper;
         parent::__construct($context);
     }
 
@@ -123,6 +129,7 @@ class Source extends AbstractHelper
      * @param string $type
      *
      * @return array
+     * @throws LocalizedException
      */
     public function getConfig($storeId, $type = 'feed')
     {
@@ -642,6 +649,7 @@ class Source extends AbstractHelper
      * @param $type
      *
      * @return array
+     * @throws LocalizedException
      */
     public function getInventoryData($type)
     {
@@ -660,10 +668,12 @@ class Source extends AbstractHelper
         $invAtt['attributes'] = explode(',', $fields);
         $invAtt['attributes'][] = 'is_in_stock';
         $invAtt['attributes'][] = 'qty';
+
         if (in_array('manage_stock', $invAtt['attributes'])) {
             $invAtt['attributes'][] = 'use_config_manage_stock';
             $invAtt['config_manage_stock'] = $this->generalHelper->getStoreValue(self::XPATH_MANAGE_STOCK);
         }
+
         if (in_array('qty_increments', $invAtt['attributes'])) {
             $invAtt['attributes'][] = 'use_config_qty_increments';
             $invAtt['attributes'][] = 'enable_qty_increments';
@@ -671,9 +681,16 @@ class Source extends AbstractHelper
             $invAtt['config_qty_increments'] = $this->generalHelper->getStoreValue(self::XPATH_QTY_INCREMENTS);
             $invAtt['config_enable_qty_inc'] = $this->generalHelper->getStoreValue(self::XPATH_QTY_INC_ENABLED);
         }
+
         if (in_array('min_sale_qty', $invAtt['attributes'])) {
             $invAtt['attributes'][] = 'use_config_min_sale_qty';
             $invAtt['config_min_sale_qty'] = $this->generalHelper->getStoreValue(self::XPATH_MIN_SALES_QTY);
+        }
+
+        $invAtt['use_salable_qty'] = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY_SALABLE);
+        if ($invAtt['use_salable_qty']) {
+            $websiteCode = $this->storeManager->getWebsite()->getCode();
+            $invAtt['stock_id'] = $this->inventoryHelper->getInventorySource($websiteCode);
         }
 
         return $invAtt;
