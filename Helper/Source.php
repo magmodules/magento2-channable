@@ -66,7 +66,7 @@ class Source extends AbstractHelper
     const XPATH_GROUPED_LINK = 'magmodules_channable/types/grouped_link';
     const XPATH_GROUPED_IMAGE = 'magmodules_channable/types/grouped_image';
     const XPATH_GROUPED_PARENT_PRICE = 'magmodules_channable/types/grouped_parent_price';
-    const XPATH_GROUPED_PARENT_ATTS = 'magmodules_channable/types/grouped_parrent_atts';
+    const XPATH_GROUPED_PARENT_ATTS = 'magmodules_channable/types/grouped_parent_atts';
     const XPATH_GROUPED_NONVISIBLE = 'magmodules_channable/types/grouped_nonvisible';
 
     /**
