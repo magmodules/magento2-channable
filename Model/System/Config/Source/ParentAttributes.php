@@ -59,7 +59,7 @@ class ParentAttributes implements ArrayInterface
         $attributes = [];
         $storeId = $this->request->getParam('store');
         $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
-        $source = $this->sourceHelper->getAttributes('parent');
+        $source = $this->sourceHelper->getAttributes('parent', '', $storeId);
         $this->appEmulation->stopEnvironmentEmulation();
 
         foreach ($source as $key => $attribute) {
