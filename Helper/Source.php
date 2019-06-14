@@ -93,7 +93,10 @@ class Source extends AbstractHelper
      * @var Inventory
      */
     private $inventoryHelper;
-
+    /**
+     * @var
+     */
+    private $storeId = null;
 
     /**
      * Source constructor.
@@ -136,7 +139,7 @@ class Source extends AbstractHelper
         $config = [];
         $config['flat'] = false;
         $config['type'] = $type;
-        $config['store_id'] = $storeId;
+        $config['store_id'] = $this->getStoreId($storeId);
         $config['website_id'] = $this->storeManager->getStore()->getWebsiteId();
         $config['timestamp'] = $this->generalHelper->getLocaleDate($storeId);
         $config['date_time'] = $this->generalHelper->getDateTime();
@@ -144,19 +147,19 @@ class Source extends AbstractHelper
         $config['attributes'] = $this->getAttributes($type, $config['filters']);
         $config['price_config'] = $this->getPriceConfig($type);
         $config['inventory'] = $this->getInventoryData($type);
-        $config['inc_hidden_image'] = $this->generalHelper->getStoreValue(self::XPATH_IMAGE_INC_HIDDEN);
+        $config['inc_hidden_image'] = $this->getStoreValue(self::XPATH_IMAGE_INC_HIDDEN);
 
         if ($type == 'feed') {
             $config['base_url'] = $this->storeManager->getStore()->getBaseUrl();
-            $config['weight_unit'] = ' ' . $this->generalHelper->getStoreValue(self::XPATH_WEIGHT_UNIT, $storeId);
+            $config['weight_unit'] = ' ' . $this->getStoreValue(self::XPATH_WEIGHT_UNIT);
             $config['categories'] = $this->categoryHelper->getCollection(
                 $storeId,
                 '',
                 '',
                 'channable_cat_disable_export'
             );
-            $config['item_updates'] = $this->itemHelper->isEnabled();
-            $config['delivery'] = $this->generalHelper->getStoreValue(self::XPATH_DELIVERY_TIME);
+            $config['item_updates'] = $this->itemHelper->isEnabled($storeId);
+            $config['delivery'] = $this->getStoreValue(self::XPATH_DELIVERY_TIME);
         }
 
         if ($type == 'api') {
@@ -164,6 +167,20 @@ class Source extends AbstractHelper
         }
 
         return $config;
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return null
+     */
+    public function getStoreId($storeId = null)
+    {
+        if ($this->storeId === null) {
+            $this->storeId = $storeId;
+        }
+
+        return $this->storeId;
     }
 
     /**
@@ -182,7 +199,7 @@ class Source extends AbstractHelper
         $filters['image'] = [];
         $filters['link'] = [];
 
-        $configurabale = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE);
+        $configurabale = $this->getStoreValue(self::XPATH_CONFIGURABLE);
         switch ($configurabale) {
             case "parent":
                 array_push($filters['type_id'], 'configurable');
@@ -191,15 +208,15 @@ class Source extends AbstractHelper
                 array_push($filters['relations'], 'configurable');
                 array_push($filters['exclude_parents'], 'configurable');
 
-                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_PARENT_ATTS)) {
+                if ($attributes = $this->getStoreValue(self::XPATH_CONFIGURABLE_PARENT_ATTS)) {
                     $filters['parent_attributes']['configurable'] = explode(',', $attributes);
                 }
 
-                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_NONVISIBLE)) {
+                if ($nonVisible = $this->getStoreValue(self::XPATH_CONFIGURABLE_NONVISIBLE)) {
                     array_push($filters['nonvisible'], 'configurable');
                 }
 
-                if ($link = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_LINK)) {
+                if ($link = $this->getStoreValue(self::XPATH_CONFIGURABLE_LINK)) {
                     $filters['link']['configurable'] = $link;
                     if (isset($filters['parent_attributes']['configurable'])) {
                         array_push($filters['parent_attributes']['configurable'], 'link');
@@ -208,7 +225,7 @@ class Source extends AbstractHelper
                     }
                 }
 
-                if ($image = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_IMAGE)) {
+                if ($image = $this->getStoreValue(self::XPATH_CONFIGURABLE_IMAGE)) {
                     $filters['image']['configurable'] = $image;
                     if (isset($filters['parent_attributes']['configurable'])) {
                         array_push($filters['parent_attributes']['configurable'], 'image_link');
@@ -222,15 +239,15 @@ class Source extends AbstractHelper
                 array_push($filters['type_id'], 'configurable');
                 array_push($filters['relations'], 'configurable');
 
-                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_PARENT_ATTS)) {
+                if ($attributes = $this->getStoreValue(self::XPATH_CONFIGURABLE_PARENT_ATTS)) {
                     $filters['parent_attributes']['configurable'] = explode(',', $attributes);
                 }
 
-                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_NONVISIBLE)) {
+                if ($nonVisible = $this->getStoreValue(self::XPATH_CONFIGURABLE_NONVISIBLE)) {
                     array_push($filters['nonvisible'], 'configurable');
                 }
 
-                if ($link = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_LINK)) {
+                if ($link = $this->getStoreValue(self::XPATH_CONFIGURABLE_LINK)) {
                     $filters['link']['configurable'] = $link;
                     if (isset($filters['parent_attributes']['configurable'])) {
                         array_push($filters['parent_attributes']['configurable'], 'link');
@@ -239,7 +256,7 @@ class Source extends AbstractHelper
                     }
                 }
 
-                if ($image = $this->generalHelper->getStoreValue(self::XPATH_CONFIGURABLE_IMAGE)) {
+                if ($image = $this->getStoreValue(self::XPATH_CONFIGURABLE_IMAGE)) {
                     $filters['image']['configurable'] = $image;
                     if (isset($filters['parent_attributes']['configurable'])) {
                         array_push($filters['parent_attributes']['configurable'], 'image_link');
@@ -251,7 +268,7 @@ class Source extends AbstractHelper
                 break;
         }
 
-        $bundle = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE);
+        $bundle = $this->getStoreValue(self::XPATH_BUNDLE);
         switch ($bundle) {
             case "parent":
                 array_push($filters['type_id'], 'bundle');
@@ -260,15 +277,15 @@ class Source extends AbstractHelper
                 array_push($filters['relations'], 'bundle');
                 array_push($filters['exclude_parents'], 'bundle');
 
-                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_PARENT_ATTS)) {
+                if ($attributes = $this->getStoreValue(self::XPATH_BUNDLE_PARENT_ATTS)) {
                     $filters['parent_attributes']['bundle'] = explode(',', $attributes);
                 }
 
-                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_NONVISIBLE)) {
+                if ($nonVisible = $this->getStoreValue(self::XPATH_BUNDLE_NONVISIBLE)) {
                     array_push($filters['nonvisible'], 'bundle');
                 }
 
-                if ($link = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_LINK)) {
+                if ($link = $this->getStoreValue(self::XPATH_BUNDLE_LINK)) {
                     $filters['link']['bundle'] = $link;
                     if (isset($filters['parent_attributes']['bundle'])) {
                         array_push($filters['parent_attributes']['bundle'], 'link');
@@ -277,7 +294,7 @@ class Source extends AbstractHelper
                     }
                 }
 
-                if ($image = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_IMAGE)) {
+                if ($image = $this->getStoreValue(self::XPATH_BUNDLE_IMAGE)) {
                     $filters['image']['bundle'] = $image;
                     if (isset($filters['parent_attributes']['bundle'])) {
                         array_push($filters['parent_attributes']['bundle'], 'image_link');
@@ -291,15 +308,15 @@ class Source extends AbstractHelper
                 array_push($filters['type_id'], 'bundle');
                 array_push($filters['relations'], 'bundle');
 
-                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_PARENT_ATTS)) {
+                if ($attributes = $this->getStoreValue(self::XPATH_BUNDLE_PARENT_ATTS)) {
                     $filters['parent_attributes']['bundle'] = explode(',', $attributes);
                 }
 
-                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_NONVISIBLE)) {
+                if ($nonVisible = $this->getStoreValue(self::XPATH_BUNDLE_NONVISIBLE)) {
                     array_push($filters['nonvisible'], 'bundle');
                 }
 
-                if ($link = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_LINK)) {
+                if ($link = $this->getStoreValue(self::XPATH_BUNDLE_LINK)) {
                     $filters['link']['bundle'] = $link;
                     if (isset($filters['parent_attributes']['bundle'])) {
                         array_push($filters['parent_attributes']['bundle'], 'link');
@@ -308,7 +325,7 @@ class Source extends AbstractHelper
                     }
                 }
 
-                if ($image = $this->generalHelper->getStoreValue(self::XPATH_BUNDLE_IMAGE)) {
+                if ($image = $this->getStoreValue(self::XPATH_BUNDLE_IMAGE)) {
                     $filters['image']['bundle'] = $image;
                     if (isset($filters['parent_attributes']['bundle'])) {
                         array_push($filters['parent_attributes']['bundle'], 'image_link');
@@ -320,7 +337,7 @@ class Source extends AbstractHelper
                 break;
         }
 
-        $grouped = $this->generalHelper->getStoreValue(self::XPATH_GROUPED);
+        $grouped = $this->getStoreValue(self::XPATH_GROUPED);
         switch ($grouped) {
             case "parent":
                 array_push($filters['type_id'], 'grouped');
@@ -329,15 +346,15 @@ class Source extends AbstractHelper
                 array_push($filters['relations'], 'grouped');
                 array_push($filters['exclude_parents'], 'grouped');
 
-                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_PARENT_ATTS)) {
+                if ($attributes = $this->getStoreValue(self::XPATH_GROUPED_PARENT_ATTS)) {
                     $filters['parent_attributes']['grouped'] = explode(',', $attributes);
                 }
 
-                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_NONVISIBLE)) {
+                if ($nonVisible = $this->getStoreValue(self::XPATH_GROUPED_NONVISIBLE)) {
                     array_push($filters['nonvisible'], 'grouped');
                 }
 
-                if ($link = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_LINK)) {
+                if ($link = $this->getStoreValue(self::XPATH_GROUPED_LINK)) {
                     $filters['link']['grouped'] = $link;
                     if (isset($filters['parent_attributes']['grouped'])) {
                         array_push($filters['parent_attributes']['grouped'], 'link');
@@ -346,7 +363,7 @@ class Source extends AbstractHelper
                     }
                 }
 
-                if ($image = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_IMAGE)) {
+                if ($image = $this->getStoreValue(self::XPATH_GROUPED_IMAGE)) {
                     $filters['image']['grouped'] = $image;
                     if (isset($filters['parent_attributes']['grouped'])) {
                         array_push($filters['parent_attributes']['grouped'], 'image_link');
@@ -360,15 +377,15 @@ class Source extends AbstractHelper
                 array_push($filters['type_id'], 'grouped');
                 array_push($filters['relations'], 'grouped');
 
-                if ($attributes = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_PARENT_ATTS)) {
+                if ($attributes = $this->getStoreValue(self::XPATH_GROUPED_PARENT_ATTS)) {
                     $filters['parent_attributes']['grouped'] = explode(',', $attributes);
                 }
 
-                if ($nonVisible = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_NONVISIBLE)) {
+                if ($nonVisible = $this->getStoreValue(self::XPATH_GROUPED_NONVISIBLE)) {
                     array_push($filters['nonvisible'], 'grouped');
                 }
 
-                if ($link = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_LINK)) {
+                if ($link = $this->getStoreValue(self::XPATH_GROUPED_LINK)) {
                     $filters['link']['grouped'] = $link;
                     if (isset($filters['parent_attributes']['grouped'])) {
                         array_push($filters['parent_attributes']['grouped'], 'link');
@@ -377,7 +394,7 @@ class Source extends AbstractHelper
                     }
                 }
 
-                if ($image = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_IMAGE)) {
+                if ($image = $this->getStoreValue(self::XPATH_GROUPED_IMAGE)) {
                     $filters['image']['grouped'] = $image;
                     if (isset($filters['parent_attributes']['grouped'])) {
                         array_push($filters['parent_attributes']['grouped'], 'image_link');
@@ -389,9 +406,9 @@ class Source extends AbstractHelper
                 break;
         }
 
-        $visibilityFilter = $this->generalHelper->getStoreValue(self::XPATH_VISBILITY);
+        $visibilityFilter = $this->getStoreValue(self::XPATH_VISBILITY);
         if ($visibilityFilter) {
-            $visibility = $this->generalHelper->getStoreValue(self::XPATH_VISIBILITY_OPTIONS);
+            $visibility = $this->getStoreValue(self::XPATH_VISIBILITY_OPTIONS);
             $filters['visibility'] = explode(',', $visibility);
             $filters['visibility_parents'] = $filters['visibility'];
         } else {
@@ -406,17 +423,17 @@ class Source extends AbstractHelper
             }
         }
 
-        $filters['limit'] = preg_replace('/\D/', '', $this->generalHelper->getStoreValue(self::XPATH_LIMIT));
+        $filters['limit'] = preg_replace('/\D/', '', $this->getStoreValue(self::XPATH_LIMIT));
         if ($type == 'api') {
             $filters['limit'] = 0;
         }
 
-        $filters['stock'] = $this->generalHelper->getStoreValue(self::XPATH_STOCK);
+        $filters['stock'] = $this->getStoreValue(self::XPATH_STOCK);
 
-        $categoryFilter = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_FILTER);
+        $categoryFilter = $this->getStoreValue(self::XPATH_CATEGORY_FILTER);
         if ($categoryFilter) {
-            $categoryIds = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_IDS);
-            $filterType = $this->generalHelper->getStoreValue(self::XPATH_CATEGORY_FILTER_TYPE);
+            $categoryIds = $this->getStoreValue(self::XPATH_CATEGORY_IDS);
+            $filterType = $this->getStoreValue(self::XPATH_CATEGORY_FILTER_TYPE);
             if (!empty($categoryIds) && !empty($filterType)) {
                 $filters['category_ids'] = explode(',', $categoryIds);
                 $filters['category_type'] = $filterType;
@@ -424,9 +441,9 @@ class Source extends AbstractHelper
         }
 
         $filters['advanced'] = [];
-        $productFilters = $this->generalHelper->getStoreValue(self::XPATH_FILTERS);
+        $productFilters = $this->getStoreValue(self::XPATH_FILTERS);
         if ($productFilters) {
-            if ($advFilters = $this->generalHelper->getStoreValueArray(self::XPATH_FILTERS_DATA)) {
+            if ($advFilters = $this->getStoreValueArray(self::XPATH_FILTERS_DATA)) {
                 foreach ($advFilters as $advFilter) {
                     array_push($filters['advanced'], $advFilter);
                 }
@@ -437,14 +454,37 @@ class Source extends AbstractHelper
     }
 
     /**
-     * @param $type
-     * @param $filters
+     * @param $path
+     *
+     * @return mixed
+     */
+    public function getStoreValue($path)
+    {
+        return $this->generalHelper->getStoreValue($path, $this->storeId);
+    }
+
+    /**
+     * @param $path
+     *
+     * @return mixed
+     */
+    public function getStoreValueArray($path)
+    {
+        return $this->generalHelper->getStoreValueArray($path, $this->storeId);
+    }
+
+    /**
+     * @param       $type
+     * @param array $filters
+     * @param null  $storeId
      *
      * @return array
      */
-    public function getAttributes($type, $filters = [])
+    public function getAttributes($type, $filters = [], $storeId = null)
     {
-        $inventory = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY);
+        $this->getStoreId($storeId);
+
+        $inventory = $this->getStoreValue(self::XPATH_INVENTORY);
 
         $attributes = [];
         $attributes['id'] = [
@@ -454,11 +494,11 @@ class Source extends AbstractHelper
         ];
         $attributes['title'] = [
             'label'  => 'title',
-            'source' => $this->generalHelper->getStoreValue(self::XPATH_NAME_SOURCE),
+            'source' => $this->getStoreValue(self::XPATH_NAME_SOURCE),
         ];
         $attributes['ean'] = [
             'label'  => 'ean',
-            'source' => $this->generalHelper->getStoreValue(self::XPATH_EAN_SOURCE),
+            'source' => $this->getStoreValue(self::XPATH_EAN_SOURCE),
         ];
         $attributes['price'] = [
             'label'                     => 'price',
@@ -495,7 +535,7 @@ class Source extends AbstractHelper
             ];
             $attributes['description'] = [
                 'label'  => 'description',
-                'source' => $this->generalHelper->getStoreValue(self::XPATH_DESCRIPTION_SOURCE),
+                'source' => $this->getStoreValue(self::XPATH_DESCRIPTION_SOURCE),
             ];
             $attributes['link'] = [
                 'label'  => 'link',
@@ -503,32 +543,32 @@ class Source extends AbstractHelper
             ];
             $attributes['image_link'] = [
                 'label'  => 'image_link',
-                'source' => $this->generalHelper->getStoreValue(self::XPATH_IMAGE_SOURCE),
-                'main'   => $this->generalHelper->getStoreValue(self::XPATH_IMAGE_MAIN),
+                'source' => $this->getStoreValue(self::XPATH_IMAGE_SOURCE),
+                'main'   => $this->getStoreValue(self::XPATH_IMAGE_MAIN),
             ];
             $attributes['brand'] = [
                 'label'  => 'brand',
-                'source' => $this->generalHelper->getStoreValue(self::XPATH_BRAND_SOURCE),
+                'source' => $this->getStoreValue(self::XPATH_BRAND_SOURCE),
             ];
             $attributes['sku'] = [
                 'label'  => 'sku',
-                'source' => $this->generalHelper->getStoreValue(self::XPATH_SKU_SOURCE),
+                'source' => $this->getStoreValue(self::XPATH_SKU_SOURCE),
             ];
             $attributes['color'] = [
                 'label'  => 'color',
-                'source' => $this->generalHelper->getStoreValue(self::XPATH_COLOR_SOURCE),
+                'source' => $this->getStoreValue(self::XPATH_COLOR_SOURCE),
             ];
             $attributes['gender'] = [
                 'label'  => 'gender',
-                'source' => $this->generalHelper->getStoreValue(self::XPATH_GENDER_SOURCE)
+                'source' => $this->getStoreValue(self::XPATH_GENDER_SOURCE)
             ];
             $attributes['material'] = [
                 'label'  => 'material',
-                'source' => $this->generalHelper->getStoreValue(self::XPATH_MATERIAL_SOURCE),
+                'source' => $this->getStoreValue(self::XPATH_MATERIAL_SOURCE),
             ];
             $attributes['size'] = [
                 'label'  => 'size',
-                'source' => $this->generalHelper->getStoreValue(self::XPATH_SIZE_SOURCE),
+                'source' => $this->getStoreValue(self::XPATH_SIZE_SOURCE),
             ];
 
             if ($inventory) {
@@ -600,7 +640,7 @@ class Source extends AbstractHelper
     public function getExtraFields()
     {
         $extraFields = [];
-        if ($attributes = $this->generalHelper->getStoreValueArray(self::XPATH_EXTRA_FIELDS)) {
+        if ($attributes = $this->getStoreValueArray(self::XPATH_EXTRA_FIELDS)) {
             foreach ($attributes as $attribute) {
                 $label = strtolower(str_replace(' ', '_', $attribute['name']));
                 $extraFields[$label] = [
@@ -630,9 +670,9 @@ class Source extends AbstractHelper
         $priceFields['sales_date_range'] = 'sale_price_effective_date';
         $priceFields['currency'] = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
         $priceFields['exchange_rate'] = $store->getBaseCurrency()->getRate($priceFields['currency']);
-        $priceFields['grouped_price_type'] = $this->generalHelper->getStoreValue(self::XPATH_GROUPED_PARENT_PRICE);
+        $priceFields['grouped_price_type'] = $this->getStoreValue(self::XPATH_GROUPED_PARENT_PRICE);
 
-        if ($this->generalHelper->getStoreValue(self::XPATH_TAX)) {
+        if ($this->getStoreValue(self::XPATH_TAX)) {
             $priceFields['incl_vat'] = true;
         }
 
@@ -654,8 +694,8 @@ class Source extends AbstractHelper
     public function getInventoryData($type)
     {
         $invAtt = [];
-        $enabled = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY);
-        $fields = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY_DATA);
+        $enabled = $this->getStoreValue(self::XPATH_INVENTORY);
+        $fields = $this->getStoreValue(self::XPATH_INVENTORY_DATA);
 
         if (!$enabled || empty($fields)) {
             $invAtt['attributes'][] = 'is_in_stock';
@@ -671,23 +711,23 @@ class Source extends AbstractHelper
 
         if (in_array('manage_stock', $invAtt['attributes'])) {
             $invAtt['attributes'][] = 'use_config_manage_stock';
-            $invAtt['config_manage_stock'] = $this->generalHelper->getStoreValue(self::XPATH_MANAGE_STOCK);
+            $invAtt['config_manage_stock'] = $this->getStoreValue(self::XPATH_MANAGE_STOCK);
         }
 
         if (in_array('qty_increments', $invAtt['attributes'])) {
             $invAtt['attributes'][] = 'use_config_qty_increments';
             $invAtt['attributes'][] = 'enable_qty_increments';
             $invAtt['attributes'][] = 'use_config_enable_qty_inc';
-            $invAtt['config_qty_increments'] = $this->generalHelper->getStoreValue(self::XPATH_QTY_INCREMENTS);
-            $invAtt['config_enable_qty_inc'] = $this->generalHelper->getStoreValue(self::XPATH_QTY_INC_ENABLED);
+            $invAtt['config_qty_increments'] = $this->getStoreValue(self::XPATH_QTY_INCREMENTS);
+            $invAtt['config_enable_qty_inc'] = $this->getStoreValue(self::XPATH_QTY_INC_ENABLED);
         }
 
         if (in_array('min_sale_qty', $invAtt['attributes'])) {
             $invAtt['attributes'][] = 'use_config_min_sale_qty';
-            $invAtt['config_min_sale_qty'] = $this->generalHelper->getStoreValue(self::XPATH_MIN_SALES_QTY);
+            $invAtt['config_min_sale_qty'] = $this->getStoreValue(self::XPATH_MIN_SALES_QTY);
         }
 
-        $invAtt['use_salable_qty'] = $this->generalHelper->getStoreValue(self::XPATH_INVENTORY_SALABLE);
+        $invAtt['use_salable_qty'] = $this->getStoreValue(self::XPATH_INVENTORY_SALABLE);
         if ($invAtt['use_salable_qty']) {
             $websiteCode = $this->storeManager->getWebsite()->getCode();
             $invAtt['stock_id'] = $this->inventoryHelper->getInventorySource($websiteCode);
