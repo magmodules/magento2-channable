@@ -9,6 +9,7 @@ namespace Magmodules\Channable\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magmodules\Channable\Helper\Source as SourceHelper;
+use Magmodules\Channable\Helper\Selftest as SelftestHelper;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
 
@@ -25,6 +26,10 @@ class Preview extends AbstractHelper
      */
     private $sourceHelper;
     /**
+     * @var Selftest
+     */
+    private $selftestHelper;
+    /**
      * @var Emulation
      */
     private $appEmulation;
@@ -35,14 +40,17 @@ class Preview extends AbstractHelper
      * @param Context   $context
      * @param Emulation $appEmulation
      * @param Source    $sourceHelper
+     * @param Selftest  $selftestHelper
      */
     public function __construct(
         Context $context,
         Emulation $appEmulation,
-        SourceHelper $sourceHelper
+        SourceHelper $sourceHelper,
+        SelftestHelper $selftestHelper
     ) {
         $this->appEmulation = $appEmulation;
         $this->sourceHelper = $sourceHelper;
+        $this->selftestHelper = $selftestHelper;
         parent::__construct($context);
     }
 
@@ -70,15 +78,16 @@ class Preview extends AbstractHelper
      *
      * @return string
      */
-    public function getPreviewTable($feed, $config)
+    private function getPreviewTable($feed, $config)
     {
-
         $configTable = $this->getConfigTable($feed);
         $filterTable = $this->getFilterTable($config);
         $attributeTabe = $this->getAttributeTable($config);
+        $priceAttributes = $this->selftestHelper->checkPriceAttributes($config['store_id']);
 
         $hStyle = 'font-weight: bold;';
         $bStyle = 'background: #efefef;border: 1px solid #e7e7e7;';
+        $bStyleWarning = 'background: #EDA28A;border: 1px solid #EDA28A;';
 
         $html = '<h1 style="font-size: 25px;padding: 10px;border-left: 6px solid;">' . __('Config Values') . '</h1>';
         $html .= '<table width="100%" cellpadding="5" cellspacing="5">';
@@ -90,6 +99,19 @@ class Preview extends AbstractHelper
         $html .= '  <td width="50%" valign="top" style="' . $bStyle . '">' . $configTable . $filterTable . '</td>';
         $html .= '  <td width="50%" valign="top" style="' . $bStyle . '">' . $attributeTabe . '</td>';
         $html .= ' </tr>';
+
+        if ($priceAttributes) {
+            $issue = __('"%1" attribute(s) found in extra fields', implode(', ', $priceAttributes));
+            $html .= '  <tr>';
+            $html .= '   <td style="' . $hStyle . '">' . __('Selftest Issues') . '</td>';
+            $html .= '   <td style="' . $hStyle . '">' . __('Attributes') . '</td>';
+            $html .= '  </tr>';
+            $html .= ' <tr>';
+            $html .= '  <td width="50%" valign="top" style="' . $bStyleWarning . '">' . __('Pricing Issues') . '</td>';
+            $html .= '  <td width="50%" valign="top" style="' . $bStyleWarning . '">' . $issue . '</td>';
+            $html .= ' </tr>';
+        }
+
         $html .= '</table>';
 
         return $html;

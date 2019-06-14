@@ -12,7 +12,6 @@ use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\HTTP\Adapter\CurlFactory;
-use Magmodules\Channable\Model\ItemFactory;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magmodules\Channable\Model\Collection\Products as ProductsModel;
@@ -20,6 +19,7 @@ use Magmodules\Channable\Helper\Product as ProductHelper;
 use Magmodules\Channable\Helper\Item as ItemHelper;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class Item
@@ -33,7 +33,7 @@ class Item extends AbstractModel
     const CURL_TIMEOUT = 15;
 
     /**
-     * @var \Magmodules\Channable\Model\ItemFactory
+     * @var ItemFactory
      */
     private $itemFactory;
     /**
@@ -68,19 +68,19 @@ class Item extends AbstractModel
     /**
      * Item constructor.
      *
-     * @param \Magmodules\Channable\Model\ItemFactory $itemFactory
-     * @param GeneralHelper                           $generalHelper
-     * @param ProductsModel                           $productModel
-     * @param ProductHelper                           $productHelper
-     * @param ItemHelper                              $itemHelper
-     * @param SourceHelper                            $sourceHelper
-     * @param Emulation                               $appEmulation
-     * @param CurlFactory                             $curlFactory
-     * @param Context                                 $context
-     * @param Registry                                $registry
-     * @param AbstractResource|null                   $resource
-     * @param AbstractDb|null                         $resourceCollection
-     * @param array                                   $data
+     * @param ItemFactory           $itemFactory
+     * @param GeneralHelper         $generalHelper
+     * @param ProductsModel         $productModel
+     * @param ProductHelper         $productHelper
+     * @param ItemHelper            $itemHelper
+     * @param SourceHelper          $sourceHelper
+     * @param Emulation             $appEmulation
+     * @param CurlFactory           $curlFactory
+     * @param Context               $context
+     * @param Registry              $registry
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null       $resourceCollection
+     * @param array                 $data
      */
     public function __construct(
         ItemFactory $itemFactory,
@@ -146,7 +146,8 @@ class Item extends AbstractModel
     }
 
     /**
-     * Update all Stores
+     * @return array
+     * @throws LocalizedException
      */
     public function updateAll()
     {
@@ -211,11 +212,13 @@ class Item extends AbstractModel
     }
 
     /**
-     * @param $storeId
+     * @param      $storeId
+     * @param null $itemIds
      *
-     * @return array
+     * @return array|mixed
+     * @throws LocalizedException
      */
-    public function updateByStore($storeId)
+    public function updateByStore($storeId, $itemIds = null)
     {
         $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
 
@@ -224,9 +227,15 @@ class Item extends AbstractModel
         if (!empty($config['api']['webhook'])) {
             $items = $this->itemFactory->create()->getCollection()
                 ->addFieldToFilter('store_id', $storeId)
-                ->addFieldToFilter('needs_update', 1)
                 ->setOrder('updated_at', 'ASC')
                 ->setPageSize($config['api']['limit']);
+
+            if ($itemIds !== null) {
+                $items->addFieldToFilter('item_id', ['in' => $itemIds]);
+            } else {
+                $items->addFieldToFilter('needs_update', 1);
+            }
+
             $items->getSelect()->order('last_call', 'ASC');
             if (!$items->getSize()) {
                 $result = [
@@ -259,10 +268,11 @@ class Item extends AbstractModel
 
     /**
      * @param        $items
-     * @param int    $storeId
+     * @param        $storeId
      * @param string $config
      *
-     * @return array
+     * @return mixed
+     * @throws LocalizedException
      */
     public function updateCollection($items, $storeId, $config = '')
     {
@@ -283,6 +293,7 @@ class Item extends AbstractModel
      * @param $config
      *
      * @return array
+     * @throws LocalizedException
      */
     public function getProductData($items, $config)
     {
@@ -313,6 +324,7 @@ class Item extends AbstractModel
             }
         } catch (\Exception $e) {
             $this->generalHelper->addTolog('getProductData', $e->getMessage());
+            throw new LocalizedException(__($e->getMessage()));
         }
 
         return $productData;
@@ -348,7 +360,7 @@ class Item extends AbstractModel
             $update['stock'] = isset($product['qty']) ? round($product['qty']) : 0;
             $update['availability'] = isset($product['availability']) ? $product['availability'] : 0;
             $update['price'] = isset($product['price']) ? $product['price'] : number_format($item->getPrice(), 2);
-            $update['discount_price'] = isset($product['discount_price']) ? $product['discount_price'] : '';
+            $update['discount_price'] = isset($product['sale_price']) ? $product['sale_price'] : '';
 
             $postData[] = $update;
         }
@@ -436,14 +448,33 @@ class Item extends AbstractModel
         }
 
         foreach ($postData as $key => $data) {
-            $item = $this->itemFactory->create();
-            $item->setData($data);
-            try {
-                $item->save();
-            } catch (\Exception $e) {
-                $this->generalHelper->addTolog('Item updateData', $e->getMessage());
+            if (!empty($data) && is_array($data)) {
+                $item = $this->itemFactory->create();
+                try {
+                    $item->setData($data)->save();
+                } catch (\Exception $e) {
+                    $this->generalHelper->addTolog('Item updateData', $e->getMessage());
+                }
             }
         }
+    }
+
+    /**
+     * @param $itemIds
+     *
+     * @return array
+     * @throws LocalizedException
+     */
+    public function updateByItemIds($itemIds)
+    {
+        $result = [];
+
+        $storeIds = $this->itemHelper->getStoreIds();
+        foreach ($storeIds as $storeId) {
+            $result[$storeId] = $this->updateByStore($storeId, $itemIds);
+        }
+
+        return $result;
     }
 
     /**

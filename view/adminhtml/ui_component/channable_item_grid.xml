@@ -263,6 +263,13 @@
                 </item>
             </argument>
         </column>
+        <actionsColumn name="actions" class="Magmodules\Channable\Ui\Component\Listing\Column\Item\Actions">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="indexField" xsi:type="string">item_id</item>
+                </item>
+            </argument>
+        </actionsColumn>
     </columns>
     <container name="sticky">
         <argument name="data" xsi:type="array">

@@ -65,7 +65,7 @@ class ParentAttributes implements ArrayInterface
             $excludes = ['image_link', 'link'];
             $storeId = $this->request->getParam('store');
             $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
-            $source = $this->sourceHelper->getAttributes('parent');
+            $source = $this->sourceHelper->getAttributes('parent', '', $storeId);
             $this->appEmulation->stopEnvironmentEmulation();
             foreach ($source as $key => $attribute) {
                 if (empty($attribute['parent_selection_disabled']) && !in_array($key, $excludes)) {
