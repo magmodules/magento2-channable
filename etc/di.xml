@@ -94,4 +94,7 @@
     <type name="Magento\CatalogInventory\Model\StockState">
         <plugin name="channable_skip_qty_check" type="Magmodules\Channable\Plugin\AfterCheckQty"/>
     </type>
+    <type name="Magento\Framework\App\Request\CsrfValidator">
+        <plugin name="channable_skip_csrf_validator" type="Magmodules\Channable\Plugin\AroundCsrfValidator" />
+    </type>
 </config>
