@@ -589,7 +589,7 @@ class Order
                 $price = ($item['price'] / (100 + $percent) * 100);
             }
 
-            $product->setPrice($price)->setFinalPrice($price)->setSpecialPrice($price);
+            $product->setPrice($price)->setFinalPrice($price)->setSpecialPrice($price)->setTierPrice([]);
             if ($this->orderHelper->getEnableBackorders($store->getId())) {
                 $stockItem->setUseConfigBackorders(false)->setBackorders(true)->setIsInStock(true);
                 $productData = $product->getData();
