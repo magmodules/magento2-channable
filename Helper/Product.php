@@ -240,7 +240,7 @@ class Product extends AbstractHelper
         $filters = $config['filters'];
         if (!empty($parent)) {
             if (!empty($filters['stock'])) {
-                if (!$parent->getIsSalable() && !$parent->getIsInStock()) {
+                if (!$parent->getIsInStock()) {
                     return false;
                 }
             }
