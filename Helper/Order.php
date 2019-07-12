@@ -9,9 +9,9 @@ namespace Magmodules\Channable\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
-use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magento\Catalog\Model\ProductFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
+use Magmodules\Channable\Helper\General as GeneralHelper;
+use Magmodules\Channable\Service\Order\TestData;
 
 /**
  * Class Order
@@ -43,6 +43,7 @@ class Order extends AbstractHelper
     const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
     const XPATH_SHIPPING_TAX_CLASS = 'tax/classes/shipping_tax_class';
     const XPATH_CUSTOMER_STREET_LINES = 'customer/address/street_lines';
+
     /**
      * @var General
      */
@@ -52,9 +53,9 @@ class Order extends AbstractHelper
      */
     private $storeManager;
     /**
-     * @var ProductFactory
+     * @var TestData
      */
-    private $product;
+    private $testData;
     /**
      * @var OrderCollectionFactory
      */
@@ -66,19 +67,19 @@ class Order extends AbstractHelper
      * @param Context                $context
      * @param StoreManagerInterface  $storeManager
      * @param General                $generalHelper
-     * @param ProductFactory         $product
+     * @param TestData               $testData
      * @param OrderCollectionFactory $orderCollectionFactory
      */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
         GeneralHelper $generalHelper,
-        ProductFactory $product,
+        TestData $testData,
         OrderCollectionFactory $orderCollectionFactory
     ) {
         $this->generalHelper = $generalHelper;
         $this->storeManager = $storeManager;
-        $this->product = $product;
+        $this->testData = $testData;
         $this->orderCollectionFactory = $orderCollectionFactory;
         parent::__construct($context);
     }
@@ -164,16 +165,19 @@ class Order extends AbstractHelper
      * @param \Magento\Framework\App\RequestInterface $request
      *
      * @return bool|mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function validateJsonData($orderData, $request)
     {
         $data = null;
         $test = $request->getParam('test');
         $lvb = $request->getParam('lvb');
+        $country = $request->getParam('country', 'NL');
         $storeId = $request->getParam('store');
 
         if ($test) {
-            $data = $this->getTestJsonData($test, $lvb);
+            $data = $this->testData->getOrder($test, $lvb, $country);
         } else {
             if ($orderData == null) {
                 return $this->jsonResponse('Post data empty!');
@@ -205,43 +209,6 @@ class Order extends AbstractHelper
         }
 
         return $data;
-    }
-
-    /**
-     * @param      $productId
-     * @param bool $lvb
-     *
-     * @return bool|string
-     */
-    public function getTestJsonData($productId, $lvb = false)
-    {
-        $orderStatus = $lvb ? 'shipped' : 'not_shipped';
-        /** @var \Magento\Catalog\Model\Product $product */
-        $product = $this->product->create()->load($productId);
-        if ($product) {
-            $data = '{"channable_id": 112345, "channable_channel_label": "Bol NL", "channel_id": 123456, 
-              "channel_name": "Bol", "order_status": "' . $orderStatus . '", "extra": {"memo": "Channable Test", 
-              "comment": "Channable order id: 999999999"}, "price": {"total": "' . $product->getFinalPrice() . '", 
-              "currency": "EUR", "shipping": 0, "subtotal": "' . $product->getFinalPrice() . '",
-              "commission": 2.50, "payment_method": "bol", "transaction_fee": 0},
-              "billing": { "city": "Amsterdam", "state": "", "email": "dontemail@me.net",
-              "address_line_1": "Billing Line 1", "address_line_2": "Billing Line 2", "street": "Donkere Spaarne", 
-              "company": "Test company", "zip_code": "5000 ZZ", "last_name": "Channable", "first_name": "Test",
-              "middle_name": "from", "country_code": "NL", "house_number": 100, "house_number_ext": "a",
-              "address_supplement": "Address supplement" }, "customer": { "email": "dontemail@me.net", 
-              "phone": "054333333", "gender": "man", "mobile": "", "company": "Test company", "last_name":
-              "From Channable", "first_name": "Test", "middle_name": "" },
-              "products": [{"id": "' . $product->getEntityId() . '", "ean": "000000000", 
-              "price": "' . $product->getFinalPrice() . '", "title": "' . htmlentities($product->getName()) . '", 
-              "quantity": 1, "shipping": 0, "commission": 2.50, "reference_code": "00000000", 
-              "delivery_period": "2016-07-12+02:00"}], "shipping": {  "city": "Amsterdam", "state": "", 
-              "email": "dontemail@me.net", "street": "Shipping Street", "company": "Magmodules",
-              "zip_code": "1000 AA", "last_name": "from Channable", "first_name": "Test order", "middle_name": "",
-              "country_code": "NL", "house_number": 21, "house_number_ext": "B", "address_supplement": 
-              "Address Supplement", "address_line_1": "Shipping Line 1", "address_line_2": "Shipping Line 2" }}';
-            return json_decode($data, true);
-        }
-        return false;
     }
 
     /**

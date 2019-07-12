@@ -502,8 +502,9 @@ class Order
             'street'      => $this->getStreet($address),
             'city'        => $address['city'],
             'country_id'  => $address['country_code'],
+            'region'      => !empty($address['state_code']) ? $address['state_code'] : null,
             'postcode'    => $address['zip_code'],
-            'telephone'   => $telephone
+            'telephone'   => $telephone,
         ];
 
         if ($this->importCustomer) {
@@ -516,6 +517,7 @@ class Order
                 ->setStreet($addressData['street'])
                 ->setCity($addressData['city'])
                 ->setCountryId($addressData['country_id'])
+                ->setRegion($addressData['region'])
                 ->setPostcode($addressData['postcode'])
                 ->setTelephone($addressData['telephone']);
 
@@ -589,7 +591,7 @@ class Order
                 $price = ($item['price'] / (100 + $percent) * 100);
             }
 
-            $product->setPrice($price)->setFinalPrice($price)->setSpecialPrice($price);
+            $product->setPrice($price)->setFinalPrice($price)->setSpecialPrice($price)->setTierPrice([]);
             if ($this->orderHelper->getEnableBackorders($store->getId())) {
                 $stockItem->setUseConfigBackorders(false)->setBackorders(true)->setIsInStock(true);
                 $productData = $product->getData();
