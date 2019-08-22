@@ -368,8 +368,8 @@ class Order
                 if (!empty($item['title']) && !empty($item['id'])) {
                     $error[] = __(
                         'Product "%1" not found in catalog (ID: %2)',
-                        $product['title'],
-                        $product['id']
+                        $item['title'],
+                        $item['id']
                     );
                 } else {
                     $error[] = __('Product not found in catalog');
