@@ -100,6 +100,10 @@ class UpgradeData implements UpgradeDataInterface
             $this->addChannelLabelToOrderGrid($setup);
         }
 
+        if (version_compare($context->getVersion(), "1.4.12", "<")) {
+            $this->updateSalesOrderGridField($setup);
+        }
+
         $setup->endSetup();
     }
 
@@ -293,6 +297,26 @@ class UpgradeData implements UpgradeDataInterface
                 'length'   => 255,
                 'nullable' => true,
                 'comment'  => 'Channable: Channel Label'
+            ]
+        );
+    }
+
+    /**
+     * @param ModuleDataSetupInterface $setup
+     */
+    private function updateSalesOrderGridField(ModuleDataSetupInterface $setup)
+    {
+        $salesConnection = $setup->getConnection('sales');
+        $orderGridTable = $setup->getTable('sales_order_grid');
+        $salesConnection->changeColumn(
+            $orderGridTable,
+            'channable_id',
+            'channable_id',
+            [
+                'type'     => Table::TYPE_INTEGER,
+                'default'  => 0,
+                'nullable' => true,
+                'comment'  => 'Channable: Order ID'
             ]
         );
     }
