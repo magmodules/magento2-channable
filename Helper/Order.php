@@ -507,4 +507,14 @@ class Order extends AbstractHelper
         return $this->generalHelper->getStoreValue(self::XPATH_LOG);
     }
 
+    /**
+     * @param $email
+     *
+     * @return mixed
+     */
+    public function cleanEmail($email)
+    {
+        return str_replace([':'], '', $email);
+    }
+
 }
