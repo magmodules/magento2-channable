@@ -348,7 +348,7 @@ class Product extends AbstractHelper
     {
         $url = null;
         if ($requestPath = $product->getRequestPath()) {
-            $url = $config['base_url'] . $requestPath;
+            $url = $product->getProductUrl();
         } else {
             $url = $config['base_url'] . 'catalog/product/view/id/' . $product->getEntityId();
         }
