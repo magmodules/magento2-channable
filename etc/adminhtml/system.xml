@@ -635,6 +635,12 @@
                         <field id="channel_orderid">1</field>
                     </depends>
                 </field>
+                <field id="import_company_name" translate="label" type="select" sortOrder="48" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Import Company Name on Order</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Choose if you want to import the Company Name when this is provided in the Marketplace order.]]></comment>
+                </field>
                 <field id="heading_order_advanced" translate="label comment" type="text" sortOrder="50"
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Advanced</label>

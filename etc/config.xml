@@ -45,6 +45,7 @@
                 <import_customer>0</import_customer>
                 <orderid_prefix>M-</orderid_prefix>
                 <orderid_alphanumeric>1</orderid_alphanumeric>
+                <import_company_name>1</import_company_name>
             </order>
             <item>
                 <enable>0</enable>

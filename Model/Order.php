@@ -496,7 +496,7 @@ class Order
 
         $addressData = [
             'customer_id' => $customerId,
-            'company'     => $address['company'],
+            'company'     => $this->orderHelper->importCompanyName($this->storeId) ? $address['company'] : null,
             'firstname'   => $address['first_name'],
             'middlename'  => $address['middle_name'],
             'lastname'    => $address['last_name'],
