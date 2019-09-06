@@ -368,8 +368,8 @@ class Order
                 if (!empty($item['title']) && !empty($item['id'])) {
                     $error[] = __(
                         'Product "%1" not found in catalog (ID: %2)',
-                        $product['title'],
-                        $product['id']
+                        $item['title'],
+                        $item['id']
                     );
                 } else {
                     $error[] = __('Product not found in catalog');
@@ -436,20 +436,21 @@ class Order
     {
         $storeId = $store->getId();
         $websiteId = $store->getWebsiteId();
+        $email = $this->orderHelper->cleanEmail($data['customer']['email']);
 
         if ($this->importCustomer) {
             $customerGroupId = $this->orderHelper->getCustomerGroupId($storeId);
             $customer = $this->customerFactory->create();
             $customer->setWebsiteId($websiteId);
-            $customer->loadByEmail($data['customer']['email']);
+            $customer->loadByEmail($email);
             if (!$customerId = $customer->getEntityId()) {
                 $customer->setWebsiteId($websiteId)
                     ->setStore($store)
                     ->setFirstname($data['customer']['first_name'])
                     ->setMiddlename($data['customer']['middle_name'])
                     ->setLastname($data['customer']['last_name'])
-                    ->setEmail($data['customer']['email'])
-                    ->setPassword($data['customer']['email'])
+                    ->setEmail($email)
+                    ->setPassword($email)
                     ->setGroupId($customerGroupId)
                     ->save();
                 $customerId = $customer->getId();
@@ -459,7 +460,7 @@ class Order
         } else {
             $customerId = 0;
             $cart->setCustomerId($customerId)
-                ->setCustomerEmail($data['customer']['email'])
+                ->setCustomerEmail($email)
                 ->setCustomerFirstname($data['customer']['first_name'])
                 ->setCustomerMiddlename($data['customer']['middle_name'])
                 ->setCustomerLastname($data['customer']['last_name'])
@@ -495,7 +496,7 @@ class Order
 
         $addressData = [
             'customer_id' => $customerId,
-            'company'     => $address['company'],
+            'company'     => $this->orderHelper->importCompanyName($this->storeId) ? $address['company'] : null,
             'firstname'   => $address['first_name'],
             'middlename'  => $address['middle_name'],
             'lastname'    => $address['last_name'],

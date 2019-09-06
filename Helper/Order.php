@@ -38,6 +38,7 @@ class Order extends AbstractHelper
     const XPATH_LVB_AUTO_SHIP = 'magmodules_channable_marketplace/order/lvb_ship';
     const XPATH_ORDERID_PREFIX = 'magmodules_channable_marketplace/order/orderid_prefix';
     const XPATH_ORDERID_ALPHANUMERIC = 'magmodules_channable_marketplace/order/orderid_alphanumeric';
+    const XPATH_IMPORT_COMPANY_NAME = 'magmodules_channable_marketplace/order/import_company_name';
     const XPATH_LOG = 'magmodules_channable_marketplace/order/log';
     const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
     const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
@@ -327,6 +328,16 @@ class Order extends AbstractHelper
     }
 
     /**
+     * @param $storeId
+     *
+     * @return bool
+     */
+    public function importCompanyName($storeId)
+    {
+        return (bool)$this->generalHelper->getStoreValue(self::XPATH_IMPORT_COMPANY_NAME, $storeId);
+    }
+
+    /**
      * @param $channelId
      * @param $storeId
      *
@@ -505,6 +516,16 @@ class Order extends AbstractHelper
     public function isLoggingEnabled()
     {
         return $this->generalHelper->getStoreValue(self::XPATH_LOG);
+    }
+
+    /**
+     * @param $email
+     *
+     * @return mixed
+     */
+    public function cleanEmail($email)
+    {
+        return str_replace([':'], '', $email);
     }
 
 }

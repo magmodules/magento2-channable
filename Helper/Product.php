@@ -22,6 +22,7 @@ use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable as
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link as GroupedResource;
 use Magento\Bundle\Model\ResourceModel\Selection as BundleResource;
 use Magmodules\Channable\Logger\ChannableLogger;
+use Magmodules\Channable\Service\Product\InventoryData;
 
 /**
  * Class Product
@@ -64,9 +65,9 @@ class Product extends AbstractHelper
      */
     private $productImageHelper;
     /**
-     * @var Inventory
+     * @var InventoryData
      */
-    private $inventoryHelper;
+    private $inventoryData;
     /**
      * @var GalleryReadHandler
      */
@@ -96,7 +97,6 @@ class Product extends AbstractHelper
      * @param CatalogProductMediaConfig       $catalogProductMediaConfig
      * @param CatalogHelper                   $catalogHelper
      * @param ProductImageHelper              $productImageHelper
-     * @param Inventory                       $inventoryHelper
      * @param RuleFactory                     $ruleFactory
      * @param EavConfig                       $eavConfig
      * @param FilterManager                   $filter
@@ -105,6 +105,7 @@ class Product extends AbstractHelper
      * @param BundleResource                  $catalogProductTypeBundle
      * @param ConfigurableResource            $catalogProductTypeConfigurable
      * @param CatalogPrice                    $commonPriceModel
+     * @param InventoryData                   $inventoryData
      * @param ChannableLogger                 $logger
      */
     public function __construct(
@@ -113,7 +114,6 @@ class Product extends AbstractHelper
         CatalogProductMediaConfig $catalogProductMediaConfig,
         CatalogHelper $catalogHelper,
         ProductImageHelper $productImageHelper,
-        Inventory $inventoryHelper,
         RuleFactory $ruleFactory,
         EavConfig $eavConfig,
         FilterManager $filter,
@@ -122,13 +122,13 @@ class Product extends AbstractHelper
         BundleResource $catalogProductTypeBundle,
         ConfigurableResource $catalogProductTypeConfigurable,
         CatalogPrice $commonPriceModel,
+        InventoryData $inventoryData,
         ChannableLogger $logger
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
         $this->catalogHelper = $catalogHelper;
         $this->productImageHelper = $productImageHelper;
-        $this->inventoryHelper = $inventoryHelper;
         $this->ruleFactory = $ruleFactory;
         $this->eavConfig = $eavConfig;
         $this->filter = $filter;
@@ -137,6 +137,7 @@ class Product extends AbstractHelper
         $this->catalogProductTypeGrouped = $catalogProductTypeGrouped;
         $this->catalogProductTypeBundle = $catalogProductTypeBundle;
         $this->commonPriceModel = $commonPriceModel;
+        $this->inventoryData = $inventoryData;
         $this->logger = $logger;
         parent::__construct($context);
     }
@@ -152,6 +153,8 @@ class Product extends AbstractHelper
     public function getDataRow($product, $parent, $config)
     {
         $dataRow = [];
+
+        $product = $this->inventoryData->addDataToProduct($product, $config);
 
         if (!$this->validateProduct($product, $parent, $config)) {
             return $dataRow;
@@ -292,7 +295,7 @@ class Product extends AbstractHelper
                 $value = $this->getAttributeSetName($product);
                 break;
             case 'qty':
-                $value = $this->getQtyValue($product, $config['inventory']);
+                $value = $this->getQtyValue($product);
                 break;
             case 'manage_stock':
                 $value = $this->getManageStockValue($product, $config['inventory']);
@@ -345,7 +348,7 @@ class Product extends AbstractHelper
     {
         $url = null;
         if ($requestPath = $product->getRequestPath()) {
-            $url = $config['base_url'] . $requestPath;
+            $url = $product->getProductUrl();
         } else {
             $url = $config['base_url'] . 'catalog/product/view/id/' . $product->getEntityId();
         }
@@ -579,13 +582,9 @@ class Product extends AbstractHelper
      *
      * @return float
      */
-    private function getQtyValue($product, $inventory)
+    private function getQtyValue($product)
     {
-        $qty = $product->getQty();
-        if (!empty($inventory['use_salable_qty']) && !empty($inventory['stock_id'])) {
-            $qty -= $this->inventoryHelper->getReservations($product->getSku(), $inventory['stock_id']);
-        }
-        return $qty;
+        return $product->getQty();
     }
 
     /**
