@@ -24,10 +24,8 @@ use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Sales\Model\Service\InvoiceService;
 use Magento\Sales\Api\ShipmentRepositoryInterface;
 use Magento\Sales\Model\Convert\Order as OrderConverter;
-use Magento\Framework\DB\Transaction;
 use Magento\Tax\Model\Calculation as TaxCalculationn;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 use Magento\Shipping\Model\ShippingFactory;
@@ -36,6 +34,7 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\CatalogInventory\Observer\ItemsForReindex;
 use Magento\Framework\Registry;
+use Magmodules\Channable\Service\Order\CreateInvoice;
 
 /**
  * Class Order
@@ -99,10 +98,6 @@ class Order
      */
     private $stockRegistry;
     /**
-     * @var InvoiceService
-     */
-    private $invoiceService;
-    /**
      * @var OrderConverter
      */
     private $orderConverter;
@@ -110,10 +105,6 @@ class Order
      * @var ShipmentRepositoryInterface
      */
     private $shipmentRepository;
-    /**
-     * @var Transaction
-     */
-    private $transaction;
     /**
      * @var CartRepositoryInterface
      */
@@ -166,6 +157,10 @@ class Order
      * @var Registry
      */
     private $registry;
+    /**
+     * @var CreateInvoice
+     */
+    private $createInvoice;
 
     /**
      * Order constructor.
@@ -181,10 +176,8 @@ class Order
      * @param OrderService                $orderService
      * @param OrderRepositoryInterface    $orderRepository
      * @param StockRegistryInterface      $stockRegistry
-     * @param InvoiceService              $invoiceService
      * @param OrderConverter              $orderConverter
      * @param ShipmentRepositoryInterface $shipmentRepository
-     * @param Transaction                 $transaction
      * @param CartRepositoryInterface     $cartRepositoryInterface
      * @param CartManagementInterface     $cartManagementInterface
      * @param SearchCriteriaBuilder       $searchCriteriaBuilder
@@ -211,10 +204,8 @@ class Order
         OrderService $orderService,
         OrderRepositoryInterface $orderRepository,
         StockRegistryInterface $stockRegistry,
-        InvoiceService $invoiceService,
         OrderConverter $orderConverter,
         ShipmentRepositoryInterface $shipmentRepository,
-        Transaction $transaction,
         CartRepositoryInterface $cartRepositoryInterface,
         CartManagementInterface $cartManagementInterface,
         SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -227,7 +218,8 @@ class Order
         OrderlHelper $orderHelper,
         CheckoutSession $checkoutSession,
         ItemsForReindex $itemsForReindex,
-        Registry $registry
+        Registry $registry,
+        CreateInvoice $createInvoice
     ) {
         $this->storeManager = $storeManager;
         $this->product = $product;
@@ -240,10 +232,8 @@ class Order
         $this->orderService = $orderService;
         $this->orderRepository = $orderRepository;
         $this->stockRegistry = $stockRegistry;
-        $this->invoiceService = $invoiceService;
         $this->orderConverter = $orderConverter;
         $this->shipmentRepository = $shipmentRepository;
-        $this->transaction = $transaction;
         $this->cartRepositoryInterface = $cartRepositoryInterface;
         $this->cartManagementInterface = $cartManagementInterface;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
@@ -257,6 +247,7 @@ class Order
         $this->checkoutSession = $checkoutSession;
         $this->itemsForReindex = $itemsForReindex;
         $this->registry = $registry;
+        $this->createInvoice = $createInvoice;
     }
 
     /**
@@ -336,7 +327,7 @@ class Order
             $this->addPaymentData($order, $data);
 
             if ($this->orderHelper->getInvoiceOrder($storeId)) {
-                $this->invoiceOrder($order);
+                $this->createInvoice->execute($order);
             }
 
             if ($this->lvb && $this->orderHelper->getLvbAutoShip($storeId)) {
@@ -748,33 +739,6 @@ class Order
         }
         $payment->setAdditionalInformation('delivery', $itemRows);
         $this->orderRepository->save($order);
-    }
-
-    /**
-     * @param OrderModel $order
-     */
-    private function invoiceOrder($order)
-    {
-        if ($order->canInvoice()) {
-            try {
-                $invoice = $this->invoiceService->prepareInvoice($order);
-                $invoice->register();
-                $invoice->save();
-                $transactionSave = $this->transaction->addObject($invoice)->addObject($invoice->getOrder());
-                $transactionSave->save();
-
-                $order->setState(OrderModel::STATE_PROCESSING);
-                if ($status = $this->orderHelper->getProcessingStatus($order->getStore())) {
-                    $order->setStatus($status);
-                } else {
-                    $order->setStatus(OrderModel::STATE_PROCESSING);
-                }
-
-                $this->orderRepository->save($order);
-            } catch (\Exception $e) {
-                $this->generalHelper->addTolog('invoiceOrder: ' . $order->getIncrementId(), $e->getMessage());
-            }
-        }
     }
 
     /**
