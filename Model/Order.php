@@ -15,7 +15,6 @@ use Magento\Quote\Model\QuoteFactory;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Model\Order as OrderModel;
 use Magento\Customer\Model\CustomerFactory;
-use Magento\Customer\Model\AddressFactory;
 use Magento\Sales\Model\Service\OrderService;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -24,10 +23,8 @@ use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Sales\Model\Service\InvoiceService;
 use Magento\Sales\Api\ShipmentRepositoryInterface;
 use Magento\Sales\Model\Convert\Order as OrderConverter;
-use Magento\Framework\DB\Transaction;
 use Magento\Tax\Model\Calculation as TaxCalculationn;
 use Magento\Quote\Model\Quote\Address\RateRequestFactory;
 use Magento\Shipping\Model\ShippingFactory;
@@ -36,6 +33,8 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\CatalogInventory\Observer\ItemsForReindex;
 use Magento\Framework\Registry;
+use Magmodules\Channable\Service\Order\CreateInvoice;
+use Magmodules\Channable\Service\Order\AddressData;
 
 /**
  * Class Order
@@ -49,8 +48,6 @@ class Order
     public $total = 0;
     public $storeId = null;
     public $importCustomer = false;
-    public $seperateHousenumber = 1;
-    public $numberOfStreetLines = 1;
     public $backorders = false;
     public $lvb = false;
 
@@ -79,10 +76,6 @@ class Order
      */
     private $customerFactory;
     /**
-     * @var AddressFactory
-     */
-    private $addressFactory;
-    /**
      * @var CustomerRepositoryInterface
      */
     private $customerRepository;
@@ -99,10 +92,6 @@ class Order
      */
     private $stockRegistry;
     /**
-     * @var InvoiceService
-     */
-    private $invoiceService;
-    /**
      * @var OrderConverter
      */
     private $orderConverter;
@@ -110,10 +99,6 @@ class Order
      * @var ShipmentRepositoryInterface
      */
     private $shipmentRepository;
-    /**
-     * @var Transaction
-     */
-    private $transaction;
     /**
      * @var CartRepositoryInterface
      */
@@ -166,6 +151,14 @@ class Order
      * @var Registry
      */
     private $registry;
+    /**
+     * @var CreateInvoice
+     */
+    private $createInvoice;
+    /**
+     * @var AddressData
+     */
+    private $addressData;
 
     /**
      * Order constructor.
@@ -176,15 +169,12 @@ class Order
      * @param QuoteFactory                $quote
      * @param QuoteManagement             $quoteManagement
      * @param CustomerFactory             $customerFactory
-     * @param AddressFactory              $addressFactory
      * @param CustomerRepositoryInterface $customerRepository
      * @param OrderService                $orderService
      * @param OrderRepositoryInterface    $orderRepository
      * @param StockRegistryInterface      $stockRegistry
-     * @param InvoiceService              $invoiceService
      * @param OrderConverter              $orderConverter
      * @param ShipmentRepositoryInterface $shipmentRepository
-     * @param Transaction                 $transaction
      * @param CartRepositoryInterface     $cartRepositoryInterface
      * @param CartManagementInterface     $cartManagementInterface
      * @param SearchCriteriaBuilder       $searchCriteriaBuilder
@@ -198,6 +188,7 @@ class Order
      * @param CheckoutSession             $checkoutSession
      * @param ItemsForReindex             $itemsForReindex
      * @param Registry                    $registry
+     * @param AddressData                 $addressData
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -206,15 +197,12 @@ class Order
         QuoteFactory $quote,
         QuoteManagement $quoteManagement,
         CustomerFactory $customerFactory,
-        AddressFactory $addressFactory,
         CustomerRepositoryInterface $customerRepository,
         OrderService $orderService,
         OrderRepositoryInterface $orderRepository,
         StockRegistryInterface $stockRegistry,
-        InvoiceService $invoiceService,
         OrderConverter $orderConverter,
         ShipmentRepositoryInterface $shipmentRepository,
-        Transaction $transaction,
         CartRepositoryInterface $cartRepositoryInterface,
         CartManagementInterface $cartManagementInterface,
         SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -227,7 +215,9 @@ class Order
         OrderlHelper $orderHelper,
         CheckoutSession $checkoutSession,
         ItemsForReindex $itemsForReindex,
-        Registry $registry
+        Registry $registry,
+        CreateInvoice $createInvoice,
+        AddressData $addressData
     ) {
         $this->storeManager = $storeManager;
         $this->product = $product;
@@ -235,15 +225,12 @@ class Order
         $this->quote = $quote;
         $this->quoteManagement = $quoteManagement;
         $this->customerFactory = $customerFactory;
-        $this->addressFactory = $addressFactory;
         $this->customerRepository = $customerRepository;
         $this->orderService = $orderService;
         $this->orderRepository = $orderRepository;
         $this->stockRegistry = $stockRegistry;
-        $this->invoiceService = $invoiceService;
         $this->orderConverter = $orderConverter;
         $this->shipmentRepository = $shipmentRepository;
-        $this->transaction = $transaction;
         $this->cartRepositoryInterface = $cartRepositoryInterface;
         $this->cartManagementInterface = $cartManagementInterface;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
@@ -257,6 +244,8 @@ class Order
         $this->checkoutSession = $checkoutSession;
         $this->itemsForReindex = $itemsForReindex;
         $this->registry = $registry;
+        $this->createInvoice = $createInvoice;
+        $this->addressData = $addressData;
     }
 
     /**
@@ -270,8 +259,6 @@ class Order
 
         $this->storeId = $storeId;
         $this->importCustomer = $this->orderHelper->getImportCustomer($storeId);
-        $this->seperateHousenumber = $this->orderHelper->getSeperateHousenumber($storeId);
-        $this->numberOfStreetLines = $this->orderHelper->getCustomerStreetLines($storeId);
         $this->backorders = $this->orderHelper->getEnableBackorders($storeId);
         $this->lvb = ($data['order_status'] == 'shipped') ? true : false;
 
@@ -285,19 +272,11 @@ class Order
             $cart = $this->cartRepositoryInterface->get($cartId)->setStore($store)->setCurrency()->setIsSuperMode(true);
             $customerId = $this->setCustomerCart($cart, $store, $data);
 
-            $billingAddress = $this->getAddressData('billing', $data, $customerId);
-            if (!empty($billingAddress['errors'])) {
-                return $this->jsonRepsonse($billingAddress['errors'], '', $data['channable_id']);
-            } else {
-                $cart->getBillingAddress()->addData($billingAddress);
-            }
+            $billingAddress = $this->addressData->execute('billing', $data, $storeId, $customerId);
+            $cart->getBillingAddress()->addData($billingAddress);
 
-            $shippingAddress = $this->getAddressData('shipping', $data, $customerId);
-            if (!empty($shippingAddress['errors'])) {
-                return $this->jsonRepsonse($shippingAddress['errors'], '', $data['channable_id']);
-            } else {
-                $cart->getShippingAddress()->addData($shippingAddress);
-            }
+            $shippingAddress = $this->addressData->execute('shipping', $data, $storeId, $customerId);
+            $cart->getShippingAddress()->addData($shippingAddress);
 
             $itemCount = $this->addProductsToQuote($cart, $data, $store);
             $shippingPriceCal = $this->getShippingPrice($cart, $data, $store);
@@ -336,7 +315,7 @@ class Order
             $this->addPaymentData($order, $data);
 
             if ($this->orderHelper->getInvoiceOrder($storeId)) {
-                $this->invoiceOrder($order);
+                $this->createInvoice->execute($order);
             }
 
             if ($this->lvb && $this->orderHelper->getLvbAutoShip($storeId)) {
@@ -472,101 +451,6 @@ class Order
     }
 
     /**
-     * @param        $type
-     * @param array  $order
-     * @param string $customerId
-     *
-     * @return array
-     */
-    public function getAddressData($type, $order, $customerId = null)
-    {
-        if ($type == 'billing') {
-            $address = $order['billing'];
-        } else {
-            $address = $order['shipping'];
-        }
-
-        $telephone = '000';
-        if (!empty($order['customer']['phone'])) {
-            $telephone = $order['customer']['phone'];
-        }
-        if (!empty($order['customer']['mobile'])) {
-            $telephone = $order['customer']['mobile'];
-        }
-
-        $addressData = [
-            'customer_id' => $customerId,
-            'company'     => $this->orderHelper->importCompanyName($this->storeId) ? $address['company'] : null,
-            'firstname'   => $address['first_name'],
-            'middlename'  => $address['middle_name'],
-            'lastname'    => $address['last_name'],
-            'street'      => $this->getStreet($address),
-            'city'        => $address['city'],
-            'country_id'  => $address['country_code'],
-            'region'      => !empty($address['state_code']) ? $address['state_code'] : null,
-            'postcode'    => $address['zip_code'],
-            'telephone'   => $telephone,
-        ];
-
-        if ($this->importCustomer) {
-            $newAddress = $this->addressFactory->create();
-            $newAddress->setCustomerId($customerId)
-                ->setCompany($addressData['company'])
-                ->setFirstname($addressData['firstname'])
-                ->setMiddlename($addressData['middlename'])
-                ->setLastname($addressData['lastname'])
-                ->setStreet($addressData['street'])
-                ->setCity($addressData['city'])
-                ->setCountryId($addressData['country_id'])
-                ->setRegion($addressData['region'])
-                ->setPostcode($addressData['postcode'])
-                ->setTelephone($addressData['telephone']);
-
-            if ($type == 'billing') {
-                $newAddress->setIsDefaultBilling('1')->setSaveInAddressBook('1');
-            } else {
-                $newAddress->setIsDefaultShipping('1')->setSaveInAddressBook('1');
-            }
-
-            try {
-                $newAddress->save();
-            } catch (\Exception $e) {
-                return ['errors' => $e->getMessage()];
-            }
-        }
-
-        return $addressData;
-    }
-
-    /**
-     * @param array $address
-     *
-     * @return string
-     */
-    private function getStreet($address)
-    {
-        if ($this->seperateHousenumber || empty($address['address_line_1'])) {
-            $street[] = $address['street'];
-            $street[] = $address['house_number'];
-            $street[] = $address['house_number_ext'];
-        } else {
-            $street[] = $address['address_line_1'];
-            $street[] = $address['address_line_2'];
-            $street[] = null;
-        }
-
-        if ($this->numberOfStreetLines == 1) {
-            return trim(implode(' ', $street));
-        }
-
-        if ($this->numberOfStreetLines == 2) {
-            $street = [$street[0], trim($street[1] . ' ' . $street[2])];
-        }
-
-        return implode("\n", $street);
-    }
-
-    /**
      * @param CartRepositoryInterface $cart
      * @param array                   $data
      * @param StoreManagerInterface   $store
@@ -592,7 +476,7 @@ class Order
                 $price = ($item['price'] / (100 + $percent) * 100);
             }
 
-            $product->setPrice($price)->setFinalPrice($price)->setSpecialPrice($price)->setTierPrice([]);
+            $product->setPrice($price)->setFinalPrice($price)->setSpecialPrice($price)->setTierPrice([])->setSpecialFromDate(null)->setSpecialToDate(null);
             if ($this->orderHelper->getEnableBackorders($store->getId())) {
                 $stockItem->setUseConfigBackorders(false)->setBackorders(true)->setIsInStock(true);
                 $productData = $product->getData();
@@ -602,6 +486,7 @@ class Order
                 $productData['stock_data'] = $stockItem;
                 $product->setData($productData);
             }
+
 
             $this->total += $price;
             $this->weight += ($product->getWeight() * intval($item['quantity']));
@@ -748,33 +633,6 @@ class Order
         }
         $payment->setAdditionalInformation('delivery', $itemRows);
         $this->orderRepository->save($order);
-    }
-
-    /**
-     * @param OrderModel $order
-     */
-    private function invoiceOrder($order)
-    {
-        if ($order->canInvoice()) {
-            try {
-                $invoice = $this->invoiceService->prepareInvoice($order);
-                $invoice->register();
-                $invoice->save();
-                $transactionSave = $this->transaction->addObject($invoice)->addObject($invoice->getOrder());
-                $transactionSave->save();
-
-                $order->setState(OrderModel::STATE_PROCESSING);
-                if ($status = $this->orderHelper->getProcessingStatus($order->getStore())) {
-                    $order->setStatus($status);
-                } else {
-                    $order->setStatus(OrderModel::STATE_PROCESSING);
-                }
-
-                $this->orderRepository->save($order);
-            } catch (\Exception $e) {
-                $this->generalHelper->addTolog('invoiceOrder: ' . $order->getIncrementId(), $e->getMessage());
-            }
-        }
     }
 
     /**
