@@ -46,6 +46,7 @@
                 <orderid_prefix>M-</orderid_prefix>
                 <orderid_alphanumeric>1</orderid_alphanumeric>
                 <import_company_name>1</import_company_name>
+                <invoice_order_email>0</invoice_order_email>
             </order>
             <item>
                 <enable>0</enable>
