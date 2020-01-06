@@ -70,6 +70,7 @@ class TestData
                 "middle_name"      => "From",
                 "last_name"        => "Channable",
                 "company"          => "Do Not Ship",
+                "vat_id"           => 'NL0001',
                 "email"            => "dontemail@me.net",
                 "address_line_1"   => "Billing Line 1",
                 "address_line_2"   => "Billing Line 2",

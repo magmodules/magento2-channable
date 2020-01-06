@@ -15,7 +15,6 @@ use Magento\Quote\Model\QuoteFactory;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Model\Order as OrderModel;
 use Magento\Customer\Model\CustomerFactory;
-use Magento\Customer\Model\AddressFactory;
 use Magento\Sales\Model\Service\OrderService;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -35,6 +34,7 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\CatalogInventory\Observer\ItemsForReindex;
 use Magento\Framework\Registry;
 use Magmodules\Channable\Service\Order\CreateInvoice;
+use Magmodules\Channable\Service\Order\AddressData;
 
 /**
  * Class Order
@@ -48,8 +48,6 @@ class Order
     public $total = 0;
     public $storeId = null;
     public $importCustomer = false;
-    public $seperateHousenumber = 1;
-    public $numberOfStreetLines = 1;
     public $backorders = false;
     public $lvb = false;
 
@@ -77,10 +75,6 @@ class Order
      * @var CustomerFactory
      */
     private $customerFactory;
-    /**
-     * @var AddressFactory
-     */
-    private $addressFactory;
     /**
      * @var CustomerRepositoryInterface
      */
@@ -161,6 +155,10 @@ class Order
      * @var CreateInvoice
      */
     private $createInvoice;
+    /**
+     * @var AddressData
+     */
+    private $addressData;
 
     /**
      * Order constructor.
@@ -171,7 +169,6 @@ class Order
      * @param QuoteFactory                $quote
      * @param QuoteManagement             $quoteManagement
      * @param CustomerFactory             $customerFactory
-     * @param AddressFactory              $addressFactory
      * @param CustomerRepositoryInterface $customerRepository
      * @param OrderService                $orderService
      * @param OrderRepositoryInterface    $orderRepository
@@ -191,6 +188,7 @@ class Order
      * @param CheckoutSession             $checkoutSession
      * @param ItemsForReindex             $itemsForReindex
      * @param Registry                    $registry
+     * @param AddressData                 $addressData
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -199,7 +197,6 @@ class Order
         QuoteFactory $quote,
         QuoteManagement $quoteManagement,
         CustomerFactory $customerFactory,
-        AddressFactory $addressFactory,
         CustomerRepositoryInterface $customerRepository,
         OrderService $orderService,
         OrderRepositoryInterface $orderRepository,
@@ -219,7 +216,8 @@ class Order
         CheckoutSession $checkoutSession,
         ItemsForReindex $itemsForReindex,
         Registry $registry,
-        CreateInvoice $createInvoice
+        CreateInvoice $createInvoice,
+        AddressData $addressData
     ) {
         $this->storeManager = $storeManager;
         $this->product = $product;
@@ -227,7 +225,6 @@ class Order
         $this->quote = $quote;
         $this->quoteManagement = $quoteManagement;
         $this->customerFactory = $customerFactory;
-        $this->addressFactory = $addressFactory;
         $this->customerRepository = $customerRepository;
         $this->orderService = $orderService;
         $this->orderRepository = $orderRepository;
@@ -248,6 +245,7 @@ class Order
         $this->itemsForReindex = $itemsForReindex;
         $this->registry = $registry;
         $this->createInvoice = $createInvoice;
+        $this->addressData = $addressData;
     }
 
     /**
@@ -261,8 +259,6 @@ class Order
 
         $this->storeId = $storeId;
         $this->importCustomer = $this->orderHelper->getImportCustomer($storeId);
-        $this->seperateHousenumber = $this->orderHelper->getSeperateHousenumber($storeId);
-        $this->numberOfStreetLines = $this->orderHelper->getCustomerStreetLines($storeId);
         $this->backorders = $this->orderHelper->getEnableBackorders($storeId);
         $this->lvb = ($data['order_status'] == 'shipped') ? true : false;
 
@@ -276,19 +272,11 @@ class Order
             $cart = $this->cartRepositoryInterface->get($cartId)->setStore($store)->setCurrency()->setIsSuperMode(true);
             $customerId = $this->setCustomerCart($cart, $store, $data);
 
-            $billingAddress = $this->getAddressData('billing', $data, $customerId);
-            if (!empty($billingAddress['errors'])) {
-                return $this->jsonRepsonse($billingAddress['errors'], '', $data['channable_id']);
-            } else {
-                $cart->getBillingAddress()->addData($billingAddress);
-            }
+            $billingAddress = $this->addressData->execute('billing', $data, $storeId, $customerId);
+            $cart->getBillingAddress()->addData($billingAddress);
 
-            $shippingAddress = $this->getAddressData('shipping', $data, $customerId);
-            if (!empty($shippingAddress['errors'])) {
-                return $this->jsonRepsonse($shippingAddress['errors'], '', $data['channable_id']);
-            } else {
-                $cart->getShippingAddress()->addData($shippingAddress);
-            }
+            $shippingAddress = $this->addressData->execute('shipping', $data, $storeId, $customerId);
+            $cart->getShippingAddress()->addData($shippingAddress);
 
             $itemCount = $this->addProductsToQuote($cart, $data, $store);
             $shippingPriceCal = $this->getShippingPrice($cart, $data, $store);
@@ -460,101 +448,6 @@ class Order
         }
 
         return $customerId;
-    }
-
-    /**
-     * @param        $type
-     * @param array  $order
-     * @param string $customerId
-     *
-     * @return array
-     */
-    public function getAddressData($type, $order, $customerId = null)
-    {
-        if ($type == 'billing') {
-            $address = $order['billing'];
-        } else {
-            $address = $order['shipping'];
-        }
-
-        $telephone = '000';
-        if (!empty($order['customer']['phone'])) {
-            $telephone = $order['customer']['phone'];
-        }
-        if (!empty($order['customer']['mobile'])) {
-            $telephone = $order['customer']['mobile'];
-        }
-
-        $addressData = [
-            'customer_id' => $customerId,
-            'company'     => $this->orderHelper->importCompanyName($this->storeId) ? $address['company'] : null,
-            'firstname'   => $address['first_name'],
-            'middlename'  => $address['middle_name'],
-            'lastname'    => $address['last_name'],
-            'street'      => $this->getStreet($address),
-            'city'        => $address['city'],
-            'country_id'  => $address['country_code'],
-            'region'      => !empty($address['state_code']) ? $address['state_code'] : null,
-            'postcode'    => $address['zip_code'],
-            'telephone'   => $telephone,
-        ];
-
-        if ($this->importCustomer) {
-            $newAddress = $this->addressFactory->create();
-            $newAddress->setCustomerId($customerId)
-                ->setCompany($addressData['company'])
-                ->setFirstname($addressData['firstname'])
-                ->setMiddlename($addressData['middlename'])
-                ->setLastname($addressData['lastname'])
-                ->setStreet($addressData['street'])
-                ->setCity($addressData['city'])
-                ->setCountryId($addressData['country_id'])
-                ->setRegion($addressData['region'])
-                ->setPostcode($addressData['postcode'])
-                ->setTelephone($addressData['telephone']);
-
-            if ($type == 'billing') {
-                $newAddress->setIsDefaultBilling('1')->setSaveInAddressBook('1');
-            } else {
-                $newAddress->setIsDefaultShipping('1')->setSaveInAddressBook('1');
-            }
-
-            try {
-                $newAddress->save();
-            } catch (\Exception $e) {
-                return ['errors' => $e->getMessage()];
-            }
-        }
-
-        return $addressData;
-    }
-
-    /**
-     * @param array $address
-     *
-     * @return string
-     */
-    private function getStreet($address)
-    {
-        if ($this->seperateHousenumber || empty($address['address_line_1'])) {
-            $street[] = $address['street'];
-            $street[] = $address['house_number'];
-            $street[] = $address['house_number_ext'];
-        } else {
-            $street[] = $address['address_line_1'];
-            $street[] = $address['address_line_2'];
-            $street[] = null;
-        }
-
-        if ($this->numberOfStreetLines == 1) {
-            return trim(implode(' ', $street));
-        }
-
-        if ($this->numberOfStreetLines == 2) {
-            $street = [$street[0], trim($street[1] . ' ' . $street[2])];
-        }
-
-        return implode("\n", $street);
     }
 
     /**
