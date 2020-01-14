@@ -7,6 +7,7 @@
 namespace Magmodules\Channable\Service\Product;
 
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Module\Manager as ModuleManager;
 
 /**
  * Class InventorySource
@@ -22,14 +23,22 @@ class InventorySource
     private $resourceConnection;
 
     /**
-     * Inventory constructor.
+     * @var ModuleManager
+     */
+    private $moduleManager;
+
+    /**
+     * InventorySource constructor.
      *
      * @param ResourceConnection $resourceConnection
+     * @param ModuleManager      $moduleManager
      */
     public function __construct(
-        ResourceConnection $resourceConnection
+        ResourceConnection $resourceConnection,
+        ModuleManager $moduleManager
     ) {
         $this->resourceConnection = $resourceConnection;
+        $this->moduleManager = $moduleManager;
     }
 
     /**
@@ -42,6 +51,11 @@ class InventorySource
     public function execute($websiteCode)
     {
         $source = null;
+
+        if (!$this->isMsiEnabled()) {
+            return $source;
+        }
+
         $connection = $this->resourceConnection->getConnection();
         $tableName = $this->resourceConnection->getTableName('inventory_stock_sales_channel');
 
@@ -55,6 +69,14 @@ class InventorySource
             ->limit(1);
 
         return $connection->fetchOne($select);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMsiEnabled()
+    {
+        return $this->moduleManager->isEnabled('Magento_Inventory');
     }
 
 }
