@@ -232,7 +232,9 @@ class Products
             'lteg' => '<='
         ];
 
-        $collection->addAttributeToFilter('status', 1);
+        if (!isset($filters['add_disabled'])) {
+            $collection->addAttributeToFilter('status', 1);
+        }
 
         foreach ($filters['advanced'] as $filter) {
             $attribute = $filter['attribute'];

@@ -322,18 +322,29 @@
                    showInStore="1">
                 <label>Filter Options</label>
                 <comment>This option allows you to include/exclude products from the Channable feed based on the product visibility or stock information.</comment>
-                <field id="heading_visibility" translate="label comment" type="text" sortOrder="1" showInDefault="1"
+                <field id="heading_status" translate="label comment" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Filter on Status</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                    <comment>By default only enabled products are added.</comment>
+                </field>
+                <field id="add_disabled" translate="label" type="select" sortOrder="2" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Add disabled products</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="heading_visibility" translate="label comment" type="text" sortOrder="3" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Filter on Visibility</label>
                     <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                     <comment>Include or exclude products based on the visibility.</comment>
                 </field>
-                <field id="visbility_enabled" translate="label" type="select" sortOrder="3" showInDefault="1"
+                <field id="visbility_enabled" translate="label" type="select" sortOrder="5" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="visbility" translate="label" type="multiselect" sortOrder="4" showInDefault="1"
+                <field id="visbility" translate="label" type="multiselect" sortOrder="5" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Only add products with the following Visibility</label>
                     <source_model>Magmodules\Channable\Model\System\Config\Source\ProductVisibility</source_model>

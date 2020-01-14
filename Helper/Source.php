@@ -52,6 +52,7 @@ class Source extends AbstractHelper
     const XPATH_CATEGORY_IDS = 'magmodules_channable/filter/category';
     const XPATH_FILTERS = 'magmodules_channable/filter/filters';
     const XPATH_FILTERS_DATA = 'magmodules_channable/filter/filters_data';
+    const XPATH_ADD_DISABLED = 'magmodules_channable/filter/add_disabled';
     const XPATH_CONFIGURABLE = 'magmodules_channable/types/configurable';
     const XPATH_CONFIGURABLE_LINK = 'magmodules_channable/types/configurable_link';
     const XPATH_CONFIGURABLE_IMAGE = 'magmodules_channable/types/configurable_image';
@@ -448,6 +449,10 @@ class Source extends AbstractHelper
                     array_push($filters['advanced'], $advFilter);
                 }
             }
+        }
+
+        if ($this->getStoreValue(self::XPATH_ADD_DISABLED)) {
+            $filters['add_disabled'] = 1;
         }
 
         return $filters;
