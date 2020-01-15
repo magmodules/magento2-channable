@@ -70,6 +70,11 @@ class AddressData
             $telephone = $order['customer']['mobile'];
         }
 
+        $email = $this->cleanEmail($address['email']);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $email = $this->cleanEmail($order['customer']['email']);
+        }
+
         $addressData = [
             'customer_id' => $customerId,
             'company'     => $this->config->importCompanyName($storeId) ? $address['company'] : null,
@@ -83,6 +88,7 @@ class AddressData
             'postcode'    => $address['zip_code'],
             'telephone'   => $telephone,
             'vat_id'      => !empty($address['vat_id']) ? $address['vat_id'] : null,
+            'email'       => $email
         ];
 
         if ($this->config->importCustomer($storeId)) {
@@ -155,5 +161,15 @@ class AddressData
         }
 
         $this->addressRepository->save($address);
+    }
+
+    /**
+     * @param $email
+     *
+     * @return mixed
+     */
+    private function cleanEmail($email)
+    {
+        return str_replace([':'], '', $email);
     }
 }
