@@ -12,6 +12,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Order as OrderHelper;
 use Magmodules\Channable\Model\Order as OrderModel;
+use Magmodules\Channable\Service\Order\Items\Validate as ValidateItems;
 
 /**
  * Class Hook
@@ -34,6 +35,10 @@ class Hook extends Action
      */
     private $orderModel;
     /**
+     * @var ValidateItems
+     */
+    private $validateItems;
+    /**
      * @var JsonFactory
      */
     private $resultJsonFactory;
@@ -45,6 +50,7 @@ class Hook extends Action
      * @param GeneralHelper $generalHelper
      * @param OrderHelper   $orderHelper
      * @param OrderModel    $orderModel
+     * @param ValidateItems $validateItems
      * @param JsonFactory   $resultJsonFactory
      */
     public function __construct(
@@ -52,11 +58,13 @@ class Hook extends Action
         GeneralHelper $generalHelper,
         OrderHelper $orderHelper,
         OrderModel $orderModel,
+        ValidateItems $validateItems,
         JsonFactory $resultJsonFactory
     ) {
         $this->generalHelper = $generalHelper;
         $this->orderHelper = $orderHelper;
         $this->orderModel = $orderModel;
+        $this->validateItems = $validateItems;
         $this->resultJsonFactory = $resultJsonFactory;
         parent::__construct($context);
     }
@@ -81,6 +89,7 @@ class Hook extends Action
 
         if (empty($response['errors'])) {
             try {
+                $this->validateItems->execute($orderData['products']);
                 $response = $this->orderModel->importOrder($orderData, $storeId);
             } catch (\Exception $e) {
                 $response = $this->orderHelper->jsonResponse($e->getMessage());

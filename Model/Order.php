@@ -19,7 +19,6 @@ use Magento\Sales\Model\Service\OrderService;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\CartManagementInterface;
-use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -35,6 +34,7 @@ use Magento\CatalogInventory\Observer\ItemsForReindex;
 use Magento\Framework\Registry;
 use Magmodules\Channable\Service\Order\CreateInvoice;
 use Magmodules\Channable\Service\Order\AddressData;
+use Magmodules\Channable\Service\Order\Items\Add as AddItems;
 
 /**
  * Class Order
@@ -44,11 +44,8 @@ use Magmodules\Channable\Service\Order\AddressData;
 class Order
 {
 
-    public $weight = 0;
-    public $total = 0;
     public $storeId = null;
     public $importCustomer = false;
-    public $backorders = false;
     public $lvb = false;
 
     /**
@@ -87,10 +84,6 @@ class Order
      * @var OrderRepositoryInterface
      */
     private $orderRepository;
-    /**
-     * @var StockRegistryInterface
-     */
-    private $stockRegistry;
     /**
      * @var OrderConverter
      */
@@ -159,6 +152,10 @@ class Order
      * @var AddressData
      */
     private $addressData;
+    /**
+     * @var AddItems
+     */
+    private $addItems;
 
     /**
      * Order constructor.
@@ -172,7 +169,6 @@ class Order
      * @param CustomerRepositoryInterface $customerRepository
      * @param OrderService                $orderService
      * @param OrderRepositoryInterface    $orderRepository
-     * @param StockRegistryInterface      $stockRegistry
      * @param OrderConverter              $orderConverter
      * @param ShipmentRepositoryInterface $shipmentRepository
      * @param CartRepositoryInterface     $cartRepositoryInterface
@@ -188,7 +184,9 @@ class Order
      * @param CheckoutSession             $checkoutSession
      * @param ItemsForReindex             $itemsForReindex
      * @param Registry                    $registry
+     * @param CreateInvoice               $createInvoice
      * @param AddressData                 $addressData
+     * @param AddItems                    $addItems
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -200,7 +198,6 @@ class Order
         CustomerRepositoryInterface $customerRepository,
         OrderService $orderService,
         OrderRepositoryInterface $orderRepository,
-        StockRegistryInterface $stockRegistry,
         OrderConverter $orderConverter,
         ShipmentRepositoryInterface $shipmentRepository,
         CartRepositoryInterface $cartRepositoryInterface,
@@ -217,7 +214,8 @@ class Order
         ItemsForReindex $itemsForReindex,
         Registry $registry,
         CreateInvoice $createInvoice,
-        AddressData $addressData
+        AddressData $addressData,
+        AddItems $addItems
     ) {
         $this->storeManager = $storeManager;
         $this->product = $product;
@@ -228,7 +226,6 @@ class Order
         $this->customerRepository = $customerRepository;
         $this->orderService = $orderService;
         $this->orderRepository = $orderRepository;
-        $this->stockRegistry = $stockRegistry;
         $this->orderConverter = $orderConverter;
         $this->shipmentRepository = $shipmentRepository;
         $this->cartRepositoryInterface = $cartRepositoryInterface;
@@ -246,6 +243,7 @@ class Order
         $this->registry = $registry;
         $this->createInvoice = $createInvoice;
         $this->addressData = $addressData;
+        $this->addItems = $addItems;
     }
 
     /**
@@ -259,12 +257,7 @@ class Order
 
         $this->storeId = $storeId;
         $this->importCustomer = $this->orderHelper->getImportCustomer($storeId);
-        $this->backorders = $this->orderHelper->getEnableBackorders($storeId);
         $this->lvb = ($data['order_status'] == 'shipped') ? true : false;
-
-        if ($errors = $this->checkItems($data['products'])) {
-            return $this->jsonRepsonse($errors, '', $data['channable_id']);
-        }
 
         try {
             $store = $this->storeManager->getStore($storeId);
@@ -278,7 +271,7 @@ class Order
             $shippingAddress = $this->addressData->execute('shipping', $data, $storeId, $customerId);
             $cart->getShippingAddress()->addData($shippingAddress);
 
-            $itemCount = $this->addProductsToQuote($cart, $data, $store);
+            $itemCount = $this->addItems->execute($cart, $data, $store);
             $shippingPriceCal = $this->getShippingPrice($cart, $data, $store);
 
             $this->checkoutSession->setChannableEnabled(1);
@@ -333,76 +326,6 @@ class Order
     }
 
     /**
-     * @param  array $items
-     *
-     * @return array|bool
-     */
-    private function checkItems($items)
-    {
-        $error = [];
-        foreach ($items as $item) {
-            /** @var \Magento\Catalog\Model\Product $product */
-            $product = $this->product->create()->load($item['id']);
-            if (!$product->getId()) {
-                if (!empty($item['title']) && !empty($item['id'])) {
-                    $error[] = __(
-                        'Product "%1" not found in catalog (ID: %2)',
-                        $item['title'],
-                        $item['id']
-                    );
-                } else {
-                    $error[] = __('Product not found in catalog');
-                }
-            } else {
-                if ($product->getTypeId() == 'configurable') {
-                    $error[] = __(
-                        'Product "%1" can not be ordered, as this is the configurable parent (ID: %2)',
-                        $product->getName(),
-                        $product->getEntityId()
-                    );
-                }
-                if (!$product->isSalable() && !$this->lvb && !$this->backorders) {
-                    $error[] = __(
-                        'Product "%1" not available in requested quantity (ID: %2)',
-                        $product->getName(),
-                        $product->getEntityId()
-                    );
-                }
-                $options = $product->getRequiredOptions();
-                if (!empty($options)) {
-                    $error[] = __(
-                        'Product "%1" has required options, this is not supported (ID: %2)',
-                        $product->getName(),
-                        $product->getEntityId()
-                    );
-                }
-            }
-        }
-        if (!empty($error)) {
-            return $error;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * @param string $errors
-     * @param string $orderId
-     * @param string $channableId
-     *
-     * @return array
-     */
-    private function jsonRepsonse($errors = '', $orderId = '', $channableId = '')
-    {
-        $response = $this->orderHelper->jsonResponse($errors, $orderId);
-        if ($this->orderHelper->isLoggingEnabled()) {
-            $this->orderHelper->addTolog($channableId, $response);
-        }
-
-        return $response;
-    }
-
-    /**
      * @param CartRepositoryInterface $cart
      * @param StoreManagerInterface   $store
      * @param array                   $data
@@ -452,57 +375,6 @@ class Order
 
     /**
      * @param CartRepositoryInterface $cart
-     * @param array                   $data
-     * @param StoreManagerInterface   $store
-     *
-     * @return int
-     */
-    private function addProductsToQuote($cart, $data, $store)
-    {
-        $qty = 0;
-        $taxCalculation = $this->orderHelper->getNeedsTaxCalulcation('price', $store->getId());
-        $shippingAddressId = $cart->getShippingAddress();
-        $billingAddressId = $cart->getBillingAddress();
-
-        foreach ($data['products'] as $item) {
-            $product = $this->product->create()->load($item['id']);
-            $stockItem = $this->stockRegistry->getStockItem($item['id']);
-            $price = $item['price'];
-
-            if (empty($taxCalculation)) {
-                $taxClassId = $product->getData('tax_class_id');
-                $request = $this->taxCalculation->getRateRequest($shippingAddressId, $billingAddressId, null, $store);
-                $percent = $this->taxCalculation->getRate($request->setProductClassId($taxClassId));
-                $price = ($item['price'] / (100 + $percent) * 100);
-            }
-
-            $product->setPrice($price)->setFinalPrice($price)->setSpecialPrice($price)->setTierPrice([])->setSpecialFromDate(null)->setSpecialToDate(null);
-            if ($this->orderHelper->getEnableBackorders($store->getId())) {
-                $stockItem->setUseConfigBackorders(false)->setBackorders(true)->setIsInStock(true);
-                $productData = $product->getData();
-                $productData['quantity_and_stock_status']['is_in_stock'] = true;
-                $productData['is_in_stock'] = true;
-                $productData['is_salable'] = true;
-                $productData['stock_data'] = $stockItem;
-                $product->setData($productData);
-            }
-
-
-            $this->total += $price;
-            $this->weight += ($product->getWeight() * intval($item['quantity']));
-            $qty += intval($item['quantity']);
-            $cart->addProduct($product, intval($item['quantity']));
-        }
-
-        if ($this->orderHelper->getEnableBackorders($store->getId())) {
-            $this->registry->register('channable_skip_qty_check', true);
-        }
-
-        return $qty;
-    }
-
-    /**
-     * @param CartRepositoryInterface $cart
      * @param                         $data
      * @param StoreManagerInterface   $store
      *
@@ -539,22 +411,22 @@ class Order
 
         $destCountryId = $cart->getShippingAddress()->getCountryId();
         $destPostcode = $cart->getShippingAddress()->getPostcode();
+        $total = $cart->getGrandTotal();
 
         /** @var \Magento\Quote\Model\Quote\Address\RateRequest $request */
         $request = $this->rateRequestFactory->create();
         $request->setAllItems($cart->getAllItems());
         $request->setDestCountryId($destCountryId);
         $request->setDestPostcode($destPostcode);
-        $request->setPackageValue($this->total);
-        $request->setPackageValueWithDiscount($this->total);
-        $request->setPackageWeight($this->weight);
+        $request->setPackageValue($total);
+        $request->setPackageValueWithDiscount($total);
         $request->setPackageQty($itemCount);
         $request->setStoreId($store->getId());
         $request->setWebsiteId($store->getWebsiteId());
         $request->setBaseCurrency($store->getBaseCurrency());
         $request->setPackageCurrency($store->getCurrentCurrency());
         $request->setLimitCarrier('');
-        $request->setBaseSubtotalInclTax($this->total);
+        $request->setBaseSubtotalInclTax($total);
         $shipping = $this->shippingFactory->create();
         $result = $shipping->collectRates($request)->getResult();
 
@@ -664,6 +536,23 @@ class Order
                 $this->generalHelper->addTolog('shipOrder: ' . $order->getIncrementId(), $e->getMessage());
             }
         }
+    }
+
+    /**
+     * @param string $errors
+     * @param string $orderId
+     * @param string $channableId
+     *
+     * @return array
+     */
+    private function jsonRepsonse($errors = '', $orderId = '', $channableId = '')
+    {
+        $response = $this->orderHelper->jsonResponse($errors, $orderId);
+        if ($this->orderHelper->isLoggingEnabled()) {
+            $this->orderHelper->addTolog($channableId, $response);
+        }
+
+        return $response;
     }
 
     /**

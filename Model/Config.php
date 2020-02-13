@@ -19,6 +19,9 @@ class Config
     const XPATH_IMPORT_COMPANY_NAME = 'magmodules_channable_marketplace/order/import_company_name';
     const XPATH_SEPERATE_HOUSENUMBER = 'magmodules_channable_marketplace/order/seperate_housenumber';
     const XPATH_CUSTOMER_STREET_LINES = 'customer/address/street_lines';
+    const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
+    const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
+    const XPATH_ENABLE_BACKORDERS = 'magmodules_channable_marketplace/order/backorders';
 
     /**
      * @var ScopeConfigInterface
@@ -51,6 +54,17 @@ class Config
     }
 
     /**
+     * @param $path
+     * @param $storeId
+     *
+     * @return string
+     */
+    private function getPath($path, $storeId)
+    {
+        return $this->config->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    /**
      * @param $storeId
      *
      * @return bool
@@ -58,6 +72,17 @@ class Config
     public function sendInvoiceEmail($storeId)
     {
         return $this->getFlag(self::XPATH_SEND_INVOICE, $storeId);
+    }
+
+    /**
+     * @param $path
+     * @param $storeId
+     *
+     * @return bool
+     */
+    private function getFlag($path, $storeId)
+    {
+        return $this->config->isSetFlag($path, ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     /**
@@ -97,28 +122,41 @@ class Config
      */
     public function getCustomerStreetLines($storeId)
     {
-        return (int) $this->getPath(self::XPATH_CUSTOMER_STREET_LINES, $storeId);
+        return (int)$this->getPath(self::XPATH_CUSTOMER_STREET_LINES, $storeId);
     }
 
     /**
-     * @param $path
-     * @param $storeId
+     * @param null $storeId
      *
-     * @return string
+     * @return mixed
      */
-    private function getPath($path, $storeId)
+    public function getDefaultManageStock($storeId = null)
     {
-        return $this->config->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
+        return $this->getPath(\Magento\CatalogInventory\Model\Configuration::XML_PATH_MANAGE_STOCK, $storeId);
     }
 
     /**
-     * @param $path
-     * @param $storeId
+     * @param      $type
+     * @param null $storeId
      *
-     * @return bool
+     * @return int
      */
-    private function getFlag($path, $storeId)
+    public function getNeedsTaxCalulcation($type, $storeId = null)
     {
-        return $this->config->isSetFlag($path, ScopeInterface::SCOPE_STORE, $storeId);
+        if ($type == 'shipping') {
+            return $this->getFlag(self::XPATH_TAX_SHIPPING, $storeId);
+        } else {
+            return $this->getFlag(self::XPATH_TAX_PRICE, $storeId);
+        }
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return mixed
+     */
+    public function getEnableBackorders($storeId = null)
+    {
+        return $this->getFlag(self::XPATH_ENABLE_BACKORDERS, $storeId);
     }
 }
