@@ -7,6 +7,7 @@
 namespace Magmodules\Channable\Service\Product;
 
 use Magento\Framework\App\ResourceConnection;
+use Magento\Catalog\Api\Data\ProductInterface;
 
 /**
  * Class InventoryData
@@ -33,31 +34,24 @@ class InventoryData
     }
 
     /**
-     * @param \Magento\Catalog\Model\Product $product
-     * @param                                $config
+     * @param ProductInterface $product
+     * @param                  $stockId
      *
-     * @return \Magento\Catalog\Model\Product
+     * @return float|int|mixed
      */
-    public function addDataToProduct($product, $config)
+    public function getSalableQty(ProductInterface $product, $stockId)
     {
-        if (empty($config['inventory']['stock_id'])) {
-            return $product;
-        }
-
-        /**
-         * Return if product is not of simple type
-         */
-        if ($product->getTypeId() != 'simple') {
-            return $product;
-        }
-
-        $inventoryData = $this->getInventoryData($product->getSku(), $config['inventory']['stock_id']);
-        $reservations = $this->getReservations($product->getSku(), $config['inventory']['stock_id']);
+        $inventoryData = $this->getInventoryData($product->getSku(), $stockId);
+        $reservations = $this->getReservations($product->getSku(), $stockId);
 
         $qty = isset($inventoryData['quantity']) ? $inventoryData['quantity'] - $reservations : 0;
         $isSalable = isset($inventoryData['is_salable']) ? $inventoryData['is_salable'] : 0;
 
-        return $product->setQty($qty)->setIsSalable($isSalable)->setIsInStock($isSalable);
+        if ($isSalable) {
+            return $qty;
+        }
+
+        return 0;
     }
 
     /**
@@ -113,5 +107,33 @@ class InventoryData
         }
 
         return $reservationQty;
+    }
+
+    /**
+     * @param ProductInterface               $product
+     * @param                                $config
+     *
+     * @return ProductInterface
+     */
+    public function addDataToProduct($product, $config)
+    {
+        if (empty($config['inventory']['stock_id'])) {
+            return $product;
+        }
+
+        /**
+         * Return if product is not of simple type
+         */
+        if ($product->getTypeId() != 'simple') {
+            return $product;
+        }
+
+        $inventoryData = $this->getInventoryData($product->getSku(), $config['inventory']['stock_id']);
+        $reservations = $this->getReservations($product->getSku(), $config['inventory']['stock_id']);
+
+        $qty = isset($inventoryData['quantity']) ? $inventoryData['quantity'] - $reservations : 0;
+        $isSalable = isset($inventoryData['is_salable']) ? $inventoryData['is_salable'] : 0;
+
+        return $product->setQty($qty)->setIsSalable($isSalable)->setIsInStock($isSalable);
     }
 }
