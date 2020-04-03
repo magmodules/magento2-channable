@@ -137,35 +137,41 @@ class Source extends AbstractHelper
      */
     public function getConfig($storeId, $type = 'feed')
     {
-        $config = [];
-        $config['flat'] = false;
-        $config['type'] = $type;
-        $config['store_id'] = $this->getStoreId($storeId);
-        $config['website_id'] = $this->storeManager->getStore()->getWebsiteId();
-        $config['timestamp'] = $this->generalHelper->getLocaleDate($storeId);
-        $config['date_time'] = $this->generalHelper->getDateTime();
-        $config['filters'] = $this->getProductFilters($type);
-        $config['attributes'] = $this->getAttributes($type, $config['filters']);
-        $config['price_config'] = $this->getPriceConfig($type);
-        $config['inventory'] = $this->getInventoryData($type);
-        $config['inc_hidden_image'] = $this->getStoreValue(self::XPATH_IMAGE_INC_HIDDEN);
+        $config = [
+            'flat' => false,
+            'type' => $type,
+            'store_id' => $this->getStoreId((int)$storeId),
+            'website_id' => $this->storeManager->getStore()->getWebsiteId(),
+            'timestamp' => $this->generalHelper->getLocaleDate((int)$storeId),
+            'date_time' => $this->generalHelper->getDateTime(),
+            'filters' => $this->getProductFilters($type),
+            'attributes' => $this->getAttributes($type, $this->getProductFilters($type)),
+            'price_config' => $this->getPriceConfig($type),
+            'inventory' => $this->getInventoryData($type),
+            'inc_hidden_image' => $this->getStoreValue(self::XPATH_IMAGE_INC_HIDDEN)
+        ];
+        switch ($type) {
+            case 'feed':
+                $config += [
+                    'base_url' => $this->storeManager->getStore()->getBaseUrl(),
+                    'weight_unit' => ' ' . $this->getStoreValue(self::XPATH_WEIGHT_UNIT),
+                    'categories' => $this->categoryHelper->getCollection(
+                        $storeId,
+                        '',
+                        '',
+                        'channable_cat_disable_export'
+                    ),
+                    'item_updates' =>  $this->itemHelper->isEnabled($storeId),
+                    'delivery' => $this->getStoreValue(self::XPATH_DELIVERY_TIME)
+                ];
+                break;
+            case 'api':
+                $config['api'] = $this->itemHelper->getApiConfigDetails($storeId);
+                break;
 
-        if ($type == 'feed') {
-            $config['base_url'] = $this->storeManager->getStore()->getBaseUrl();
-            $config['weight_unit'] = ' ' . $this->getStoreValue(self::XPATH_WEIGHT_UNIT);
-            $config['categories'] = $this->categoryHelper->getCollection(
-                $storeId,
-                '',
-                '',
-                'channable_cat_disable_export'
-            );
-            $config['item_updates'] = $this->itemHelper->isEnabled($storeId);
-            $config['delivery'] = $this->getStoreValue(self::XPATH_DELIVERY_TIME);
         }
 
-        if ($type == 'api') {
-            $config['api'] = $this->itemHelper->getApiConfigDetails($storeId);
-        }
+        $this->storeId = null;
 
         return $config;
     }

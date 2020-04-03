@@ -11,9 +11,9 @@ use Magento\Store\Api\Data\StoreInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
-use Magento\Framework\Registry;
 use Magento\Tax\Model\Calculation as TaxCalculationn;
 use Magmodules\Channable\Model\Config;
+use Magento\Checkout\Model\Session as CheckoutSession;
 
 /**
  * Class Add
@@ -39,9 +39,9 @@ class Add
     private $stockRegistry;
 
     /**
-     * @var Registry
+     * @var CheckoutSession
      */
-    private $registry;
+    private $checkoutSession;
 
     /**
      * @var TaxCalculationn
@@ -50,24 +50,23 @@ class Add
 
     /**
      * Add constructor.
-     *
-     * @param Config                     $config
+     * @param Config $config
      * @param ProductRepositoryInterface $productRepository
-     * @param StockRegistryInterface     $stockRegistry
-     * @param Registry                   $registry
-     * @param TaxCalculationn            $taxCalculation
+     * @param StockRegistryInterface $stockRegistry
+     * @param CheckoutSession $checkoutSession
+     * @param TaxCalculationn $taxCalculation
      */
     public function __construct(
         Config $config,
         ProductRepositoryInterface $productRepository,
         StockRegistryInterface $stockRegistry,
-        Registry $registry,
+        CheckoutSession $checkoutSession,
         TaxCalculationn $taxCalculation
     ) {
         $this->config = $config;
         $this->productRepository = $productRepository;
         $this->stockRegistry = $stockRegistry;
-        $this->registry = $registry;
+        $this->checkoutSession = $checkoutSession;
         $this->taxCalculation = $taxCalculation;
     }
 
@@ -75,25 +74,26 @@ class Add
      * @param CartRepositoryInterface $cart
      * @param array                   $data
      * @param StoreInterface          $store
+     * @param bool                    $lvbOrder
      *
      * @return int
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function execute($cart, $data, $store)
+    public function execute($cart, $data, $store, $lvbOrder = false)
     {
         $qty = 0;
+
+        if ($this->config->getEnableBackorders($store->getId()) || $lvbOrder) {
+            $this->checkoutSession->setChannableSkipQtyCheck(true);
+        }
 
         foreach ($data['products'] as $item) {
             $product = $this->getProductById($item['id']);
             $price = $this->getProductPrice($item, $product, $store, $cart);
-            $product = $this->setProductData($product, $price, $store);
+            $product = $this->setProductData($product, $price, $store, $lvbOrder);
+            $qty += intval($item['quantity']);
             $item = $cart->addProduct($product, intval($item['quantity']));
             $item->setOriginalCustomPrice($price);
-            $qty += intval($item['quantity']);
-        }
-
-        if ($this->config->getEnableBackorders($store->getId())) {
-            $this->registry->register('channable_skip_qty_check', true);
         }
 
         return $qty;
@@ -139,12 +139,13 @@ class Add
      * @param ProductInterface $product
      * @param double           $price
      * @param StoreInterface   $store
+     * @param bool             $lvbOrder
      *
      * @return ProductInterface
      */
-    private function setProductData($product, $price, $store)
+    private function setProductData($product, $price, $store, $lvbOrder)
     {
-        if ($this->config->getEnableBackorders($store->getId())) {
+        if ($this->config->getEnableBackorders($store->getId()) || $lvbOrder) {
             $stockItem = $this->stockRegistry->getStockItem($product->getId());
             $stockItem->setUseConfigBackorders(false)->setBackorders(true)->setIsInStock(true);
             $productData = $product->getData();

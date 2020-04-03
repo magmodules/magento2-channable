@@ -271,7 +271,7 @@ class Order
             $shippingAddress = $this->addressData->execute('shipping', $data, $storeId, $customerId);
             $cart->getShippingAddress()->addData($shippingAddress);
 
-            $itemCount = $this->addItems->execute($cart, $data, $store);
+            $itemCount = $this->addItems->execute($cart, $data, $store, $this->lvb);
             $shippingPriceCal = $this->getShippingPrice($cart, $data, $store);
 
             $this->checkoutSession->setChannableEnabled(1);
@@ -314,15 +314,16 @@ class Order
             if ($this->lvb && $this->orderHelper->getLvbAutoShip($storeId)) {
                 $this->shipOrder($order);
             }
+
+            return $this->jsonRepsonse('', $order->getIncrementId());
         } catch (\Exception $e) {
             $this->generalHelper->addTolog('importOrder: ' . $data['channable_id'], $e->getMessage());
             return $this->jsonRepsonse($e->getMessage(), '', $data['channable_id']);
+        } finally {
+            $this->checkoutSession->unsChannableEnabled();
+            $this->checkoutSession->unsChannableShipping();
+            $this->checkoutSession->unsChannableSkipQtyCheck();
         }
-
-        $this->checkoutSession->unsChannableEnabled();
-        $this->checkoutSession->unsChannableShipping();
-
-        return $this->jsonRepsonse('', $order->getIncrementId());
     }
 
     /**
