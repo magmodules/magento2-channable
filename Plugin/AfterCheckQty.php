@@ -6,25 +6,33 @@
 
 namespace Magmodules\Channable\Plugin;
 
+use Magento\Checkout\Model\Session as CheckoutSession;
+
 class AfterCheckQty
 {
 
     /**
-     * @var \Magento\Framework\Registry
+     * @var CheckoutSession
      */
-    private $registry;
+    private $checkoutSession;
 
     /**
-     * StockStateProvider constructor.
-     *
-     * @param \Magento\Framework\Registry $registry
+     * AfterCheckQty constructor.
+     * @param CheckoutSession $checkoutSession
      */
-    public function __construct(\Magento\Framework\Registry $registry)
-    {
-        $this->registry = $registry;
+    public function __construct(
+        CheckoutSession $checkoutSession
+    ) {
+        $this->checkoutSession = $checkoutSession;
     }
 
     /**
+     * Skip CheckQty for adding products to Quote for LVB Orders,
+     * or with "Enable order for out of stock items" enabled.
+     *
+     * LVB Orders are shipped from external warehouse and have no impact on stock movement,
+     * thus should also be skipped from this check.
+     *
      * @param \Magento\CatalogInventory\Model\StockState $subject
      * @param                                            $result
      *
@@ -32,7 +40,7 @@ class AfterCheckQty
      */
     public function afterCheckQty(\Magento\CatalogInventory\Model\StockState $subject, $result)
     {
-        if ($this->registry->registry('channable_skip_qty_check')) {
+        if ($this->checkoutSession->getChannableSkipQtyCheck()) {
             return true;
         }
 

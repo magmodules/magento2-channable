@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 -->
@@ -96,5 +96,8 @@
     </type>
     <type name="Magento\Framework\App\Request\CsrfValidator">
         <plugin name="channable_skip_csrf_validator" type="Magmodules\Channable\Plugin\AroundCsrfValidator" />
+    </type>
+    <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsSalableWithReservationsCondition">
+        <plugin name="chanable_skip_salable_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsSalableWithReservationsCondition" />
     </type>
 </config>
