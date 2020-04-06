@@ -100,4 +100,7 @@
     <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsSalableWithReservationsCondition">
         <plugin name="chanable_skip_salable_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsSalableWithReservationsCondition" />
     </type>
+    <type name="Magento\CatalogInventory\Model\Configuration">
+        <plugin name="chanable_force_backorder" type="Magmodules\Channable\Plugin\AfterGetBackorders" />
+    </type>
 </config>

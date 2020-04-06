@@ -85,7 +85,6 @@ class Hook extends Action
         $request = $this->getRequest();
         $storeId = $request->getParam('store');
         $response = $this->orderHelper->validateRequestData($request);
-
         try {
             if (empty($response['errors'])) {
                 try {

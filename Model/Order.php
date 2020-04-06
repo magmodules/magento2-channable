@@ -44,8 +44,17 @@ use Magmodules\Channable\Service\Order\Items\Add as AddItems;
 class Order
 {
 
+    /**
+     * @var null
+     */
     public $storeId = null;
+    /**
+     * @var bool
+     */
     public $importCustomer = false;
+    /**
+     * @var bool
+     */
     public $lvb = false;
 
     /**
@@ -156,6 +165,10 @@ class Order
      * @var AddItems
      */
     private $addItems;
+    /**
+     * @var Config
+     */
+    private $config;
 
     /**
      * Order constructor.
@@ -187,6 +200,7 @@ class Order
      * @param CreateInvoice               $createInvoice
      * @param AddressData                 $addressData
      * @param AddItems                    $addItems
+     * @param Config                      $config
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -215,7 +229,8 @@ class Order
         Registry $registry,
         CreateInvoice $createInvoice,
         AddressData $addressData,
-        AddItems $addItems
+        AddItems $addItems,
+        Config $config
     ) {
         $this->storeManager = $storeManager;
         $this->product = $product;
@@ -244,6 +259,7 @@ class Order
         $this->createInvoice = $createInvoice;
         $this->addressData = $addressData;
         $this->addItems = $addItems;
+        $this->config = $config;
     }
 
     /**
@@ -260,6 +276,8 @@ class Order
         $this->lvb = ($data['order_status'] == 'shipped') ? true : false;
 
         try {
+            $this->checkoutSession->setForceBackorder($this->config->getEnableBackorders());
+
             $store = $this->storeManager->getStore($storeId);
             $cartId = $this->cartManagementInterface->createEmptyCart();
             $cart = $this->cartRepositoryInterface->get($cartId)->setStore($store)->setCurrency()->setIsSuperMode(true);
@@ -320,6 +338,7 @@ class Order
             $this->generalHelper->addTolog('importOrder: ' . $data['channable_id'], $e->getMessage());
             return $this->jsonRepsonse($e->getMessage(), '', $data['channable_id']);
         } finally {
+            $this->checkoutSession->unsForceBackorder();
             $this->checkoutSession->unsChannableEnabled();
             $this->checkoutSession->unsChannableShipping();
             $this->checkoutSession->unsChannableSkipQtyCheck();
