@@ -9,6 +9,9 @@ namespace Magmodules\Channable\Service\Order;
 use Magmodules\Channable\Model\Config;
 use Magento\Customer\Api\Data\AddressInterfaceFactory;
 use Magento\Customer\Api\AddressRepositoryInterface;
+use Magento\Customer\Api\Data\RegionInterfaceFactory;
+use Magento\Customer\Api\Data\RegionInterface;
+use Magento\Framework\App\ObjectManager;
 
 class AddressData
 {
@@ -29,6 +32,11 @@ class AddressData
     private $addressFactory;
 
     /**
+     * @var RegionInterfaceFactory
+     */
+    private $regionFactory;
+
+    /**
      * AddressData constructor.
      *
      * @param AddressRepositoryInterface $addressRepository
@@ -38,11 +46,13 @@ class AddressData
     public function __construct(
         AddressRepositoryInterface $addressRepository,
         AddressInterfaceFactory $addressFactory,
-        Config $config
+        Config $config,
+        RegionInterfaceFactory $regionFactory = null
     ) {
         $this->addressRepository = $addressRepository;
         $this->addressFactory = $addressFactory;
         $this->config = $config;
+        $this->regionFactory = $regionFactory ?: ObjectManager::getInstance()->get(RegionInterfaceFactory::class);
     }
 
     /**
@@ -84,7 +94,7 @@ class AddressData
             'street'      => $this->getStreet($address, $storeId),
             'city'        => $address['city'],
             'country_id'  => $address['country_code'],
-            'region'      => !empty($address['state_code']) ? $address['state_code'] : null,
+            'region'      => $this->getRegion($address['state_code']),
             'postcode'    => $address['zip_code'],
             'telephone'   => $telephone,
             'vat_id'      => !empty($address['vat_id']) ? $address['vat_id'] : null,
@@ -171,5 +181,18 @@ class AddressData
     private function cleanEmail($email)
     {
         return str_replace([':'], '', $email);
+    }
+
+    /**
+     * @param $stateCode
+     * @return mixed
+     */
+    private function getRegion($stateCode)
+    {
+        if (!($stateCode instanceof RegionInterface)) {
+            $stateCode = $this->regionFactory->create()->setRegionCode($stateCode);
+        }
+
+        return $stateCode;
     }
 }
