@@ -131,7 +131,7 @@ class AddressData
         }
 
         if ($numberOfStreetLines == 1) {
-            $street = trim(implode(' ', $street));
+            $street = [trim(implode(' ', $street))];
         }
 
         if ($numberOfStreetLines == 2) {
