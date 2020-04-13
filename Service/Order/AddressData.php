@@ -1,14 +1,16 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Service\Order;
 
 use Magmodules\Channable\Model\Config;
 use Magento\Customer\Api\Data\AddressInterfaceFactory;
 use Magento\Customer\Api\AddressRepositoryInterface;
+use Magento\Directory\Model\RegionFactory;
 
 class AddressData
 {
@@ -29,20 +31,27 @@ class AddressData
     private $addressFactory;
 
     /**
+     * @var RegionFactory
+     */
+    private $regionFactory;
+
+    /**
      * AddressData constructor.
-     *
      * @param AddressRepositoryInterface $addressRepository
-     * @param AddressInterfaceFactory    $addressFactory
-     * @param Config                     $config
+     * @param AddressInterfaceFactory $addressFactory
+     * @param Config $config
+     * @param RegionFactory $regionFactory
      */
     public function __construct(
         AddressRepositoryInterface $addressRepository,
         AddressInterfaceFactory $addressFactory,
-        Config $config
+        Config $config,
+        RegionFactory $regionFactory
     ) {
         $this->addressRepository = $addressRepository;
         $this->addressFactory = $addressFactory;
         $this->config = $config;
+        $this->regionFactory = $regionFactory;
     }
 
     /**
@@ -84,7 +93,9 @@ class AddressData
             'street'      => $this->getStreet($address, $storeId),
             'city'        => $address['city'],
             'country_id'  => $address['country_code'],
-            'region'      => !empty($address['state_code']) ? $address['state_code'] : null,
+            'region' => !empty($address['state_code'])
+                ? $this->getRegionId($address['state_code'], $address['country_code'])
+                : null,
             'postcode'    => $address['zip_code'],
             'telephone'   => $telephone,
             'vat_id'      => !empty($address['vat_id']) ? $address['vat_id'] : null,
@@ -149,7 +160,7 @@ class AddressData
             ->setStreet($addressData['street'])
             ->setCity($addressData['city'])
             ->setCountryId($addressData['country_id'])
-            ->setRegion($addressData['region'])
+            ->setRegionId($addressData['region'])
             ->setPostcode($addressData['postcode'])
             ->setVatId($addressData['vat_id'])
             ->setTelephone($addressData['telephone']);
@@ -171,5 +182,16 @@ class AddressData
     private function cleanEmail($email)
     {
         return str_replace([':'], '', $email);
+    }
+
+    /**
+     * @param string $code
+     * @param string $countryId
+     * @return mixed
+     */
+    private function getRegionId(string $code, string $countryId)
+    {
+        $region = $this->regionFactory->create();
+        return $region->loadByCode($code, $countryId)->getId();
     }
 }
