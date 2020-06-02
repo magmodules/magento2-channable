@@ -90,7 +90,7 @@ class Attributes implements ArrayInterface
             return strcmp($a["label"], $b["label"]);
         });
 
-        return ['label' => __('Atttibutes'), 'value' => $attributes, 'optgroup-name' => __('Atttibutes')];
+        return ['label' => __('Attributes'), 'value' => $attributes, 'optgroup-name' => __('Attributes')];
     }
 
     /**
