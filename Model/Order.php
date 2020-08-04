@@ -279,6 +279,8 @@ class Order
             $this->checkoutSession->setForceBackorder($this->config->getEnableBackorders());
 
             $store = $this->storeManager->getStore($storeId);
+            $store->setCurrentCurrencyCode($data['price']['currency']);
+            
             $cartId = $this->cartManagementInterface->createEmptyCart();
             $cart = $this->cartRepositoryInterface->get($cartId)->setStore($store)->setCurrency()->setIsSuperMode(true);
             $customerId = $this->setCustomerCart($cart, $store, $data);
@@ -315,7 +317,8 @@ class Order
             }
 
             $orderId = $this->cartManagementInterface->placeOrder($cart->getId());
-
+            $store->setCurrentCurrencyCode($store->getBaseCurrencyCode());
+            
             /** @var \Magento\Sales\Model\Order $order */
             $order = $this->orderRepository->get($orderId);
             if ($this->orderHelper->getUseChannelOrderId($storeId)) {
