@@ -2,7 +2,7 @@
   "name": "magmodules/magento2-channable",
   "description": "Channable integration for Magento 2",
   "type": "magento2-module",
-  "version": "1.4.18",
+  "version": "1.4.19",
   "license": "BSD-2-Clause",
   "homepage": "https://github.com/magmodules/magento2-channable",
   "require": {

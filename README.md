@@ -28,16 +28,20 @@ Step-by-step to install the Magento® 2 extension through Composer:
 ```
 composer require magmodules/magento2-channable
 ``` 
-4.	After that run the Magento® upgrade and clean the caches:
+4.	Once completed run the Magento® module enable command:
+```
+bin/magento module:enable Magmodules_Channable
+``` 
+5.	After that run the Magento® upgrade and clean the caches:
 ```
 php bin/magento setup:upgrade
 php bin/magento cache:flush
 ```
-5.  If Magento® is running in production mode you also need to redeploy the static content:
+6.  If Magento® is running in production mode you also need to redeploy the static content:
 ```
 php bin/magento setup:static-content:deploy
 ```
-6.  After the installation: Go to your Magento® admin portal and open ‘Stores’ > ‘Configuration’ > ‘Magmodules’ > ‘Channable’.
+7.  After the installation: Go to your Magento® admin portal and open ‘Stores’ > ‘Configuration’ > ‘Magmodules’ > ‘Channable’.
    
 ### Installation using the [Magento® Marketplace](https://marketplace.magento.com/magmodules-magento2-channable.html) ###
 Get your authentication keys
