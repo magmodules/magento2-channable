@@ -206,6 +206,14 @@ class Order extends AbstractHelper
             }
         }
 
+        if (!empty($data['price']['currency'])) {
+            $currencyCodes = $this->storeManager->getStore($storeId)->getAvailableCurrencyCodes();
+            if (!in_array($data['price']['currency'], $currencyCodes)) {
+                $msg = __('"%1" not in available currencies for this store', $data['price']['currency']);
+                return $this->jsonResponse($msg);
+            }
+        }
+
         return $data;
     }
 
