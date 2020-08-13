@@ -12,6 +12,7 @@
             <general>
                 <enable>0</enable>
                 <limit>250</limit>
+                <version>v1.4.20</version>
             </general>
             <data>
                 <name_attribute>name</name_attribute>
