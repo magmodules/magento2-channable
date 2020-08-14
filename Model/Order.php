@@ -293,12 +293,15 @@ class Order
 
             $itemCount = $this->addItems->execute($cart, $data, $store, $this->lvb);
             $shippingPriceCal = $this->getShippingPrice($cart, $data, $store);
+            $cart->collectTotals();
 
             $this->checkoutSession->setChannableEnabled(1);
             $this->checkoutSession->setChannableShipping($shippingPriceCal);
 
-            $shippingMethod = $this->getShippingMethod($cart, $store, $itemCount);
+            $shippingMethod = $this->getShippingMethod($cart, $store, $itemCount, $shippingPriceCal);
             $shippingAddress = $cart->getShippingAddress();
+            $shippingAddress->setFreeShipping($shippingPriceCal <= 0); // Some carriers also check this flag.
+
             $shippingAddress->setCollectShippingRates(true)
                 ->collectShippingRates()
                 ->setShippingMethod($shippingMethod);
@@ -306,7 +309,7 @@ class Order
             $cart->setPaymentMethod('channable');
             $cart->setInventoryProcessed(false);
             $cart->getPayment()->importData(['method' => 'channable']);
-            $cart->collectTotals();
+            $cart->setTotalsCollectedFlag(false)->collectTotals();
             $cart->save();
 
             $cart = $this->cartRepositoryInterface->get($cart->getId());
@@ -422,12 +425,13 @@ class Order
 
     /**
      * @param CartRepositoryInterface $cart
-     * @param StoreManagerInterface   $store
-     * @param                         $itemCount
+     * @param StoreManagerInterface $store
+     * @param int $itemCount
+     * @param float|int $shippingPriceCal
      *
      * @return mixed|null|string
      */
-    private function getShippingMethod($cart, $store, $itemCount)
+    private function getShippingMethod($cart, $store, $itemCount, $shippingPriceCal)
     {
         $shippingMethod = $this->orderHelper->getShippingMethod($store->getId());
         $shippingMethodFallback = $this->orderHelper->getShippingMethodFallback($store->getId());
@@ -450,6 +454,7 @@ class Order
         $request->setPackageCurrency($store->getCurrentCurrency());
         $request->setLimitCarrier('');
         $request->setBaseSubtotalInclTax($total);
+        $request->setFreeShipping($shippingPriceCal <= 0);
         $shipping = $this->shippingFactory->create();
         $result = $shipping->collectRates($request)->getResult();
 

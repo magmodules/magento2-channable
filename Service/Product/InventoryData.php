@@ -103,7 +103,7 @@ class InventoryData
             ->where('stock_id' . ' = ?', $stockId)
             ->limit(1);
         if ($reservationQty = $connection->fetchOne($select)) {
-            return ($reservationQty * -1);
+            return max(0, ($reservationQty * -1));
         }
 
         return $reservationQty;
