@@ -14,7 +14,6 @@ use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Config\Model\ResourceModel\Config as ConfigData;
 use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigDataCollectionFactory;
-use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magmodules\Channable\Logger\ChannableLogger;
 use Magento\Framework\App\ProductMetadata;
@@ -30,14 +29,11 @@ class General extends AbstractHelper
 
     const MODULE_CODE = 'Magmodules_Channable';
     const XPATH_EXTENSION_ENABLED = 'magmodules_channable/general/enable';
+    const XPATH_EXTENSION_VERSION = 'magmodules_channable/general/version';
     const XPATH_MARKETPLACE_ENABLE = 'magmodules_channable_marketplace/general/enable';
     const XPATH_TOKEN = 'magmodules_channable/general/token';
     const XPATH_USE_ROW_ID = 'magmodules_channable/advanced/use_row_id';
 
-    /**
-     * @var ModuleListInterface
-     */
-    private $moduleList;
     /**
      * @var ProductMetadataInterface
      */
@@ -88,7 +84,6 @@ class General extends AbstractHelper
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
-        ModuleListInterface $moduleList,
         ProductMetadataInterface $metadata,
         ConfigDataCollectionFactory $configDataCollectionFactory,
         ConfigData $config,
@@ -98,7 +93,6 @@ class General extends AbstractHelper
         Unserialize $unserialize
     ) {
         $this->storeManager = $storeManager;
-        $this->moduleList = $moduleList;
         $this->metadata = $metadata;
         $this->configDataCollectionFactory = $configDataCollectionFactory;
         $this->config = $config;
@@ -240,9 +234,7 @@ class General extends AbstractHelper
      */
     public function getExtensionVersion()
     {
-        $moduleInfo = $this->moduleList->getOne(self::MODULE_CODE);
-
-        return $moduleInfo['setup_version'];
+       return $this->getStoreValue(self::XPATH_EXTENSION_VERSION);
     }
 
     /**
