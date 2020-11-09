@@ -120,10 +120,6 @@ class Products
             $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
         }
 
-        if (($filters['limit'] > 0) && empty($productId)) {
-            $collection->setPage($page, $filters['limit'])->getCurPage();
-        }
-
         if (!empty($filters['type_id'])) {
             $collection->addAttributeToFilter('type_id', ['in' => $filters['type_id']]);
         }

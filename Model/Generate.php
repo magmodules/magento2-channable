@@ -134,10 +134,9 @@ class Generate
                 }
                 if ($dataRow = $this->getDataRow($product, $parent, $config)) {
                     $feed[] = $dataRow;
-                }
-
-                if (!empty($config['item_updates'])) {
-                    $this->itemModel->add($dataRow, $storeId);
+                    if (!empty($config['item_updates'])) {
+                        $this->itemModel->add($dataRow, $storeId);
+                    }
                 }
             }
 
