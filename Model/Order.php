@@ -393,7 +393,8 @@ class Order
                 ->setCustomerMiddlename($data['customer']['middle_name'])
                 ->setCustomerLastname($data['customer']['last_name'])
                 ->setCustomerIsGuest(true)
-                ->setCustomerGroupId(GroupInterface::NOT_LOGGED_IN_ID);
+                ->setCustomerGroupId(GroupInterface::NOT_LOGGED_IN_ID)
+                ->setCheckoutMethod(CartManagementInterface::METHOD_GUEST);
         }
 
         return $customerId;
@@ -532,6 +533,10 @@ class Order
             ];
         }
         $payment->setAdditionalInformation('delivery', $itemRows);
+        if (!empty($data['memo'])) {
+            $payment->setAdditionalInformation('memo', $data['memo']);
+        }
+
         $this->orderRepository->save($order);
     }
 
