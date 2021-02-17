@@ -64,6 +64,16 @@ $specificInfo = $block->getSpecificInformation();
                 </td>
             </tr>
         <?php endif; ?>
+        <?php if ($memo = $this->getInfo()->getAdditionalInformation('memo')): ?>
+            <tr>
+                <th><?= __('Memo'); ?></th>
+                <td>
+                    <a href="#" class="channable-tooltip"><?= __('Show Memo Data'); ?>
+                        <span><?= nl2br($memo); ?></span>
+                    </a>
+                </td>
+            </tr>
+        <?php endif; ?>
     </tbody>
 </table>
 <?php echo $block->getChildHtml() ?>

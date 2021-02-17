@@ -532,6 +532,10 @@ class Order
             ];
         }
         $payment->setAdditionalInformation('delivery', $itemRows);
+        if (!empty($data['memo'])) {
+            $payment->setAdditionalInformation('memo', $data['memo']);
+        }
+
         $this->orderRepository->save($order);
     }
 
