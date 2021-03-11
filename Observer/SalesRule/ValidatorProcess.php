@@ -6,26 +6,28 @@
 
 namespace Magmodules\Channable\Observer\SalesRule;
 
+use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\SalesRule\Model\Rule\Action\Discount\Data as DiscountData;
+use Magmodules\Channable\Model\Payment\Channable as ChannablePaymentMethod;
 
 /**
  * Class ValidatorProcess
- *
- * @package Magmodules\Channable\Observer\SalesRule
+ * Unset discount amount for orders imported by Channable.
  */
 class ValidatorProcess implements ObserverInterface
 {
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
+     * @param Observer $observer
      */
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    public function execute(Observer $observer)
     {
         $quote = $observer->getEvent()->getQuote();
-        if ($quote->getPaymentMethod() == \Magmodules\Channable\Model\Payment\Channable::CODE) {
-            /** @var \Magento\SalesRule\Model\Rule $salesRule */
-            $salesRule = $observer->getEvent()->getRule();
-            $salesRule->setRuleId('')->setStopRulesProcessing(true);
+        if ($quote->getPayment()->getMethod() == ChannablePaymentMethod::CODE) {
+            /** @var DiscountData $discountData */
+            $discountData = $observer->getEvent()->getResult();
+            $discountData->setAmount(0)->setBaseAmount(0);
         }
     }
 }
