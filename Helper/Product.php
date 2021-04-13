@@ -283,6 +283,9 @@ class Product extends AbstractHelper
         if (!empty($attribute['source']) && ($attribute['source'] == 'crosssell_skus')) {
             $type = 'crosssell_skus';
         }
+        if (!empty($attribute['source']) && ($attribute['source'] == 'category_ids')) {
+            $type = 'category_ids';
+        }
 
         switch ($type) {
             case 'link':
@@ -313,6 +316,9 @@ class Product extends AbstractHelper
             case 'upsell_skus':
             case 'crosssell_skus':
                 $value = $this->getProductRelations($type, $product);
+                break;
+            case 'category_ids':
+                $value = $product->getCategoryIds();
                 break;
             default:
                 $value = $this->getValue($attribute, $product);
