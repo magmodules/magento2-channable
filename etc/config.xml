@@ -73,6 +73,8 @@
                 <title>Channable</title>
                 <price>0.00</price>
                 <type>I</type>
+                <overwrite_title>0</overwrite_title>
+                <overwrite_name>0</overwrite_name>
             </channable>
         </carriers>
     </default>

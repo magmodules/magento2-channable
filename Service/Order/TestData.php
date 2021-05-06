@@ -55,6 +55,7 @@ class TestData
             "channel_id"              => "TEST-" . $random,
             "channel_name"            => "Channable",
             "order_status"            => $lvb ? "shipped" : "not_shipped",
+            "shipment_method"         => "Prime",
             "customer"                => [
                 "gender"      => "male",
                 "phone"       => "01234567890",
