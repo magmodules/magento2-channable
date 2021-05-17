@@ -506,13 +506,13 @@ class Order
 
         $title = str_replace(
             '{{channable_channel_label}}',
-            $data['channable_channel_label'] ?? 'Channable',
+            !empty($data['channable_channel_label']) ? $data['channable_channel_label'] : 'Channable',
             $this->config->getCarrierTitle($order->getStoreId())
         );
 
         $name = str_replace(
             '{{shipment_method}}',
-            $data['shipment_method'] ?? 'Shipping',
+            !empty($data['shipment_method']) ? $data['shipment_method'] : 'Shipping',
             $this->config->getCarrierName($order->getStoreId())
         );
 
