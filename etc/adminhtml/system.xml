@@ -447,6 +447,17 @@
                         <field id="inventory">1</field>
                     </depends>
                 </field>
+                <field id="force_non_msi" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
+                    <label>Force NON-MSI</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Force the use of legacy stock QTY ignoring the Reservation and Salable QTY table.
+                    Only use this function in case you are not using MSI and the QTY in the feed is not correct.
+                    <b>Recommended option: No</b>]]></comment>
+                    <depends>
+                        <field id="inventory">1</field>
+                    </depends>
+                </field>
                 <field id="heading_delivery" translate="label comment" type="text" sortOrder="30" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Delivery Time</label>
@@ -836,13 +847,37 @@
         <section id="carriers">
             <group id="channable" translate="label" type="text" sortOrder="999" showInDefault="1">
                 <label>Channable</label>
-                <field id="name" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1"
-                       showInStore="1">
+
+                <field id="heading_title" translate="label comment" type="text" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
+                    <label>Title</label>
+                </field>
+                <field id="overwrite_title" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
+                    <label>Replace by Channel Name</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>If enabled; channel name will be used as carrier title, eg. Amazon</comment>
+                </field>
+
+                <field id="heading_name" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Name</label>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                </field>
+                <field id="name" translate="label" type="text" sortOrder="21" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
                     <label>Name</label>
                 </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
-                       showInStore="1">
-                    <label>Title</label>
+                <field id="overwrite_name" translate="label" type="select" sortOrder="22" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
+                    <label>Replace by Selected Shipping Method</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>If enabled; selected shipping method from platform will be used for name, eg. Prime</comment>
                 </field>
             </group>
         </section>

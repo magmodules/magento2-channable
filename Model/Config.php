@@ -22,6 +22,10 @@ class Config
     const XPATH_TAX_PRICE = 'tax/calculation/price_includes_tax';
     const XPATH_TAX_SHIPPING = 'tax/calculation/shipping_includes_tax';
     const XPATH_ENABLE_BACKORDERS = 'magmodules_channable_marketplace/order/backorders';
+    const XPATH_CARRIER_TITLE = 'carriers/channable/title';
+    const XPATH_CARRIER_OVERWRITE_TITLE = 'carriers/channable/overwrite_title';
+    const XPATH_CARRIER_NAME = 'carriers/channable/name';
+    const XPATH_CARRIER_OVERWRITE_NAME = 'carriers/channable/overwrite_name';
 
     /**
      * @var ScopeConfigInterface
@@ -139,7 +143,7 @@ class Config
      * @param      $type
      * @param null $storeId
      *
-     * @return int
+     * @return bool
      */
     public function getNeedsTaxCalulcation($type, $storeId = null)
     {
@@ -153,10 +157,38 @@ class Config
     /**
      * @param null $storeId
      *
-     * @return mixed
+     * @return bool
      */
     public function getEnableBackorders($storeId = null)
     {
         return $this->getFlag(self::XPATH_ENABLE_BACKORDERS, $storeId);
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return string
+     */
+    public function getCarrierTitle($storeId = null)
+    {
+        if ($this->getFlag(self::XPATH_CARRIER_OVERWRITE_TITLE, $storeId)) {
+            return '{{channable_channel_label}}';
+        }
+
+        return $this->getPath(self::XPATH_CARRIER_TITLE, $storeId);
+    }
+
+    /**
+     * @param null $storeId
+     *
+     * @return string
+     */
+    public function getCarrierName($storeId = null)
+    {
+        if ($this->getFlag(self::XPATH_CARRIER_OVERWRITE_NAME, $storeId)) {
+            return '{{shipment_method}}';
+        }
+
+        return $this->getPath(self::XPATH_CARRIER_NAME, $storeId);
     }
 }

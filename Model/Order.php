@@ -329,6 +329,10 @@ class Order
                 $order->setIncrementId($newIncrementId);
             }
 
+            if ($shippingDescription = $this->getShippingDescription($order, $data)) {
+                $order->setShippingDescription($shippingDescription);
+            }
+
             $this->addPaymentData($order, $data);
 
             if ($this->orderHelper->getInvoiceOrder($storeId)) {
@@ -486,6 +490,33 @@ class Order
         }
 
         return $shippingMethodFallback;
+    }
+
+    /**
+     * @param OrderModel $order
+     * @param array $data
+     *
+     * @return mixed
+     */
+    private function getShippingDescription($order, $data)
+    {
+        if ($order->getShippingMethod() !== 'channable_channable') {
+            return;
+        }
+
+        $title = str_replace(
+            '{{channable_channel_label}}',
+            !empty($data['channable_channel_label']) ? $data['channable_channel_label'] : 'Channable',
+            $this->config->getCarrierTitle($order->getStoreId())
+        );
+
+        $name = str_replace(
+            '{{shipment_method}}',
+            !empty($data['shipment_method']) ? $data['shipment_method'] : 'Shipping',
+            $this->config->getCarrierName($order->getStoreId())
+        );
+
+        return implode([$title, $name], ' - ');
     }
 
     /**
