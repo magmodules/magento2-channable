@@ -352,12 +352,7 @@ class Product extends AbstractHelper
      */
     public function getProductUrl($product, $simple, $config)
     {
-        $url = null;
-        if ($requestPath = $product->getRequestPath()) {
-            $url = $product->getProductUrl();
-        } else {
-            $url = $config['base_url'] . 'catalog/product/view/id/' . $product->getEntityId();
-        }
+        $url = $product->getProductUrl();
         if (!empty($config['utm_code'])) {
             if ($config['utm_code'][0] != '?') {
                 $url .= '?' . $config['utm_code'];
