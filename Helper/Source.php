@@ -42,6 +42,7 @@ class Source extends AbstractHelper
     const XPATH_DELIVERY_TIME = 'magmodules_channable/advanced/delivery_time';
     const XPATH_INVENTORY = 'magmodules_channable/advanced/inventory';
     const XPATH_INVENTORY_DATA = 'magmodules_channable/advanced/inventory_fields';
+    const XPATH_FORCE_NON_MSI = 'magmodules_channable/advanced/force_non_msi';
     const XPATH_TAX = 'magmodules_channable/advanced/tax';
     const XPATH_MANAGE_STOCK = 'cataloginventory/item_options/manage_stock';
     const XPATH_MIN_SALES_QTY = 'cataloginventory/item_options/min_sale_qty';
@@ -739,7 +740,12 @@ class Source extends AbstractHelper
         }
 
         $websiteCode = $this->storeManager->getWebsite()->getCode();
-        $invAtt['stock_id'] = $this->inventorySource->execute($websiteCode);
+
+        if ($this->getStoreValue(self::XPATH_FORCE_NON_MSI)) {
+            $invAtt['stock_id'] = null;
+        } else {
+            $invAtt['stock_id'] = $this->inventorySource->execute($websiteCode);
+        }
 
         return $invAtt;
     }

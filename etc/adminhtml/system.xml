@@ -447,6 +447,17 @@
                         <field id="inventory">1</field>
                     </depends>
                 </field>
+                <field id="force_non_msi" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
+                    <label>Force NON-MSI</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Force the use of legacy stock QTY ignoring the Reservation and Salable QTY table.
+                    Only use this function in case you are not using MSI and the QTY in the feed is not correct.
+                    <b>Recommended option: No</b>]]></comment>
+                    <depends>
+                        <field id="inventory">1</field>
+                    </depends>
+                </field>
                 <field id="heading_delivery" translate="label comment" type="text" sortOrder="30" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Delivery Time</label>
