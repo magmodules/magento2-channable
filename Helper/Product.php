@@ -1019,12 +1019,12 @@ class Product extends AbstractHelper
      */
     public function processPrice($product, $price, $config)
     {
-        if (!empty($config['exchange_rate'])) {
-            $price = $price * $config['exchange_rate'];
+        if (!empty($config['price_config']['exchange_rate'])) {
+            $price = $price * $config['price_config']['exchange_rate'];
         }
 
-        if (isset($config['incl_vat'])) {
-            $price = $this->catalogHelper->getTaxPrice($product, $price, $config['incl_vat']);
+        if (isset($config['price_config']['incl_vat'])) {
+            $price = $this->catalogHelper->getTaxPrice($product, $price, $config['price_config']['incl_vat']);
         }
 
         return $this->formatPrice($price, $config);
@@ -1038,10 +1038,10 @@ class Product extends AbstractHelper
      */
     public function formatPrice($price, $config)
     {
-        $decimal = isset($config['decimal_point']) ? $config['decimal_point'] : '.';
+        $decimal = isset($config['price_config']['decimal_point']) ? $config['price_config']['decimal_point'] : '.';
         $price = number_format(floatval(str_replace(',', '.', $price)), 2, $decimal, '');
-        if (!empty($config['use_currency']) && ($price >= 0)) {
-            $price .= ' ' . $config['currency'];
+        if (!empty($config['price_config']['use_currency']) && ($price >= 0)) {
+            $price .= ' ' . $config['price_config']['currency'];
         }
         return $price;
     }
