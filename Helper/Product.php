@@ -581,15 +581,18 @@ class Product extends AbstractHelper
     }
 
     /**
-     * Get QTY from inventory with support for reservations (if enabled)
+     * Get QTY value from product
      *
      * @param \Magento\Catalog\Model\Product $product
-     * @param [] $inventory
      *
-     * @return float
+     * @return float|null
      */
     private function getQtyValue($product)
     {
+        if (in_array($product->getTypeId(), ['bundle','configurable','grouped'])) {
+            return null;
+        }
+
         return $product->getQty();
     }
 
