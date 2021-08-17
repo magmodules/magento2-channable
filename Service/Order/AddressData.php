@@ -113,7 +113,7 @@ class AddressData
      * @param $address
      * @param $storeId
      *
-     * @return array
+     * @return string
      */
     private function getStreet($address, $storeId)
     {
@@ -138,7 +138,11 @@ class AddressData
             $street = [$street[0], trim($street[1] . ' ' . $street[2])];
         }
 
-        return $street;
+        /**
+         * 17-aug-2021: added implode to street lines to add (temp.) compatability for Magento 2.4.3
+         * as setting an array for street raises an "Array to string conversion" notice.
+         */
+        return trim(implode("\n", $street));
     }
 
     /**
