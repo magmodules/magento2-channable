@@ -114,7 +114,7 @@ class Products
             ->addStoreFilter($config['store_id'])
             ->addAttributeToSelect($attributes)
             ->addUrlRewrite()
-            ->setOrder('entity_id', 'ASC');
+            ->setOrder('product_website.product_id', 'ASC');
 
         if (!empty($filters['visibility'])) {
             $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
