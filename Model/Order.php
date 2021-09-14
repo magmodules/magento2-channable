@@ -388,7 +388,7 @@ class Order
                 $customerId = $customer->getId();
             }
             $customer = $this->customerRepository->getById($customerId);
-            $cart->assignCustomer($customer);
+            $cart->setCustomerIsGuest(false)->assignCustomer($customer);
         } else {
             $customerId = 0;
             $cart->setCustomerId($customerId)
