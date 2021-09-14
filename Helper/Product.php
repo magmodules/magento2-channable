@@ -897,9 +897,9 @@ class Product extends AbstractHelper
                 break;
             default:
                 if (floatval($product->getFinalPrice()) !== 0) {
-                    $price = $this->processPrice($product, $product->getPrice(), $config);
-                    $finalPrice = $this->processPrice($product, $product->getFinalPrice(), $config);
-                    $specialPrice = $this->processPrice($product, $product->getSpecialPrice(), $config);
+                    $price = $product->getPrice();
+                    $finalPrice = $product->getFinalPrice();
+                    $specialPrice = $product->getSpecialPrice();
                 } else {
                     $finalPrice = $product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue();
                     $price = $product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue();
@@ -920,7 +920,6 @@ class Product extends AbstractHelper
 
                 break;
         }
-
         $prices = [];
         $config = $config['price_config'];
         $prices[$config['price']] = $this->processPrice($product, $price, $config);
@@ -1022,12 +1021,11 @@ class Product extends AbstractHelper
      */
     public function processPrice($product, $price, $config)
     {
-        if (!empty($config['price_config']['exchange_rate'])) {
-            $price = $price * $config['price_config']['exchange_rate'];
+        if (!empty($config['exchange_rate'])) {
+            $price = $price * $config['exchange_rate'];
         }
-
-        if (isset($config['price_config']['incl_vat'])) {
-            $price = $this->catalogHelper->getTaxPrice($product, $price, $config['price_config']['incl_vat']);
+        if (isset($config['incl_vat'])) {
+            $price = $this->catalogHelper->getTaxPrice($product, $price, ['incl_vat']);
         }
 
         return $this->formatPrice($price, $config);
@@ -1041,10 +1039,10 @@ class Product extends AbstractHelper
      */
     public function formatPrice($price, $config)
     {
-        $decimal = isset($config['price_config']['decimal_point']) ? $config['price_config']['decimal_point'] : '.';
+        $decimal = isset($config['decimal_point']) ? $config['decimal_point'] : '.';
         $price = number_format(floatval(str_replace(',', '.', $price)), 2, $decimal, '');
-        if (!empty($config['price_config']['use_currency']) && ($price >= 0)) {
-            $price .= ' ' . $config['price_config']['currency'];
+        if (!empty($config['use_currency']) && ($price >= 0)) {
+            $price .= ' ' . $config['currency'];
         }
         return $price;
     }

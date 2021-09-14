@@ -388,7 +388,7 @@ class Order
                 $customerId = $customer->getId();
             }
             $customer = $this->customerRepository->getById($customerId);
-            $cart->assignCustomer($customer);
+            $cart->setCustomerIsGuest(false)->assignCustomer($customer);
         } else {
             $customerId = 0;
             $cart->setCustomerId($customerId)
@@ -522,6 +522,8 @@ class Order
     /**
      * @param OrderModel $order
      * @param array      $data
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     private function addPaymentData($order, $data)
     {
@@ -536,10 +538,9 @@ class Order
             $order->setChannelId($data['channel_id']);
         }
 
-        if (!empty($data['price']['commission'])) {
-            $commission = $data['price']['currency'] . ' ' . $data['price']['commission'];
-            $payment->setAdditionalInformation('commission', $commission);
-        }
+        $commissionValue = isset($data['price']['commission']) ? $data['price']['commission'] : 0;
+        $commission = $data['price']['currency'] . ' ' . $commissionValue;
+        $payment->setAdditionalInformation('commission', $commission);
 
         if (!empty($data['channel_name'])) {
             if ($this->lvb) {
