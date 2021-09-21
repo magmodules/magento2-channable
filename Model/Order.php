@@ -460,6 +460,9 @@ class Order
         $request->setLimitCarrier('');
         $request->setBaseSubtotalInclTax($total);
         $request->setFreeShipping($shippingPriceCal <= 0);
+        if (!empty($cart->getShippingAddress()->getWeight())) {
+            $request->setPackageWeight($cart->getShippingAddress()->getWeight());
+        }
         $shipping = $this->shippingFactory->create();
         $result = $shipping->collectRates($request)->getResult();
 
