@@ -56,6 +56,8 @@ class TestData
             "channel_name"            => "Channable",
             "order_status"            => $lvb ? "shipped" : "not_shipped",
             "shipment_method"         => "Prime",
+            "channel_customer_number" => "123456789",
+            "shipment_promise"        => "2021-09-06 23:00:00000000",
             "customer"                => [
                 "gender"      => "male",
                 "phone"       => "01234567890",

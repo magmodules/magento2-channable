@@ -538,6 +538,14 @@ class Order
             $order->setChannelId($data['channel_id']);
         }
 
+        if (!empty($data['channel_customer_number'])) {
+            $payment->setAdditionalInformation('channel_customer_number', $data['channel_customer_number']);
+        }
+
+        if (!empty($data['shipment_promise'])) {
+            $payment->setAdditionalInformation('shipment_promise', $data['shipment_promise']);
+        }
+
         $commissionValue = isset($data['price']['commission']) ? $data['price']['commission'] : 0;
         $commission = $data['price']['currency'] . ' ' . $commissionValue;
         $payment->setAdditionalInformation('commission', $commission);
