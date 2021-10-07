@@ -32,6 +32,18 @@ $specificInfo = $block->getSpecificInformation();
                 <td><?= $channelId; ?></td>
             </tr>
         <?php endif; ?>
+        <?php if ($shipmentPromise = $this->getInfo()->getAdditionalInformation('shipment_promise')): ?>
+            <tr>
+                <th><?= __('Shipment Promise'); ?></th>
+                <td><?= $shipmentPromise; ?></td>
+            </tr>
+        <?php endif; ?>
+        <?php if ($channelCustomerNumber = $this->getInfo()->getAdditionalInformation('channel_customer_number')): ?>
+            <tr>
+                <th><?= __('Channel Customer Number'); ?></th>
+                <td><?= $channelCustomerNumber; ?></td>
+            </tr>
+        <?php endif; ?>
         <?php if ($channableId = $this->getInfo()->getAdditionalInformation('channable_id')): ?>
             <tr>
                 <th><?= __('Channable ID'); ?></th>

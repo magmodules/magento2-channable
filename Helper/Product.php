@@ -639,7 +639,7 @@ class Product extends AbstractHelper
                 return false;
             }
         } else {
-            if (!$product->getData('enable_qty_inc')) {
+            if (!$product->getData('enable_qty_increments')) {
                 return false;
             }
         }
