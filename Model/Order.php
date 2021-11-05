@@ -293,6 +293,8 @@ class Order
 
             $itemCount = $this->addItems->execute($cart, $data, $store, $this->lvb);
             $shippingPriceCal = $this->getShippingPrice($cart, $data, $store);
+
+            $this->checkoutSession->replaceQuote($cart);
             $cart->collectTotals();
 
             $this->checkoutSession->setChannableEnabled(1);
