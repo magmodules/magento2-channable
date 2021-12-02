@@ -319,15 +319,16 @@ class Order
                 $this->itemsForReindex->clear();
             }
 
+            if ($this->orderHelper->getUseChannelOrderId($storeId)) {
+                $newIncrementId = $this->orderHelper->getUniqueIncrementId($data['channel_id'], $storeId);
+                $cart->setReservedOrderId($newIncrementId);
+            }
+
             $orderId = $this->cartManagementInterface->placeOrder($cart->getId());
             $store->setCurrentCurrencyCode($store->getBaseCurrencyCode());
 
             /** @var \Magento\Sales\Model\Order $order */
             $order = $this->orderRepository->get($orderId);
-            if ($this->orderHelper->getUseChannelOrderId($storeId)) {
-                $newIncrementId = $this->orderHelper->getUniqueIncrementId($data['channel_id'], $storeId);
-                $order->setIncrementId($newIncrementId);
-            }
 
             if ($shippingDescription = $this->getShippingDescription($order, $data)) {
                 $order->setShippingDescription($shippingDescription);
