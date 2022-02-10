@@ -1,15 +1,16 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Block\Adminhtml\Magmodules;
 
+use Magento\Backend\Block\Template\Context;
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magento\Backend\Block\Template\Context;
 
 /**
  * Class Header
@@ -22,6 +23,7 @@ class Header extends Field
     const MODULE_CODE = 'magento2-channable';
     const MODULE_SUPPORT_LINK = 'https://www.magmodules.eu/help/' . self::MODULE_CODE;
     const MODULE_CONTACT_LINK = 'https://www.magmodules.eu/support.html?ext=' . self::MODULE_CODE;
+
     /**
      * @var string
      */
@@ -34,7 +36,7 @@ class Header extends Field
     /**
      * Header constructor.
      *
-     * @param Context       $context
+     * @param Context $context
      * @param GeneralHelper $generalHelper
      */
     public function __construct(
@@ -64,10 +66,12 @@ class Header extends Field
      */
     public function getImage()
     {
-        $extVersion = $this->generalHelper->getExtensionVersion();
-        $magVersion = $this->generalHelper->getMagentoVersion();
-
-        return sprintf('https://www.magmodules.eu/logo/%s/%s/%s/logo.png', self::MODULE_CODE, $extVersion, $magVersion);
+        return sprintf(
+            'https://www.magmodules.eu/logo/%s/%s/%s/logo.png',
+            self::MODULE_CODE,
+            $this->generalHelper->getExtensionVersion(),
+            $this->generalHelper->getMagentoVersion()
+        );
     }
 
     /**

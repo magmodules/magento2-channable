@@ -18,9 +18,6 @@
     <event name="cataloginventory_stock_item_save_after">
         <observer name="channable_cataloginventory_stock_item_save_after" instance="Magmodules\Channable\Observer\CatalogInventory\StockItemSaveAfter" />
     </event>
-    <event name="controller_action_predispatch_adminhtml_system_config_edit">
-        <observer name="channable_system_config_observer" instance="Magmodules\Channable\Observer\System\Config" />
-    </event>
     <event name="xtento_stockimport_stockupdate_after">
         <observer name="xtentoInvalidateProducts" instance="Magmodules\Channable\Observer\Xtento\InvalidateProducts" />
     </event>

@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Magmodules\Channable\Model\ItemFactory as ItemFactory;
-use Magmodules\Channable\Helper\General\Proxy as GeneralHelper;
+use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magento\Framework\App\State as AppState;
 
 /**

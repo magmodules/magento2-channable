@@ -6,6 +6,32 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Log Block Start -->
+    <preference for="Magmodules\Channable\Api\Log\RepositoryInterface"
+                type="Magmodules\Channable\Model\Log\Repository"/>
+    <type name="Magmodules\Channable\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Magmodules\Channable\Logger\ErrorLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">ChannableError</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Magmodules\Channable\Logger\Handler\Error</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magmodules\Channable\Logger\DebugLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">ChannableDebug</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Magmodules\Channable\Logger\Handler\Debug</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- Log Block End -->
+
     <type name="Magmodules\Channable\Logger\ChannableHandler">
         <arguments>
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
@@ -73,24 +99,19 @@
             </argument>
         </arguments>
     </type>
-    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
-        <arguments>
-            <argument name="columns" xsi:type="array">
-                <item name="channable_id" xsi:type="string">sales_order.channable_id</item>
-                <item name="channel_id" xsi:type="string">sales_order.channel_id</item>
-                <item name="channel_name" xsi:type="string">sales_order.channel_name</item>
-                <item name="channel_label" xsi:type="string">sales_order.channel_label</item>
-            </argument>
-        </arguments>
-    </virtualType>
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="ChannableConfig" xsi:type="object">Magmodules\Channable\Console\Command\Config</item>
                 <item name="ChannableItemUpdate" xsi:type="object">Magmodules\Channable\Console\Command\ItemUpdate</item>
             </argument>
         </arguments>
     </type>
+    <type name="Magmodules\Channable\Console\Command\ItemUpdate">
+        <arguments>
+            <argument name="generalHelper" xsi:type="object">Magmodules\Channable\Helper\General\Proxy</argument>
+        </arguments>
+    </type>
+
     <type name="Magento\CatalogInventory\Model\StockState">
         <plugin name="channable_skip_qty_check" type="Magmodules\Channable\Plugin\AfterCheckQty"/>
     </type>
@@ -103,4 +124,70 @@
     <type name="Magento\CatalogInventory\Model\Configuration">
         <plugin name="chanable_force_backorder" type="Magmodules\Channable\Plugin\AfterGetBackorders" />
     </type>
+
+    <preference for="Magmodules\Channable\Api\Config\RepositoryInterface"
+                type="Magmodules\Channable\Model\Config\Repository"/>
+    <preference for="Magmodules\Channable\Api\Config\System\OrderInterface"
+                type="Magmodules\Channable\Model\Config\System\OrderRepository"/>
+
+    <!-- Channable Order Block Start -->
+    <preference for="Magmodules\Channable\Api\Order\RepositoryInterface"
+                type="Magmodules\Channable\Model\Order\Repository"/>
+    <preference for="Magmodules\Channable\Api\Order\Data\DataInterface"
+                type="Magmodules\Channable\Model\Order\DataModel"/>
+    <preference for="Magmodules\Channable\Api\Order\Data\SearchResultsInterface"
+                type="Magento\Framework\Api\SearchResults"/>
+    <preference for="Magmodules\Channable\Api\Order\Data\SearchResultsInterface"
+                type="Magento\Framework\Api\SearchResults"/>
+    <type name="Magmodules\Channable\Model\Order\Repository">
+        <arguments>
+            <argument name="metadata" xsi:type="object">channableOrderMetadata</argument>
+        </arguments>
+    </type>
+    <virtualType name="channableOrderMetadata" type="Magmodules\Channable\Model\Base\Metadata">
+        <arguments>
+            <argument name="resourceClassName"
+                      xsi:type="string">Magmodules\Channable\Model\Order\ResourceModel\ResourceModel
+            </argument>
+            <argument name="modelClassName"
+                      xsi:type="string">Magmodules\Channable\Model\Order\DataModel
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Magmodules\Channable\Model\Order\ResourceModel\Collection</argument>
+            <argument name="filterPool" xsi:type="object" shared="false">OrderGridFilterPool</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Magmodules\Channable\Model\Order\ResourceModel\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">channable_orders</argument>
+            <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\Order\ResourceModel\ResourceModel</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="channable_order_grid_data_source" xsi:type="string">Magmodules\Channable\Model\Order\ResourceModel\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="channable_order_grid_data_source" xsi:type="string">Magmodules\Channable\Model\Order\ResourceModel\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Channable Order Block End -->
 </config>
