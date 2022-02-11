@@ -1,18 +1,20 @@
 {
-  "name": "magmodules/magento2-channable",
-  "description": "Channable integration for Magento 2",
-  "type": "magento2-module",
-  "version": "1.5.5",
-  "license": "BSD-2-Clause",
-  "homepage": "https://github.com/magmodules/magento2-channable",
-  "require": {
-    "magento/framework": ">=100.1.0",
-    "ext-json": "*"
-  },
-  "autoload": {
-    "files": [ "registration.php" ],
-    "psr-4": {
-      "Magmodules\\Channable\\": ""
+    "name": "magmodules/magento2-channable",
+    "description": "Channable integration for Magento 2",
+    "type": "magento2-module",
+    "version": "1.6.0",
+    "license": "BSD-2-Clause",
+    "homepage": "https://github.com/magmodules/magento2-channable",
+    "require": {
+        "magento/framework": ">=102.0.3",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Magmodules\\Channable\\": ""
+        }
     }
-  }
 }
