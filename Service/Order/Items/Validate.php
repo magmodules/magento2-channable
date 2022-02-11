@@ -3,22 +3,23 @@
  * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Service\Order\Items;
 
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Store\Api\WebsiteRepositoryInterface;
-use Magmodules\Channable\Service\Product\InventorySource;
-use Magmodules\Channable\Service\Product\InventoryData;
-use Magmodules\Channable\Model\Config;
-use Magmodules\Channable\Exceptions\CouldNotImportOrder;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Api\Data\StoreInterface;
+use Magento\Store\Api\WebsiteRepositoryInterface;
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Exceptions\CouldNotImportOrder;
+use Magmodules\Channable\Service\Product\InventoryData;
+use Magmodules\Channable\Service\Product\InventorySource;
 
 /**
- * Class Validate
- *
- * @package Magmodules\Channable\Service\Order\Items
+ * Validate items to check on salability
  */
 class Validate
 {
@@ -27,6 +28,11 @@ class Validate
      * Exception msg for empty order lines
      */
     const EMPTY_ITEMS_EXCEPTION = 'No products found in order';
+
+    /**
+     * Exception msg for missing product id
+     */
+    const NO_ID_SET_EXCEPTION = 'Could not load product, due to missing id';
 
     /**
      * Exception msg for product not found
@@ -74,9 +80,9 @@ class Validate
     private $websiteRepository;
 
     /**
-     * @var Config
+     * @var ConfigProvider
      */
-    private $config;
+    private $configProvider;
 
     /**
      * @var StockRegistryInterface
@@ -85,7 +91,7 @@ class Validate
 
     /**
      * Validate constructor.
-     * @param Config $config
+     * @param ConfigProvider $configProvider
      * @param InventorySource $inventorySource
      * @param InventoryData $inventoryData
      * @param ProductRepositoryInterface $productRepository
@@ -93,14 +99,14 @@ class Validate
      * @param StockRegistryInterface $stockRegistry
      */
     public function __construct(
-        Config $config,
+        ConfigProvider $configProvider,
         InventorySource $inventorySource,
         InventoryData $inventoryData,
         ProductRepositoryInterface $productRepository,
         WebsiteRepositoryInterface $websiteRepository,
         StockRegistryInterface $stockRegistry
     ) {
-        $this->config = $config;
+        $this->configProvider = $configProvider;
         $this->inventorySource = $inventorySource;
         $this->inventoryData = $inventoryData;
         $this->websiteRepository = $websiteRepository;
@@ -112,62 +118,51 @@ class Validate
      * Validate all items in Chanable order
      *
      * @param array $items
-     * @param int $websiteId
+     * @param StoreInterface $store
      * @param bool $lvb
      *
      * @throws CouldNotImportOrder
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
-    public function execute(array $items, $websiteId, $lvb)
+    public function execute(array $items, StoreInterface $store, $lvb)
     {
         if (empty($items)) {
             $exceptionMsg = self::EMPTY_ITEMS_EXCEPTION;
             throw new CouldNotImportOrder(__($exceptionMsg));
         }
 
-        $websiteCode = $this->getWebsiteCode($websiteId);
-        $stockId = $this->inventorySource->execute($websiteCode);
-        $stockCheck = $this->config->getEnableBackorders();
-
         foreach ($items as $item) {
             $product = $this->getProduct($item);
             $this->isNotOfConfigurableType($product);
             $this->doesNotHaveRequiredOption($product);
 
-            if (!$stockCheck && !$lvb) {
-                $this->hasSufficientStock($product, $item['quantity'], $stockId);
+            if (!$this->configProvider->getEnableBackorders() && !$lvb) {
+                $websiteCode = $this->getWebsiteCode((int)$store->getWebsiteId());
+                $stockId = $this->inventorySource->execute($websiteCode);
+                $this->hasSufficientStock($product, $item, (int)$stockId, (int)$store->getId());
             }
         }
     }
 
     /**
-     * Get website code by ID
+     * Load product by channable order item array
      *
-     * @param int $websiteId
-     * @return string
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    private function getWebsiteCode($websiteId)
-    {
-        $website = $this->websiteRepository->getById($websiteId);
-
-        return $website->getCode();
-    }
-
-    /**
-     * Load product by item
-     *
-     * @param $item
+     * @param array $item
      *
      * @return ProductInterface
      * @throws CouldNotImportOrder
      */
-    private function getProduct($item)
+    private function getProduct($item): ProductInterface
     {
-        $productId = $item['id'];
+        if (empty($item['id'])) {
+            $exceptionMsg = self::NO_ID_SET_EXCEPTION;
+            throw new CouldNotImportOrder(
+                __($exceptionMsg)
+            );
+        }
 
         try {
-            return $this->productRepository->getById($productId);
+            return $this->productRepository->getById($item['id']);
         } catch (\Exception $exception) {
             $exceptionMsg = self::PRODUCT_NOT_FOUND_EXCEPTION;
             throw new CouldNotImportOrder(__(
@@ -222,19 +217,38 @@ class Validate
     }
 
     /**
-     * Validate product for enough stock
+     * Get website code by website id
+     *
+     * @param int $websiteId
+     * @return string
+     * @throws NoSuchEntityException
+     */
+    private function getWebsiteCode(int $websiteId): string
+    {
+        $website = $this->websiteRepository->getById($websiteId);
+        return $website->getCode();
+    }
+
+    /**
+     * Check if product has sufficient stock
      *
      * @param ProductInterface $product
-     * @param                  $qty
-     * @param                  $stockId
+     * @param array $item
+     * @param int $stockId
+     * @param int $storeId
      *
      * @throws CouldNotImportOrder
      */
-    private function hasSufficientStock(ProductInterface $product, $qty, $stockId)
-    {
+    private function hasSufficientStock(
+        ProductInterface $product,
+        array $item,
+        int $stockId,
+        int $storeId
+    ) {
+        $qty = $item['quantity'];
         $stockItem = $this->stockRegistry->getStockItem($product->getId());
         if ($stockItem->getUseConfigManageStock()) {
-            $manageStock = $this->config->getDefaultManageStock();
+            $manageStock = $this->configProvider->getDefaultManageStock((int)$storeId);
         } else {
             $manageStock = $stockItem->getManageStock();
         }
@@ -253,13 +267,11 @@ class Validate
                     $product->getId()
                 ));
             }
-
             if ($stockId) {
-                $salableQty = $this->inventoryData->getSalableQty($product, $stockId);
+                $salableQty = $this->inventoryData->getSalableQty($product, (int)$stockId);
             } else {
                 $salableQty = $stockItem->getQty();
             }
-
             if ($salableQty < $qty) {
                 $exceptionMsg = self::STOCK_EXCEPTION;
                 throw new CouldNotImportOrder(__(

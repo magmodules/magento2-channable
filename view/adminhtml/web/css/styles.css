@@ -1,3 +1,25 @@
+#menu-magmodules-channable-channable a:before {
+    background: url(../images/channable.svg) no-repeat scroll 25px 0px;
+    height: 35px;
+    background-size: 30px;
+    content: "";
+}
+
+.channable-tab .title {
+    line-height: 20px;
+}
+
+.channable-tab .title:before {
+    width: 20px;
+    height: 20px;
+    content: " ";
+    background: url(../images/channable.svg);
+    background-size: 20px;
+    display: inline-block;
+    float: left;
+    margin-right: 10px;
+}
+
 .mm-comment-channable {
     padding: 5px 10px;
 }
@@ -352,3 +374,71 @@ a.channable-tooltip:hover span {
     margin-bottom: 20px;
     border: 1px solid #E3E3E3;
 }
+
+
+.channable-table .data-grid thead tr th {
+    padding: 10px;
+}
+
+.channable-table .data-grid td {
+    padding: 10px !important;
+}
+
+.channable-table .data-grid td textarea {
+    min-height: 200px;
+}
+
+.channable-table .data-grid td a {
+    background-color: #eb5202;
+    border-color: #eb5202;
+    color: #ffffff;
+    padding: 5px;
+    text-shadow: 1px 1px 0 rgb(0 0 0 / 25%);
+    display: block;
+    text-align: center;
+}
+
+.channable-table .data-grid td a:hover {
+    text-decoration: none;
+    background: #be4201;
+}
+
+.grid-more-info span {
+    display: none;
+    padding: 2px 3px;
+    margin-left: 8px;
+    width: auto;
+}
+
+.grid-more-info:hover span {
+    display: block;
+    position: absolute;
+    background: #FFFFFF;
+    border: 1px solid #CCCCCC;
+    color: #6C6C6C;
+    width: auto;
+    margin-right: 20px;
+    z-index: 9999;
+}
+
+
+.grid-more-info span table {
+    border-top: 1px solid #cccccc;
+}
+
+.grid-more-info span table td:first-child {
+    font-weight: bold;
+    font-size: 11px;
+    padding: 7px;
+}
+
+.grid-more-info span table td {
+    font-size: 11px;
+    padding: 7px;
+}
+
+.grid-more-info span table tr {
+    border-bottom: 1px solid whitesmoke;
+}
+
+

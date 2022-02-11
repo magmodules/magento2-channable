@@ -1,62 +1,56 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Controller\Order;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magmodules\Channable\Helper\Order as OrderHelper;
-use Magmodules\Channable\Model\Order as OrderModel;
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Service\Webhook\Shipments as ShipmentsCollector;
+use Magmodules\Channable\Service\Order\Validator\Data as DataValidator;
 
-/**
- * Class Status
- *
- * @package Magmodules\Channable\Controller\Shipments
- */
 class Shipments extends Action
 {
 
     /**
-     * @var GeneralHelper
+     * @var ConfigProvider
      */
-    private $generalHelper;
-    /**
-     * @var OrderHelper
-     */
-    private $orderHelper;
-    /**
-     * @var OrderModel
-     */
-    private $orderModel;
+    private $configProvider;
     /**
      * @var JsonFactory
      */
     private $resultJsonFactory;
+    /**
+     * @var DataValidator
+     */
+    private $dataValidator;
+    /**
+     * @var ShipmentsCollector
+     */
+    private $shipmentsCollector;
 
     /**
-     * Status constructor.
-     *
-     * @param Context       $context
-     * @param GeneralHelper $generalHelper
-     * @param OrderHelper   $orderHelper
-     * @param OrderModel    $orderModel
-     * @param JsonFactory   $resultJsonFactory
+     * @param Context $context
+     * @param ConfigProvider $configProvider
+     * @param ShipmentsCollector $shipmentsCollector
+     * @param DataValidator $dataValidator
+     * @param JsonFactory $resultJsonFactory
      */
     public function __construct(
         Context $context,
-        GeneralHelper $generalHelper,
-        OrderHelper $orderHelper,
-        OrderModel $orderModel,
+        ConfigProvider $configProvider,
+        ShipmentsCollector $shipmentsCollector,
+        DataValidator $dataValidator,
         JsonFactory $resultJsonFactory
     ) {
-        $this->generalHelper = $generalHelper;
-        $this->orderHelper = $orderHelper;
-        $this->orderModel = $orderModel;
+        $this->configProvider = $configProvider;
+        $this->shipmentsCollector = $shipmentsCollector;
+        $this->dataValidator = $dataValidator;
         $this->resultJsonFactory = $resultJsonFactory;
         parent::__construct($context);
     }
@@ -66,21 +60,17 @@ class Shipments extends Action
      */
     public function execute()
     {
-        $token = $this->generalHelper->getToken();
+        $token = $this->configProvider->getToken();
         $code = $this->getRequest()->getParam('code');
-        if ($token && $code) {
-            if ($code == $token) {
-                $timespan = intval($this->getRequest()->getParam('timespan'));
-                if ($timespan >= 1 && $timespan <= 336) {
-                    $response = $this->orderModel->getShipments($timespan);
-                } else {
-                    $response = $this->orderHelper->jsonResponse('Invalid timespan, supported range: 1-336');
-                }
+        if ($token && $code && $code == $token) {
+            $timespan = intval($this->getRequest()->getParam('timespan'));
+            if ($timespan >= 1 && $timespan <= 336) {
+                $response = $this->shipmentsCollector->execute($timespan);
             } else {
-                $response = $this->orderHelper->jsonResponse('Unknown Token');
+                $response = $this->dataValidator->jsonResponse('Invalid timespan, supported range: 1-336');
             }
         } else {
-            $response = $this->orderHelper->jsonResponse('Extension not enabled!');
+            $response = $this->dataValidator->jsonResponse('Unknown Token');
         }
 
         $result = $this->resultJsonFactory->create();

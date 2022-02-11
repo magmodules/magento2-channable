@@ -1,62 +1,56 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Controller\Order;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magmodules\Channable\Helper\Order as OrderHelper;
-use Magmodules\Channable\Model\Order as OrderModel;
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Service\Webhook\OrderStatus as OrderStatusCollector;
+use Magmodules\Channable\Service\Order\Validator\Data as DataValidator;
 
-/**
- * Class Status
- *
- * @package Magmodules\Channable\Controller\Order
- */
 class Status extends Action
 {
 
     /**
-     * @var GeneralHelper
+     * @var ConfigProvider
      */
-    private $generalHelper;
+    private $configProvider;
     /**
-     * @var OrderHelper
+     * @var OrderStatusCollector
      */
-    private $orderHelper;
-    /**
-     * @var OrderModel
-     */
-    private $orderModel;
+    private $orderStatusCollector;
     /**
      * @var JsonFactory
      */
     private $resultJsonFactory;
+    /**
+     * @var DataValidator
+     */
+    private $dataValidator;
 
     /**
-     * Status constructor.
-     *
-     * @param Context       $context
-     * @param GeneralHelper $generalHelper
-     * @param OrderHelper   $orderHelper
-     * @param OrderModel    $orderModel
-     * @param JsonFactory   $resultJsonFactory
+     * @param Context $context
+     * @param ConfigProvider $configProvider
+     * @param OrderStatusCollector $orderStatusCollector
+     * @param DataValidator $dataValidator
+     * @param JsonFactory $resultJsonFactory
      */
     public function __construct(
         Context $context,
-        GeneralHelper $generalHelper,
-        OrderHelper $orderHelper,
-        OrderModel $orderModel,
+        ConfigProvider $configProvider,
+        OrderStatusCollector $orderStatusCollector,
+        DataValidator $dataValidator,
         JsonFactory $resultJsonFactory
     ) {
-        $this->generalHelper = $generalHelper;
-        $this->orderHelper = $orderHelper;
-        $this->orderModel = $orderModel;
+        $this->configProvider = $configProvider;
+        $this->orderStatusCollector = $orderStatusCollector;
+        $this->dataValidator = $dataValidator;
         $this->resultJsonFactory = $resultJsonFactory;
         parent::__construct($context);
     }
@@ -66,20 +60,16 @@ class Status extends Action
      */
     public function execute()
     {
-        $token = $this->generalHelper->getToken();
+        $token = $this->configProvider->getToken();
         $code = $this->getRequest()->getParam('code');
-        if ($token && $code) {
-            if ($code == $token) {
-                if ($id = $this->getRequest()->getParam('id')) {
-                    $response = $this->orderModel->getOrderById($id);
-                } else {
-                    $response = $this->orderHelper->jsonResponse('Missing ID');
-                }
+        if ($token && $code && $code == $token) {
+            if ($incrementId = (string)$this->getRequest()->getParam('id')) {
+                $response = $this->orderStatusCollector->execute($incrementId);
             } else {
-                $response = $this->orderHelper->jsonResponse('Unknown Token');
+                $response = $this->dataValidator->jsonResponse('Missing ID');
             }
         } else {
-            $response = $this->orderHelper->jsonResponse('Extension not enabled!');
+            $response = $this->dataValidator->jsonResponse('Unknown Token');
         }
 
         $result = $this->resultJsonFactory->create();

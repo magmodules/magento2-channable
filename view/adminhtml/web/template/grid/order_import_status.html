@@ -1,0 +1,12 @@
+<!-- ko if: ($col.getLabel($row()) == "New") -->
+<span class='grid-severity-minor'><!-- ko i18n: 'New' --><!-- /ko --></span>
+<!--/ko-->
+<!-- ko if: ($col.getLabel($row()) == "Imported") -->
+<span class='grid-severity-notice'><!-- ko i18n: 'Imported' --><!-- /ko --></span>
+<!--/ko-->
+<!-- ko if: ($col.getLabel($row()) == "Error") -->
+<span class='grid-severity-major'><!-- ko i18n: 'Error' --><!-- /ko --></span>
+<!--/ko-->
+<!-- ko if: ($col.getLabel($row()) == "Failed") -->
+<span class='grid-severity-critical'><!-- ko i18n: 'Failed' --><!-- /ko --></span>
+<!--/ko-->

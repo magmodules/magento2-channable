@@ -6,15 +6,15 @@
 
 namespace Magmodules\Channable\Helper;
 
+use Magento\Cron\Model\Schedule;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
-use Magmodules\Channable\Helper\General as GeneralHelper;
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
-use Magmodules\Channable\Helper\Order as OrderHelper;
+use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Item as ItemHelper;
 use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magmodules\Channable\Model\Generate as GenerateModel;
-use Magento\Cron\Model\Schedule;
 
 /**
  * Class Selftest
@@ -39,9 +39,9 @@ class Selftest extends AbstractHelper
      */
     private $itemHelper;
     /**
-     * @var Order
+     * @var ConfigProvider
      */
-    private $orderHelper;
+    private $configProvider;
     /**
      * @var GenerateModel
      */
@@ -52,28 +52,26 @@ class Selftest extends AbstractHelper
     private $schedule;
 
     /**
-     * Selftest constructor.
-     *
-     * @param Context       $context
-     * @param General       $generalHelper
-     * @param Feed          $feedHelper
-     * @param Order         $orderHelper
-     * @param Item          $itemHelper
+     * @param Context $context
+     * @param General $generalHelper
+     * @param Feed $feedHelper
+     * @param ConfigProvider $configProvider
+     * @param Item $itemHelper
      * @param GenerateModel $generateModel
-     * @param Schedule      $schedule
+     * @param Schedule $schedule
      */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
         FeedHelper $feedHelper,
-        OrderHelper $orderHelper,
+        ConfigProvider $configProvider,
         ItemHelper $itemHelper,
         GenerateModel $generateModel,
         Schedule $schedule
     ) {
         $this->generalHelper = $generalHelper;
         $this->feedHelper = $feedHelper;
-        $this->orderHelper = $orderHelper;
+        $this->configProvider = $configProvider;
         $this->itemHelper = $itemHelper;
         $this->generateModel = $generateModel;
         $this->schedule = $schedule;
@@ -92,9 +90,9 @@ class Selftest extends AbstractHelper
         foreach ($configData as $storeId => $feedData) {
             if ($feedData['status']) {
                 $stores[] = [
-                    'id'           => $storeId,
-                    'name'         => $feedData['name'],
-                    'qty'          => $this->generateModel->getSize($storeId),
+                    'id' => $storeId,
+                    'name' => $feedData['name'],
+                    'qty' => $this->generateModel->getSize($storeId),
                     'last_fetched' => $feedData['last_fetched'],
                 ];
                 $names[] = $feedData['name'];
@@ -114,20 +112,23 @@ class Selftest extends AbstractHelper
                     $msg = __('Storeview "%1": no products found, please check the filter settings', $store['name']);
                     $results[] = $this->getFail($msg);
                 } else {
-                    $msg = __('Storeview "%1": found ~%2 items with current settings/filters. <small><i>Note:</i> This quantity is an indication, actual item quantity can vary due to product ralations.</small>', $store['name'], $store['qty']);
+                    $msg = __('Storeview "%1": found ~%2 items with current settings/filters. <small><i>Note:</i> This quantity is an indication, actual item quantity can vary due to product ralations.</small>',
+                        $store['name'], $store['qty']);
                     $results[] = $this->getPass($msg);
                 }
                 if (!empty($store['last_fetched'])) {
                     $msg = __('Storeview "%1": last fetched %2', $store['name'], $store['last_fetched']);
                     $results[] = $this->getPass($msg);
                 } else {
-                    $msg = __('Storeview "%1": not yet fetched, please check the Connection with your Channable account', $store['name']);
+                    $msg = __('Storeview "%1": not yet fetched, please check the Connection with your Channable account',
+                        $store['name']);
                     $results[] = $this->getNotice($msg);
                 }
 
                 $priceAttributes = $this->checkPriceAttributes($store['id']);
                 if (!empty($priceAttributes)) {
-                    $msg = __('Storeview "%1": found price attributes (%2) in extra fields. This is not recommended as prices are created dynamically based on multiple factors like VAT, Price Rules, etc.', $store['name'], implode(',', $priceAttributes));
+                    $msg = __('Storeview "%1": found price attributes (%2) in extra fields. This is not recommended as prices are created dynamically based on multiple factors like VAT, Price Rules, etc.',
+                        $store['name'], implode(',', $priceAttributes));
                     $results[] = $this->getNotice($msg);
                 }
             }
@@ -233,7 +234,7 @@ class Selftest extends AbstractHelper
     public function runApiTests()
     {
 
-        $enabled = $this->orderHelper->getEnabled();
+        $enabled = $this->configProvider->isOrderEnabled();
         if ($enabled) {
             $msg = __('Order Import: Enabled');
             $results[] = $this->getPass($msg);
@@ -249,7 +250,7 @@ class Selftest extends AbstractHelper
         foreach ($configData as $storeId => $itemData) {
             if ($itemData['enable']) {
                 $stores[] = [
-                    'name'    => $itemData['name'],
+                    'name' => $itemData['name'],
                     'webhook' => $itemData['webhook']
                 ];
                 $names[] = $itemData['name'];
