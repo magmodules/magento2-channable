@@ -1,0 +1,15 @@
+name: Codesniffer with the Magento Coding standard
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run codesniffer
+        run:
+          docker run
+          --volume $(pwd)/:/app/workdir
+          michielgerritsen/magento-coding-standard:latest
+          --severity=10

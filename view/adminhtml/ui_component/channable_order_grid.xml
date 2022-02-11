@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright © Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">channable_order_grid.channable_order_grid_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>channable_order_columns</spinner>
+        <deps>
+            <dep>channable_order_grid.channable_order_grid_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="channable_order_grid_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <dataProvider class="Magmodules\Channable\Ui\Component\OrderDataProvider" name="channable_order_grid_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters">
+            <settings>
+                <templates>
+                    <filters>
+                        <select>
+                            <param name="template" xsi:type="string">ui/grid/filters/elements/ui-select</param>
+                            <param name="component" xsi:type="string">Magento_Ui/js/form/element/ui-select</param>
+                        </select>
+                    </filters>
+                </templates>
+            </settings>
+            <filterSelect name="store_id" provider="${ $.parentName }">
+                <settings>
+                    <captionValue>0</captionValue>
+                    <options class="Magento\Cms\Ui\Component\Listing\Column\Cms\Options"/>
+                    <label translate="true">Store View</label>
+                    <dataScope>store_id</dataScope>
+                    <imports>
+                        <link name="visible">componentType = column, index = ${ $.index }:visible</link>
+                    </imports>
+                </settings>
+            </filterSelect>
+        </filters>
+        <filterSearch name="fulltext">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="provider" xsi:type="string">channable_order_grid.channable_order_grid_data_source</item>
+                    <item name="chipsProvider" xsi:type="string">channable_order_grid.channable_order_grid.listing_top.listing_filters_chips</item>
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="provider" xsi:type="string">channable_order_grid.channable_order_grid.listing_top.bookmarks</item>
+                        <item name="namespace" xsi:type="string">current.search</item>
+                    </item>
+                </item>
+            </argument>
+        </filterSearch>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="channable_order_columns">
+        <selectionsColumn name="ids">
+            <settings>
+                <indexField>item_id</indexField>
+            </settings>
+        </selectionsColumn>
+        <column name="channable_id">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Channable ID</label>
+            </settings>
+        </column>
+        <column name="entity_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">ID</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="store_id" class="Magento\Search\Ui\Component\Listing\Column\StoreView">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Store</label>
+            </settings>
+        </column>
+        <column name="channel_name">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Channel Name</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="channel_label">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Channel</label>
+            </settings>
+        </column>
+        <column name="channel_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Channel ID</label>
+            </settings>
+        </column>
+        <column name="channable_order_status">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Channable Order Status</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="products" class="Magmodules\Channable\Ui\Component\Listing\Column\Order\Products">
+            <settings>
+                <filter>text</filter>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">Products</label>
+            </settings>
+        </column>
+        <column name="customer" class="Magmodules\Channable\Ui\Component\Listing\Column\Order\Customer">
+            <settings>
+                <filter>text</filter>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">Customer</label>
+            </settings>
+        </column>
+        <column name="billing" class="Magmodules\Channable\Ui\Component\Listing\Column\Order\Billing">
+            <settings>
+                <filter>text</filter>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">Billing Address</label>
+            </settings>
+        </column>
+        <column name="shipping" class="Magmodules\Channable\Ui\Component\Listing\Column\Order\Shipping">
+            <settings>
+                <filter>text</filter>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">Shipping Address</label>
+            </settings>
+        </column>
+        <column name="price" class="Magmodules\Channable\Ui\Component\Listing\Column\Order\Price">
+            <settings>
+                <filter>text</filter>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">Price</label>
+            </settings>
+        </column>
+        <column name="magento_order_id">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Magento Order ID</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="magento_increment_id"  component="Magento_Ui/js/grid/columns/link">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="link" xsi:type="string">order_link</item>
+                </item>
+            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Magento Increment ID</label>
+            </settings>
+        </column>
+        <column name="error_msg" class="Magmodules\Channable\Ui\Component\Listing\Column\Order\Error">
+            <settings>
+                <filter>text</filter>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">Error Message</label>
+            </settings>
+        </column>
+        <column name="is_test" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <filter>select</filter>
+                <label translate="true">Is Test</label>
+                <dataType>select</dataType>
+            </settings>
+        </column>
+        <column name="attempts">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Attempts</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date">
+            <settings>
+                <filter>text</filter>
+                <sorting>desc</sorting>
+                <label translate="true">Created At</label>
+            </settings>
+        </column>
+        <column name="updated_at" class="Magento\Ui\Component\Listing\Columns\Date">
+            <settings>
+                <filter>text</filter>
+                <sorting>desc</sorting>
+                <label translate="true">Updated At</label>
+            </settings>
+        </column>
+        <column name="status" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="Magmodules\Channable\Model\System\Config\Source\Status"/>
+                <filter>select</filter>
+                <label translate="true">Import Status</label>
+                <dataType>select</dataType>
+                <bodyTmpl>Magmodules_Channable/grid/order_import_status</bodyTmpl>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Magmodules\Channable\Ui\Component\Listing\Column\Order\Actions">
+            <settings>
+                <indexField>entity_id</indexField>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

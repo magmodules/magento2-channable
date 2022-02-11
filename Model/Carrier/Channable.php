@@ -6,16 +6,17 @@
 
 namespace Magmodules\Channable\Model\Carrier;
 
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
-use Magento\Shipping\Model\Rate\Result;
+use Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory;
+use Magento\Quote\Model\Quote\Address\RateResult\Method;
+use Magento\Quote\Model\Quote\Address\RateResult\MethodFactory;
 use Magento\Shipping\Model\Carrier\AbstractCarrier;
 use Magento\Shipping\Model\Carrier\CarrierInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory;
-use Psr\Log\LoggerInterface;
+use Magento\Shipping\Model\Rate\Result;
 use Magento\Shipping\Model\Rate\ResultFactory;
-use Magento\Quote\Model\Quote\Address\RateResult\MethodFactory;
-use Magento\Checkout\Model\Session as CheckoutSession;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class Channable
@@ -26,9 +27,17 @@ class Channable extends AbstractCarrier implements CarrierInterface
 {
 
     /**
+     * Code of the carrier
+     *
      * @var string
      */
-    protected $_code = 'channable';
+    const CODE = 'channable';
+
+    /**
+     * @var string
+     */
+    protected $_code = self::CODE;
+
     /**
      * @var ResultFactory
      */
@@ -46,12 +55,12 @@ class Channable extends AbstractCarrier implements CarrierInterface
      * Channable constructor.
      *
      * @param ScopeConfigInterface $scopeConfig
-     * @param ErrorFactory         $rateErrorFactory
-     * @param LoggerInterface      $logger
-     * @param ResultFactory        $rateResultFactory
-     * @param MethodFactory        $rateMethodFactory
-     * @param CheckoutSession      $checkoutSession
-     * @param array                $data
+     * @param ErrorFactory $rateErrorFactory
+     * @param LoggerInterface $logger
+     * @param ResultFactory $rateResultFactory
+     * @param MethodFactory $rateMethodFactory
+     * @param CheckoutSession $checkoutSession
+     * @param array $data
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -87,10 +96,10 @@ class Channable extends AbstractCarrier implements CarrierInterface
             $price = '0.00';
         }
 
-        /** @var \Magento\Shipping\Model\Rate\Result $result */
+        /** @var Result $result */
         $result = $this->_rateResultFactory->create();
 
-        /** @var \Magento\Quote\Model\Quote\Address\RateResult\Method $method */
+        /** @var Method $method */
         $method = $this->_rateMethodFactory->create();
 
         $method->setCarrier($this->_code);

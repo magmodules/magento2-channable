@@ -1,15 +1,16 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Block\Adminhtml\Magmodules;
 
+use Magento\Backend\Block\Template\Context;
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magento\Backend\Block\Template\Context;
 
 /**
  * Class Version
@@ -27,7 +28,7 @@ class Version extends Field
     /**
      * Version constructor.
      *
-     * @param Context       $context
+     * @param Context $context
      * @param GeneralHelper $generalHelper
      */
     public function __construct(
