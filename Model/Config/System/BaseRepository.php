@@ -97,9 +97,9 @@ class BaseRepository
      * @param string $path
      * @param int|null $storeId
      * @param string|null $scope
-     * @return mixed
+     * @return string|null
      */
-    protected function getStoreValue(string $path, int $storeId = null, string $scope = null)
+    protected function getStoreValue(string $path, int $storeId = null, string $scope = null): ?string
     {
         if (empty($scope)) {
             $scope = ScopeInterface::SCOPE_STORE;
@@ -132,9 +132,9 @@ class BaseRepository
      * @param string $path
      * @param int|null $storeId
      * @param string|null $scope
-     * @return mixed
+     * @return bool
      */
-    protected function isSetFlag(string $path, int $storeId = null, string $scope = null)
+    protected function isSetFlag(string $path, int $storeId = null, string $scope = null): bool
     {
         if (empty($scope)) {
             $scope = ScopeInterface::SCOPE_STORE;

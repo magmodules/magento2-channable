@@ -157,7 +157,6 @@
             <field id="orderid_prefix" translate="label" type="text" sortOrder="48" showInDefault="1"
                    showInWebsite="1" showInStore="1">
                 <label>Order ID Prefix</label>
-                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 <config_path>magmodules_channable_marketplace/order/orderid_prefix</config_path>
                 <comment><![CDATA[<strong>NOTE:</strong> As the Order Increment ID is a unique value, we strongly
                 recommend to add a prefix to the Channable Order ID to make sure the order number is unique.

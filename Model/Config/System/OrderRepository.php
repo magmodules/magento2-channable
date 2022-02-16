@@ -154,7 +154,7 @@ class OrderRepository extends BaseRepository implements OrderInterface
      */
     public function getOrderIdPrefix(int $storeId = null): ?string
     {
-        return $this->isSetFlag(self::XML_PATH_ORDERID_PREFIX, $storeId);
+        return $this->getStoreValue(self::XML_PATH_ORDERID_PREFIX, $storeId);
     }
 
     /**
