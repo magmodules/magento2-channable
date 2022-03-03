@@ -21,7 +21,7 @@ class Index extends Action
     /**
      * Authorization level
      */
-    const ADMIN_RESOURCE = 'Magmodules_Channable::general_orders';
+    const ADMIN_RESOURCE = 'Magmodules_Channable::order_view';
 
     /**
      * @var PageFactory

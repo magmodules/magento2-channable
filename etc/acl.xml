@@ -10,7 +10,11 @@
         <resources>
             <resource id="Magento_Backend::admin">
                 <resource id="Magmodules_Channable::general" title="Channable" sortOrder="50">
-                    <resource id="Magmodules_Channable::general_orders" title="Processed orders" sortOrder="100"/>
+                    <resource id="Magmodules_Channable::general_orders" title="Processed orders" sortOrder="100">
+                        <resource id="Magmodules_Channable::order_view" title="Order View" sortOrder="100"/>
+                        <resource id="Magmodules_Channable::order_import" title="Order Import" sortOrder="110"/>
+                        <resource id="Magmodules_Channable::order_delete" title="Order Delete" sortOrder="130"/>
+                    </resource>
                     <resource id="Magmodules_Channable::general_item" title="Item Updates" sortOrder="110"/>
                     <resource id="Magmodules_Channable::general_returns" title="Returns" sortOrder="120"/>
                 </resource>
@@ -19,7 +23,9 @@
                         <resource id="Magento_Config::config">
                             <resource id="Magmodules_Channable::feed" title="Channable Feed Config" sortOrder="100"/>
                             <resource id="Magmodules_Channable::marketplace" title="Channable Marketplace Config" sortOrder="110"/>
-                            <resource id="Magmodules_Channable::config_order" title="Channable Order Config" sortOrder="120"/>
+                            <resource id="Magmodules_Channable::config_order" title="Channable Order Config" sortOrder="120">
+                                <resource id="Magmodules_Channable::order_simulate" title="Order Simulate" sortOrder="100"/>
+                            </resource>
                         </resource>
                     </resource>
                 </resource>

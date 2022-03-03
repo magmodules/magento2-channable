@@ -24,7 +24,7 @@ class Simulate extends Action
     /**
      * Authorization level
      */
-    const ADMIN_RESOURCE = 'Magmodules_Channable::general_orders';
+    const ADMIN_RESOURCE = 'Magmodules_Channable::order_simulate';
 
     /**
      * @var ImportSimulator
