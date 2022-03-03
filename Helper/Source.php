@@ -418,17 +418,8 @@ class Source extends AbstractHelper
         if ($visibilityFilter) {
             $visibility = $this->getStoreValue(self::XPATH_VISIBILITY_OPTIONS);
             $filters['visibility'] = explode(',', $visibility);
-            $filters['visibility_parents'] = $filters['visibility'];
         } else {
-            $filters['visibility'] = [
-                Visibility::VISIBILITY_IN_CATALOG,
-                Visibility::VISIBILITY_IN_SEARCH,
-                Visibility::VISIBILITY_BOTH,
-            ];
-            $filters['visibility_parents'] = $filters['visibility'];
-            if (!empty($filters['relations'])) {
-                array_push($filters['visibility'], Visibility::VISIBILITY_NOT_VISIBLE);
-            }
+            $filters['visibility'] = [];
         }
 
         $filters['limit'] = preg_replace('/\D/', '', $this->getStoreValue(self::XPATH_LIMIT));

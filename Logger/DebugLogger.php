@@ -24,10 +24,10 @@ class DebugLogger extends Logger
     /**
      * DebugLogger constructor.
      *
-     * @param Json $json
+     * @param Json   $json
      * @param string $name
-     * @param array $handlers
-     * @param array $processors
+     * @param array  $handlers
+     * @param array  $processors
      */
     public function __construct(
         Json $json,
@@ -40,17 +40,17 @@ class DebugLogger extends Logger
     }
 
     /**
-     * Add debug data to kiyoh Log
+     * Add debug data to Channable log
      *
      * @param string $type
-     * @param mixed $data
+     * @param mixed  $data
      */
     public function addLog(string $type, $data): void
     {
         if (is_array($data) || is_object($data)) {
-            $this->addDebug($type . ': ' . $this->json->serialize($data));
+            $this->addRecord(static::INFO, $type . ': ' . $this->json->serialize($data));
         } else {
-            $this->addDebug($type . ': ' . $data);
+            $this->addRecord(static::INFO, $type . ': ' . $data);
         }
     }
 }

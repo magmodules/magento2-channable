@@ -9,9 +9,7 @@ namespace Magmodules\Channable\Logger;
 use Monolog\Logger;
 
 /**
- * Class ChannableLogger
- *
- * @package Magmodules\Channable\Logger
+ * @deprecated
  */
 class ChannableLogger extends Logger
 {

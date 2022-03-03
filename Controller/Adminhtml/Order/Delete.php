@@ -17,11 +17,11 @@ use Magmodules\Channable\Api\Order\RepositoryInterface as ChannableOrderReposito
  */
 class Delete extends Action
 {
-    
+
     /**
      * Authorization level
      */
-    const ADMIN_RESOURCE = 'Magmodules_Channable::general_orders';
+    const ADMIN_RESOURCE = 'Magmodules_Channable::order_delete';
 
     /**
      * @var ChannableOrderRepository

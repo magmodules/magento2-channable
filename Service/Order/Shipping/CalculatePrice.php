@@ -53,7 +53,7 @@ class CalculatePrice
     public function execute(Quote $quote, array $orderData, StoreInterface $store): float
     {
         $taxCalculation = $this->configProvider->getNeedsTaxCalulcation('shipping', (int)$store->getId());
-        $shippingPriceCal = $orderData['price']['shipping'];
+        $shippingPriceCal = (float) $orderData['price']['shipping'];
 
         if (empty($taxCalculation)) {
             $shippingAddress = $quote->getShippingAddress();

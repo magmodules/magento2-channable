@@ -85,6 +85,9 @@ class GetMethod
         $request->setLimitCarrier('');
         $request->setBaseSubtotalInclTax($total);
         $request->setFreeShipping($shippingPriceCal <= 0);
+        if (!empty($quote->getShippingAddress()->getWeight())) {
+            $request->setPackageWeight($quote->getShippingAddress()->getWeight());
+        }
 
         $shipping = $this->shippingFactory->create();
         $result = $shipping->collectRates($request)->getResult();

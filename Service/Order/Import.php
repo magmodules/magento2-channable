@@ -219,6 +219,11 @@ class Import
             $quote->setTotals($totals);
             $quote->collectTotals();
             $quote->setTotalsCollectedFlag(false)->collectTotals();
+
+            if ($customIncrementId = $this->getCustomIncrementId->execute($orderData, $store)) {
+                $quote->setReservedOrderId($customIncrementId);
+            }
+
             $quote->save();
 
             if ($lvbOrder && $this->configProvider->disableStockMovementForLvbOrders((int)$store->getId())) {
@@ -235,10 +240,6 @@ class Import
                 $order->setDiscountAmount($orderData['price']['discount'])->save();
             }
             $store->setCurrentCurrencyCode($store->getBaseCurrencyCode());
-
-            if ($customIncrementId = $this->getCustomIncrementId->execute($orderData, $store)) {
-                $order->setIncrementId($customIncrementId);
-            }
 
             if ($shippingDescription = $this->getShippingDescription->execute($order, $orderData)) {
                 $order->setShippingDescription($shippingDescription);
