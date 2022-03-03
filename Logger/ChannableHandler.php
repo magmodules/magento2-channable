@@ -10,9 +10,7 @@ use Monolog\Logger;
 use Magento\Framework\Logger\Handler\Base;
 
 /**
- * Class ChannableHandler
- *
- * @package Magmodules\Channable\Logger
+ * @deprecated
  */
 class ChannableHandler extends Base
 {
