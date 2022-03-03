@@ -404,8 +404,8 @@ class Products
                 }
             }
 
-            if (!empty($filters['visibility_parent'])) {
-                $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility_parent']]);
+            if (!empty($filters['visibility'])) {
+                $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
             }
 
             if (!empty($config['inventory']['attributes'])) {
