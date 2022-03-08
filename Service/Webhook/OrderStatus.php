@@ -11,6 +11,7 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magmodules\Channable\Model\Payment\Channable;
+use Magmodules\Channable\Service\Order\Shipping\Fulfillment;
 
 class OrderStatus
 {
@@ -26,6 +27,10 @@ class OrderStatus
      * @var SearchCriteriaBuilder
      */
     private $searchCriteriaBuilder;
+    /**
+     * @var Fulfillment
+     */
+    private $fulfillment;
 
     /**
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
@@ -33,10 +38,12 @@ class OrderStatus
      */
     public function __construct(
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        OrderRepositoryInterface $orderRepository
+        OrderRepositoryInterface $orderRepository,
+        Fulfillment $fulfillment
     ) {
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->orderRepository = $orderRepository;
+        $this->fulfillment = $fulfillment;
     }
 
     /**
@@ -71,14 +78,11 @@ class OrderStatus
             'id' => $order->getIncrementId(),
             'status' => $order->getStatus()
         ];
-        if (!$tracking = $this->getTracking($order)) {
-            return $response;
+
+        if (!$fulfillments = $this->getFulfillment($order)) {
+            $response['fulfillment'] = $fulfillments;
         }
-        foreach ($tracking as $track) {
-            $response['fulfillment']['tracking_code'][] = $track['tracking'];
-            $response['fulfillment']['title'][] = $track['title'];
-            $response['fulfillment']['carrier_code'][] = $track['carrier_code'];
-        }
+
         return $response;
     }
 
@@ -87,21 +91,16 @@ class OrderStatus
      *
      * @return array|bool
      */
-    private function getTracking(OrderInterface $order)
+    private function getFulfillment(OrderInterface $order)
     {
-        $tracking = [];
+        $fulfillment = [];
         $shipmentCollection = $order->getShipmentsCollection();
         foreach ($shipmentCollection as $shipment) {
-            foreach ($shipment->getAllTracks() as $tracknum) {
-                $tracking[] = [
-                    'tracking' => $tracknum->getNumber(),
-                    'title' => $tracknum->getTitle(),
-                    'carrier_code' => $tracknum->getCarrierCode()
-                ];
-            }
+            $fulfillment += $this->fulfillment->execute($shipment);
         }
-        return (!empty($tracking))
-            ? ($tracking)
+
+        return (!empty($fulfillment))
+            ? ($fulfillment)
             : (false);
     }
 }

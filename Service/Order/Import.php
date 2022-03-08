@@ -232,6 +232,8 @@ class Import
             }
             $orderId = $this->quoteManagement->placeOrder($quote->getId());
             $order = $this->orderRepository->get($orderId);
+            $order->setTransactionFee($quote->getTransactionFee());
+
             if (isset($orderData['price']['discount']) && $orderData['price']['discount']) {
                 $order->setDiscountDescription(__('Channable discount'));
                 $order->setBaseDiscountAmount($orderData['price']['discount']);

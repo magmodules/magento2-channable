@@ -22,6 +22,8 @@ interface OrderInterface
     const XML_PATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
     const XML_PATH_SHIPPING_CUSTOM = 'magmodules_channable_marketplace/order/shipping_method_custom';
     const XML_PATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
+    const XML_PATH_RETURN_LABEL = 'magmodules_channable_marketplace/order/return_label';
+    const XML_PATH_RETURN_LABEL_REGEXP = 'magmodules_channable_marketplace/order/return_label_regexp';
     const XML_PATH_IMPORT_CUSTOMER = 'magmodules_channable_marketplace/order/import_customer';
     const XML_PATH_CUSTOMER_GROUP_ID = 'magmodules_channable_marketplace/order/customers_group';
     const XML_PATH_SEPERATE_HOUSENUMBER = 'magmodules_channable_marketplace/order/seperate_housenumber';
@@ -288,6 +290,23 @@ interface OrderInterface
      * @return string
      */
     public function getCarrierTitle(int $storeId = null): string;
+
+    /**
+     * Returns labels option
+     * Options: \Magmodules\Channable\Model\Config\Source\ReturnLabel
+     *
+     * @param null|int $storeId
+     * @return null|string
+     */
+    public function useReturnLabel(int $storeId = null): ?string;
+
+    /**
+     * Retruns array of carrier_code and regex to determine is label is return label
+     *
+     * @param null|int $storeId
+     * @return array
+     */
+    public function getReturnLabelRegexp(int $storeId = null): array;
 
     /**
      * @param null|int $storeId
