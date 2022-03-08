@@ -277,4 +277,20 @@ class OrderRepository extends BaseRepository implements OrderInterface
     {
         return $this->isSetFlag(CatalogInventoryConfiguration::XML_PATH_MANAGE_STOCK, $storeId);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function useReturnLabel(int $storeId = null): ?string
+    {
+        return $this->getStoreValue(self::XML_PATH_RETURN_LABEL, $storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getReturnLabelRegexp(int $storeId = null): array
+    {
+        return $this->getStoreValueArray(self::XML_PATH_RETURN_LABEL_REGEXP, $storeId);
+    }
 }

@@ -226,20 +226,46 @@
                     <field id="lvb">1</field>
                 </depends>
             </field>
-            <field id="heading_log" translate="label" type="text" sortOrder="65" showInDefault="1" showInWebsite="0"
+            <field id="heading_returns" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Return Labels</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <comment>Enable this option if you are using the default Magento Track and Trace method within a
+                    shipment to enter your returns so Channable can get this information and share this with the
+                    Marketplaces.
+                </comment>
+            </field>
+            <field id="return_label" translate="label" type="select" sortOrder="71" showInDefault="1"
+                   showInWebsite="1"
+                   showInStore="1">
+                <label>Enable</label>
+                <source_model>Magmodules\Channable\Model\Config\Source\ReturnLabel</source_model>
+                <config_path>magmodules_channable_marketplace/order/return_label</config_path>
+            </field>
+            <field id="return_label_regexp" translate="label" type="select" sortOrder="72" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Regexp</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\ReturnLabel</frontend_model>
+                <backend_model>Magmodules\Channable\Model\Config\Backend\Serialized\ReturnLabel</backend_model>
+                <config_path>magmodules_channable_marketplace/order/return_label_regexp</config_path>
+                <depends>
+                    <field id="return_label">regex</field>
+                </depends>
+            </field>
+            <field id="heading_log" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="0"
                    showInStore="0">
                 <label>Logging</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
                 <comment>Enable the Order Logging option to log all the incoming orders from the connected Marketplaces.</comment>
             </field>
-            <field id="log" translate="label" type="select" sortOrder="66" showInDefault="1" showInWebsite="0"
+            <field id="log" translate="label" type="select" sortOrder="81" showInDefault="1" showInWebsite="0"
                    showInStore="0">
                 <label>Enable</label>
                 <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 <config_path>magmodules_channable_marketplace/order/log</config_path>
                 <comment model="Magmodules\Channable\Block\Adminhtml\Magmodules\Log" />
             </field>
-            <field id="heading_order_stores" translate="label comment" type="text" sortOrder="70" showInDefault="1"
+            <field id="heading_order_stores" translate="label comment" type="text" sortOrder="100" showInDefault="1"
                    showInWebsite="1" showInStore="1">
                 <label>Webhooks</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
@@ -248,7 +274,7 @@
                 because of the length.<br><br>You can simulate a test order by adding /test/{productID} to
                 the end of the Webhook.]]></comment>
             </field>
-            <field id="order_stores" translate="label" type="text" sortOrder="71" showInDefault="1"
+            <field id="order_stores" translate="label" type="text" sortOrder="101" showInDefault="1"
                    showInWebsite="1" showInStore="1">
                 <label/>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Table\Orders</frontend_model>

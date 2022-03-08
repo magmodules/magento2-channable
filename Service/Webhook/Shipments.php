@@ -12,6 +12,7 @@ use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Sales\Model\Order as OrderModel;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\Shipment\CollectionFactory as ShipmentCollectionFactory;
+use Magmodules\Channable\Service\Order\Shipping\Fulfillment;
 
 class Shipments
 {
@@ -37,6 +38,11 @@ class Shipments
     private $orderCollectionFactory;
 
     /**
+     * @var Fulfillment
+     */
+    private $fulfillment;
+
+    /**
      * @param ShipmentCollectionFactory $shipmentCollectionFactory
      * @param DateTime $coreDate
      * @param TimezoneInterface $localeDate
@@ -46,12 +52,14 @@ class Shipments
         ShipmentCollectionFactory $shipmentCollectionFactory,
         DateTime $coreDate,
         TimezoneInterface $localeDate,
-        OrderCollectionFactory $orderCollectionFactory
+        OrderCollectionFactory $orderCollectionFactory,
+        Fulfillment $fulfillment
     ) {
         $this->shipmentCollectionFactory = $shipmentCollectionFactory;
         $this->coreDate = $coreDate;
         $this->localeDate = $localeDate;
         $this->orderCollectionFactory = $orderCollectionFactory;
+        $this->fulfillment = $fulfillment;
     }
 
     /**
@@ -81,17 +89,13 @@ class Shipments
         )->addFieldToFilter('sop.method', 'channable');
 
         foreach ($collection as $shipment) {
-            $data['id'] = $shipment->getOrderIncrementId();
-            $data['type'] = 'shipment';
-            $data['status'] = $shipment->getStatus();
-            $data['date'] = $this->localeDate->date($shipment->getCreatedAt())->format('Y-m-d H:i:s');
-            foreach ($shipment->getAllTracks() as $tracknum) {
-                $data['fulfillment']['tracking_code'][] = $tracknum->getNumber();
-                $data['fulfillment']['title'][] = $tracknum->getTitle();
-                $data['fulfillment']['carrier_code'][] = $tracknum->getCarrierCode();
-            }
-
-            $response[] = $data;
+            $response[] = [
+                'id' => $shipment->getOrderIncrementId(),
+                'type'=> 'shipment',
+                'status' => $shipment->getStatus(),
+                'date' => $this->localeDate->date($shipment->getCreatedAt())->format('Y-m-d H:i:s'),
+                'fulfillment' => $this->fulfillment->execute($shipment)
+            ];
             $orderIncrements[] = $shipment->getOrderIncrementId();
             unset($data);
         }
