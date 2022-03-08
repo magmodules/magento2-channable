@@ -335,6 +335,14 @@
                 comment="Transaction Fee"/>
     </table>
 
+    <table name="sales_order">
+        <column name="transaction_fee"
+                xsi:type="float"
+                unsigned="true"
+                nullable="false"
+                comment="Transaction Fee"/>
+    </table>
+
     <table name="sales_order_grid">
         <column name="channable_id"
                 xsi:type="int"
