@@ -105,7 +105,7 @@ class Generate
         $size = $this->productModel->getCollectionCountWithFilters($productCollection);
 
 
-        if (($config['filters']['limit'] > 0) && empty($productId)) {
+        if (($config['filters']['limit'] > 0) && empty($productIds)) {
             $productCollection->setPage($page, $config['filters']['limit'])->getCurPage();
             $pages = ceil($size / $config['filters']['limit']);
         }
@@ -141,7 +141,7 @@ class Generate
             }
 
             $return = [];
-            if (empty($productId)) {
+            if (empty($productIds)) {
                 $limit = $config['filters']['limit'];
                 $return['config'] = $this->feedHelper->getFeedSummary($timeStart, $size, $limit, count($feed), $page, $pages);
                 $return['products'] = $feed;
@@ -174,7 +174,7 @@ class Generate
     {
         try {
             $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
-            $config = $this->sourceHelper->getConfig($storeId, 'szie');
+            $config = $this->sourceHelper->getConfig($storeId, 'size');
             $productCollection = $this->productModel->getCollection($config, 1, []);
             $size = $this->productModel->getCollectionCountWithFilters($productCollection);
             $this->appEmulation->stopEnvironmentEmulation();

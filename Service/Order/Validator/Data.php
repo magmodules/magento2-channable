@@ -132,7 +132,7 @@ class Data
 
         if ($test) {
             if (!isset($request['product_id'])) {
-                return $this->jsonResponse('Post data empty!');
+                $request['product_id'] = $test;
             }
             if (!isset($request['country'])) {
                 $request['country'] = 'NL';
