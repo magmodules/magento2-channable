@@ -1,49 +1,59 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Controller\Adminhtml\Returns;
 
 use Magento\Backend\App\Action;
-use Magento\Backend\App\Action\Context;
-use Magmodules\Channable\Model\Returns as ReturnsModel;
+use Magmodules\Channable\Api\Returns\RepositoryInterface as ReturnsRepository;
+use Magmodules\Channable\Service\Returns\ProcessReturn;
 
 /**
- * Class Process
- *
- * @package Magmodules\Channable\Controller\Adminhtml\Returns
+ * Returns Process controller
  */
 class Process extends Action
 {
+    /**
+     * Authorization level
+     */
+    const ADMIN_RESOURCE = 'Magmodules_Channable::returns_process';
 
     /**
-     * @var ReturnsModel
+     * @var ReturnsRepository
      */
-    private $returnsModel;
+    private $returnsRepository;
+    /**
+     * @var ProcessReturn
+     */
+    private $processReturn;
 
     /**
      * Process constructor.
      *
-     * @param Context      $context
-     * @param ReturnsModel $returnsModel
+     * @param Action\Context $context
+     * @param ReturnsRepository $returnsRepository
+     * @param ProcessReturn $processReturn
      */
     public function __construct(
-        Context $context,
-        ReturnsModel $returnsModel
+        Action\Context $context,
+        ReturnsRepository $returnsRepository,
+        ProcessReturn $processReturn
     ) {
         parent::__construct($context);
-        $this->returnsModel = $returnsModel;
+        $this->returnsRepository = $returnsRepository;
+        $this->processReturn = $processReturn;
     }
 
     /**
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
+     * Execute function for Returns Process
      */
     public function execute()
     {
         $data = $this->getRequest()->getParams();
-        $result = $this->returnsModel->processReturn($data);
+        $result = $this->processReturn->execute($data);
 
         if (!empty($result['status']) && $result['status'] == 'success') {
             if (!empty($result['msg'])) {
@@ -62,13 +72,5 @@ class Process extends Action
         }
 
         $this->_redirect('channable/returns/index');
-    }
-
-    /**
-     * @return bool
-     */
-    protected function _isAllowed()
-    {
-        return $this->_authorization->isAllowed('Magmodules_Channable::general_returns');
     }
 }

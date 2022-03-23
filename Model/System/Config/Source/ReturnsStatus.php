@@ -1,19 +1,18 @@
 <?php
 /**
- *  Copyright © 2019 Magmodules.eu. All rights reserved.
+ *  Copyright © Magmodules.eu. All rights reserved.
  *  See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
-namespace Magmodules\Channable\Model\Renderer\Returns;
+namespace Magmodules\Channable\Model\System\Config\Source;
 
-use Magento\Framework\Option\ArrayInterface;
+use Magento\Framework\Data\OptionSourceInterface;
 
 /**
- * Class Status
- *
- * @package Magmodules\Channable\Model\Renderer\Returns
+ * ReturnsStatus Option Source model
  */
-class Status implements ArrayInterface
+class ReturnsStatus implements OptionSourceInterface
 {
 
     /**
@@ -26,7 +25,7 @@ class Status implements ArrayInterface
     /**
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         if (!$this->options) {
             $this->options = [

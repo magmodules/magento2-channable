@@ -1,22 +1,22 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Ui\Component\Listing\Column\Returns;
 
+use Magento\Framework\Phrase;
 use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
- * Class Actions
- *
- * @package Magmodules\DigitecGalaxus\Ui\Component\Listing\Column\Order
+ * Prepare actions column for Returns Class
  */
 class Actions extends Column
 {
 
-    const ROUTE = 'channable/returns/process';
+    const URL = 'channable/returns/process';
 
     /**
      * Prepare Data Source
@@ -25,7 +25,7 @@ class Actions extends Column
      *
      * @return array
      */
-    public function prepareDataSource(array $dataSource)
+    public function prepareDataSource(array $dataSource): array
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
@@ -34,66 +34,63 @@ class Actions extends Column
 
                 if ($status == 'new') {
                     $item[$name]['accept'] = [
-                        'href'    => $this->context->getUrl(self::ROUTE, ['id' => $item['id'], 'type' => 'accepted']),
-                        'label'   => __('Accept'),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'accepted']),
+                        'label' => __('Accept'),
                         'confirm' => [
-                            'title'   => __('Process #${ $.$data.order_id }?'),
-                            'message' => __('Are you sure you want to update this as "Accepted" and close this return? This action can not be undone!')
+                            'title' => __("Process return #{$item['id']}?"),
+                            'message' => $this->getConfirm('Accepted')
                         ],
                     ];
                     $item[$name]['reject'] = [
-                        'href'    => $this->context->getUrl(self::ROUTE, ['id' => $item['id'], 'type' => 'rejected']),
-                        'label'   => __('Reject'),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'rejected']),
+                        'label' => __('Reject'),
                         'confirm' => [
-                            'title'   => __('Process #${ $.$data.order_id }?'),
-                            'message' => __('Are you sure you want to update this as "Rejected" and close this return? This action can not be undone!')
+                            'title' => __("Process return #{$item['id']}?"),
+                            'message' => $this->getConfirm('Rejected')
                         ],
                     ];
                     $item[$name]['repair'] = [
-                        'href'    => $this->context->getUrl(self::ROUTE, ['id' => $item['id'], 'type' => 'repaired']),
-                        'label'   => __('Repair'),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'repaired']),
+                        'label' => __('Repair'),
                         'confirm' => [
-                            'title'   => __('Process #${ $.$data.order_id }?'),
-                            'message' => __('Are you sure you want to update this as "Repaired" and close this return? This action can not be undone!')
+                            'title' => __("Process return #{$item['id']}?"),
+                            'message' => $this->getConfirm('Repaired')
                         ],
                     ];
                     $item[$name]['exchange'] = [
-                        'href'    => $this->context->getUrl(
-                            self::ROUTE,
-                            ['id' => $item['id'], 'type' => 'exchanged']
-                        ),
-                        'label'   => __('Exchange'),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'exchanged']),
+                        'label' => __('Exchange'),
                         'confirm' => [
-                            'title'   => __('Process #${ $.$data.order_id }?'),
-                            'message' => __('Are you sure you want to update this as "Exchanged" and close this return? This action can not be undone!')
+                            'title' => __("Process return #{$item['id']}?"),
+                            'message' => $this->getConfirm('Exchanged')
                         ],
                     ];
                     $item[$name]['keep'] = [
-                        'href'    => $this->context->getUrl(self::ROUTE, ['id' => $item['id'], 'type' => 'keeps']),
-                        'label'   => __('Keep'),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'keeps']),
+                        'label' => __('Keep'),
                         'confirm' => [
-                            'title'   => __('Process #${ $.$data.order_id }?'),
-                            'message' => __('Are you sure you want to update this as "Keeps" and close this return? This action can not be undone!')
+                            'title' => __("Process return #{$item['id']}?"),
+                            'message' => $this->getConfirm('Keeps')
                         ],
                     ];
                     $item[$name]['cancel'] = [
-                        'href'    => $this->context->getUrl(
-                            self::ROUTE,
-                            ['id' => $item['id'], 'type' => 'cancelled']
-                        ),
-                        'label'   => __('Cancel'),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'cancelled']),
+                        'label' => __('Cancel'),
                         'confirm' => [
-                            'title'   => __('Process #${ $.$data.order_id }?'),
-                            'message' => __('Are you sure you want to update this as "Cancelled" and close this return? This action can not be undone!')
+                            'title' => __("Process return #{$item['id']}?"),
+                            'message' => $this->getConfirm('Cancelled')
                         ],
                     ];
                 } else {
                     $item[$name]['delete'] = [
-                        'href'    => $this->context->getUrl(self::ROUTE, ['id' => $item['id'], 'type' => 'delete']),
-                        'label'   => __('Delete'),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'delete']),
+                        'label' => __('Delete'),
                         'confirm' => [
-                            'title'   => __('Delete #${ $.$data.order_id }?'),
-                            'message' => __('Are you sure you want to delete this return? This action can not be undone and will not update the status on Channable!')
+                            'title' => __("Delete return #{$item['id']}?"),
+                            'message' => __(
+                                'Are you sure you want to delete this return?
+                                This action can not be undone and will not update the status on Channable!'
+                            )
                         ],
                     ];
                 }
@@ -101,5 +98,18 @@ class Actions extends Column
         }
 
         return $dataSource;
+    }
+
+    /**
+     * @param $type
+     * @return Phrase
+     */
+    private function getConfirm($type)
+    {
+        $msg = sprintf(
+            'Are you sure you want to update this as "%s" and close this return? This action can not be undone!',
+            $type
+        );
+        return __($msg);
     }
 }

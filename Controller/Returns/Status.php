@@ -1,63 +1,70 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Controller\Returns;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magmodules\Channable\Helper\Returns as ReturnsHelper;
-use Magmodules\Channable\Model\Returns as ReturnsModel;
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Api\Returns\RepositoryInterface as Repository;
+use Magmodules\Channable\Service\Returns\JsonResponse;
+use Magmodules\Channable\Service\Returns\GetReturnStatus;
 
 /**
- * Class Status
- *
- * @package Magmodules\Channable\Controller\Returns
+ * Returns Status Controller
  */
 class Status extends Action
 {
 
     /**
-     * @var GeneralHelper
+     * @var ConfigProvider
      */
-    private $generalHelper;
+    private $configProvider;
     /**
-     * @var ReturnsHelper
+     * @var Repository
      */
-    private $returnsHelper;
-    /**
-     * @var ReturnsModel
-     */
-    private $returnsModel;
+    private $returnsRepository;
     /**
      * @var JsonFactory
      */
     private $resultJsonFactory;
+    /**
+     * @var JsonResponse
+     */
+    private $jsonResponse;
+    /**
+     * @var GetReturnStatus
+     */
+    private $getReturnStatus;
 
     /**
      * Status constructor.
      *
-     * @param Context       $context
-     * @param GeneralHelper $generalHelper
-     * @param ReturnsHelper $returnsHelper
-     * @param ReturnsModel  $returnsModel
-     * @param JsonFactory   $resultJsonFactory
+     * @param Context $context
+     * @param ConfigProvider $configProvider
+     * @param Repository $returnsRepository
+     * @param JsonResponse $jsonResponse
+     * @param JsonFactory $resultJsonFactory
+     * @param GetReturnStatus $getReturnStatus
      */
     public function __construct(
         Context $context,
-        GeneralHelper $generalHelper,
-        ReturnsHelper $returnsHelper,
-        ReturnsModel $returnsModel,
-        JsonFactory $resultJsonFactory
+        ConfigProvider $configProvider,
+        Repository $returnsRepository,
+        JsonResponse $jsonResponse,
+        JsonFactory $resultJsonFactory,
+        GetReturnStatus $getReturnStatus
     ) {
-        $this->generalHelper = $generalHelper;
-        $this->returnsHelper = $returnsHelper;
-        $this->returnsModel = $returnsModel;
+        $this->configProvider = $configProvider;
+        $this->returnsRepository = $returnsRepository;
+        $this->jsonResponse = $jsonResponse;
         $this->resultJsonFactory = $resultJsonFactory;
+        $this->getReturnStatus = $getReturnStatus;
         parent::__construct($context);
     }
 
@@ -66,21 +73,21 @@ class Status extends Action
      */
     public function execute()
     {
-        $enabled = $this->generalHelper->getEnabled();
-        $token = $this->generalHelper->getToken();
+        $enabled = $this->configProvider->isReturnsEnabled();
+        $token = $this->configProvider->getToken();
         $code = $this->getRequest()->getParam('code');
         if ($enabled && $token && $code) {
             if ($code == $token) {
                 if ($id = $this->getRequest()->getParam('id')) {
-                    $response = $this->returnsModel->getReturnStatus($id);
+                    $response = $this->getReturnStatus->execute((int)$id);
                 } else {
-                    $response = $this->returnsHelper->jsonResponse('Missing ID');
+                    $response = $this->jsonResponse->execute('Missing ID');
                 }
             } else {
-                $response = $this->returnsHelper->jsonResponse('Unknown Token');
+                $response = $this->jsonResponse->execute('Unknown Token');
             }
         } else {
-            $response = $this->returnsHelper->jsonResponse('Extension not enabled!');
+            $response = $this->jsonResponse->execute('Extension not enabled!');
         }
 
         $result = $this->resultJsonFactory->create();
