@@ -9,10 +9,11 @@ namespace Magmodules\Channable\Controller\Feed;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
-use Magmodules\Channable\Model\Generate as GenerateModel;
-use Magmodules\Channable\Helper\General as GeneralHelper;
+use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
+use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Preview as PreviewHelper;
+use Magmodules\Channable\Model\Generate as GenerateModel;
 
 /**
  * Class Preview
@@ -38,6 +39,10 @@ class Preview extends Action
      * @var PreviewHelper
      */
     private $previewHelper;
+    /**
+     * @var LogRepository
+     */
+    private $logger;
 
     /**
      * Preview constructor.
@@ -53,12 +58,14 @@ class Preview extends Action
         GeneralHelper $generalHelper,
         GenerateModel $generateModel,
         FeedHelper $feedHelper,
-        PreviewHelper $previewHelper
+        PreviewHelper $previewHelper,
+        LogRepository $logger
     ) {
         $this->generateModel = $generateModel;
         $this->generalHelper = $generalHelper;
         $this->feedHelper = $feedHelper;
         $this->previewHelper = $previewHelper;
+        $this->logger = $logger;
         $this->resultFactory = $context->getResultFactory();
         parent::__construct($context);
     }
@@ -117,7 +124,7 @@ class Preview extends Action
                 return $result;
             }
         } catch (\Exception $e) {
-            $this->generalHelper->addTolog('Generate', $e->getMessage());
+            $this->logger->addErrorLog('Generate', $e->getMessage());
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/html');
             $result->setContents('We can\'t generate the feed right now, please check error log (var/log/channable.log)');
