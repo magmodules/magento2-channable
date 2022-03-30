@@ -124,6 +124,9 @@
     <type name="Magento\CatalogInventory\Model\Configuration">
         <plugin name="chanable_force_backorder" type="Magmodules\Channable\Plugin\AfterGetBackorders" />
     </type>
+    <type name="Amasty\ShopbySeo\Helper\Data">
+        <plugin name="chanable_bypass_amasty_shopbyseo" type="Magmodules\Channable\Plugin\AroundIsAllowedRequest"/>
+    </type>
 
     <preference for="Magmodules\Channable\Api\Config\RepositoryInterface"
                 type="Magmodules\Channable\Model\Config\Repository"/>
