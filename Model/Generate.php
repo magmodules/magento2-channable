@@ -146,16 +146,12 @@ class Generate
                 $return['config'] = $this->feedHelper->getFeedSummary($timeStart, $size, $limit, count($feed), $page, $pages);
                 $return['products'] = $feed;
             } else {
-                if (!empty($feed[0])) {
-                    $return['feed'] = $feed[0];
-                }
-                if (!empty($feed['product_source'])) {
-                    $return['product'] = $feed['product_source'];
-                }
-                if (!empty($feed['parent_source'])) {
-                    $return['parent'] = $feed['parent_source'];
-                }
-                $return['config'] = $config;
+                $return['products'] = array_filter([
+                    'product' => !empty($feed['product_source']) ? $feed['product_source'] : null,
+                    'parent' => !empty($feed['parent_source']) ? $feed['parent_source'] : null,
+                    'feed' => !empty($feed[0]) ? $feed[0] : null,
+                ]);
+                $return['config'] = $this->feedHelper->getFeedSummary($timeStart, $size, count($productIds), count($feed), $page, $pages);
             }
             $feed = $return;
         }
