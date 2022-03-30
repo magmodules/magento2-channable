@@ -116,7 +116,7 @@ class ImportSimulator
             );
         }
         $channableOrder = $this->channableOrderRepository->createByDataArray(
-            $this->getTestData($params),
+            $this->getTestData($params, $storeId),
             $storeId
         );
         return $this->import->execute($channableOrder);
@@ -130,9 +130,8 @@ class ImportSimulator
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getTestData($params = []): array
+    public function getTestData($params = [], $storeId = null): array
     {
-        $lvb = !empty($params['lvb']);
         $country = !empty($params['country']) ? $params['country'] : 'NL';
         $this->productId = !empty($params['product_id']) ? $params['product_id'] : null;
 
@@ -145,7 +144,7 @@ class ImportSimulator
             "channel_id" => "TEST-" . $random,
             "channel_name" => "Channable",
             "is_test" => true,
-            "order_status" => $lvb ? "shipped" : "not_shipped",
+            "order_status" => !empty($params['lvb']) ? "shipped" : "not_shipped",
             "shipment_method" => "Prime",
             "channel_customer_number" => "123456789",
             "shipment_promise" => "2021-09-06 23:00:00000000",
