@@ -121,6 +121,18 @@
     <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsSalableWithReservationsCondition">
         <plugin name="chanable_skip_salable_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsSalableWithReservationsCondition" />
     </type>
+    <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsAnySourceItemInStockCondition">
+        <plugin name="chanable_skip_in_stock_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsAnySourceItemInStockCondition" />
+    </type>
+    <type name="Magento\CatalogInventory\Observer\QuantityValidatorObserver">
+        <plugin name="chanable_skip_quantity_validator_lvb_orders" type="Magmodules\Channable\Plugin\AroundQuantityValidator" />
+    </type>
+    <type name="Magento\InventorySourceDeductionApi\Model\SourceDeductionServicer">
+        <plugin name="chanable_skip_source_deduction_lvb_orders" type="Magmodules\Channable\Plugin\AroundSourceDeductionService" />
+    </type>
+    <type name="Magento\InventoryConfiguration\Model\StockItemConfiguration">
+        <plugin name="chanable_skip_manage_stock_lvb_orders" type="Magmodules\Channable\Plugin\AfterStockItemConfiguration" />
+    </type>
     <type name="Magento\CatalogInventory\Model\Configuration">
         <plugin name="chanable_force_backorder" type="Magmodules\Channable\Plugin\AfterGetBackorders" />
     </type>

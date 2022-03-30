@@ -6,14 +6,13 @@
 
 namespace Magmodules\Channable\Plugin;
 
-use Magento\InventorySalesApi\Api\Data\ProductSalableResultInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\InventoryConfiguration\Model\StockItemConfiguration;
 
 /**
- * Class AfterGetBackorders
- *
+ * Plugin for StockItemConfiguration
  */
-class AfterGetBackorders
+class AfterStockItemConfiguration
 {
 
     /**
@@ -22,7 +21,8 @@ class AfterGetBackorders
     private $checkoutSession;
 
     /**
-     * AfterGetBackorders constructor.
+     * AfterStockItemConfiguration constructor.
+     *
      * @param CheckoutSession $checkoutSession
      */
     public function __construct(
@@ -32,23 +32,22 @@ class AfterGetBackorders
     }
 
     /**
-     * Force allow backorders for adding products to order.
+     * Bypass Stock Item Configuration
      *
      * Out-of-stock products: depending on configuration setting
      * LVB Orders: these orders are shipped from external warehouse
      *
-     * @param $subject
-     * @param int $result
-     * @return int $result
+     * @param StockItemConfiguration $subject
+     * @param bool                   $result
+     *
+     * @return bool
      */
-    public function afterGetBackorders(
-        $subject,
-        $result
+    public function afterIsManageStock(
+        StockItemConfiguration $subject,
+        bool $result
     ) {
-        if ($this->checkoutSession->getChannableSkipQtyCheck()
-            && interface_exists(ProductSalableResultInterface::class)
-        ) {
-            return 1;
+        if ($this->checkoutSession->getChannableSkipReservation()) {
+            return false;
         }
 
         return $result;
