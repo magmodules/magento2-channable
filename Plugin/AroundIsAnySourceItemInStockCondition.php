@@ -6,11 +6,12 @@
 
 namespace Magmodules\Channable\Plugin;
 
-use Magento\InventorySalesApi\Api\Data\ProductSalableResultInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsAnySourceItemInStockCondition;
+use Magento\InventorySalesApi\Api\Data\ProductSalableResultInterface;
 
 /**
- * Class AroundIsSalableWithReservationsCondition
+ * Plugin for IsAnySourceItemInStockCondition
  *
  * This class has also a hidden dependency not listed in the constuctor:
  * - \Magento\InventorySalesApi\Api\Data\ProductSalableResultInterface
@@ -18,7 +19,7 @@ use Magento\Checkout\Model\Session as CheckoutSession;
  * This class is only loaded when MSI is enabled, but when setup:di:compile runs it will still fail on this class
  * in Magento 2.2 because it doesn't exist. That's why they are using the object manager.
  */
-class AroundIsSalableWithReservationsCondition
+class AroundIsAnySourceItemInStockCondition
 {
 
     /**
@@ -27,7 +28,8 @@ class AroundIsSalableWithReservationsCondition
     private $checkoutSession;
 
     /**
-     * AroundIsSalableWithReservationsCondition constructor.
+     * AroundIsAnySourceItemInStockCondition constructor.
+     *
      * @param CheckoutSession $checkoutSession
      */
     public function __construct(
@@ -37,20 +39,21 @@ class AroundIsSalableWithReservationsCondition
     }
 
     /**
-     * Skip MSI Salable With Reservations check on submitting quote
+     * Skip stock condition check for adding products to order.
      *
      * Out-of-stock products: depending on configuration setting
      * LVB Orders: these orders are shipped from external warehouse
      *
-     * @param $subject
-     * @param \Closure $proceed
-     * @param string $sku
-     * @param int $stockId
-     * @param float $requestedQty
+     * @param IsAnySourceItemInStockCondition $subject
+     * @param \Closure                        $proceed
+     * @param string                          $sku
+     * @param int                             $stockId
+     * @param float                           $requestedQty
+     *
      * @return mixed
      */
     public function aroundExecute(
-        $subject,
+        IsAnySourceItemInStockCondition $subject,
         $proceed,
         string $sku,
         int $stockId,

@@ -72,33 +72,6 @@
             </argument>
         </arguments>
     </type>
-    <virtualType name="ReturnsGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
-        <arguments>
-            <argument name="appliers" xsi:type="array">
-                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
-                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
-            </argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="ReturnsGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
-        <arguments>
-            <argument name="collection" xsi:type="object" shared="false">Magmodules\Channable\Model\ResourceModel\Returns\Collection</argument>
-            <argument name="filterPool" xsi:type="object" shared="false">ReturnsGridFilterPool</argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="Magmodules\Channable\Model\ResourceModel\Returns\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
-        <arguments>
-            <argument name="mainTable" xsi:type="string">channable_returns</argument>
-            <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\ResourceModel\Returns</argument>
-        </arguments>
-    </virtualType>
-    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
-        <arguments>
-            <argument name="collections" xsi:type="array">
-                <item name="channable_returns_grid_data_source" xsi:type="string">Magmodules\Channable\Model\ResourceModel\Returns\Grid\Collection</item>
-            </argument>
-        </arguments>
-    </type>
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
@@ -121,14 +94,31 @@
     <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsSalableWithReservationsCondition">
         <plugin name="chanable_skip_salable_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsSalableWithReservationsCondition" />
     </type>
+    <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsAnySourceItemInStockCondition">
+        <plugin name="chanable_skip_in_stock_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsAnySourceItemInStockCondition" />
+    </type>
+    <type name="Magento\CatalogInventory\Observer\QuantityValidatorObserver">
+        <plugin name="chanable_skip_quantity_validator_lvb_orders" type="Magmodules\Channable\Plugin\AroundQuantityValidator" />
+    </type>
+    <type name="Magento\InventorySourceDeductionApi\Model\SourceDeductionServicer">
+        <plugin name="chanable_skip_source_deduction_lvb_orders" type="Magmodules\Channable\Plugin\AroundSourceDeductionService" />
+    </type>
+    <type name="Magento\InventoryConfiguration\Model\StockItemConfiguration">
+        <plugin name="chanable_skip_manage_stock_lvb_orders" type="Magmodules\Channable\Plugin\AfterStockItemConfiguration" />
+    </type>
     <type name="Magento\CatalogInventory\Model\Configuration">
         <plugin name="chanable_force_backorder" type="Magmodules\Channable\Plugin\AfterGetBackorders" />
+    </type>
+    <type name="Amasty\ShopbySeo\Helper\Data">
+        <plugin name="chanable_bypass_amasty_shopbyseo" type="Magmodules\Channable\Plugin\AroundIsAllowedRequest"/>
     </type>
 
     <preference for="Magmodules\Channable\Api\Config\RepositoryInterface"
                 type="Magmodules\Channable\Model\Config\Repository"/>
     <preference for="Magmodules\Channable\Api\Config\System\OrderInterface"
                 type="Magmodules\Channable\Model\Config\System\OrderRepository"/>
+    <preference for="Magmodules\Channable\Api\Config\System\ReturnsInterface"
+                type="Magmodules\Channable\Model\Config\System\ReturnsRepository"/>
 
     <!-- Channable Order Block Start -->
     <preference for="Magmodules\Channable\Api\Order\RepositoryInterface"
@@ -188,6 +178,56 @@
             </argument>
         </arguments>
     </type>
-
     <!-- Channable Order Block End -->
+
+    <!-- Channable Returns Block Start -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="channable_returns_grid_data_source" xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <preference for="Magmodules\Channable\Api\Returns\RepositoryInterface"
+                type="Magmodules\Channable\Model\Returns\Repository"/>
+    <preference for="Magmodules\Channable\Api\Returns\Data\DataInterface"
+                type="Magmodules\Channable\Model\Returns\Data\ApiModel"/>
+    <preference for="Magmodules\Channable\Api\Returns\Data\SearchResultsInterface"
+                type="Magento\Framework\Api\SearchResults"/>
+    <type name="Magmodules\Channable\Model\Returns\Repository">
+        <arguments>
+            <argument name="metadata" xsi:type="object">channableReturnsMetadata</argument>
+        </arguments>
+    </type>
+    <virtualType name="channableReturnsMetadata" type="Magmodules\Channable\Model\Base\Metadata">
+        <arguments>
+            <argument name="resourceClassName"
+                      xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel\ResourceModel
+            </argument>
+            <argument name="modelClassName"
+                      xsi:type="string">Magmodules\Channable\Model\Returns\DataModel
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ReturnsGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ReturnsGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Magmodules\Channable\Model\Returns\ResourceModel\Collection</argument>
+            <argument name="filterPool" xsi:type="object" shared="false">ReturnsGridFilterPool</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Magmodules\Channable\Model\Returns\ResourceModel\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">channable_returns</argument>
+            <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel\ResourceModel</argument>
+        </arguments>
+    </virtualType>
+    <!-- Channable Returns Block End -->
 </config>

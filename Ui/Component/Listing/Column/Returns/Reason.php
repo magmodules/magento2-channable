@@ -1,17 +1,16 @@
 <?php
 /**
- *  Copyright © 2019 Magmodules.eu. All rights reserved.
+ *  Copyright © Magmodules.eu. All rights reserved.
  *  See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Ui\Component\Listing\Column\Returns;
 
 use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
- * Class Reason
- *
- * @package Magmodules\Channable\Ui\Component\Listing\Column\Transactions
+ * Reason Column class for Returns Grid
  */
 class Reason extends Column
 {
@@ -23,7 +22,7 @@ class Reason extends Column
      *
      * @return array
      */
-    public function prepareDataSource(array $dataSource)
+    public function prepareDataSource(array $dataSource): array
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {

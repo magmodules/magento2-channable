@@ -131,16 +131,19 @@ class Validate
             throw new CouldNotImportOrder(__($exceptionMsg));
         }
 
+        if ($this->configProvider->getEnableBackorders()
+            || ($lvb && $this->configProvider->disableStockMovementForLvbOrders((int)$store->getId()))
+        ) {
+            return;
+        }
+
         foreach ($items as $item) {
             $product = $this->getProduct($item);
             $this->isNotOfConfigurableType($product);
             $this->doesNotHaveRequiredOption($product);
-
-            if (!$this->configProvider->getEnableBackorders() && !$lvb) {
-                $websiteCode = $this->getWebsiteCode((int)$store->getWebsiteId());
-                $stockId = $this->inventorySource->execute($websiteCode);
-                $this->hasSufficientStock($product, $item, (int)$stockId, (int)$store->getId());
-            }
+            $websiteCode = $this->getWebsiteCode((int)$store->getWebsiteId());
+            $stockId = $this->inventorySource->execute($websiteCode);
+            $this->hasSufficientStock($product, $item, (int)$stockId, (int)$store->getId());
         }
     }
 

@@ -12,7 +12,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 /**
  * Order group interface
  */
-interface OrderInterface
+interface OrderInterface extends ReturnsInterface
 {
 
     /** General Group */

@@ -172,14 +172,10 @@ class Preview extends AbstractHelper
         $html .= ' <tbody>';
 
         foreach ($config['filters']['advanced'] as $filter) {
-            $attribute = $filter['attribute'];
-            if ($attribute == 'quantity_and_stock_status') {
-                $attribute = 'qty';
-            }
             $html .= '<tr>';
             $html .= ' <td style="' . $fStyle . '" >' . __('filter') . '</td>';
             $html .= ' <td style="' . $cStyle . '" >';
-            $html .= '   ' . $attribute . ' ' . $filter['condition'] . ' ' . $filter['value'] . '</td>';
+            $html .= '   ' . $filter['attribute'] . ' ' . $filter['condition'] . ' ' . $filter['value'] . '</td>';
             $html .= '</tr>';
         }
 

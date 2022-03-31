@@ -6,10 +6,14 @@
 
 namespace Magmodules\Channable\Plugin;
 
-use Magento\CatalogInventory\Model\StockState;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\Event\Observer;
+use Magento\CatalogInventory\Observer\QuantityValidatorObserver;
 
-class AfterCheckQty
+/**
+ * Plugin for QuantityValidatorObserver
+ */
+class AroundQuantityValidator
 {
 
     /**
@@ -18,7 +22,7 @@ class AfterCheckQty
     private $checkoutSession;
 
     /**
-     * AfterCheckQty constructor.
+     * AroundIsAnySourceItemInStockCondition constructor.
      *
      * @param CheckoutSession $checkoutSession
      */
@@ -29,22 +33,25 @@ class AfterCheckQty
     }
 
     /**
-     * Skip CheckQty for adding products to order.
+     * Skip QuantityValidator for adding products to order.
      *
      * Out-of-stock products: depending on configuration setting
      * LVB Orders: these orders are shipped from external warehouse
      *
-     * @param StockState $subject
-     * @param $result
-     *
+     * @param QuantityValidatorObserver $subject
+     * @param \Closure $proceed
+     * @param Observer $observer
      * @return mixed
      */
-    public function afterCheckQty(StockState $subject, $result)
-    {
+    public function aroundExecute(
+        QuantityValidatorObserver $subject,
+        $proceed,
+        Observer $observer
+    ) {
         if ($this->checkoutSession->getChannableSkipQtyCheck()) {
-            return true;
+            return false;
         }
 
-        return $result;
+        return $proceed($observer);
     }
 }

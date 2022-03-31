@@ -697,7 +697,7 @@
                 <field id="order_stores" translate="label" type="text" sortOrder="71" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Stores</label>
-                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\ReturnsStores</frontend_model>
+                    <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Table\Returns</frontend_model>
                 </field>
             </group>
         </section>

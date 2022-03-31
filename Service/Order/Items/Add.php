@@ -85,11 +85,9 @@ class Add
      */
     public function execute(Quote $quote, array $data, StoreInterface $store, bool $lvbOrder = false): int
     {
-        $qty = 0;
-        if ($this->configProvider->disableStockCheckOnImport((int)$store->getId()) || $lvbOrder) {
-            $this->checkoutSession->setChannableSkipQtyCheck(true);
-        }
+        $this->setCheckoutSessionData($lvbOrder, $quote->getStoreId());
 
+        $qty = 0;
         foreach ($data['products'] as $item) {
             $product = $this->getProductById((int)$item['id']);
             $price = $this->getProductPrice($item, $product, $store, $quote);
@@ -182,5 +180,23 @@ class Add
             ->setSpecialToDate(null);
 
         return $product;
+    }
+
+    /**
+     * @param bool $lvbOrder
+     * @param int  $storeId
+     *
+     * @return void
+     */
+    private function setCheckoutSessionData(bool $lvbOrder = false, int $storeId = 0): void
+    {
+        $this->checkoutSession->setChannableSkipQtyCheck(
+            $this->configProvider->getEnableBackorders($storeId) ||
+            $lvbOrder && $this->configProvider->disableStockMovementForLvbOrders($storeId)
+        );
+
+        $this->checkoutSession->setChannableSkipReservation(
+            $lvbOrder && $this->configProvider->disableStockMovementForLvbOrders($storeId)
+        );
     }
 }

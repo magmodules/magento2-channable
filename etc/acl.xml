@@ -16,7 +16,10 @@
                         <resource id="Magmodules_Channable::order_delete" title="Order Delete" sortOrder="130"/>
                     </resource>
                     <resource id="Magmodules_Channable::general_item" title="Item Updates" sortOrder="110"/>
-                    <resource id="Magmodules_Channable::general_returns" title="Returns" sortOrder="120"/>
+                    <resource id="Magmodules_Channable::general_returns" title="Returns" sortOrder="120">
+                        <resource id="Magmodules_Channable::returns_view" title="Channable Returns View" sortOrder="100"/>
+                        <resource id="Magmodules_Channable::returns_process" title="Channable Returns Process" sortOrder="100"/>
+                    </resource>
                 </resource>
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">

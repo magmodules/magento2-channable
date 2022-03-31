@@ -14,7 +14,7 @@ use Magento\Tax\Model\Config as TaxConfig;
 /**
  * Order provider class
  */
-class OrderRepository extends BaseRepository implements OrderInterface
+class OrderRepository extends ReturnsRepository implements OrderInterface
 {
 
     /**
