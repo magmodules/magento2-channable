@@ -37,7 +37,7 @@ class GetDescription
      */
     public function execute(OrderInterface $order, array $orderData): ?string
     {
-        if ($order->getShippingMethod() !== ChannableCarrier::CODE) {
+        if ($order->getShippingMethod(true)->getMethod() !== ChannableCarrier::CODE) {
             return null;
         }
 

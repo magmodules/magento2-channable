@@ -34,6 +34,6 @@ class AroundIsAllowedRequest
             return false;
         }
 
-        $proceed($request, $allowEmptyModuleName);
+        return $proceed($request, $allowEmptyModuleName);
     }
 }
