@@ -18,6 +18,7 @@ interface RepositoryInterface extends System\OrderInterface
 
     /** General Group */
     const XML_PATH_EXTENSION_VERSION = 'magmodules_channable/general/version';
+    const XML_PATH_ENABLE = 'magmodules_channable/general/enable';
     const XML_PATH_DEBUG = 'magmodules_channable/general/debug';
 
     /**
@@ -40,6 +41,13 @@ interface RepositoryInterface extends System\OrderInterface
      * @return string
      */
     public function getMagentoEdition(): string;
+
+    /**
+     * Module enable flag
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool;
 
     /**
      * Returns saved module token
