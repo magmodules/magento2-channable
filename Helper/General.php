@@ -15,7 +15,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Config\Model\ResourceModel\Config as ConfigData;
 use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory as ConfigDataCollectionFactory;
 use Magento\Framework\App\ProductMetadataInterface;
-use Magmodules\Channable\Logger\ChannableLogger;
+use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 use Magento\Framework\App\ProductMetadata;
 use Magento\Framework\Unserialize\Unserialize;
 
@@ -59,7 +59,7 @@ class General extends AbstractHelper
      */
     private $localeDate;
     /**
-     * @var ChannableLogger
+     * @var LogRepository
      */
     private $logger;
     /**
@@ -72,13 +72,12 @@ class General extends AbstractHelper
      *
      * @param Context                     $context
      * @param StoreManagerInterface       $storeManager
-     * @param ModuleListInterface         $moduleList
      * @param ProductMetadataInterface    $metadata
      * @param ConfigDataCollectionFactory $configDataCollectionFactory
      * @param ConfigData                  $config
      * @param DateTime                    $coreDate
      * @param TimezoneInterface           $localeDate
-     * @param ChannableLogger             $logger
+     * @param LogRepository               $logger
      * @param Unserialize                 $unserialize
      */
     public function __construct(
@@ -89,7 +88,7 @@ class General extends AbstractHelper
         ConfigData $config,
         DateTime $coreDate,
         TimezoneInterface $localeDate,
-        ChannableLogger $logger,
+        LogRepository $logger,
         Unserialize $unserialize
     ) {
         $this->storeManager = $storeManager;
@@ -369,7 +368,7 @@ class General extends AbstractHelper
      */
     public function addTolog($type, $data)
     {
-        $this->logger->add($type, $data);
+        $this->logger->addDebugLog($type, $data);
     }
 
     /**

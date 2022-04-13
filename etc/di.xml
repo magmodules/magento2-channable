@@ -31,20 +31,6 @@
         </arguments>
     </type>
     <!-- Log Block End -->
-
-    <type name="Magmodules\Channable\Logger\ChannableHandler">
-        <arguments>
-            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
-        </arguments>
-    </type>
-    <type name="Magmodules\Channable\Logger\ChannableLogger">
-        <arguments>
-            <argument name="name" xsi:type="string">Channable</argument>
-            <argument name="handlers"  xsi:type="array">
-                <item name="system" xsi:type="object">Magmodules\Channable\Logger\ChannableHandler</item>
-            </argument>
-        </arguments>
-    </type>
     <virtualType name="ItemGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
         <arguments>
             <argument name="appliers" xsi:type="array">

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 declare(strict_types=1);
@@ -51,13 +51,11 @@ class ValidateRequestData
             return $this->jsonResponse->execute('Store param missing in request');
         }
 
-        $enabled = $this->configProvider->getEnabled($storeId);
-        if (empty($enabled)) {
+        if (!$this->configProvider->isEnabled()) {
             return $this->jsonResponse->execute('Extension not enabled');
         }
 
-        $returns = $this->configProvider->isReturnsEnabled((int)$storeId);
-        if (empty($returns)) {
+        if (!$this->configProvider->isReturnsEnabled((int)$storeId)) {
             return $this->jsonResponse->execute('Returns not enabled');
         }
 
