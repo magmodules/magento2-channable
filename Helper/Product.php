@@ -21,7 +21,7 @@ use Magento\Framework\Filter\FilterManager;
 use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable as ConfigurableResource;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link as GroupedResource;
 use Magento\Bundle\Model\ResourceModel\Selection as BundleResource;
-use Magmodules\Channable\Logger\ChannableLogger;
+use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 use Magmodules\Channable\Service\Product\InventoryData;
 
 /**
@@ -85,7 +85,7 @@ class Product extends AbstractHelper
      */
     private $commonPriceModel;
     /**
-     * @var ChannableLogger
+     * @var LogRepository
      */
     private $logger;
 
@@ -106,7 +106,7 @@ class Product extends AbstractHelper
      * @param ConfigurableResource            $catalogProductTypeConfigurable
      * @param CatalogPrice                    $commonPriceModel
      * @param InventoryData                   $inventoryData
-     * @param ChannableLogger                 $logger
+     * @param LogRepository                   $logger
      */
     public function __construct(
         Context $context,
@@ -123,7 +123,7 @@ class Product extends AbstractHelper
         ConfigurableResource $catalogProductTypeConfigurable,
         CatalogPrice $commonPriceModel,
         InventoryData $inventoryData,
-        ChannableLogger $logger
+        LogRepository $logger
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
@@ -574,7 +574,7 @@ class Product extends AbstractHelper
             $attributeSetRepository = $this->attributeSet->get($product->getAttributeSetId());
             return $attributeSetRepository->getAttributeSetName();
         } catch (\Exception $e) {
-            $this->logger->add('getAttributeSetName', $e->getMessage());
+            $this->logger->addErrorLog('getAttributeSetName', $e->getMessage());
         }
 
         return false;
@@ -725,7 +725,7 @@ class Product extends AbstractHelper
                 }
             }
         } catch (\Exception $e) {
-            $this->logger->add('getValue', $e->getMessage());
+            $this->logger->addErrorLog('getValue', $e->getMessage());
         }
 
         return $product->getData($attribute['source']);
@@ -1082,7 +1082,7 @@ class Product extends AbstractHelper
                         $attributes[$key]['type'] = $type;
                     }
                 } catch (\Exception $e) {
-                    $this->logger->add('addAttributeData', $e->getMessage());
+                    $this->logger->addErrorLog('addAttributeData', $e->getMessage());
                     unset($attributes[$key]);
                 }
             }
