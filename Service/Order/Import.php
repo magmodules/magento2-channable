@@ -252,7 +252,7 @@ class Import
                 $order->setBaseDiscountAmount($orderData['price']['discount']);
                 $order->setGrandTotal($order->getGrandTotal() - $orderData['price']['discount']);
                 $order->setBaseGrandTotal($order->getBaseGrandTotal() - $orderData['price']['discount']);
-                $order->setDiscountAmount($orderData['price']['discount'])->save();
+                $order->setDiscountAmount($orderData['price']['discount']);
             }
             $store->setCurrentCurrencyCode($store->getBaseCurrencyCode());
 
@@ -263,6 +263,7 @@ class Import
             $this->addPaymentData->execute($order, $orderData, $lvbOrder);
             $this->afterOrderImport($order, $storeId, $lvbOrder);
             $this->setChannableOrderImportSuccess($channableOrder, $order);
+            $this->orderRepository->save($order);
             return $order;
         } catch (Exception $exception) {
             $coulNotImportMsg = self::COULD_NOT_IMPORT_ORDER;
