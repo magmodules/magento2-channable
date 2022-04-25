@@ -260,6 +260,7 @@ class Import
                 $order->setShippingDescription($shippingDescription);
             }
 
+            $this->addPaymentData->execute($order, $orderData, $lvbOrder);
             $this->afterOrderImport($order, $storeId, $lvbOrder);
             $this->setChannableOrderImportSuccess($channableOrder, $order);
             return $order;
