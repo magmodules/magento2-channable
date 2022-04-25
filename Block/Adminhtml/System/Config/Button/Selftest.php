@@ -1,27 +1,26 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
-namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest;
+namespace Magmodules\Channable\Block\Adminhtml\System\Config\Button;
 
 use Magento\Backend\Block\Template\Context;
+use Magento\Backend\Block\Widget\Button;
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 
 /**
- * Class Feed
- *
- * @package Magmodules\Channable\Block\Adminhtml\System\Config\Form\Selftest
+ * Selftest button class
  */
-class Feed extends Field
+class Selftest extends Field
 {
 
     /**
      * @var string
      */
-    protected $_template = 'Magmodules_Channable::system/config/button/selftest/feed.phtml';
+    protected $_template = 'Magmodules_Channable::system/config/button/selftest.phtml';
     /**
      * @var \Magento\Framework\App\RequestInterface
      */
@@ -66,9 +65,9 @@ class Feed extends Field
     /**
      * @return string
      */
-    public function getAjaxUrl()
+    public function getSelftestUrl()
     {
-        return $this->getUrl('channable/selftest/feed');
+        return $this->getUrl('channable/selftest/index');
     }
 
     /**
@@ -77,11 +76,12 @@ class Feed extends Field
     public function getButtonHtml()
     {
         try {
-            $buttonData = ['id' => 'selftest_button', 'label' => __('Selftest')];
-            $button = $this->getLayout()->createBlock('Magento\Backend\Block\Widget\Button')->setData($buttonData);
-            return $button->toHtml();
+            return $this->getLayout()
+                ->createBlock(Button::class)
+                ->setData(['id' => 'button_test', 'label' => __('Run Selftest')])
+                ->toHtml();
         } catch (\Exception $e) {
-            return '';
+            return false;
         }
     }
 }

@@ -1,18 +1,18 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  *
  * @var $block Magmodules\Channable\Block\Adminhtml\Magmodules\Header
  */
 ?>
-<div class="mm-block-channable" style="background-image: url(<?php echo $block->escapeUrl($block->getImage()); ?>)">
-    <a class="helpbutton" href="<?php echo $block->escapeUrl($block->getSupportLink()); ?>" target="_blank">
-        <?php echo __('Extension Manual'); ?>
+<div class="mm-block-channable" style="background-image: url(<?= $block->escapeUrl($block->getImage()); ?>)">
+    <a class="helpbutton" href="<?= $block->escapeUrl($block->getSupportLink()); ?>" target="_blank">
+        <?= $block->escapeHtml(__('Extension Manual')); ?>
     </a>
     <p>
-        <strong><?php echo __('Developed by Magmodules.'); ?></strong>
-        <?php echo __('A Magento only eCommerce Agency located in the Netherlands.'); ?>
+        <strong><?= $block->escapeHtml(__('Developed by Magmodules.')); ?></strong>
+        <?= $block->escapeHtml(__('A Magento only eCommerce Agency located in the Netherlands.')); ?>
     </p>
     <table>
         <tbody>
@@ -23,14 +23,14 @@
                 </td>
                 <td>
                     <div class="icon1"></div>
-                    <a href="<?php echo $block->escapeUrl($block->getContactLink()); ?>" target="_blank">
-                        <?php echo __('Contact.'); ?>
+                    <a href="<?= $block->escapeUrl($block->getContactLink()); ?>" target="_blank">
+                        <?= $block->escapeHtml(__('Contact')); ?>
                     </a>
                 </td>
                 <td>
                     <div class="icon3"></div>
                     <a href="https://support.channable.com/hc/en-us" target="_blank">
-                        <?php echo __('Channable Support'); ?>
+                        <?= $block->escapeHtml(__('Channable Support')); ?>
                     </a>
                 </td>
             </tr>

@@ -1,0 +1,103 @@
+@import "variables/_icons.less";
+
+@icons-magmodules__font-name: 'magmodules-icons';
+@icons-magmodules__file-name: @icons-magmodules__font-name;
+
+.lib-font-face(
+    @family-name: @icons-magmodules__font-name,
+    @font-path: '@{baseDir}Magmodules_Channable/fonts/@{icons-magmodules__file-name}/@{icons-magmodules__file-name}',
+    @font-weight: normal,
+    @font-style: normal
+);
+
+[class^="mm-channable-"]:before,
+[class*=" mm-channable-"]:before {
+    font-family: @icons-magmodules__font-name;
+    font-style: normal;
+    font-weight: normal;
+    speak: never;
+    display: inline-block;
+    text-decoration: inherit;
+    width: 2.5rem;
+    margin-right: 0.5rem;
+    text-align: center;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 2.5rem;
+    margin-left: 0.5rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.mm-channable-icon__download-alt:before {
+    content: @mm-channable-icon__download-alt;
+    line-height: normal !important;
+}
+
+.mm-channable-icon__list:before {
+    content: @mm-channable-icon__list;
+}
+
+.mm-channable-icon__magmodules:before {
+    content: @mm-channable-icon__magmodules;
+}
+
+.mm-channable-icon__list-unordered:before {
+    content: @mm-channable-icon__list-unordered;
+}
+
+.mm-channable-icon__help-rounded:before {
+    content: @mm-channable-icon__help-rounded;
+}
+
+.mm-channable-icon__thumbs-down:before {
+    content: @mm-channable-icon__thumbs-down;
+}
+
+.mm-channable-icon__thumbs-up:before {
+    content: @mm-channable-icon__thumbs-up;
+}
+
+.mm-channable-icon__font-icons:before {
+    content: @mm-channable-icon__font-icons;
+}
+
+.mm-channable-icon__info-rounded1:before {
+    content: @mm-channable-icon__info-rounded1;
+}
+
+.mm-channable-icon__download:before {
+    content: @mm-channable-icon__download;
+}
+
+.mm-channable-icon__external-link:before {
+    content: @mm-channable-icon__external-link;
+}
+
+.mm-channable-icon__notification-rounded:before {
+    content: @mm-channable-icon__notification-rounded;
+}
+
+.mm-channable-icon__envelop:before {
+    content: @mm-channable-icon__envelop;
+}
+
+.mm-channable-icon__list-unordered-four:before {
+    content: @mm-channable-icon__list-unordered-four;
+}
+
+.mm-channable-icon__question-circled:before {
+    content: @mm-channable-icon__question-circled;
+}
+
+.mm-channable-icon__list-thumbnails:before {
+    content: @mm-channable-icon__list-thumbnails;
+}
+
+.mm-channable-icon__repeat:before {
+    content: @mm-channable-icon__repeat;
+}
+
+.mm-channable-icon__info-rounded0:before {
+    content: @mm-channable-icon__info-rounded0;
+}

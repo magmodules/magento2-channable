@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!--
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 -->
@@ -24,10 +24,14 @@
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
-                            <resource id="Magmodules_Channable::feed" title="Channable Feed Config" sortOrder="100"/>
-                            <resource id="Magmodules_Channable::marketplace" title="Channable Marketplace Config" sortOrder="110"/>
-                            <resource id="Magmodules_Channable::config_order" title="Channable Order Config" sortOrder="120">
-                                <resource id="Magmodules_Channable::order_simulate" title="Order Simulate" sortOrder="100"/>
+                            <resource id="Magmodules_Channable::configuration" title="Channable" sortOrder="500">
+                                <resource id="Magmodules_Channable::config_general" title="General Config" sortOrder="10"/>
+                                <resource id="Magmodules_Channable::config_feed" title="Product Feed Config" sortOrder="20"/>
+                                <resource id="Magmodules_Channable::config_itemupdates" title="Product Updates Config" sortOrder="30"/>
+                                <resource id="Magmodules_Channable::config_order" title="Order Config" sortOrder="40">
+                                    <resource id="Magmodules_Channable::order_simulate" title="Order Simulate" sortOrder="10"/>
+                                </resource>
+                                <resource id="Magmodules_Channable::config_returns" title="Returns Config" sortOrder="50"/>
                             </resource>
                         </resource>
                     </resource>

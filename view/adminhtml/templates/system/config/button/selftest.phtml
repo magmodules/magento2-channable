@@ -1,0 +1,24 @@
+<?php
+/**
+ * Copyright © Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+use Magmodules\Channable\Block\Adminhtml\System\Config\Button\Selftest;
+
+/**
+ * @see \Magmodules\Channable\Block\Adminhtml\System\Config\Button\Selftest
+ * @var Selftest $block
+ */
+?>
+<button id="mm-channable-button_test" title="<?= $block->escapeUrl(__('Run Self-test')); ?>"
+        type="button" class="action-default scalable">
+    <i class="mm-channable-icon__list-unordered-four"></i>
+    <span><?= $block->escapeUrl(__('Run Self-test')); ?></span>
+</button>
+<div id="mm-channable-result_test-modal"
+     data-mm-channable-endpoind-url="<?= $block->escapeUrl($block->getSelftestUrl()) ?>">
+    <div id="mm-channable-result_test">
+        <ul class="result"></ul>
+    </div>
+</div>

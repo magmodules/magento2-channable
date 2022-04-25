@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 -->
@@ -29,7 +29,6 @@
              resource="Magmodules_Channable::general_orders"
              action="channable/order/index"
         />
-
         <add id="Magmodules_Channable::channable_returns"
              title="Processed Returns"
              module="Magmodules_Channable"
@@ -46,7 +45,6 @@
              resource="Magmodules_Channable::general_item"
              action="channable/item/index"
         />
-
         <add id="Magmodules_Channable::configuration"
              title="Configuration"
              module="Magmodules_Channable"
@@ -54,29 +52,45 @@
              parent="Magmodules_Channable::channable"
              resource="Magmodules_Channable::general"
         />
+        <add id="Magmodules_Channable::config_general"
+             title="General"
+             module="Magmodules_Channable"
+             sortOrder="10"
+             parent="Magmodules_Channable::configuration"
+             resource="Magmodules_Channable::config_general"
+             action="admin/system_config/edit/section/channable_general"
+        />
+        <add id="Magmodules_Channable::config_feed"
+             title="Product Feed"
+             module="Magmodules_Channable"
+             sortOrder="20"
+             parent="Magmodules_Channable::configuration"
+             resource="Magmodules_Channable::config_feed"
+             action="admin/system_config/edit/section/channable_feed"
+        />
+        <add id="Magmodules_Channable::config_itemupdates"
+             title="Product Updates"
+             module="Magmodules_Channable"
+             sortOrder="30"
+             parent="Magmodules_Channable::configuration"
+             resource="Magmodules_Channable::config_itemupdates"
+             action="admin/system_config/edit/section/channable_itemupdates"
+        />
         <add id="Magmodules_Channable::config_order"
              title="Orders"
              module="Magmodules_Channable"
-             sortOrder="2"
+             sortOrder="40"
              parent="Magmodules_Channable::configuration"
              resource="Magmodules_Channable::config_order"
-             action="admin/system_config/edit/section/magmodules_channable_order"
+             action="admin/system_config/edit/section/channable_order"
         />
-        <add id="Magmodules_Channable::feed"
-             title="Productfeed"
+        <add id="Magmodules_Channable::config_returns"
+             title="Returns"
              module="Magmodules_Channable"
-             sortOrder="3"
+             sortOrder="50"
              parent="Magmodules_Channable::configuration"
-             resource="Magmodules_Channable::feed"
-             action="admin/system_config/edit/section/magmodules_channable"
-        />
-        <add id="Magmodules_Channable::marketplace"
-             title="Product Updates  &amp; Returns"
-             module="Magmodules_Channable"
-             sortOrder="4"
-             parent="Magmodules_Channable::configuration"
-             resource="Magmodules_Channable::marketplace"
-             action="admin/system_config/edit/section/magmodules_channable_marketplace"
+             resource="Magmodules_Channable::config_returns"
+             action="admin/system_config/edit/section/channable_returns"
         />
     </menu>
 </config>

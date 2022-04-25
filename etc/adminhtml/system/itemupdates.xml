@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <section id="channable_itemupdates" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Product Updates</label>
+        <tab>channable</tab>
+        <resource>Magmodules_Channable::config_itemupdates</resource>
+        <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Branding</label>
+            <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Header</frontend_model>
+        </group>
+        <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>General</label>
+            <attribute type="expanded">1</attribute>
+            <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Enable</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/item/enable</config_path>
+            </field>
+            <field id="limit" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Products per run</label>
+                <config_path>magmodules_channable_marketplace/item/limit</config_path>
+                <comment><![CDATA[Set a limit on the number of products for each update with a maximum value of <strong>50</strong.>]]></comment>
+            </field>
+            <field id="webhook" translate="label" type="text" sortOrder="2" showInDefault="0" showInWebsite="0" showInStore="1">
+                <label>Webhook</label>
+                <config_path>magmodules_channable_marketplace/item/webhook</config_path>
+                <depends>
+                    <field id="enable">1</field>
+                </depends>
+            </field>
+            <field id="heading_item_stores" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Enabled Stores</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <comment>You can only activate and or set the Webhook per specific Store View. You can select the Store Views using the dropdown on the top of the left.</comment>
+            </field>
+            <field id="item_stores" translate="label" type="text" sortOrder="41" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label></label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Table\Itemupdates</frontend_model>
+            </field>
+        </group>
+        <group id="item" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Settings</label>
+            <attribute type="expanded">0</attribute>
+            <field id="heading_invalidation" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Invalidation Type</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <comment>Log Product movements using Observer or Cron.</comment>
+            </field>
+            <field id="invalidation_modus" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Modus</label>
+                <source_model>Magmodules\Channable\Model\System\Config\Source\InvalidationModus</source_model>
+                <config_path>magmodules_channable_marketplace/item/invalidation_modus</config_path>
+            </field>
+            <field id="heading_settings" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Cron</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <comment>Configure the Item update with the values below, we highly recommend you to check your Magento cron job functionality to make sure all your items are updated frequently.</comment>
+            </field>
+            <field id="cron" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Enable</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            </field>
+            <field id="cron_frequency" translate="label" type="select" sortOrder="22" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Frequency</label>
+                <source_model>Magmodules\Channable\Model\System\Config\Source\CronFrequency</source_model>
+                <backend_model>Magmodules\Channable\Model\Config\Backend\Cron</backend_model>
+                <config_path>magmodules_channable_marketplace/item/cron</config_path>
+                <depends>
+                    <field id="cron">1</field>
+                </depends>
+            </field>
+            <field id="custom_frequency" translate="label" type="text" sortOrder="23" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Custom Frequency</label>
+                <config_path>magmodules_channable_marketplace/item/custom_frequency</config_path>
+                <depends>
+                    <field id="cron">1</field>
+                    <field id="cron_frequency">custom</field>
+                </depends>
+            </field>
+        </group>
+        <group id="debug" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Debugging</label>
+            <attribute type="expanded">1</attribute>
+            <field id="log" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Log Calls</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/item/log</config_path>
+                <comment>Write all the calls and updates to the Channable log file located in /var/log/channable.log.</comment>
+            </field>
+        </group>
+    </section>
+</include>

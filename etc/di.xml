@@ -216,4 +216,41 @@
         </arguments>
     </virtualType>
     <!-- Channable Returns Block End -->
+
+    <!-- Channable Selftest Block Start -->
+    <preference for="Magmodules\Channable\Api\Selftest\RepositoryInterface"
+                type="Magmodules\Channable\Model\Selftest\Repository"/>
+    <type name="Magmodules\Channable\Model\Selftest\Repository">
+        <arguments>
+            <argument name="testList" xsi:type="array">
+                <item name="extensionStatus" xsi:type="object">Magmodules\Channable\Service\Test\ExtensionStatus</item>
+                <item name="magentoVersion" xsi:type="object">Magmodules\Channable\Service\Test\MagentoVersion</item>
+                <item name="extensionVersion" xsi:type="object">Magmodules\Channable\Service\Test\ExtensionVersion</item>
+                <item name="phpVersion" xsi:type="object">Magmodules\Channable\Service\Test\PhpVersion</item>
+                <item name="phpExtensions" xsi:type="object">Magmodules\Channable\Service\Test\PhpExtensions</item>
+                <item name="orderImport" xsi:type="object">Magmodules\Channable\Service\Test\OrderImport</item>
+                <item name="productFeed" xsi:type="object">Magmodules\Channable\Service\Test\ProductFeed</item>
+                <item name="itemUpdate" xsi:type="object">Magmodules\Channable\Service\Test\ItemUpdate</item>
+                <item name="cron" xsi:type="object">Magmodules\Channable\Service\Test\Cron</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magmodules\Channable\Console\Command\Selftest">
+        <arguments>
+            <argument name="selftestRepository"
+                      xsi:type="object">Magmodules\Channable\Model\Selftest\Repository\Proxy</argument>
+        </arguments>
+    </type>
+    <!-- Channable Selftest Block End -->
+
+    <!-- Command line block start -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="ChannableSelftest" xsi:type="object">Magmodules\Channable\Console\Command\Selftest</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- Command line block end -->
 </config>
