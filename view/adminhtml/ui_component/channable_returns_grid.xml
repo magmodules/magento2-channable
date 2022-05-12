@@ -24,7 +24,7 @@
         <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="channable_returns_grid_data_source">
             <settings>
                 <requestFieldName>id</requestFieldName>
-                <primaryFieldName>main_table.id</primaryFieldName>
+                <primaryFieldName>main_table.entity_id</primaryFieldName>
             </settings>
         </dataProvider>
     </dataSource>
@@ -60,12 +60,11 @@
         <selectionsColumn name="ids">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="indexField" xsi:type="string">id</item>
+                    <item name="indexField" xsi:type="string">entity_id</item>
                 </item>
             </argument>
         </selectionsColumn>
-
-        <column name="id">
+        <column name="entity_id">
             <settings>
                 <filter>text</filter>
                 <label translate="true">ID</label>

@@ -115,6 +115,7 @@ class Hook extends Action
                 }
             }
             if (empty($response['errors'])) {
+                $this->logRepository->addDebugLog('Returns', $returnData);
                 $response = $this->importReturn->execute($returnData, $storeId);
             }
         } catch (\Exception $e) {

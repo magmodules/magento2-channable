@@ -31,7 +31,9 @@
                                 <resource id="Magmodules_Channable::config_order" title="Order Config" sortOrder="40">
                                     <resource id="Magmodules_Channable::order_simulate" title="Order Simulate" sortOrder="10"/>
                                 </resource>
-                                <resource id="Magmodules_Channable::config_returns" title="Returns Config" sortOrder="50"/>
+                                <resource id="Magmodules_Channable::config_returns" title="Returns Config" sortOrder="50">
+                                    <resource id="Magmodules_Channable::returns_simulate" title="Returns Simulate" sortOrder="10"/>
+                                </resource>
                             </resource>
                         </resource>
                     </resource>

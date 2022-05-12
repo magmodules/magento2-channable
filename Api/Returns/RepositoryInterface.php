@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magmodules\Channable\Api\Returns;
 
 use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magmodules\Channable\Api\Returns\Data\DataInterface as ChannableReturnsData;
@@ -19,6 +18,23 @@ use Magmodules\Channable\Api\Returns\Data\SearchResultsInterface;
  */
 interface RepositoryInterface
 {
+
+    /**
+     * Input exception text
+     */
+    public const INPUT_EXCEPTION = 'An ID is needed. Set the ID and try again.';
+    /**
+     * "No such entity" exception text
+     */
+    public const NO_SUCH_ENTITY_EXCEPTION = 'The return with id "%1" does not exist.';
+    /**
+     * "Could not delete" exception text
+     */
+    public const COULD_NOT_DELETE_EXCEPTION = 'Could not delete the return: %1';
+    /**
+     * "Could not save" exception text
+     */
+    public const COULD_NOT_SAVE_EXCEPTION = 'Could not save the return: %1';
 
     /**
      * Loads a specified Return
@@ -38,14 +54,14 @@ interface RepositoryInterface
     public function create();
 
     /**
-     * Retrieves an Channable Returns matching the specified criteria.
+     * Retrieves a Channable Returns matching the specified criteria.
      *
      * @param SearchCriteriaInterface $searchCriteria
      *
      * @return SearchResultsInterface
      * @throws LocalizedException
      */
-    public function getList($searchCriteria);
+    public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface;
 
     /**
      * Register entity to delete
@@ -58,15 +74,15 @@ interface RepositoryInterface
     public function delete(ChannableReturnsData $entity): bool;
 
     /**
-     * Deletes an Channable Returns entity by ID
+     * Deletes a Channable Returns entity by ID
      *
-     * @param int $id
+     * @param int $entityId
      *
      * @return bool true on success
      * @throws NoSuchEntityException
      * @throws LocalizedException
      */
-    public function deleteById($id);
+    public function deleteById(int $entityId): bool;
 
     /**
      * Perform persist operations for one entity

@@ -1,0 +1,105 @@
+{
+    "channable_orders": {
+        "column": {
+            "entity_id": true,
+            "channable_id": true,
+            "channel_name": true,
+            "order_status": true,
+            "channel_label": true,
+            "channel_id": true,
+            "channable_order_status": true,
+            "is_test": true,
+            "products": true,
+            "customer": true,
+            "billing": true,
+            "shipping": true,
+            "price": true,
+            "magento_order_id": true,
+            "magento_increment_id": true,
+            "store_id": true,
+            "status": true,
+            "error_msg": true,
+            "created_at": true,
+            "updated_at": true,
+            "attempts": true
+        },
+        "index": {
+            "FTI_489FA236241E26B3CF278097F9ADE3E4": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "channable_items": {
+        "column": {
+            "item_id": true,
+            "store_id": true,
+            "id": true,
+            "parent_id": true,
+            "gtin": true,
+            "title": true,
+            "price": true,
+            "discount_price": true,
+            "qty": true,
+            "is_in_stock": true,
+            "call_result": true,
+            "status": true,
+            "needs_update": true,
+            "created_at": true,
+            "updated_at": true,
+            "last_call": true
+        },
+        "index": {
+            "CHANNABLE_ITEMS_STORE_ID_ID_NEEDS_UPDATE_UPDATED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "channable_returns": {
+        "column": {
+            "store_id": true,
+            "order_id": true,
+            "channel_name": true,
+            "channel_id": true,
+            "channable_id": true,
+            "magento_order_id": true,
+            "magento_increment_id": true,
+            "item": true,
+            "customer_name": true,
+            "customer": true,
+            "address": true,
+            "reason": true,
+            "comment": true,
+            "status": true,
+            "created_at": true,
+            "updated_at": true,
+            "entity_id": true,
+            "id": true
+        },
+        "index": {
+            "IDX_8C173AFD5BA1C589364EB29DBD02F16B": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "quote": {
+        "column": {
+            "transaction_fee": true
+        }
+    },
+    "sales_order": {
+        "column": {
+            "transaction_fee": true
+        }
+    },
+    "sales_order_grid": {
+        "column": {
+            "channable_id": true,
+            "channel_id": true,
+            "channel_name": true,
+            "channel_label": true
+        }
+    }
+}

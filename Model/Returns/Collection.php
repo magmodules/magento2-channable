@@ -5,11 +5,11 @@
  */
 declare(strict_types=1);
 
-namespace Magmodules\Channable\Model\Returns\ResourceModel;
+namespace Magmodules\Channable\Model\Returns;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use Magmodules\Channable\Model\Returns\DataModel as ChannableReturnsData;
-use Magmodules\Channable\Model\Returns\ResourceModel\ResourceModel as ChannableReturnsResource;
+use Magmodules\Channable\Model\Returns\ResourceModel as ChannableReturnsResource;
 
 /**
  * Returns collection
@@ -20,7 +20,7 @@ class Collection extends AbstractCollection
     /**
      * @var string
      */
-    protected $_idFieldName = 'id';
+    protected $_idFieldName = 'entity_id';
 
     /**
      * @inheritDoc

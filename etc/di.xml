@@ -157,16 +157,21 @@
             </argument>
         </arguments>
     </type>
-    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
-        <arguments>
-            <argument name="collections" xsi:type="array">
-                <item name="channable_order_grid_data_source" xsi:type="string">Magmodules\Channable\Model\Order\ResourceModel\Grid\Collection</item>
-            </argument>
-        </arguments>
-    </type>
     <!-- Channable Order Block End -->
 
     <!-- Channable Returns Block Start -->
+    <preference for="Magmodules\Channable\Api\Returns\RepositoryInterface"
+                type="Magmodules\Channable\Model\Returns\Repository"/>
+    <preference for="Magmodules\Channable\Api\Returns\Data\DataInterface"
+                type="Magmodules\Channable\Model\Returns\DataModel"/>
+    <preference for="Magmodules\Channable\Api\Returns\Data\SearchResultsInterface"
+                type="Magento\Framework\Api\SearchResults"/>
+    <virtualType name="Magmodules\Channable\Model\Returns\ResourceModel\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">channable_returns</argument>
+            <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel</argument>
+        </arguments>
+    </virtualType>
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
@@ -174,47 +179,6 @@
             </argument>
         </arguments>
     </type>
-    <preference for="Magmodules\Channable\Api\Returns\RepositoryInterface"
-                type="Magmodules\Channable\Model\Returns\Repository"/>
-    <preference for="Magmodules\Channable\Api\Returns\Data\DataInterface"
-                type="Magmodules\Channable\Model\Returns\Data\ApiModel"/>
-    <preference for="Magmodules\Channable\Api\Returns\Data\SearchResultsInterface"
-                type="Magento\Framework\Api\SearchResults"/>
-    <type name="Magmodules\Channable\Model\Returns\Repository">
-        <arguments>
-            <argument name="metadata" xsi:type="object">channableReturnsMetadata</argument>
-        </arguments>
-    </type>
-    <virtualType name="channableReturnsMetadata" type="Magmodules\Channable\Model\Base\Metadata">
-        <arguments>
-            <argument name="resourceClassName"
-                      xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel\ResourceModel
-            </argument>
-            <argument name="modelClassName"
-                      xsi:type="string">Magmodules\Channable\Model\Returns\DataModel
-            </argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="ReturnsGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
-        <arguments>
-            <argument name="appliers" xsi:type="array">
-                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
-                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
-            </argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="ReturnsGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
-        <arguments>
-            <argument name="collection" xsi:type="object" shared="false">Magmodules\Channable\Model\Returns\ResourceModel\Collection</argument>
-            <argument name="filterPool" xsi:type="object" shared="false">ReturnsGridFilterPool</argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="Magmodules\Channable\Model\Returns\ResourceModel\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
-        <arguments>
-            <argument name="mainTable" xsi:type="string">channable_returns</argument>
-            <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel\ResourceModel</argument>
-        </arguments>
-    </virtualType>
     <!-- Channable Returns Block End -->
 
     <!-- Channable Selftest Block Start -->
@@ -238,8 +202,7 @@
 
     <type name="Magmodules\Channable\Console\Command\Selftest">
         <arguments>
-            <argument name="selftestRepository"
-                      xsi:type="object">Magmodules\Channable\Model\Selftest\Repository\Proxy</argument>
+            <argument name="selftestRepository" xsi:type="object">Magmodules\Channable\Model\Selftest\Repository\Proxy</argument>
         </arguments>
     </type>
     <!-- Channable Selftest Block End -->

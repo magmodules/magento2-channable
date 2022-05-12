@@ -34,59 +34,59 @@ class Actions extends Column
 
                 if ($status == 'new') {
                     $item[$name]['accept'] = [
-                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'accepted']),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['entity_id'], 'type' => 'accepted']),
                         'label' => __('Accept'),
                         'confirm' => [
-                            'title' => __("Process return #{$item['id']}?"),
+                            'title' => __("Process return #{$item['entity_id']}?"),
                             'message' => $this->getConfirm('Accepted')
                         ],
                     ];
                     $item[$name]['reject'] = [
-                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'rejected']),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['entity_id'], 'type' => 'rejected']),
                         'label' => __('Reject'),
                         'confirm' => [
-                            'title' => __("Process return #{$item['id']}?"),
+                            'title' => __("Process return #{$item['entity_id']}?"),
                             'message' => $this->getConfirm('Rejected')
                         ],
                     ];
                     $item[$name]['repair'] = [
-                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'repaired']),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['entity_id'], 'type' => 'repaired']),
                         'label' => __('Repair'),
                         'confirm' => [
-                            'title' => __("Process return #{$item['id']}?"),
+                            'title' => __("Process return #{$item['entity_id']}?"),
                             'message' => $this->getConfirm('Repaired')
                         ],
                     ];
                     $item[$name]['exchange'] = [
-                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'exchanged']),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['entity_id'], 'type' => 'exchanged']),
                         'label' => __('Exchange'),
                         'confirm' => [
-                            'title' => __("Process return #{$item['id']}?"),
+                            'title' => __("Process return #{$item['entity_id']}?"),
                             'message' => $this->getConfirm('Exchanged')
                         ],
                     ];
                     $item[$name]['keep'] = [
-                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'keeps']),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['entity_id'], 'type' => 'keeps']),
                         'label' => __('Keep'),
                         'confirm' => [
-                            'title' => __("Process return #{$item['id']}?"),
+                            'title' => __("Process return #{$item['entity_id']}?"),
                             'message' => $this->getConfirm('Keeps')
                         ],
                     ];
                     $item[$name]['cancel'] = [
-                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'cancelled']),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['entity_id'], 'type' => 'cancelled']),
                         'label' => __('Cancel'),
                         'confirm' => [
-                            'title' => __("Process return #{$item['id']}?"),
+                            'title' => __("Process return #{$item['entity_id']}?"),
                             'message' => $this->getConfirm('Cancelled')
                         ],
                     ];
                 } else {
                     $item[$name]['delete'] = [
-                        'href' => $this->context->getUrl(self::URL, ['id' => $item['id'], 'type' => 'delete']),
+                        'href' => $this->context->getUrl(self::URL, ['id' => $item['entity_id'], 'type' => 'delete']),
                         'label' => __('Delete'),
                         'confirm' => [
-                            'title' => __("Delete return #{$item['id']}?"),
+                            'title' => __("Delete return #{$item['entity_id']}?"),
                             'message' => __(
                                 'Are you sure you want to delete this return?
                                 This action can not be undone and will not update the status on Channable!'
