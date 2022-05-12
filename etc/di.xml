@@ -9,11 +9,6 @@
     <!-- Log Block Start -->
     <preference for="Magmodules\Channable\Api\Log\RepositoryInterface"
                 type="Magmodules\Channable\Model\Log\Repository"/>
-    <type name="Magmodules\Channable\Logger\Handler">
-        <arguments>
-            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
-        </arguments>
-    </type>
     <type name="Magmodules\Channable\Logger\ErrorLogger">
         <arguments>
             <argument name="name" xsi:type="string">ChannableError</argument>
@@ -58,18 +53,7 @@
             </argument>
         </arguments>
     </type>
-    <type name="Magento\Framework\Console\CommandList">
-        <arguments>
-            <argument name="commands" xsi:type="array">
-                <item name="ChannableItemUpdate" xsi:type="object">Magmodules\Channable\Console\Command\ItemUpdate</item>
-            </argument>
-        </arguments>
-    </type>
-    <type name="Magmodules\Channable\Console\Command\ItemUpdate">
-        <arguments>
-            <argument name="generalHelper" xsi:type="object">Magmodules\Channable\Helper\General\Proxy</argument>
-        </arguments>
-    </type>
+
 
     <type name="Magento\CatalogInventory\Model\StockState">
         <plugin name="channable_skip_qty_check" type="Magmodules\Channable\Plugin\AfterCheckQty"/>
@@ -78,25 +62,25 @@
         <plugin name="channable_skip_csrf_validator" type="Magmodules\Channable\Plugin\AroundCsrfValidator" />
     </type>
     <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsSalableWithReservationsCondition">
-        <plugin name="chanable_skip_salable_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsSalableWithReservationsCondition" />
+        <plugin name="channable_skip_salable_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsSalableWithReservationsCondition" />
     </type>
     <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsAnySourceItemInStockCondition">
-        <plugin name="chanable_skip_in_stock_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsAnySourceItemInStockCondition" />
+        <plugin name="channable_skip_in_stock_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsAnySourceItemInStockCondition" />
     </type>
     <type name="Magento\CatalogInventory\Observer\QuantityValidatorObserver">
-        <plugin name="chanable_skip_quantity_validator_lvb_orders" type="Magmodules\Channable\Plugin\AroundQuantityValidator" />
+        <plugin name="channable_skip_quantity_validator_lvb_orders" type="Magmodules\Channable\Plugin\AroundQuantityValidator" />
     </type>
     <type name="Magento\InventorySourceDeductionApi\Model\SourceDeductionServicer">
-        <plugin name="chanable_skip_source_deduction_lvb_orders" type="Magmodules\Channable\Plugin\AroundSourceDeductionService" />
+        <plugin name="channable_skip_source_deduction_lvb_orders" type="Magmodules\Channable\Plugin\AroundSourceDeductionService" />
     </type>
     <type name="Magento\InventoryConfiguration\Model\StockItemConfiguration">
-        <plugin name="chanable_skip_manage_stock_lvb_orders" type="Magmodules\Channable\Plugin\AfterStockItemConfiguration" />
+        <plugin name="channable_skip_manage_stock_lvb_orders" type="Magmodules\Channable\Plugin\AfterStockItemConfiguration" />
     </type>
     <type name="Magento\CatalogInventory\Model\Configuration">
-        <plugin name="chanable_force_backorder" type="Magmodules\Channable\Plugin\AfterGetBackorders" />
+        <plugin name="channable_force_backorder" type="Magmodules\Channable\Plugin\AfterGetBackorders" />
     </type>
     <type name="Amasty\ShopbySeo\Helper\Data">
-        <plugin name="chanable_bypass_amasty_shopbyseo" type="Magmodules\Channable\Plugin\AroundIsAllowedRequest"/>
+        <plugin name="channable_bypass_amasty_shopbyseo" type="Magmodules\Channable\Plugin\AroundIsAllowedRequest"/>
     </type>
 
     <preference for="Magmodules\Channable\Api\Config\RepositoryInterface"
@@ -111,8 +95,6 @@
                 type="Magmodules\Channable\Model\Order\Repository"/>
     <preference for="Magmodules\Channable\Api\Order\Data\DataInterface"
                 type="Magmodules\Channable\Model\Order\DataModel"/>
-    <preference for="Magmodules\Channable\Api\Order\Data\SearchResultsInterface"
-                type="Magento\Framework\Api\SearchResults"/>
     <preference for="Magmodules\Channable\Api\Order\Data\SearchResultsInterface"
                 type="Magento\Framework\Api\SearchResults"/>
     <type name="Magmodules\Channable\Model\Order\Repository">
@@ -199,19 +181,28 @@
             </argument>
         </arguments>
     </type>
+    <!-- Channable Selftest Block End -->
 
+    <!-- Proxy block start -->
+    <type name="Magmodules\Channable\Console\Command\ItemUpdate">
+        <arguments>
+            <argument name="generalHelper" xsi:type="object">Magmodules\Channable\Helper\General\Proxy</argument>
+        </arguments>
+    </type>
     <type name="Magmodules\Channable\Console\Command\Selftest">
         <arguments>
             <argument name="selftestRepository" xsi:type="object">Magmodules\Channable\Model\Selftest\Repository\Proxy</argument>
         </arguments>
     </type>
-    <!-- Channable Selftest Block End -->
+    <!-- Proxy block start -->
 
     <!-- Command line block start -->
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="ChannableSelftest" xsi:type="object">Magmodules\Channable\Console\Command\Selftest</item>
+                <item name="ChannableSOrderSimulate" xsi:type="object">Magmodules\Channable\Console\Command\OrderSimulate</item>
+                <item name="ChannableItemUpdate" xsi:type="object">Magmodules\Channable\Console\Command\ItemUpdate</item>
             </argument>
         </arguments>
     </type>
