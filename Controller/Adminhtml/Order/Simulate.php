@@ -24,7 +24,7 @@ class Simulate extends Action
     /**
      * Authorization level
      */
-    const ADMIN_RESOURCE = 'Magmodules_Channable::order_simulate';
+    public const ADMIN_RESOURCE = 'Magmodules_Channable::order_simulate';
 
     /**
      * @var ImportSimulator
@@ -39,6 +39,7 @@ class Simulate extends Action
      * Simulate constructor.
      * @param Context $context
      * @param ImportSimulator $importSimulator
+     * @param RedirectInterface $redirect
      */
     public function __construct(
         Context $context,
@@ -76,6 +77,8 @@ class Simulate extends Action
     }
 
     /**
+     * Process and validate params
+     *
      * @return array
      */
     private function getExtraParams(): array

@@ -12,7 +12,7 @@ use Magmodules\Channable\Api\Config\System\ReturnsInterface;
 /**
  * Returns provider class
  */
-class ReturnsRepository extends BaseRepository implements ReturnsInterface
+class ReturnsRepository extends ItemupdateRepository implements ReturnsInterface
 {
 
     /**
@@ -29,7 +29,6 @@ class ReturnsRepository extends BaseRepository implements ReturnsInterface
     public function getReturnsWebhookUrl(int $storeId): string
     {
         $url = $this->storeManager->getStore((int)$storeId)->getBaseUrl();
-        $token = $this->getToken();
-        return $url . sprintf('channable/returns/hook/store/%s/code/%s', $storeId, $token);
+        return $url . sprintf('channable/returns/hook/store/%s/code/%s', $storeId, $this->getToken());
     }
 }

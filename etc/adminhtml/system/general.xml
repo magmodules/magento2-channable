@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <section id="channable_general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>General</label>
+        <tab>channable</tab>
+        <resource>Magmodules_Channable::config_general</resource>
+        <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Branding</label>
+            <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Header</frontend_model>
+        </group>
+        <group id="general" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>General</label>
+            <attribute type="expanded">1</attribute>
+            <field id="version_button" translate="label" type="button" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Version</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Button\VersionCheck</frontend_model>
+            </field>
+            <field id="enable" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Enable</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable/general/enable</config_path>
+            </field>
+            <field id="selftest" translate="label" type="button" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Button\Selftest</frontend_model>
+            </field>
+        </group>
+    </section>
+</include>

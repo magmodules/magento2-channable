@@ -11,7 +11,6 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\App\Cache\TypeListInterface as CacheTypeListInterface;
 use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magmodules\Channable\Model\ItemFactory as ItemFactory;
 
 /**
  * Class Item
@@ -40,10 +39,6 @@ class Item extends AbstractHelper
      */
     private $generalHelper;
     /**
-     * @var ItemFactory
-     */
-    private $itemFactory;
-    /**
      * @var CacheTypeListInterface
      */
     private $cacheTypeList;
@@ -53,20 +48,17 @@ class Item extends AbstractHelper
      *
      * @param Context                $context
      * @param General                $generalHelper
-     * @param ItemFactory            $itemFactory
      * @param StoreManagerInterface  $storeManager
      * @param CacheTypeListInterface $cacheTypeList
      */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
-        ItemFactory $itemFactory,
         StoreManagerInterface $storeManager,
         CacheTypeListInterface $cacheTypeList
     ) {
         $this->storeManager = $storeManager;
         $this->generalHelper = $generalHelper;
-        $this->itemFactory = $itemFactory;
         $this->cacheTypeList= $cacheTypeList;
         parent::__construct($context);
     }
@@ -202,39 +194,6 @@ class Item extends AbstractHelper
             $productIds[] = $item->getData('id');
         }
         return $productIds;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getConfigData()
-    {
-        $configData = [];
-        $stores = $this->storeManager->getStores();
-        foreach ($stores as $store) {
-            $storeId = $store->getStoreId();
-            $configData[$storeId] = [
-                'store_id'  => $storeId,
-                'code'      => $store->getCode(),
-                'name'      => $store->getName(),
-                'is_active' => $store->getIsActive(),
-                'enable'    => $this->generalHelper->getStoreValue(self::XPATH_ENABLE, $storeId),
-                'webhook'   => $this->generalHelper->getStoreValue(self::XPATH_WEBHOOK, $storeId),
-                'qty'       => $this->getQtyByStoreId($storeId),
-            ];
-        }
-        return $configData;
-    }
-
-    /**
-     * @param $storeId
-     *
-     * @return mixed
-     */
-    public function getQtyByStoreId($storeId)
-    {
-        $items = $this->itemFactory->create()->getCollection()->addFieldToFilter('store_id', $storeId);
-        return $items->getSize();
     }
 
     /**

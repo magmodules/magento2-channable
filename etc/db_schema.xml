@@ -228,13 +228,15 @@
     </table>
 
     <table name="channable_returns">
-        <column name="id"
-                xsi:type="bigint"
+        <column name="entity_id"
+                xsi:type="int"
                 padding="20"
                 identity="true"
                 nullable="false"
                 unsigned="true"
-                comment="Entity ID"/>
+                comment="Entity ID"
+                onCreate="migrateDataFrom(id)"
+        />
         <column name="store_id"
                 xsi:type="smallint"
                 padding="5"
@@ -244,8 +246,8 @@
                 default="0"
                 comment="Store ID"/>
         <column name="order_id"
-                xsi:type="int"
-                padding="10"
+                xsi:type="bigint"
+                padding="20"
                 identity="false"
                 nullable="false"
                 unsigned="true"
@@ -255,11 +257,8 @@
                 length="255"
                 comment="Channel Name"/>
         <column name="channel_id"
-                xsi:type="int"
-                padding="10"
-                identity="false"
-                nullable="false"
-                unsigned="true"
+                xsi:type="varchar"
+                length="255"
                 comment="Channel ID"/>
         <column name="channable_id"
                 xsi:type="int"
@@ -304,6 +303,14 @@
                 xsi:type="varchar"
                 length="255"
                 comment="Status"/>
+        <column name="id"
+                xsi:type="int"
+                padding="20"
+                identity="false"
+                nullable="false"
+                unsigned="true"
+                comment="Old ID"
+        />
         <column name="created_at"
                 xsi:type="timestamp"
                 on_update="false"
@@ -314,6 +321,9 @@
                 on_update="true"
                 default="CURRENT_TIMESTAMP"
                 comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
         <index referenceId="CHANNABLE_RETURNS" indexType="btree">
             <column name="store_id"/>
             <column name="order_id"/>
@@ -322,9 +332,6 @@
             <column name="created_at"/>
             <column name="status"/>
         </index>
-        <constraint xsi:type="primary" referenceId="PRIMARY">
-            <column name="id"/>
-        </constraint>
     </table>
 
     <table name="quote">

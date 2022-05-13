@@ -1,0 +1,48 @@
+<?php
+/**
+ * Copyright © Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ *
+ * @var $block Magmodules\Channable\Block\Adminhtml\System\Config\Form\Table\Itemupdates
+ */
+?>
+<tr class="channable-table" id="row_<?= $block->escapeHtml($block->getHtmlId()); ?>">
+    <td class="label"></td>
+    <td class="value">
+        <table class="data-grid" id="<?= $block->escapeHtml($block->getId()) ?>_table">
+            <thead>
+                <th>
+                    <?= $block->escapeHtml(__('Store')) ?>
+                </th>
+                <th>
+                    <?= $block->escapeHtml(__('Updates')) ?>
+                </th>
+                <th>
+                    <?= $block->escapeHtml(__('Webhook')) ?>
+                </th>
+                <th>
+                    <?= $block->escapeHtml(__('Items')) ?>
+                </th>
+            </thead>
+            <tbody>
+                <?php foreach ($block->getStoreData() as $store): ?>
+                    <tr>
+                        <td>
+                            <?= $block->escapeHtml($store['name']); ?>
+                        </td>
+                        <td>
+                            <?= $block->escapeHtml($store['enabled']); ?>
+                        </td>
+                        <td>
+                            <?= $block->escapeHtml($store['webhook']); ?>
+                        </td>
+                        <td>
+                            <?= $block->escapeHtml($store['qty']); ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </td>
+    <td></td>
+</tr>

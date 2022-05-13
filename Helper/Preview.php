@@ -9,7 +9,7 @@ namespace Magmodules\Channable\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magmodules\Channable\Helper\Source as SourceHelper;
-use Magmodules\Channable\Helper\Selftest as SelftestHelper;
+use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
 
@@ -26,13 +26,13 @@ class Preview extends AbstractHelper
      */
     private $sourceHelper;
     /**
-     * @var Selftest
-     */
-    private $selftestHelper;
-    /**
      * @var Emulation
      */
     private $appEmulation;
+    /**
+     * @var General
+     */
+    private $generalHelper;
 
     /**
      * Preview constructor.
@@ -40,17 +40,16 @@ class Preview extends AbstractHelper
      * @param Context   $context
      * @param Emulation $appEmulation
      * @param Source    $sourceHelper
-     * @param Selftest  $selftestHelper
      */
     public function __construct(
         Context $context,
         Emulation $appEmulation,
         SourceHelper $sourceHelper,
-        SelftestHelper $selftestHelper
+        GeneralHelper $generalHelper
     ) {
         $this->appEmulation = $appEmulation;
         $this->sourceHelper = $sourceHelper;
-        $this->selftestHelper = $selftestHelper;
+        $this->generalHelper = $generalHelper;
         parent::__construct($context);
     }
 
@@ -59,6 +58,7 @@ class Preview extends AbstractHelper
      * @param $storeId
      *
      * @return mixed|string
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getPreviewData($feed, $storeId)
     {
@@ -83,7 +83,7 @@ class Preview extends AbstractHelper
         $configTable = $this->getConfigTable($feed);
         $filterTable = $this->getFilterTable($config);
         $attributeTabe = $this->getAttributeTable($config);
-        $priceAttributes = $this->selftestHelper->checkPriceAttributes($config['store_id']);
+        $priceAttributes = $this->checkPriceAttributes((int)$config['store_id']);
 
         $hStyle = 'font-weight: bold;';
         $bStyle = 'background: #efefef;border: 1px solid #e7e7e7;';
@@ -248,5 +248,26 @@ class Preview extends AbstractHelper
 
         return '<h1 style="font-size: 25px;padding: 10px;border-left: 6px solid;">' . __('Feed Output') . '</h1>
             <pre>' . print_r($feed['products'], true) . '</pre>';
+    }
+
+    /**
+     * @param int $storeId
+     *
+     * @return array
+     */
+    public function checkPriceAttributes(int $storeId): array
+    {
+        $foundAttributes = [];
+
+        $priceAttributes = ['price', 'special_price'];
+        if ($extraFields = $this->generalHelper->getStoreValueArray(SourceHelper::XPATH_EXTRA_FIELDS, $storeId)) {
+            foreach ($extraFields as $attribute) {
+                if (!empty($attribute['attribute']) && in_array($attribute['attribute'], $priceAttributes)) {
+                    $foundAttributes[] = $attribute['attribute'];
+                }
+            }
+        }
+
+        return $foundAttributes;
     }
 }

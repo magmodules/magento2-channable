@@ -16,7 +16,7 @@ use Magento\Framework\Api\ExtensibleDataInterface;
 interface DataInterface extends ExtensibleDataInterface
 {
 
-    public const ID = 'id';
+    public const ENTITY_ID = 'entity_id';
     public const STORE_ID = 'store_id';
     public const ORDER_ID = 'order_id';
     public const CHANNEL_NAME = 'channel_name';
@@ -37,13 +37,7 @@ interface DataInterface extends ExtensibleDataInterface
     /**
      * @return int
      */
-    public function getId(): int;
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setId($value): self;
+    public function getEntityId(): int;
 
     /**
      * @return int
@@ -73,24 +67,24 @@ interface DataInterface extends ExtensibleDataInterface
     public function getChannelName(): string;
 
     /**
-     * @param string $channelName
+     * @param $channelName
      * @return $this
      */
-    public function setChannelName(string $channelName): self;
+    public function setChannelName($channelName): self;
 
     /**
-     * @return int
+     * @return string
      */
-    public function getChannelId(): int;
+    public function getChannelId(): string;
 
     /**
-     * @param int $channelId
+     * @param $channelId
      * @return $this
      */
-    public function setChannelId(int $channelId): self;
+    public function setChannelId($channelId): self;
 
     /**
-     * @return int
+     * @return string
      */
     public function getChannableId(): int;
 
@@ -112,26 +106,26 @@ interface DataInterface extends ExtensibleDataInterface
     public function setMagentoOrderId(int $magentoOrderId): self;
 
     /**
-     * @return int
+     * @return string
      */
-    public function getMagentoIncrementId(): int;
+    public function getMagentoIncrementId(): string;
 
     /**
      * @param int $magentoIncrementId
      * @return $this
      */
-    public function setMagentoIncrementId(int $magentoIncrementId): self;
+    public function setMagentoIncrementId(string $magentoIncrementId): self;
 
     /**
-     * @return string
+     * @return array
      */
-    public function getItem(): string;
+    public function getItem(): array;
 
     /**
-     * @param string $item
+     * @param array $item
      * @return $this
      */
-    public function setItem(string $item): self;
+    public function setItem(array $item): self;
 
     /**
      * @return string
@@ -145,26 +139,26 @@ interface DataInterface extends ExtensibleDataInterface
     public function setCustomerName(string $customerName): self;
 
     /**
-     * @return string
+     * @return array
      */
-    public function getCustomer(): string;
+    public function getCustomer(): array;
 
     /**
-     * @param string $customer
+     * @param array $customer
      * @return $this
      */
-    public function setCustomer(string $customer): self;
+    public function setCustomer(array $customer): self;
 
     /**
-     * @return string
+     * @return array
      */
-    public function getAddress(): string;
+    public function getAddress(): array;
 
     /**
-     * @param string $address
+     * @param array $address
      * @return $this
      */
-    public function setAddress(string $address): self;
+    public function setAddress(array $address): self;
 
     /**
      * @return string

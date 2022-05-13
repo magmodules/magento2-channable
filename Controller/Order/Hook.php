@@ -16,7 +16,6 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magmodules\Channable\Api\Order\RepositoryInterface as ChannableOrderRepository;
 use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 use Magmodules\Channable\Service\Order\Import as OrderImport;
-use Magmodules\Channable\Service\Order\Items\Validate as ValidateItems;
 use Magmodules\Channable\Service\Order\Validator\Data as DataValidator;
 
 /**
@@ -46,14 +45,6 @@ class Hook extends Action
      */
     private $logRepository;
     /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-    /**
-     * @var ValidateItems
-     */
-    private $validateItems;
-    /**
      * @var ChannableOrderRepository
      */
     private $channableOrderRepository;
@@ -65,7 +56,6 @@ class Hook extends Action
      * @param DataValidator $dataValidator
      * @param JsonFactory $resultJsonFactory
      * @param FilesystemDriver $driver
-     * @param ValidateItems $validateItems
      * @param LogRepository $logRepository
      * @param StoreManagerInterface $storeManager
      * @param ChannableOrderRepository $channableOrderRepository
@@ -76,18 +66,14 @@ class Hook extends Action
         DataValidator $dataValidator,
         JsonFactory $resultJsonFactory,
         FilesystemDriver $driver,
-        ValidateItems $validateItems,
         LogRepository $logRepository,
-        StoreManagerInterface $storeManager,
         ChannableOrderRepository $channableOrderRepository
     ) {
         $this->orderImport = $orderImport;
         $this->dataValidator = $dataValidator;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->driver = $driver;
-        $this->validateItems = $validateItems;
         $this->logRepository = $logRepository;
-        $this->storeManager = $storeManager;
         $this->channableOrderRepository = $channableOrderRepository;
         parent::__construct($context);
     }
@@ -113,9 +99,6 @@ class Hook extends Action
                 }
             }
             if (empty($response['errors'])) {
-                $lvb = $orderData['order_status'] == 'shipped';
-                $store = $this->storeManager->getStore($storeId);
-                $this->validateItems->execute($orderData['products'], $store, $lvb);
                 $channableOrder = $this->channableOrderRepository->createByDataArray($orderData, $storeId);
                 $order = $this->orderImport->execute($channableOrder);
                 $response = $this->dataValidator->jsonResponse('', $order->getIncrementId());

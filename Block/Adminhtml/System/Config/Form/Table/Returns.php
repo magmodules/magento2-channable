@@ -10,6 +10,7 @@ namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Table;
 use Magento\Backend\Block\Template\Context;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magento\Framework\Data\Form\Element\Renderer\RendererInterface;
+use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Store\Model\StoreManagerInterface;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
@@ -40,6 +41,10 @@ class Returns extends Template implements RendererInterface
      * @var StoreManagerInterface
      */
     private $storeManager;
+    /**
+     * @var UrlInterface
+     */
+    private $urlBuilder;
 
     /**
      * @param Context $context
@@ -56,6 +61,7 @@ class Returns extends Template implements RendererInterface
         $this->configProvider = $configProvider;
         $this->logRepository = $logRepository;
         $this->storeManager = $storeManager;
+        $this->urlBuilder = $context->getUrlBuilder();
         parent::__construct($context);
     }
 
@@ -101,5 +107,16 @@ class Returns extends Template implements RendererInterface
             }
         }
         return $configData;
+    }
+
+    /**
+     * Url builder for returns simulator
+     *
+     * @param int $storeId
+     * @return string
+     */
+    public function getTestReturnsUrl(int $storeId): string
+    {
+        return $this->urlBuilder->getUrl('channable/returns/simulate', ['store_id' => $storeId]);
     }
 }

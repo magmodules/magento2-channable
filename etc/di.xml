@@ -9,11 +9,6 @@
     <!-- Log Block Start -->
     <preference for="Magmodules\Channable\Api\Log\RepositoryInterface"
                 type="Magmodules\Channable\Model\Log\Repository"/>
-    <type name="Magmodules\Channable\Logger\Handler">
-        <arguments>
-            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
-        </arguments>
-    </type>
     <type name="Magmodules\Channable\Logger\ErrorLogger">
         <arguments>
             <argument name="name" xsi:type="string">ChannableError</argument>
@@ -58,18 +53,7 @@
             </argument>
         </arguments>
     </type>
-    <type name="Magento\Framework\Console\CommandList">
-        <arguments>
-            <argument name="commands" xsi:type="array">
-                <item name="ChannableItemUpdate" xsi:type="object">Magmodules\Channable\Console\Command\ItemUpdate</item>
-            </argument>
-        </arguments>
-    </type>
-    <type name="Magmodules\Channable\Console\Command\ItemUpdate">
-        <arguments>
-            <argument name="generalHelper" xsi:type="object">Magmodules\Channable\Helper\General\Proxy</argument>
-        </arguments>
-    </type>
+
 
     <type name="Magento\CatalogInventory\Model\StockState">
         <plugin name="channable_skip_qty_check" type="Magmodules\Channable\Plugin\AfterCheckQty"/>
@@ -78,25 +62,25 @@
         <plugin name="channable_skip_csrf_validator" type="Magmodules\Channable\Plugin\AroundCsrfValidator" />
     </type>
     <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsSalableWithReservationsCondition">
-        <plugin name="chanable_skip_salable_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsSalableWithReservationsCondition" />
+        <plugin name="channable_skip_salable_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsSalableWithReservationsCondition" />
     </type>
     <type name="Magento\InventorySales\Model\IsProductSalableForRequestedQtyCondition\IsAnySourceItemInStockCondition">
-        <plugin name="chanable_skip_in_stock_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsAnySourceItemInStockCondition" />
+        <plugin name="channable_skip_in_stock_check_lvb_orders" type="Magmodules\Channable\Plugin\AroundIsAnySourceItemInStockCondition" />
     </type>
     <type name="Magento\CatalogInventory\Observer\QuantityValidatorObserver">
-        <plugin name="chanable_skip_quantity_validator_lvb_orders" type="Magmodules\Channable\Plugin\AroundQuantityValidator" />
+        <plugin name="channable_skip_quantity_validator_lvb_orders" type="Magmodules\Channable\Plugin\AroundQuantityValidator" />
     </type>
     <type name="Magento\InventorySourceDeductionApi\Model\SourceDeductionServicer">
-        <plugin name="chanable_skip_source_deduction_lvb_orders" type="Magmodules\Channable\Plugin\AroundSourceDeductionService" />
+        <plugin name="channable_skip_source_deduction_lvb_orders" type="Magmodules\Channable\Plugin\AroundSourceDeductionService" />
     </type>
     <type name="Magento\InventoryConfiguration\Model\StockItemConfiguration">
-        <plugin name="chanable_skip_manage_stock_lvb_orders" type="Magmodules\Channable\Plugin\AfterStockItemConfiguration" />
+        <plugin name="channable_skip_manage_stock_lvb_orders" type="Magmodules\Channable\Plugin\AfterStockItemConfiguration" />
     </type>
     <type name="Magento\CatalogInventory\Model\Configuration">
-        <plugin name="chanable_force_backorder" type="Magmodules\Channable\Plugin\AfterGetBackorders" />
+        <plugin name="channable_force_backorder" type="Magmodules\Channable\Plugin\AfterGetBackorders" />
     </type>
     <type name="Amasty\ShopbySeo\Helper\Data">
-        <plugin name="chanable_bypass_amasty_shopbyseo" type="Magmodules\Channable\Plugin\AroundIsAllowedRequest"/>
+        <plugin name="channable_bypass_amasty_shopbyseo" type="Magmodules\Channable\Plugin\AroundIsAllowedRequest"/>
     </type>
 
     <preference for="Magmodules\Channable\Api\Config\RepositoryInterface"
@@ -111,8 +95,6 @@
                 type="Magmodules\Channable\Model\Order\Repository"/>
     <preference for="Magmodules\Channable\Api\Order\Data\DataInterface"
                 type="Magmodules\Channable\Model\Order\DataModel"/>
-    <preference for="Magmodules\Channable\Api\Order\Data\SearchResultsInterface"
-                type="Magento\Framework\Api\SearchResults"/>
     <preference for="Magmodules\Channable\Api\Order\Data\SearchResultsInterface"
                 type="Magento\Framework\Api\SearchResults"/>
     <type name="Magmodules\Channable\Model\Order\Repository">
@@ -157,16 +139,21 @@
             </argument>
         </arguments>
     </type>
-    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
-        <arguments>
-            <argument name="collections" xsi:type="array">
-                <item name="channable_order_grid_data_source" xsi:type="string">Magmodules\Channable\Model\Order\ResourceModel\Grid\Collection</item>
-            </argument>
-        </arguments>
-    </type>
     <!-- Channable Order Block End -->
 
     <!-- Channable Returns Block Start -->
+    <preference for="Magmodules\Channable\Api\Returns\RepositoryInterface"
+                type="Magmodules\Channable\Model\Returns\Repository"/>
+    <preference for="Magmodules\Channable\Api\Returns\Data\DataInterface"
+                type="Magmodules\Channable\Model\Returns\DataModel"/>
+    <preference for="Magmodules\Channable\Api\Returns\Data\SearchResultsInterface"
+                type="Magento\Framework\Api\SearchResults"/>
+    <virtualType name="Magmodules\Channable\Model\Returns\ResourceModel\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">channable_returns</argument>
+            <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel</argument>
+        </arguments>
+    </virtualType>
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
@@ -174,46 +161,50 @@
             </argument>
         </arguments>
     </type>
-    <preference for="Magmodules\Channable\Api\Returns\RepositoryInterface"
-                type="Magmodules\Channable\Model\Returns\Repository"/>
-    <preference for="Magmodules\Channable\Api\Returns\Data\DataInterface"
-                type="Magmodules\Channable\Model\Returns\Data\ApiModel"/>
-    <preference for="Magmodules\Channable\Api\Returns\Data\SearchResultsInterface"
-                type="Magento\Framework\Api\SearchResults"/>
-    <type name="Magmodules\Channable\Model\Returns\Repository">
+    <!-- Channable Returns Block End -->
+
+    <!-- Channable Selftest Block Start -->
+    <preference for="Magmodules\Channable\Api\Selftest\RepositoryInterface"
+                type="Magmodules\Channable\Model\Selftest\Repository"/>
+    <type name="Magmodules\Channable\Model\Selftest\Repository">
         <arguments>
-            <argument name="metadata" xsi:type="object">channableReturnsMetadata</argument>
+            <argument name="testList" xsi:type="array">
+                <item name="extensionStatus" xsi:type="object">Magmodules\Channable\Service\Test\ExtensionStatus</item>
+                <item name="magentoVersion" xsi:type="object">Magmodules\Channable\Service\Test\MagentoVersion</item>
+                <item name="extensionVersion" xsi:type="object">Magmodules\Channable\Service\Test\ExtensionVersion</item>
+                <item name="phpVersion" xsi:type="object">Magmodules\Channable\Service\Test\PhpVersion</item>
+                <item name="phpExtensions" xsi:type="object">Magmodules\Channable\Service\Test\PhpExtensions</item>
+                <item name="orderImport" xsi:type="object">Magmodules\Channable\Service\Test\OrderImport</item>
+                <item name="productFeed" xsi:type="object">Magmodules\Channable\Service\Test\ProductFeed</item>
+                <item name="itemUpdate" xsi:type="object">Magmodules\Channable\Service\Test\ItemUpdate</item>
+                <item name="cron" xsi:type="object">Magmodules\Channable\Service\Test\Cron</item>
+            </argument>
         </arguments>
     </type>
-    <virtualType name="channableReturnsMetadata" type="Magmodules\Channable\Model\Base\Metadata">
+    <!-- Channable Selftest Block End -->
+
+    <!-- Proxy block start -->
+    <type name="Magmodules\Channable\Console\Command\ItemUpdate">
         <arguments>
-            <argument name="resourceClassName"
-                      xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel\ResourceModel
+            <argument name="generalHelper" xsi:type="object">Magmodules\Channable\Helper\General\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Magmodules\Channable\Console\Command\Selftest">
+        <arguments>
+            <argument name="selftestRepository" xsi:type="object">Magmodules\Channable\Model\Selftest\Repository\Proxy</argument>
+        </arguments>
+    </type>
+    <!-- Proxy block start -->
+
+    <!-- Command line block start -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="ChannableSelftest" xsi:type="object">Magmodules\Channable\Console\Command\Selftest</item>
+                <item name="ChannableSOrderSimulate" xsi:type="object">Magmodules\Channable\Console\Command\OrderSimulate</item>
+                <item name="ChannableItemUpdate" xsi:type="object">Magmodules\Channable\Console\Command\ItemUpdate</item>
             </argument>
-            <argument name="modelClassName"
-                      xsi:type="string">Magmodules\Channable\Model\Returns\DataModel
-            </argument>
         </arguments>
-    </virtualType>
-    <virtualType name="ReturnsGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
-        <arguments>
-            <argument name="appliers" xsi:type="array">
-                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
-                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
-            </argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="ReturnsGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
-        <arguments>
-            <argument name="collection" xsi:type="object" shared="false">Magmodules\Channable\Model\Returns\ResourceModel\Collection</argument>
-            <argument name="filterPool" xsi:type="object" shared="false">ReturnsGridFilterPool</argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="Magmodules\Channable\Model\Returns\ResourceModel\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
-        <arguments>
-            <argument name="mainTable" xsi:type="string">channable_returns</argument>
-            <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel\ResourceModel</argument>
-        </arguments>
-    </virtualType>
-    <!-- Channable Returns Block End -->
+    </type>
+    <!-- Command line block end -->
 </config>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <section id="channable_returns" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Returns</label>
+        <tab>channable</tab>
+        <resource>Magmodules_Channable::config_returns</resource>
+        <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Branding</label>
+            <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Header</frontend_model>
+        </group>
+        <group id="returns" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Returns</label>
+            <comment>In order to use the Channable Item API, you have to set the API settings on the store level where you want to import the orders from Channable. The settings are only visible when you have the right store-view selected through the store switcher on the top left.</comment>
+            <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Enable</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/returns/enable</config_path>
+            </field>
+            <field id="heading_returns_stores" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Webhooks</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <comment><![CDATA[Copy and paste the Webhook URL to configure your Magento Store in your ChannableMarketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.]]></comment>
+            </field>
+            <field id="order_stores" translate="label" type="text" sortOrder="71" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Stores</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Table\Returns</frontend_model>
+            </field>
+        </group>
+    </section>
+</include>

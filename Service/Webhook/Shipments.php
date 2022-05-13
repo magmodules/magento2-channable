@@ -47,6 +47,7 @@ class Shipments
      * @param DateTime $coreDate
      * @param TimezoneInterface $localeDate
      * @param OrderCollectionFactory $orderCollectionFactory
+     * @param Fulfillment $fulfillment
      */
     public function __construct(
         ShipmentCollectionFactory $shipmentCollectionFactory,
@@ -63,6 +64,8 @@ class Shipments
     }
 
     /**
+     * Get all shipments by timespan offset
+     *
      * @param int $timespan
      * @return array
      */
@@ -73,9 +76,10 @@ class Shipments
 
         $collection = $this->shipmentCollectionFactory->create();
         $collection->addFieldToFilter(
-            'main_table.created_at', ['gteq' => $this->getDateTime($timespan)]
+            'main_table.created_at',
+            ['gteq' => $this->getDateTime($timespan)]
         )->join(
-            ['so' => $collection->getTable('sales_order')],
+            ['so' => $collection->getTable('sales_order_grid')],
             'main_table.order_id = so.entity_id',
             [
                 'order_increment_id' => 'so.increment_id',
@@ -102,9 +106,11 @@ class Shipments
 
         $orders = $this->orderCollectionFactory->create()
             ->addFieldToFilter(
-                'updated_at', ['gteq' => $this->getDateTime($timespan)]
+                'updated_at',
+                ['gteq' => $this->getDateTime($timespan)]
             )->addFieldToFilter(
-                'state', ['in' => [OrderModel::STATE_COMPLETE, OrderModel::STATE_CLOSED, OrderModel::STATE_CANCELED]]
+                'state',
+                ['in' => [OrderModel::STATE_COMPLETE, OrderModel::STATE_CLOSED, OrderModel::STATE_CANCELED]]
             )->join(
                 ['sop' => $collection->getTable('sales_order_payment')],
                 'main_table.entity_id = sop.parent_id',
@@ -129,6 +135,8 @@ class Shipments
     }
 
     /**
+     * Get start date by offset
+     *
      * @param int $timespan
      * @return false|string
      */

@@ -11,18 +11,26 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Phrase;
 use Magento\Quote\Model\Quote;
 use Magento\Store\Api\Data\StoreInterface;
-use Magento\Tax\Model\Calculation as TaxCalculationn;
+use Magento\Tax\Model\Calculation as TaxCalculation;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Exceptions\CouldNotImportOrder;
 
 /**
  * Add items to quote
  */
 class Add
 {
+
+    /**
+     * Exception messages
+     */
+    public const EMPTY_ITEMS_EXCEPTION = 'No products found in order';
+    public const PRODUCT_NOT_FOUND_EXCEPTION = 'Product "%1" not found in catalog (ID: %2)';
+    public const PRODUCT_EXCEPTION = 'Product "%1" => %2';
 
     /**
      * @var ConfigProvider
@@ -45,7 +53,7 @@ class Add
     private $checkoutSession;
 
     /**
-     * @var TaxCalculationn
+     * @var TaxCalculation
      */
     private $taxCalculation;
 
@@ -55,14 +63,14 @@ class Add
      * @param ProductRepositoryInterface $productRepository
      * @param StockRegistryInterface $stockRegistry
      * @param CheckoutSession $checkoutSession
-     * @param TaxCalculationn $taxCalculation
+     * @param TaxCalculation $taxCalculation
      */
     public function __construct(
         ConfigProvider $configProvider,
         ProductRepositoryInterface $productRepository,
         StockRegistryInterface $stockRegistry,
         CheckoutSession $checkoutSession,
-        TaxCalculationn $taxCalculation
+        TaxCalculation $taxCalculation
     ) {
         $this->configProvider = $configProvider;
         $this->productRepository = $productRepository;
@@ -77,24 +85,32 @@ class Add
      * @param Quote $quote
      * @param array $data
      * @param StoreInterface $store
-     *
      * @param bool $lvbOrder
      * @return int
-     * @throws NoSuchEntityException
-     * @throws LocalizedException
+     * @throws CouldNotImportOrder
      */
     public function execute(Quote $quote, array $data, StoreInterface $store, bool $lvbOrder = false): int
     {
         $this->setCheckoutSessionData($lvbOrder, $quote->getStoreId());
-
         $qty = 0;
-        foreach ($data['products'] as $item) {
-            $product = $this->getProductById((int)$item['id']);
-            $price = $this->getProductPrice($item, $product, $store, $quote);
-            $product = $this->setProductData($product, $price, $store, $lvbOrder);
-            $item = $quote->addProduct($product, (int)$item['quantity']);
-            $item->setOriginalCustomPrice($price);
-            $qty += (int)$item['quantity'];
+
+        if (empty($data['products'])) {
+            $exceptionMsg = self::EMPTY_ITEMS_EXCEPTION;
+            throw new CouldNotImportOrder(__($exceptionMsg));
+        }
+
+        try {
+            foreach ($data['products'] as $item) {
+                $product = $this->getProductById((int)$item['id']);
+                $price = $this->getProductPrice($item, $product, $store, $quote);
+                $product = $this->setProductData($product, $price, $store, $lvbOrder);
+                $item = $quote->addProduct($product, (int)$item['quantity']);
+                $item->setOriginalCustomPrice($price);
+                $qty += (int)$item['quantity'];
+            }
+        } catch (\Exception $exception) {
+            $exceptionMsg = $this->reformatException($exception, $item);
+            throw new CouldNotImportOrder($exceptionMsg);
         }
 
         return $qty;
@@ -183,6 +199,8 @@ class Add
     }
 
     /**
+     * Add Channable specific data to the checkout session
+     *
      * @param bool $lvbOrder
      * @param int  $storeId
      *
@@ -197,6 +215,34 @@ class Add
 
         $this->checkoutSession->setChannableSkipReservation(
             $lvbOrder && $this->configProvider->disableStockMovementForLvbOrders($storeId)
+        );
+    }
+
+    /**
+     * Generate readable exception message
+     *
+     * @param \Exception $exception
+     * @param array $item
+     * @return Phrase
+     */
+    private function reformatException(\Exception $exception, array $item): Phrase
+    {
+        try {
+            $this->getProductById((int)$item['id']);
+        } catch (NoSuchEntityException $exception) {
+            $exceptionMsg = self::PRODUCT_NOT_FOUND_EXCEPTION;
+            return __(
+                $exceptionMsg,
+                !empty($item['title']) ? $item['title'] : __('*unknown*'),
+                $item['id']
+            );
+        }
+
+        $productException = self::PRODUCT_EXCEPTION;
+        return __(
+            $productException,
+            !empty($item['title']) ? $item['title'] : __('*unknown*'),
+            $exception->getMessage()
         );
     }
 }

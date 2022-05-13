@@ -12,8 +12,9 @@ use Magento\Framework\Exception\NoSuchEntityException;
 /**
  * Returns config group interface
  */
-interface ReturnsInterface
+interface ReturnsInterface extends ItemupdateInterface
 {
+
     public const XML_PATH_RETURNS_ENABLE = 'magmodules_channable_marketplace/returns/enable';
 
     /**

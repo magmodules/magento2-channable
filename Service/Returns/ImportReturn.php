@@ -9,12 +9,8 @@ namespace Magmodules\Channable\Service\Returns;
 
 use Exception;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\Serialize\Serializer\Json;
 use Magmodules\Channable\Api\Returns\RepositoryInterface as ReturnsRepository;
 
-/**
- * Class ImportReturn
- */
 class ImportReturn
 {
 
@@ -23,30 +19,25 @@ class ImportReturn
      */
     private $returnsRepository;
     /**
-     * @var Json
-     */
-    private $json;
-    /**
      * @var ResourceConnection
      */
     private $resource;
 
     /**
-     * @param Json               $json
      * @param ResourceConnection $resource
      * @param ReturnsRepository  $returnsRepository
      */
     public function __construct(
-        Json $json,
         ResourceConnection $resource,
         ReturnsRepository $returnsRepository
     ) {
         $this->returnsRepository = $returnsRepository;
-        $this->json = $json;
         $this->resource = $resource;
     }
 
     /**
+     * Import return data
+     *
      * @param array $returnData
      * @param int   $storeId
      *
@@ -55,36 +46,33 @@ class ImportReturn
     public function execute(array $returnData, int $storeId): array
     {
         $response = [];
-        $item = $returnData['item'];
-        $customer = $returnData['customer'];
-        $address = $returnData['address'];
+        $item = $returnData['item'] ?? [];
+        $customer = $returnData['customer'] ?? [];
+        $address = $returnData['address'] ?? [];
 
-        $data = [
-            'store_id'      => $storeId,
-            'order_id'      => $item['order_id'],
-            'channel_name'  => $returnData['channel_name'],
-            'channel_id'    => $returnData['channel_id'],
-            'channable_id'  => $returnData['channable_id'],
-            'customer_name' => trim($customer['first_name'] . ' ' . $customer['last_name']),
-            'item'          => $this->json->serialize($item),
-            'customer'      => $this->json->serialize($customer),
-            'address'       => $this->json->serialize($address),
-            'status'        => $returnData['status'],
-            'reason'        => $item['reason'],
-            'comment'       => $item['comment']
-        ];
+        $returns = $this->returnsRepository->create();
+        $returns->setStoreId($storeId)
+            ->setOrderId((int)$item['order_id'])
+            ->setChannableId((int)$returnData['channable_id'])
+            ->setChannelName($returnData['channel_name'])
+            ->setChannelId($returnData['channel_id'])
+            ->setCustomerName(trim($customer['first_name'] . ' ' . $customer['last_name']))
+            ->setItem($item)
+            ->setCustomer($customer)
+            ->setAddress($address)
+            ->setStatus($returnData['status'])
+            ->setReason($item['reason'])
+            ->setComment($item['comment']);
 
         if ($salesOrderGridData = $this->getMagentoOrder((int)$returnData['channel_id'])) {
-            $data['magento_order_id'] = $salesOrderGridData['entity_id'];
-            $data['magento_increment_id'] = $salesOrderGridData['increment_id'];
+            $returns->setMagentoOrderId((int)$salesOrderGridData['entity_id']);
+            $returns->setMagentoIncrementId((string)$salesOrderGridData['increment_id']);
         }
-
-        $returns = $this->returnsRepository->create()->addData($data);
 
         try {
             $returns = $this->returnsRepository->save($returns);
             $response['validated'] = 'true';
-            $response['return_id'] = $returns->getId();
+            $response['return_id'] = $returns->getEntityId();
         } catch (Exception $e) {
             $response['validated'] = 'false';
             $response['errors'] = $e->getMessage();
@@ -94,6 +82,8 @@ class ImportReturn
     }
 
     /**
+     * Get Magento order by channable id
+     *
      * @param int $channableId
      *
      * @return mixed

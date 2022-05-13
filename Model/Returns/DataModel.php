@@ -22,10 +22,13 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
 {
 
     /**
+     * @var string
+     */
+    protected $_eventPrefix = 'channable_returns';
+    /**
      * @var DataObjectHelper
      */
     private $dataObjectHelper;
-
     /**
      * @var DataInterfaceFactory
      */
@@ -33,21 +36,22 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
 
     /**
      * DataModel constructor.
-     * @param Context $context
-     * @param Registry $registry
+     *
+     * @param Context              $context
+     * @param Registry             $registry
      * @param DataInterfaceFactory $itemDataFactory
-     * @param DataObjectHelper $dataObjectHelper
-     * @param ResourceModel\ResourceModel $resource
-     * @param ResourceModel\Collection $collection
-     * @param array $data
+     * @param DataObjectHelper     $dataObjectHelper
+     * @param ResourceModel        $resource
+     * @param Collection           $collection
+     * @param array                $data
      */
     public function __construct(
         Context $context,
         Registry $registry,
         DataInterfaceFactory $itemDataFactory,
         DataObjectHelper $dataObjectHelper,
-        ResourceModel\ResourceModel $resource,
-        ResourceModel\Collection $collection,
+        ResourceModel $resource,
+        Collection $collection,
         array $data = []
     ) {
         $this->itemDataFactory = $itemDataFactory;
@@ -74,27 +78,11 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     }
 
     /**
-     * Constructor
-     */
-    public function _construct()
-    {
-        $this->_init(ResourceModel\ResourceModel::class);
-    }
-
-    /**
      * @inheritDoc
      */
-    public function getId(): int
+    public function getEntityId(): int
     {
-        return (int)$this->getData(self::ID);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setId($value): ChannableReturnsData
-    {
-        return $this->setData(self::ID, $value);
+        return (int)$this->getData(self::ENTITY_ID);
     }
 
     /**
@@ -140,7 +128,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
-    public function setChannelName(string $channelName): ChannableReturnsData
+    public function setChannelName($channelName): ChannableReturnsData
     {
         return $this->setData(self::CHANNEL_NAME, $channelName);
     }
@@ -148,15 +136,15 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
-    public function getChannelId(): int
+    public function getChannelId(): string
     {
-        return (int)$this->getData(self::CHANNEL_ID);
+        return (string)$this->getData(self::CHANNEL_ID);
     }
 
     /**
      * @inheritDoc
      */
-    public function setChannelId(int $channelId): ChannableReturnsData
+    public function setChannelId($channelId): ChannableReturnsData
     {
         return $this->setData(self::CHANNEL_ID, $channelId);
     }
@@ -196,15 +184,15 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
-    public function getMagentoIncrementId(): int
+    public function getMagentoIncrementId(): string
     {
-        return (int)$this->getData(self::MAGENTO_INCREMENT_ID);
+        return (string)$this->getData(self::MAGENTO_INCREMENT_ID);
     }
 
     /**
      * @inheritDoc
      */
-    public function setMagentoIncrementId(int $magentoIncrementId): ChannableReturnsData
+    public function setMagentoIncrementId(string $magentoIncrementId): ChannableReturnsData
     {
         return $this->setData(self::MAGENTO_INCREMENT_ID, $magentoIncrementId);
     }
@@ -212,15 +200,15 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
-    public function getItem(): string
+    public function getItem(): array
     {
-        return (string)$this->getData(self::ITEM);
+        return $this->getData(self::ITEM);
     }
 
     /**
      * @inheritDoc
      */
-    public function setItem(string $item): ChannableReturnsData
+    public function setItem(array $item): ChannableReturnsData
     {
         return $this->setData(self::ITEM, $item);
     }
@@ -244,15 +232,15 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
-    public function getCustomer(): string
+    public function getCustomer(): array
     {
-        return (string)$this->getData(self::CUSTOMER);
+        return $this->getData(self::CUSTOMER);
     }
 
     /**
      * @inheritDoc
      */
-    public function setCustomer(string $customer): ChannableReturnsData
+    public function setCustomer(array $customer): ChannableReturnsData
     {
         return $this->setData(self::CUSTOMER, $customer);
     }
@@ -260,15 +248,15 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
-    public function getAddress(): string
+    public function getAddress(): array
     {
-        return (string)$this->getData(self::ADDRESS);
+        return $this->getData(self::ADDRESS);
     }
 
     /**
      * @inheritDoc
      */
-    public function setAddress(string $address): ChannableReturnsData
+    public function setAddress(array $address): ChannableReturnsData
     {
         return $this->setData(self::ADDRESS, $address);
     }

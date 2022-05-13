@@ -28,9 +28,11 @@ use Magmodules\Channable\Model\Config\Source\Status;
  */
 class Import
 {
-
-    const LVB_AUTO_SHIP_MESSAGE = 'LVB Order, Automaticly Shipped';
-    const COULD_NOT_IMPORT_ORDER = 'Could not import order %1, error: %2';
+    /**
+     * Exception messages
+     */
+    private const LVB_AUTO_SHIP_MESSAGE = 'LVB Order, automatically shipped';
+    private const COULD_NOT_IMPORT_ORDER = 'Could not import order %1: %2';
 
     /**
      * @var ConfigProvider
@@ -61,11 +63,6 @@ class Import
      * @var ItemsForReindex
      */
     private $itemsForReindex;
-
-    /**
-     * @var Items\Validate
-     */
-    private $validateItems;
 
     /**
      * @var Items\Add
@@ -130,23 +127,24 @@ class Import
     /**
      * Import constructor.
      *
-     * @param ConfigProvider               $configProvider
-     * @param StoreManagerInterface        $storeManager
-     * @param QuoteManagement              $quoteManagement
-     * @param OrderRepositoryInterface     $orderRepository
-     * @param CheckoutSession              $checkoutSession
-     * @param ItemsForReindex              $itemsForReindex
-     * @param Items\Validate               $validateItems
-     * @param Items\Add                    $addItems
-     * @param Quote\Create                 $createQuote
-     * @param Shipping\CalculatePrice      $calculateShippingPrice
-     * @param Shipping\GetMethod           $getShippingMethod
-     * @param Process\CreateInvoice        $createInvoice
-     * @param Process\CreateShipment       $createShipment
-     * @param Process\AddPaymentData       $addPaymentData
+     * @param ConfigProvider $configProvider
+     * @param StoreManagerInterface $storeManager
+     * @param QuoteManagement $quoteManagement
+     * @param OrderRepositoryInterface $orderRepository
+     * @param CheckoutSession $checkoutSession
+     * @param ItemsForReindex $itemsForReindex
+     * @param Items\Add $addItems
+     * @param Quote\Create $createQuote
+     * @param Shipping\CalculatePrice $calculateShippingPrice
+     * @param Shipping\GetMethod $getShippingMethod
+     * @param Shipping\GetDescription $getShippingDescription
+     * @param Process\CreateInvoice $createInvoice
+     * @param Process\CreateShipment $createShipment
+     * @param Process\AddPaymentData $addPaymentData
      * @param Process\GetCustomIncrementId $getCustomIncrementId
-     * @param ChannableOrderRepository     $channableOrderRepository
-     * @param Json                         $json
+     * @param ChannableOrderRepository $channableOrderRepository
+     * @param LoggerRepository $logger
+     * @param Json $json
      */
     public function __construct(
         ConfigProvider $configProvider,
@@ -155,7 +153,6 @@ class Import
         OrderRepositoryInterface $orderRepository,
         CheckoutSession $checkoutSession,
         ItemsForReindex $itemsForReindex,
-        Items\Validate $validateItems,
         Items\Add $addItems,
         Quote\Create $createQuote,
         Shipping\CalculatePrice $calculateShippingPrice,
@@ -175,7 +172,6 @@ class Import
         $this->orderRepository = $orderRepository;
         $this->checkoutSession = $checkoutSession;
         $this->itemsForReindex = $itemsForReindex;
-        $this->validateItems = $validateItems;
         $this->addItems = $addItems;
         $this->createQuote = $createQuote;
         $this->calculateShippingPrice = $calculateShippingPrice;
@@ -266,9 +262,9 @@ class Import
             $this->orderRepository->save($order);
             return $order;
         } catch (Exception $exception) {
-            $coulNotImportMsg = self::COULD_NOT_IMPORT_ORDER;
+            $couldNotImportMsg = self::COULD_NOT_IMPORT_ORDER;
             $message = __(
-                (string)$coulNotImportMsg,
+                $couldNotImportMsg,
                 $orderData['channable_id'],
                 $exception->getMessage()
             );
@@ -291,6 +287,8 @@ class Import
     }
 
     /**
+     * Check if we need to invoice and ship order
+     *
      * @param OrderInterface $order
      * @param int            $storeId
      * @param bool           $lvbOrder
@@ -316,7 +314,7 @@ class Import
     }
 
     /**
-     * Add 'success' data to Channable Order on successfull import
+     * Add 'success' data to Channable Order on successfully import
      *
      * @param ChannableOrderData $channableOrder
      * @param OrderInterface     $order
@@ -337,11 +335,11 @@ class Import
      * Add 'error' data to Channable Order on failed import
      *
      * @param ChannableOrderData $channableOrder
-     * @param string             $errorMsg
+     * @param string $errorMsg
      *
      * @throws LocalizedException
      */
-    public function setChannableOrderImportError(ChannableOrderData $channableOrder, $errorMsg): void
+    public function setChannableOrderImportError(ChannableOrderData $channableOrder, string $errorMsg): void
     {
         $channableOrder->setErrorMsg($errorMsg);
         $attempts = $channableOrder->getAttempts();
@@ -366,5 +364,4 @@ class Import
         $this->checkoutSession->unsChannableSkipQtyCheck();
         $this->checkoutSession->unsChannableSkipReservation();
     }
-
 }

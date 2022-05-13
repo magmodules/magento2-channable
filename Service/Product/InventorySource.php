@@ -1,19 +1,15 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Service\Product;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Module\Manager as ModuleManager;
 
-/**
- * Class InventorySource
- *
- * @package Magmodules\Channable\Service\Product
- */
 class InventorySource
 {
 
@@ -44,23 +40,21 @@ class InventorySource
     /**
      * Returns inventory source (stock_id) by websiteCode
      *
-     * @param $websiteCode
+     * @param string $websiteCode
      *
-     * @return string
+     * @return null|int
      */
-    public function execute($websiteCode)
+    public function execute(string $websiteCode): ?int
     {
-        $source = null;
-
         if (!$this->isMsiEnabled()) {
-            return $source;
+            return null;
         }
 
         $connection = $this->resourceConnection->getConnection();
         $tableName = $this->resourceConnection->getTableName('inventory_stock_sales_channel');
 
         if (!$connection->isTableExists($tableName)) {
-            return $source;
+            return null;
         }
 
         $select = $connection->select()
@@ -68,15 +62,16 @@ class InventorySource
             ->where('code = ?', $websiteCode)
             ->limit(1);
 
-        return $connection->fetchOne($select);
+        return (int)$connection->fetchOne($select);
     }
 
     /**
+     * Check if MSI is enabled
+     *
      * @return bool
      */
-    public function isMsiEnabled()
+    public function isMsiEnabled(): bool
     {
         return $this->moduleManager->isEnabled('Magento_Inventory');
     }
-
 }

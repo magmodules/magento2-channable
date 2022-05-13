@@ -1,19 +1,16 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Service\Product;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
 
-/**
- * Class InventoryData
- *
- * @package Magmodules\Channable\Service\Product
- */
 class InventoryData
 {
 
@@ -34,39 +31,40 @@ class InventoryData
     }
 
     /**
+     * Get Salable QTY for a product by StockID
+     *
      * @param ProductInterface $product
-     * @param                  $stockId
+     * @param int $stockId
      *
      * @return float|int|mixed
      */
-    public function getSalableQty(ProductInterface $product, $stockId)
+    public function getSalableQty(ProductInterface $product, int $stockId): float
     {
         $inventoryData = $this->getInventoryData($product->getSku(), $stockId);
         $reservations = $this->getReservations($product->getSku(), $stockId);
 
-        $qty = isset($inventoryData['quantity']) ? $inventoryData['quantity'] - $reservations : 0;
-        $isSalable = isset($inventoryData['is_salable']) ? $inventoryData['is_salable'] : 0;
+        $qty = isset($inventoryData['quantity'])
+            ? $inventoryData['quantity'] - $reservations
+            : 0;
 
-        if ($isSalable) {
-            return $qty;
-        }
-
-        return 0;
+        return !empty($inventoryData['is_salable']) ? $qty : 0;
     }
 
     /**
-     * @param $sku
-     * @param $stockId
+     * Get Inventory Data by SKU and StockID
      *
-     * @return array|void
+     * @param string $sku
+     * @param int $stockId
+     *
+     * @return mixed
      */
-    private function getInventoryData($sku, $stockId)
+    private function getInventoryData(string $sku, int $stockId)
     {
         $connection = $this->resourceConnection->getConnection();
         $tableName = $this->resourceConnection->getTableName('inventory_stock_' . $stockId);
 
         if (!$connection->isTableExists($tableName)) {
-            return;
+            return [];
         }
 
         $select = $connection->select()
@@ -74,27 +72,24 @@ class InventoryData
             ->where('sku = ?', $sku)
             ->limit(1);
 
-        if ($stockData = $connection->fetchRow($select)) {
-            return $stockData;
-        }
+        return $connection->fetchRow($select);
     }
 
     /**
      * Returns number of reservations by SKU & StockId
      *
-     * @param $sku
-     * @param $stockId
+     * @param string $sku
+     * @param int $stockId
      *
      * @return float
      */
-    private function getReservations($sku, $stockId)
+    private function getReservations(string $sku, int $stockId): float
     {
-        $reservationQty = 0;
         $connection = $this->resourceConnection->getConnection();
         $tableName = $this->resourceConnection->getTableName('inventory_reservation');
 
         if (!$connection->isTableExists($tableName)) {
-            return $reservationQty;
+            return 0;
         }
 
         $select = $connection->select()
@@ -102,29 +97,25 @@ class InventoryData
             ->where('sku = ?', $sku)
             ->where('stock_id' . ' = ?', $stockId)
             ->limit(1);
-        if ($reservationQty = $connection->fetchOne($select)) {
-            return max(0, ($reservationQty * -1));
-        }
 
-        return $reservationQty;
+        return ($reservationQty = $connection->fetchOne($select))
+            ? max(0, ($reservationQty * -1))
+            : 0;
     }
 
     /**
-     * @param ProductInterface               $product
-     * @param                                $config
+     * Add stock data to product object
      *
-     * @return ProductInterface
+     * @param Product $product
+     * @param array $config
+     *
+     * @return Product
      */
-    public function addDataToProduct($product, $config)
+    public function addDataToProduct(Product $product, array $config): Product
     {
-        if (empty($config['inventory']['stock_id'])) {
-            return $product;
-        }
-
-        /**
-         * Return if product is not of simple type
-         */
-        if ($product->getTypeId() != 'simple') {
+        if (empty($config['inventory']['stock_id'])
+            || $product->getTypeId() != 'simple'
+        ) {
             return $product;
         }
 
@@ -132,8 +123,10 @@ class InventoryData
         $reservations = $this->getReservations($product->getSku(), $config['inventory']['stock_id']);
 
         $qty = isset($inventoryData['quantity']) ? $inventoryData['quantity'] - $reservations : 0;
-        $isSalable = isset($inventoryData['is_salable']) ? $inventoryData['is_salable'] : 0;
+        $isSalable = $inventoryData['is_salable'] ?? 0;
 
-        return $product->setQty($qty)->setIsSalable($isSalable)->setIsInStock($isSalable);
+        return $product->setQty($qty)
+            ->setIsSalable($isSalable)
+            ->setIsInStock($isSalable);
     }
 }

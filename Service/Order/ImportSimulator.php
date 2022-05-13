@@ -29,7 +29,12 @@ class ImportSimulator
     /**
      * Available options
      */
-    const PARAMS = ['country', 'lvb', 'product_id'];
+    public const PARAMS = ['country', 'lvb', 'product_id', 'qty'];
+
+    /**
+     * Exception message
+     */
+    private const ORDER_IMPORT_DISABLED = 'Order import not enabled for this store (Store ID: %1)';
 
     /**
      * @var Import
@@ -72,7 +77,6 @@ class ImportSimulator
     private $channableOrderRepository;
 
     /**
-     * ImportSimulator constructor.
      * @param Import $import
      * @param ProductRepositoryInterface $productRepository
      * @param ProductCollectionFactory $productCollection
@@ -108,17 +112,17 @@ class ImportSimulator
      */
     public function execute(int $storeId, array $params = []): OrderInterface
     {
-        $this->storeId = (int)$storeId;
-
-        if (!$this->configProvider->isOrderEnabled((int)$storeId)) {
-            throw new CouldNotImportOrder(
-                __('Order import not enabled for this store (Store ID: %1)', $this->storeId)
-            );
+        $this->storeId = $storeId;
+        if (!$this->configProvider->isOrderEnabled($storeId)) {
+            $errorMsg = self::ORDER_IMPORT_DISABLED;
+            throw new CouldNotImportOrder(__($errorMsg, $this->storeId));
         }
+
         $channableOrder = $this->channableOrderRepository->createByDataArray(
-            $this->getTestData($params, $storeId),
+            $this->getTestData($params),
             $storeId
         );
+
         return $this->import->execute($channableOrder);
     }
 
@@ -126,11 +130,12 @@ class ImportSimulator
      * Get test data in Channable Order format
      *
      * @param array $params
+     *
      * @return array
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getTestData($params = [], $storeId = null): array
+    public function getTestData(array $params): array
     {
         $country = !empty($params['country']) ? $params['country'] : 'NL';
         $this->productId = !empty($params['product_id']) ? $params['product_id'] : null;
@@ -207,7 +212,7 @@ class ImportSimulator
             "products" => [
                 [
                     "id" => $product['id'],
-                    "quantity" => 2,
+                    "quantity" => !empty($params['qty']) ? (float)$params['qty'] : 2,
                     "price" => $product['price'],
                     "ean" => $product['sku'],
                     "reference_code" => $product['sku'],
