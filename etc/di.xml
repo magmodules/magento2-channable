@@ -194,6 +194,11 @@
             <argument name="selftestRepository" xsi:type="object">Magmodules\Channable\Model\Selftest\Repository\Proxy</argument>
         </arguments>
     </type>
+    <type name="Magmodules\Channable\Console\Command\OrderSimulate">
+        <arguments>
+            <argument name="importSimulator" xsi:type="object">Magmodules\Channable\Service\Order\ImportSimulator\Proxy</argument>
+        </arguments>
+    </type>
     <!-- Proxy block start -->
 
     <!-- Command line block start -->
