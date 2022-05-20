@@ -74,4 +74,19 @@ class ReturnLabel extends AbstractFieldArray
         }
         $row->setData('option_extra_attrs', $options);
     }
+    
+     /**
+     * @param string $columnName
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public function renderCellTemplate($columnName)
+    {
+        if ($columnName == 'title_regexp') {
+            $this->_columns[$columnName]['class'] = 'input-select required-entry';
+        }
+
+        return parent::renderCellTemplate($columnName);
+    }
 }
