@@ -8,6 +8,7 @@ namespace Magmodules\Channable\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Framework\Exception\LocalizedException;
@@ -130,13 +131,16 @@ class Source extends AbstractHelper
     }
 
     /**
-     * @param        $storeId
-     * @param string $type
+     * Get config data as array
      *
+     * @param int $storeId
+     * @param string|null $type
+     * @param string|null $currency
      * @return array
      * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function getConfig($storeId, $type = 'feed')
+    public function getConfig(int $storeId, ?string $type = 'feed', ?string $currency = null): array
     {
         $config = [
             'flat' => false,
@@ -147,7 +151,7 @@ class Source extends AbstractHelper
             'date_time' => $this->generalHelper->getDateTime(),
             'filters' => $this->getProductFilters($type),
             'attributes' => $this->getAttributes($type, $this->getProductFilters($type)),
-            'price_config' => $this->getPriceConfig($type),
+            'price_config' => $this->getPriceConfig($type, $currency),
             'inventory' => $this->getInventoryData($type),
             'inc_hidden_image' => $this->getStoreValue(self::XPATH_IMAGE_INC_HIDDEN)
         ];
@@ -661,11 +665,13 @@ class Source extends AbstractHelper
     }
 
     /**
-     * @param $type
-     *
+     * @param string|null $type
+     * @param string|null $currency
      * @return array
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function getPriceConfig($type)
+    public function getPriceConfig(?string $type, ?string $currency = null)
     {
         $store = $this->storeManager->getStore();
 
@@ -675,7 +681,9 @@ class Source extends AbstractHelper
         $priceFields['min_price'] = 'min_price';
         $priceFields['max_price'] = 'max_price';
         $priceFields['sales_date_range'] = 'sale_price_effective_date';
-        $priceFields['currency'] = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
+        $priceFields['currency'] = $currency === null
+            ? $this->storeManager->getStore()->getCurrentCurrency()->getCode()
+            : strtoupper($currency);
         $priceFields['exchange_rate'] = $store->getBaseCurrency()->getRate($priceFields['currency']);
         $priceFields['grouped_price_type'] = $this->getStoreValue(self::XPATH_GROUPED_PARENT_PRICE);
 
@@ -751,7 +759,7 @@ class Source extends AbstractHelper
      * @param \Magento\Catalog\Model\Product $parent
      * @param                                $config
      *
-     * @return string
+     * @return array
      */
     public function reformatData($dataRow, $product, $parent, $config)
     {
