@@ -45,6 +45,7 @@ class Source extends AbstractHelper
     const XPATH_INVENTORY_DATA = 'magmodules_channable/advanced/inventory_fields';
     const XPATH_FORCE_NON_MSI = 'magmodules_channable/advanced/force_non_msi';
     const XPATH_TAX = 'magmodules_channable/advanced/tax';
+    const XPATH_TAX_INCLUDE_BOTH = 'magmodules_channable/advanced/tax_include_both';
     const XPATH_MANAGE_STOCK = 'cataloginventory/item_options/manage_stock';
     const XPATH_MIN_SALES_QTY = 'cataloginventory/item_options/min_sale_qty';
     const XPATH_QTY_INCREMENTS = 'cataloginventory/item_options/qty_increments';
@@ -680,6 +681,7 @@ class Source extends AbstractHelper
         $priceFields['sales_price'] = 'sale_price';
         $priceFields['min_price'] = 'min_price';
         $priceFields['max_price'] = 'max_price';
+
         $priceFields['sales_date_range'] = 'sale_price_effective_date';
         $priceFields['currency'] = $currency === null
             ? $this->storeManager->getStore()->getCurrentCurrency()->getCode()
@@ -695,6 +697,14 @@ class Source extends AbstractHelper
             $priceFields['use_currency'] = true;
         } else {
             $priceFields['use_currency'] = false;
+        }
+
+        if ($this->getStoreValue(self::XPATH_TAX_INCLUDE_BOTH)) {
+            $priceFields['tax_include_both'] = true;
+            $priceFields['price_excl'] = 'price_excl';
+            $priceFields['price_incl'] = 'price_incl';
+            $priceFields['sales_price_excl'] = 'sales_price_excl';
+            $priceFields['sales_price_incl'] = 'sales_price_incl';
         }
 
         return $priceFields;
