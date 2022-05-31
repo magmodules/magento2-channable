@@ -15,6 +15,7 @@ use Magento\Framework\Exception\State\InputMismatchException;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Store\Api\Data\StoreInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
 
 /**
  * Create quote (guest or customer)
@@ -38,6 +39,11 @@ class Create
     private $addressHandler;
 
     /**
+     * @var CartRepositoryInterface
+     */
+    private $cartRepository;
+
+    /**
      * QuoteCreation constructor.
      *
      * @param QuoteFactory $quoteFactory
@@ -47,11 +53,13 @@ class Create
     public function __construct(
         QuoteFactory $quoteFactory,
         CustomerHandler $customerHandler,
-        AddressHandler $addressHandler
+        AddressHandler $addressHandler,
+        CartRepositoryInterface $cartRepository
     ) {
         $this->quoteFactory = $quoteFactory;
         $this->customerHandler = $customerHandler;
         $this->addressHandler = $addressHandler;
+        $this->cartRepository = $cartRepository;
     }
 
     /**
@@ -82,6 +90,9 @@ class Create
             $quote->setTransactionFee($orderData['price']['transaction_fee']);
         }
 
-        return $quote->save();
+        // Make sure the cart is registered by the repository
+        $this->cartRepository->save($quote);
+
+        return $quote;
     }
 }
