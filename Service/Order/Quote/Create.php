@@ -92,6 +92,7 @@ class Create
 
         // Make sure the cart is registered by the repository
         $this->cartRepository->save($quote);
+        $quote = $this->cartRepository->get($quote->getId());
 
         return $quote;
     }
