@@ -40,7 +40,7 @@ class Error extends AbstractOrder
      */
     private function getFormattedErrorData(array $item): string
     {
-        $message = explode(',', $item['error_msg']);
+        $message = explode(',', (string)$item['error_msg']);
         if (count($message) == 1) {
             if (strlen($item['error_msg']) < 30) {
                 return $item['error_msg'];

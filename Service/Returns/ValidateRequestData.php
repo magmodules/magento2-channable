@@ -64,7 +64,7 @@ class ValidateRequestData
             return $this->jsonResponse->execute('Token not set in admin');
         }
 
-        $code = trim(preg_replace('/\s+/', '', $request->getParam('code')));
+        $code = trim(preg_replace('/\s+/', '', (string)$request->getParam('code')));
         if (empty($code)) {
             return $this->jsonResponse->execute('Token param missing in request');
         }

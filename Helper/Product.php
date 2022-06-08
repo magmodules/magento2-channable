@@ -534,7 +534,7 @@ class Product extends AbstractHelper
      */
     public function getResizedImage($product, $source, $size)
     {
-        $size = explode('x', $size);
+        $size = explode('x', (string)$size);
         $width = $size[0];
         $height = end($size);
 
@@ -717,7 +717,7 @@ class Product extends AbstractHelper
             if ($attribute['type'] == 'multiselect') {
                 if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                     $value_text = [];
-                    $values = explode(',', $product->getData($attribute['source']));
+                    $values = explode(',', (string)$product->getData($attribute['source']));
                     foreach ($values as $value) {
                         $value_text[] = $attr->getSource()->getOptionText($value);
                     }
@@ -810,7 +810,7 @@ class Product extends AbstractHelper
         }
 
         foreach ($conditions as $condition) {
-            $ex = explode(':', $condition);
+            $ex = explode(':', (string)$condition);
             if ($ex['0'] == '*') {
                 $data = str_replace($ex[0] . ':', '', $condition);
             }
@@ -1083,7 +1083,7 @@ class Product extends AbstractHelper
             if (!empty($value['source'])) {
                 try {
                     if (!empty($value['multi'])) {
-                        $multipleSources = explode(',', $value['multi']);
+                        $multipleSources = explode(',', (string)$value['multi']);
                         $sourcesArray = [];
                         foreach ($multipleSources as $source) {
                             if (strlen($source)) {

@@ -216,7 +216,7 @@ class AddressHandler
             ->setFirstname($addressData['firstname'])
             ->setMiddlename($addressData['middlename'])
             ->setLastname($addressData['lastname'])
-            ->setStreet(explode("\n", $addressData['street']))
+            ->setStreet(explode("\n", (string)$addressData['street']))
             ->setCity($addressData['city'])
             ->setCountryId($addressData['country_id'])
             ->setRegionId($addressData['region'])

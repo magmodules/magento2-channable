@@ -422,12 +422,12 @@ class Source extends AbstractHelper
         $visibilityFilter = $this->getStoreValue(self::XPATH_VISBILITY);
         if ($visibilityFilter) {
             $visibility = $this->getStoreValue(self::XPATH_VISIBILITY_OPTIONS);
-            $filters['visibility'] = explode(',', $visibility);
+            $filters['visibility'] = explode(',', (string)$visibility);
         } else {
             $filters['visibility'] = [];
         }
 
-        $filters['limit'] = preg_replace('/\D/', '', $this->getStoreValue(self::XPATH_LIMIT));
+        $filters['limit'] = (int)$this->getStoreValue(self::XPATH_LIMIT);
         if ($type == 'api') {
             $filters['limit'] = 0;
         }
@@ -730,7 +730,7 @@ class Source extends AbstractHelper
             return $invAtt;
         }
 
-        $invAtt['attributes'] = explode(',', $fields);
+        $invAtt['attributes'] = explode(',', (string)$fields);
         $invAtt['attributes'][] = 'is_in_stock';
         $invAtt['attributes'][] = 'qty';
 
