@@ -40,6 +40,7 @@ interface OrderInterface extends ReturnsInterface
     const XML_PATH_LVB_ENABLED = 'magmodules_channable_marketplace/order/lvb';
     const XML_PATH_LVB_SKIP_STOCK = 'magmodules_channable_marketplace/order/lvb_stock';
     const XML_PATH_LVB_AUTO_SHIP = 'magmodules_channable_marketplace/order/lvb_ship';
+    const XML_PATH_DEDUCT_FPT = 'magmodules_channable_marketplace/order/deduct_fpt';
     const XML_PATH_LOG = 'magmodules_channable_marketplace/order/log';
     const XML_PATH_CARRIER_TITLE = 'carriers/channable/title';
     const XML_PATH_CARRIER_OVERWRITE_TITLE = 'carriers/channable/overwrite_title';
@@ -261,6 +262,15 @@ interface OrderInterface extends ReturnsInterface
      * @return bool
      */
     public function autoShipLvbOrders(int $storeId = null): bool;
+
+    /**
+     * Deduct fees/fixed product taxes (FPT) before import.
+     *
+     * @param null|int $storeId
+     *
+     * @return bool
+     */
+    public function deductFptTax(int $storeId = null): bool;
 
     /**
      * Log order import

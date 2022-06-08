@@ -120,6 +120,14 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     /**
      * @inheritDoc
      */
+    public function deductFptTax(int $storeId = null): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_DEDUCT_FPT, $storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function sendInvoiceEmailOnImport(int $storeId = null): bool
     {
         return $this->isSetFlag(self::XML_PATH_SEND_INVOICE, $storeId);
