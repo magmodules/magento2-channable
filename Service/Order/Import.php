@@ -239,8 +239,7 @@ class Import
                 $this->itemsForReindex->clear();
             }
 
-            $orderId = $this->quoteManagement->placeOrder($quote->getId());
-            $order = $this->orderRepository->get($orderId);
+            $order = $this->quoteManagement->submit($quote);
             $order->setTransactionFee($quote->getTransactionFee());
 
             if (isset($orderData['price']['discount']) && $orderData['price']['discount']) {
