@@ -204,15 +204,15 @@ class ImportSimulator
                 "subtotal" => $product['price'],
                 "payment" => 0,
                 "shipping" => 0,
-                "discount" => 10,
+                "discount" => 0,
                 "total" => $product['price'],
-                "transaction_fee" => 6.2,
+                "transaction_fee" => 0,
                 "commission" => round($product['price'] * 0.10, 2),
             ],
             "products" => [
                 [
                     "id" => $product['id'],
-                    "quantity" => !empty($params['qty']) ? (float)$params['qty'] : 2,
+                    "quantity" => !empty($params['qty']) ? (float)$params['qty'] : 1,
                     "price" => $product['price'],
                     "ean" => $product['sku'],
                     "reference_code" => $product['sku'],

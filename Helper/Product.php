@@ -534,7 +534,7 @@ class Product extends AbstractHelper
      */
     public function getResizedImage($product, $source, $size)
     {
-        $size = explode('x', $size);
+        $size = explode('x', (string)$size);
         $width = $size[0];
         $height = end($size);
 
@@ -717,7 +717,7 @@ class Product extends AbstractHelper
             if ($attribute['type'] == 'multiselect') {
                 if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                     $value_text = [];
-                    $values = explode(',', $product->getData($attribute['source']));
+                    $values = explode(',', (string)$product->getData($attribute['source']));
                     foreach ($values as $value) {
                         $value_text[] = $attr->getSource()->getOptionText($value);
                     }
@@ -810,7 +810,7 @@ class Product extends AbstractHelper
         }
 
         foreach ($conditions as $condition) {
-            $ex = explode(':', $condition);
+            $ex = explode(':', (string)$condition);
             if ($ex['0'] == '*') {
                 $data = str_replace($ex[0] . ':', '', $condition);
             }
@@ -924,12 +924,21 @@ class Product extends AbstractHelper
         $config = $config['price_config'];
         $prices[$config['price']] = $this->processPrice($product, $price, $config);
 
+        if (!empty($config['tax_include_both'])) {
+            $prices[$config['price_excl']] = $this->processPrice($product, $price, $config, false);
+            $prices[$config['price_incl']] = $this->processPrice($product, $price, $config, true);
+        }
+
         if (isset($finalPrice) && !empty($config['final_price'])) {
             $prices[$config['final_price']] = $this->processPrice($product, $finalPrice, $config);
         }
 
         if (isset($finalPrice) && ($price > $finalPrice) && !empty($config['sales_price'])) {
             $prices[$config['sales_price']] = $this->processPrice($product, $finalPrice, $config);
+            if (!empty($config['tax_include_both'])) {
+                $prices[$config['sales_price_excl']] = $this->processPrice($product, $finalPrice, $config, false);
+                $prices[$config['sales_price_incl']] = $this->processPrice($product, $finalPrice, $config, true);
+            }
         }
 
         if (isset($specialPrice) && ($specialPrice == $finalPrice) && !empty($config['sales_date_range'])) {
@@ -942,7 +951,12 @@ class Product extends AbstractHelper
 
         if ($price <= 0) {
             if (!empty($product['min_price'])) {
-                $prices[$config['price']] = $this->processPrice($product, $product['min_price'], $config);
+                $minPrice = $product['min_price'];
+                $prices[$config['price']] = $this->processPrice($product, $minPrice, $config);
+                if (!empty($config['tax_include_both'])) {
+                    $prices[$config['price_excl']] = $this->processPrice($product, $minPrice, $config, false);
+                    $prices[$config['price_incl']] = $this->processPrice($product, $minPrice, $config, true);
+                }
             }
         }
 
@@ -1016,14 +1030,23 @@ class Product extends AbstractHelper
      * @param \Magento\Catalog\Model\Product $product
      * @param                                $price
      * @param                                $config
+     * @param                                $includingTax
      *
      * @return float|string
      */
-    public function processPrice($product, $price, $config)
+    public function processPrice($product, $price, $config, $includingTax = null)
     {
         if (!empty($config['exchange_rate'])) {
             $price = $price * $config['exchange_rate'];
         }
+
+        if ($includingTax !== null) {
+            return $this->formatPrice(
+                $this->catalogHelper->getTaxPrice($product, $price, $includingTax),
+                $config
+            );
+        }
+
         if (isset($config['incl_vat'])) {
             $price = $this->catalogHelper->getTaxPrice($product, $price, ['incl_vat']);
         }
@@ -1060,7 +1083,7 @@ class Product extends AbstractHelper
             if (!empty($value['source'])) {
                 try {
                     if (!empty($value['multi'])) {
-                        $multipleSources = explode(',', $value['multi']);
+                        $multipleSources = explode(',', (string)$value['multi']);
                         $sourcesArray = [];
                         foreach ($multipleSources as $source) {
                             if (strlen($source)) {

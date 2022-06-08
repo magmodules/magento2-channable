@@ -94,7 +94,7 @@ class Category extends AbstractHelper
 
         $categories = [];
         foreach ($data as $key => $category) {
-            $paths = explode('/', $category['path']);
+            $paths = explode('/', (string)$category['path']);
             $pathText = [];
             $custom = $default;
             $level = 0;

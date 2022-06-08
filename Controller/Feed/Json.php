@@ -76,6 +76,7 @@ class Json extends Action
     {
         $storeId = (int)$this->getRequest()->getParam('id');
         $page = (int)$this->getRequest()->getParam('page', 1);
+        $currency = $this->getRequest()->getParam('currency');
         $token = $this->getRequest()->getParam('token');
 
         if (empty($storeId) || empty($token)) {
@@ -102,7 +103,7 @@ class Json extends Action
         $this->feedHelper->setLastFetched($storeId, $ip);
 
         try {
-            if ($data = $this->generateModel->generateByStore($storeId, $page, $productId)) {
+            if ($data = $this->generateModel->generateByStore($storeId, $page, $productId, $currency)) {
                 $result = $this->resultJsonFactory->create();
                 return $result->setData($data);
             }

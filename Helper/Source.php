@@ -8,6 +8,7 @@ namespace Magmodules\Channable\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Framework\Exception\LocalizedException;
@@ -44,6 +45,7 @@ class Source extends AbstractHelper
     const XPATH_INVENTORY_DATA = 'magmodules_channable/advanced/inventory_fields';
     const XPATH_FORCE_NON_MSI = 'magmodules_channable/advanced/force_non_msi';
     const XPATH_TAX = 'magmodules_channable/advanced/tax';
+    const XPATH_TAX_INCLUDE_BOTH = 'magmodules_channable/advanced/tax_include_both';
     const XPATH_MANAGE_STOCK = 'cataloginventory/item_options/manage_stock';
     const XPATH_MIN_SALES_QTY = 'cataloginventory/item_options/min_sale_qty';
     const XPATH_QTY_INCREMENTS = 'cataloginventory/item_options/qty_increments';
@@ -130,13 +132,16 @@ class Source extends AbstractHelper
     }
 
     /**
-     * @param        $storeId
-     * @param string $type
+     * Get config data as array
      *
+     * @param int $storeId
+     * @param string|null $type
+     * @param string|null $currency
      * @return array
      * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function getConfig($storeId, $type = 'feed')
+    public function getConfig(int $storeId, ?string $type = 'feed', ?string $currency = null): array
     {
         $config = [
             'flat' => false,
@@ -147,7 +152,7 @@ class Source extends AbstractHelper
             'date_time' => $this->generalHelper->getDateTime(),
             'filters' => $this->getProductFilters($type),
             'attributes' => $this->getAttributes($type, $this->getProductFilters($type)),
-            'price_config' => $this->getPriceConfig($type),
+            'price_config' => $this->getPriceConfig($type, $currency),
             'inventory' => $this->getInventoryData($type),
             'inc_hidden_image' => $this->getStoreValue(self::XPATH_IMAGE_INC_HIDDEN)
         ];
@@ -417,12 +422,12 @@ class Source extends AbstractHelper
         $visibilityFilter = $this->getStoreValue(self::XPATH_VISBILITY);
         if ($visibilityFilter) {
             $visibility = $this->getStoreValue(self::XPATH_VISIBILITY_OPTIONS);
-            $filters['visibility'] = explode(',', $visibility);
+            $filters['visibility'] = explode(',', (string)$visibility);
         } else {
             $filters['visibility'] = [];
         }
 
-        $filters['limit'] = preg_replace('/\D/', '', $this->getStoreValue(self::XPATH_LIMIT));
+        $filters['limit'] = (int)$this->getStoreValue(self::XPATH_LIMIT);
         if ($type == 'api') {
             $filters['limit'] = 0;
         }
@@ -661,11 +666,13 @@ class Source extends AbstractHelper
     }
 
     /**
-     * @param $type
-     *
+     * @param string|null $type
+     * @param string|null $currency
      * @return array
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function getPriceConfig($type)
+    public function getPriceConfig(?string $type, ?string $currency = null)
     {
         $store = $this->storeManager->getStore();
 
@@ -674,8 +681,11 @@ class Source extends AbstractHelper
         $priceFields['sales_price'] = 'sale_price';
         $priceFields['min_price'] = 'min_price';
         $priceFields['max_price'] = 'max_price';
+
         $priceFields['sales_date_range'] = 'sale_price_effective_date';
-        $priceFields['currency'] = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
+        $priceFields['currency'] = $currency === null
+            ? $this->storeManager->getStore()->getCurrentCurrency()->getCode()
+            : strtoupper($currency);
         $priceFields['exchange_rate'] = $store->getBaseCurrency()->getRate($priceFields['currency']);
         $priceFields['grouped_price_type'] = $this->getStoreValue(self::XPATH_GROUPED_PARENT_PRICE);
 
@@ -687,6 +697,14 @@ class Source extends AbstractHelper
             $priceFields['use_currency'] = true;
         } else {
             $priceFields['use_currency'] = false;
+        }
+
+        if ($this->getStoreValue(self::XPATH_TAX_INCLUDE_BOTH)) {
+            $priceFields['tax_include_both'] = true;
+            $priceFields['price_excl'] = 'price_excl';
+            $priceFields['price_incl'] = 'price_incl';
+            $priceFields['sales_price_excl'] = 'sales_price_excl';
+            $priceFields['sales_price_incl'] = 'sales_price_incl';
         }
 
         return $priceFields;
@@ -712,7 +730,7 @@ class Source extends AbstractHelper
             return $invAtt;
         }
 
-        $invAtt['attributes'] = explode(',', $fields);
+        $invAtt['attributes'] = explode(',', (string)$fields);
         $invAtt['attributes'][] = 'is_in_stock';
         $invAtt['attributes'][] = 'qty';
 
@@ -751,7 +769,7 @@ class Source extends AbstractHelper
      * @param \Magento\Catalog\Model\Product $parent
      * @param                                $config
      *
-     * @return string
+     * @return array
      */
     public function reformatData($dataRow, $product, $parent, $config)
     {

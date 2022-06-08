@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -8,20 +8,17 @@ namespace Magmodules\Channable\Controller\Feed;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\Controller\Result\Raw;
 use Magento\Framework\Controller\ResultFactory;
 use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
-use Magmodules\Channable\Helper\Feed as FeedHelper;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Preview as PreviewHelper;
 use Magmodules\Channable\Model\Generate as GenerateModel;
 
-/**
- * Class Preview
- *
- * @package Magmodules\Channable\Controller\Feed
- */
 class Preview extends Action
 {
+
+    private const ERROR_MSG = 'We can\'t generate the feed right now, please check error log (var/log/channable.log)';
 
     /**
      * @var GenerateModel
@@ -32,10 +29,6 @@ class Preview extends Action
      */
     private $generalHelper;
     /**
-     * @var FeedHelper
-     */
-    private $feedHelper;
-    /**
      * @var PreviewHelper
      */
     private $previewHelper;
@@ -45,25 +38,21 @@ class Preview extends Action
     private $logger;
 
     /**
-     * Preview constructor.
-     *
-     * @param Context       $context
+     * @param Context $context
      * @param GeneralHelper $generalHelper
      * @param GenerateModel $generateModel
-     * @param FeedHelper    $feedHelper
      * @param PreviewHelper $previewHelper
+     * @param LogRepository $logger
      */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
         GenerateModel $generateModel,
-        FeedHelper $feedHelper,
         PreviewHelper $previewHelper,
         LogRepository $logger
     ) {
         $this->generateModel = $generateModel;
         $this->generalHelper = $generalHelper;
-        $this->feedHelper = $feedHelper;
         $this->previewHelper = $previewHelper;
         $this->logger = $logger;
         $this->resultFactory = $context->getResultFactory();
@@ -77,10 +66,11 @@ class Preview extends Action
     {
         $storeId = (int)$this->getRequest()->getParam('id');
         $page = (int)$this->getRequest()->getParam('page', 1);
+        $currency = $this->getRequest()->getParam('currency');
         $token = $this->getRequest()->getParam('token');
 
         if (empty($storeId) || empty($token)) {
-            /** @var \Magento\Framework\Controller\Result\Raw $result */
+            /** @var Raw $result */
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/plain');
             $result->setContents(__('Params missing!'));
@@ -91,7 +81,7 @@ class Preview extends Action
         $enabled = $this->generalHelper->getEnabled($storeId);
 
         if (empty($enabled)) {
-            /** @var \Magento\Framework\Controller\Result\Raw $result */
+            /** @var Raw $result */
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/plain');
             $result->setContents(__('Please enable extension and flush cache!'));
@@ -100,7 +90,7 @@ class Preview extends Action
         }
 
         if ($token != $this->generalHelper->getToken()) {
-            /** @var \Magento\Framework\Controller\Result\Raw $result */
+            /** @var Raw $result */
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/plain');
             $result->setContents(__('Token invalid!'));
@@ -115,9 +105,9 @@ class Preview extends Action
         }
 
         try {
-            if ($feed = $this->generateModel->generateByStore($storeId, $page, $productId)) {
+            if ($feed = $this->generateModel->generateByStore($storeId, $page, $productId, $currency)) {
                 $contents = $this->previewHelper->getPreviewData($feed, $storeId);
-                /** @var \Magento\Framework\Controller\Result\Raw $result */
+                /** @var Raw $result */
                 $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
                 $result->setHeader('content-type', 'text/html');
                 $result->setContents($contents);
@@ -127,7 +117,7 @@ class Preview extends Action
             $this->logger->addErrorLog('Generate', $e->getMessage());
             $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
             $result->setHeader('content-type', 'text/html');
-            $result->setContents('We can\'t generate the feed right now, please check error log (var/log/channable.log)');
+            $result->setContents(self::ERROR_MSG);
             return $result;
         }
     }

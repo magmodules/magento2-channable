@@ -79,7 +79,7 @@ class OrderStatus
             'status' => $order->getStatus()
         ];
 
-        if (!$fulfillments = $this->getFulfillment($order)) {
+        if ($fulfillments = $this->getFulfillment($order)) {
             $response['fulfillment'] = $fulfillments;
         }
 

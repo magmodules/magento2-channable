@@ -182,6 +182,12 @@
                     <field id="lvb">1</field>
                 </depends>
             </field>
+            <field id="deduct_fpt" translate="label" type="select" sortOrder="64" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Deduct fees/fixed product taxes (FPT) before import.</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/order/deduct_fpt</config_path>
+                <comment><![CDATA[Enable this option to deduct fees/fixed product taxes (FPT) on products before adding them to the cart.]]></comment>
+            </field>
             <field id="heading_returns" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Return Labels</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
