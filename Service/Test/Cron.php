@@ -93,7 +93,7 @@ class Cron
         if ($scheduleCollection->getSize() == 0) {
             $cronStatus = false;
         } else {
-            $scheduledAt = $scheduleCollection->getFirstItem()->getScheduledAt();
+            $scheduledAt = (string)$scheduleCollection->getFirstItem()->getScheduledAt();
             $cronStatus = (time() - strtotime($scheduledAt)) < self::CRON_DELAY;
         }
         if ($cronStatus == self::EXPECTED) {
