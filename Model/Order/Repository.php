@@ -46,7 +46,7 @@ class Repository implements ChannableOrderRepository
     /**
      * @var SearchResultsInterfaceFactory
      */
-    private $channableOrderSearchResultsactory;
+    private $channableOrderSearchResultsFactory;
     /**
      * @var ChannableOrderCollectionFactory
      */
@@ -66,7 +66,7 @@ class Repository implements ChannableOrderRepository
 
     /***
      * @param Metadata $metadata
-     * @param SearchResultsInterfaceFactory $channableOrderSearchResultsactory
+     * @param SearchResultsInterfaceFactory $channableOrderSearchResultsFactory
      * @param ChannableOrderCollectionFactory $channableOrderCollectionFactory
      * @param JoinProcessorInterface $extensionAttributesJoinProcessor
      * @param ChannableOrderResource $channableOrderResource
@@ -74,7 +74,7 @@ class Repository implements ChannableOrderRepository
      */
     public function __construct(
         Metadata $metadata,
-        SearchResultsInterfaceFactory $channableOrderSearchResultsactory,
+        SearchResultsInterfaceFactory $channableOrderSearchResultsFactory,
         ChannableOrderCollectionFactory $channableOrderCollectionFactory,
         JoinProcessorInterface $extensionAttributesJoinProcessor,
         ChannableOrderResource $channableOrderResource,
@@ -82,7 +82,7 @@ class Repository implements ChannableOrderRepository
     ) {
         $this->channableOrderResource = $channableOrderResource;
         $this->metadata = $metadata;
-        $this->channableOrderSearchResultsactory = $channableOrderSearchResultsactory;
+        $this->channableOrderSearchResultsFactory = $channableOrderSearchResultsFactory;
         $this->channableOrderCollectionFactory = $channableOrderCollectionFactory;
         $this->extensionAttributesJoinProcessor = $extensionAttributesJoinProcessor;
         $this->collectionProcessor = $collectionProcessor ?: ObjectManager::getInstance()
@@ -97,7 +97,7 @@ class Repository implements ChannableOrderRepository
         $collection = $this->channableOrderCollectionFactory->create();
         $this->extensionAttributesJoinProcessor->process($collection, self::DATA_INTERFACE);
         $this->collectionProcessor->process($criteria, $collection);
-        $searchResults = $this->channableOrderSearchResultsactory->create();
+        $searchResults = $this->channableOrderSearchResultsFactory->create();
         $searchResults->setSearchCriteria($criteria);
         $items = [];
 

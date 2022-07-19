@@ -1,7 +1,6 @@
 require([
     'jquery',
     'Magento_Ui/js/modal/modal',
-    'prototype',
     'loader'
 ], function ($, modal) {
 

@@ -11,8 +11,10 @@ use Exception;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Backend\Model\View\Result\Redirect;
+use Magento\Framework\App\Area;
 use Magento\Framework\App\Response\RedirectInterface;
 use Magento\Framework\Controller\ResultFactory;
+use Magento\Store\Model\App\Emulation;
 use Magmodules\Channable\Service\Order\ImportSimulator;
 
 /**
@@ -34,20 +36,27 @@ class Simulate extends Action
      * @var RedirectInterface
      */
     private $redirect;
+    /**
+     * @var Emulation
+     */
+    private $appEmulation;
 
     /**
      * Simulate constructor.
      * @param Context $context
      * @param ImportSimulator $importSimulator
      * @param RedirectInterface $redirect
+     * @param Emulation $appEmulation
      */
     public function __construct(
         Context $context,
         ImportSimulator $importSimulator,
-        RedirectInterface $redirect
+        RedirectInterface $redirect,
+        Emulation $appEmulation
     ) {
         $this->importSimulator = $importSimulator;
         $this->redirect = $redirect;
+        $this->appEmulation = $appEmulation;
         parent::__construct($context);
     }
 
@@ -56,12 +65,14 @@ class Simulate extends Action
      *
      * @return Redirect
      */
-    public function execute()
+    public function execute(): Redirect
     {
         /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        $storeId = (int)$this->getRequest()->getParam('store_id');
 
         try {
+            $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
             $order = $this->importSimulator->execute(
                 (int)$this->getRequest()->getParam('store_id'),
                 $this->getExtraParams()
@@ -71,6 +82,8 @@ class Simulate extends Action
         } catch (Exception $exception) {
             $this->messageManager->addErrorMessage($exception->getMessage());
             $resultRedirect->setUrl($this->redirect->getRefererUrl());
+        } finally {
+            $this->appEmulation->stopEnvironmentEmulation();
         }
 
         return $resultRedirect;

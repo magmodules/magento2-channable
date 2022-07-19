@@ -56,7 +56,7 @@ class GetReturnStatus
         }
         return [
             'validated' => 'false',
-            'errors' => self::NO_SUCH_ENTITY_EXCEPTION
+            'errors' => __(self::NO_SUCH_ENTITY_EXCEPTION, $id)->render()
         ];
     }
 }
