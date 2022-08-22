@@ -88,7 +88,7 @@
         <column name="customer" xsi:type="text" comment="Customer Info"/>
         <column name="address" xsi:type="text" comment="Address Info"/>
         <column name="reason" xsi:type="varchar" length="255" comment="Reason"/>
-        <column name="comment" xsi:type="varchar" length="255" comment="Comment"/>
+        <column name="comment" xsi:type="varchar" length="255" nullable="true" comment="Comment"/>
         <column name="status" xsi:type="varchar" length="255" comment="Status"/>
         <column name="id" xsi:type="int" padding="20" identity="false" nullable="false" unsigned="true" comment="Old ID"/>
         <column name="created_at" xsi:type="timestamp" on_update="false" default="CURRENT_TIMESTAMP" comment="Created At"/>

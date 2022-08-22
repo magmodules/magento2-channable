@@ -111,7 +111,7 @@ interface DataInterface extends ExtensibleDataInterface
     public function getMagentoIncrementId(): string;
 
     /**
-     * @param int $magentoIncrementId
+     * @param string $magentoIncrementId
      * @return $this
      */
     public function setMagentoIncrementId(string $magentoIncrementId): self;
@@ -172,15 +172,15 @@ interface DataInterface extends ExtensibleDataInterface
     public function setReason(string $reason): self;
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getComment(): string;
+    public function getComment(): ?string;
 
     /**
-     * @param string $comment
+     * @param string|null $comment
      * @return $this
      */
-    public function setComment(string $comment): self;
+    public function setComment(?string $comment): self;
 
     /**
      * @return string
