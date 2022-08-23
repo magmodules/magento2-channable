@@ -7,10 +7,12 @@ declare(strict_types=1);
 
 namespace Magmodules\Channable\Service\Order\Items;
 
+use Exception;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
 use Magento\Quote\Model\Quote;
@@ -18,7 +20,6 @@ use Magento\Store\Api\Data\StoreInterface;
 use Magento\Tax\Model\Calculation as TaxCalculation;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Exceptions\CouldNotImportOrder;
-use Magento\Framework\App\ResourceConnection;
 
 /**
  * Add items to quote
@@ -109,15 +110,15 @@ class Add
 
         try {
             foreach ($data['products'] as $item) {
-                $product = $this->getProductById((int)$item['id']);
+                $product = $this->getProductById((int)$item['id'], (int)$store->getStoreId());
                 $price = $this->getProductPrice($item, $product, $store, $quote);
                 $product = $this->setProductData($product, $price, $store, $lvbOrder);
                 $item = $quote->addProduct($product, (int)$item['quantity']);
                 $item->setOriginalCustomPrice($price);
                 $qty += (int)$item['quantity'];
             }
-        } catch (\Exception $exception) {
-            $exceptionMsg = $this->reformatException($exception, $item);
+        } catch (Exception $exception) {
+            $exceptionMsg = $this->reformatException($exception, $item, (int)$store->getStoreId());
             throw new CouldNotImportOrder($exceptionMsg);
         }
 
@@ -125,16 +126,36 @@ class Add
     }
 
     /**
+     * Add Channable specific data to the checkout session
+     *
+     * @param bool $lvbOrder
+     * @param int $storeId
+     *
+     * @return void
+     */
+    private function setCheckoutSessionData(bool $lvbOrder = false, int $storeId = 0): void
+    {
+        $this->checkoutSession->setChannableSkipQtyCheck(
+            $this->configProvider->getEnableBackorders($storeId) ||
+            $lvbOrder && $this->configProvider->disableStockMovementForLvbOrders($storeId)
+        );
+
+        $this->checkoutSession->setChannableSkipReservation(
+            $lvbOrder && $this->configProvider->disableStockMovementForLvbOrders($storeId)
+        );
+    }
+
+    /**
      * Get Product by ID
      *
      * @param int $productId
-     *
+     * @param int $storeId
      * @return ProductInterface
      * @throws NoSuchEntityException
      */
-    private function getProductById(int $productId): ProductInterface
+    private function getProductById(int $productId, int $storeId): ProductInterface
     {
-        return $this->productRepository->getById($productId);
+        return $this->productRepository->getById($productId, false, $storeId);
     }
 
     /**
@@ -236,36 +257,17 @@ class Add
     }
 
     /**
-     * Add Channable specific data to the checkout session
-     *
-     * @param bool $lvbOrder
-     * @param int  $storeId
-     *
-     * @return void
-     */
-    private function setCheckoutSessionData(bool $lvbOrder = false, int $storeId = 0): void
-    {
-        $this->checkoutSession->setChannableSkipQtyCheck(
-            $this->configProvider->getEnableBackorders($storeId) ||
-            $lvbOrder && $this->configProvider->disableStockMovementForLvbOrders($storeId)
-        );
-
-        $this->checkoutSession->setChannableSkipReservation(
-            $lvbOrder && $this->configProvider->disableStockMovementForLvbOrders($storeId)
-        );
-    }
-
-    /**
      * Generate readable exception message
      *
-     * @param \Exception $exception
+     * @param Exception $exception
      * @param array $item
+     * @param int $storeId
      * @return Phrase
      */
-    private function reformatException(\Exception $exception, array $item): Phrase
+    private function reformatException(Exception $exception, array $item, int $storeId = 0): Phrase
     {
         try {
-            $this->getProductById((int)$item['id']);
+            $this->getProductById((int)$item['id'], $storeId);
         } catch (NoSuchEntityException $exception) {
             $exceptionMsg = self::PRODUCT_NOT_FOUND_EXCEPTION;
             return __(

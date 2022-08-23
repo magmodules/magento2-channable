@@ -280,15 +280,15 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
-    public function getComment(): string
+    public function getComment(): ?string
     {
-        return (string)$this->getData(self::COMMENT);
+        return $this->getData(self::COMMENT);
     }
 
     /**
      * @inheritDoc
      */
-    public function setComment(string $comment): ChannableReturnsData
+    public function setComment(?string $comment): ChannableReturnsData
     {
         return $this->setData(self::COMMENT, $comment);
     }
