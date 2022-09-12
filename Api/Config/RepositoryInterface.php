@@ -19,7 +19,6 @@ interface RepositoryInterface extends System\OrderInterface
     /** General Group */
     const XML_PATH_EXTENSION_VERSION = 'magmodules_channable/general/version';
     const XML_PATH_ENABLE = 'magmodules_channable/general/enable';
-    const XML_PATH_DEBUG = 'magmodules_channable/general/debug';
 
     /**
      * Returns current version of module
@@ -71,11 +70,4 @@ interface RepositoryInterface extends System\OrderInterface
      * @return string
      */
     public function getStoreCurrencyCode(): string;
-
-    /**
-     * Returns true if debug log is enabled
-     *
-     * @return bool
-     */
-    public function logDebug(): bool;
 }

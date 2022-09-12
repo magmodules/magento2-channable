@@ -26,26 +26,19 @@ class Repository implements LogRepositoryInterface
      * @var ErrorLogger
      */
     private $errorLogger;
-    /**
-     * @var ConfigRepositoryInterface
-     */
-    private $configRepository;
 
     /**
      * Repository constructor.
      *
      * @param DebugLogger $debugLogger
      * @param ErrorLogger $errorLogger
-     * @param ConfigRepositoryInterface $configRepository
      */
     public function __construct(
         DebugLogger $debugLogger,
-        ErrorLogger $errorLogger,
-        ConfigRepositoryInterface $configRepository
+        ErrorLogger $errorLogger
     ) {
         $this->debugLogger = $debugLogger;
         $this->errorLogger = $errorLogger;
-        $this->configRepository = $configRepository;
     }
 
     /**
@@ -61,8 +54,6 @@ class Repository implements LogRepositoryInterface
      */
     public function addDebugLog(string $type, $data): void
     {
-        if ($this->configRepository->logDebug()) {
-            $this->debugLogger->addLog($type, $data);
-        }
+        $this->debugLogger->addLog($type, $data);
     }
 }
