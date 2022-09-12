@@ -649,16 +649,25 @@ class Source extends AbstractHelper
     /**
      * @return array
      */
-    public function getExtraFields()
+    public function getExtraFields(): array
     {
         $extraFields = [];
         if ($attributes = $this->getStoreValueArray(self::XPATH_EXTRA_FIELDS)) {
             foreach ($attributes as $attribute) {
                 $label = strtolower(str_replace(' ', '_', $attribute['name']));
-                $extraFields[$label] = [
-                    'label'  => $label,
-                    'source' => $attribute['attribute']
-                ];
+                if (preg_match('/^rendered_price__/', $attribute['attribute'])) {
+                    $extraFields['rendered_price__' . $label] = [
+                        'label'  => $label,
+                        'price_source' => explode('__', $attribute['attribute'])[1],
+                        'actions' => !empty($attribute['actions']) ? [$attribute['actions']] : null,
+                    ];
+                } else {
+                    $extraFields[$label] = [
+                        'label'  => $label,
+                        'source' => $attribute['attribute'],
+                        'actions' => !empty($attribute['actions']) ? [$attribute['actions']] : null,
+                    ];
+                }
             }
         }
 
@@ -672,7 +681,7 @@ class Source extends AbstractHelper
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getPriceConfig(?string $type, ?string $currency = null)
+    public function getPriceConfig(?string $type, ?string $currency = null): array
     {
         $store = $this->storeManager->getStore();
 
@@ -684,9 +693,14 @@ class Source extends AbstractHelper
 
         $priceFields['sales_date_range'] = 'sale_price_effective_date';
         $priceFields['currency'] = $currency === null
-            ? $this->storeManager->getStore()->getCurrentCurrency()->getCode()
+            ? $store->getDefaultCurrency()->getCode()
             : strtoupper($currency);
         $priceFields['exchange_rate'] = $store->getBaseCurrency()->getRate($priceFields['currency']);
+
+        foreach ($store->getAvailableCurrencyCodes() as $currencyCode) {
+            $priceFields['exchange_rate_' . $currencyCode] = $store->getBaseCurrency()->getRate($currencyCode);
+        }
+
         $priceFields['grouped_price_type'] = $this->getStoreValue(self::XPATH_GROUPED_PARENT_PRICE);
 
         if ($this->getStoreValue(self::XPATH_TAX)) {

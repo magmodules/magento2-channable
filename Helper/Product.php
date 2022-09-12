@@ -327,7 +327,7 @@ class Product extends AbstractHelper
 
         if (!empty($value)) {
             if (!empty($attribute['actions']) || !empty($attribute['max'])) {
-                $value = $this->getFormat($value, $attribute);
+                $value = $this->getFormat($value, $attribute, $config, $product);
             }
             if (!empty($attribute['suffix'])) {
                 if (!empty($config[$attribute['suffix']])) {
@@ -734,10 +734,11 @@ class Product extends AbstractHelper
     /**
      * @param $value
      * @param $attribute
-     *
-     * @return mixed|string
+     * @param array $config
+     * @param $product
+     * @return string
      */
-    public function getFormat($value, $attribute)
+    public function getFormat($value, $attribute, array $config, $product): string
     {
         if (!empty($attribute['actions'])) {
             $breaks = [
@@ -786,12 +787,19 @@ class Product extends AbstractHelper
                 $value = str_replace('  ', ' ', $value);
                 $value = strip_tags($value);
             }
+
+            if (preg_grep('/^currency_/', $actions)) {
+                $priceConfig = $config['price_config'];
+                $priceConfig['currency'] = explode('_', $actions[0])[1];
+                $priceConfig['exchange_rate'] = $priceConfig['exchange_rate_' . $priceConfig['currency']] ?? 1;
+                $value = $this->processPrice($product, (float)$value, $priceConfig);
+            }
         }
         if (!empty($attribute['max'])) {
             $value = $this->filter->truncate($value, ['length' => $attribute['max']]);
         }
 
-        return rtrim($value);
+        return rtrim((string)$value);
     }
 
     /**
@@ -921,6 +929,7 @@ class Product extends AbstractHelper
                 break;
         }
         $prices = [];
+        $attributes = $config['attributes'];
         $config = $config['price_config'];
         $prices[$config['price']] = $this->processPrice($product, $price, $config);
 
@@ -982,6 +991,33 @@ class Product extends AbstractHelper
                 $discount = $discount * -100;
                 if ($discount > 0) {
                     $prices[$config['discount_perc']] = round($discount, 1) . '%';
+                }
+            }
+        }
+
+        if ($extraRenderedPriceFields = preg_grep('/^rendered_price__/', array_keys($attributes))) {
+            foreach ($extraRenderedPriceFields as $label) {
+                $field = $attributes[$label];
+                $renderCurrency = $field['actions'][0] ? explode('_', $field['actions'][0])[1] : null;
+                if ($renderCurrency !== $config['currency']) {
+                    $newConfig = $config;
+                    $newConfig['currency'] = $renderCurrency;
+                    $newConfig['exchange_rate'] = $config['exchange_rate_' . $renderCurrency] ?? 1;
+                    switch ($field['price_source']) {
+                        case 'price':
+                            $prices[$field['label']] = $this->processPrice($product, $price, $newConfig);
+                            break;
+                        case 'min_price':
+                            $price = $minPrice ?? $price;
+                            $prices[$field['label']] = $this->processPrice($product, $price, $newConfig);
+                            break;
+                        case 'max_price':
+                            $price = $maxPrice ?? $price;
+                            $prices[$field['label']] = $this->processPrice($product, $price, $newConfig);
+                            break;
+                    }
+                } else {
+                    $prices[$field['label']] = $prices[$field['price_source']] ?? null;
                 }
             }
         }

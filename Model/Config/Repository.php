@@ -58,12 +58,4 @@ class Repository extends System\OrderRepository implements RepositoryInterface
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_ENABLE);
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function logDebug(): bool
-    {
-        return $this->scopeConfig->isSetFlag(self::XML_PATH_DEBUG);
-    }
 }
