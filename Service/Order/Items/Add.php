@@ -16,6 +16,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
 use Magento\Quote\Model\Quote;
+use Magento\Quote\Model\ResourceModel\Quote\Item;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Tax\Model\Calculation as TaxCalculation;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
@@ -65,12 +66,18 @@ class Add
     private $resourceConnection;
 
     /**
+     * @var Item
+     */
+    private $itemResourceModel;
+
+    /**
      * @param ConfigProvider $configProvider
      * @param ProductRepositoryInterface $productRepository
      * @param StockRegistryInterface $stockRegistry
      * @param CheckoutSession $checkoutSession
      * @param ResourceConnection $resourceConnection
      * @param TaxCalculation $taxCalculation
+     * @param Item $itemResourceModel
      */
     public function __construct(
         ConfigProvider $configProvider,
@@ -78,7 +85,8 @@ class Add
         StockRegistryInterface $stockRegistry,
         CheckoutSession $checkoutSession,
         ResourceConnection $resourceConnection,
-        TaxCalculation $taxCalculation
+        TaxCalculation $taxCalculation,
+        Item $itemResourceModel
     ) {
         $this->configProvider = $configProvider;
         $this->productRepository = $productRepository;
@@ -86,6 +94,7 @@ class Add
         $this->checkoutSession = $checkoutSession;
         $this->resourceConnection = $resourceConnection;
         $this->taxCalculation = $taxCalculation;
+        $this->itemResourceModel = $itemResourceModel;
     }
 
     /**
@@ -115,6 +124,7 @@ class Add
                 $product = $this->setProductData($product, $price, $store, $lvbOrder);
                 $item = $quote->addProduct($product, (int)$item['quantity']);
                 $item->setOriginalCustomPrice($price);
+                $this->itemResourceModel->save($item);
                 $qty += (int)$item['quantity'];
             }
         } catch (Exception $exception) {
