@@ -63,7 +63,7 @@ class Actions extends Select
     private function getAllActions(): ?array
     {
         if (!$this->options) {
-            $this->options[] = ['value' => '', 'label' => __('')];
+            $this->options[] = ['value' => '', 'label' => ''];
             $this->options[] = $this->getFormatOptions();
             $this->options[] = $this->getPriceOptions();
         }
