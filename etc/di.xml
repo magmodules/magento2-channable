@@ -212,4 +212,22 @@
         </arguments>
     </type>
     <!-- Command line block end -->
+
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="environment" xsi:type="array">
+                <item name="magmodules_channable/general/enable" xsi:type="string">1</item>
+                <item name="magmodules_channable/general/limit" xsi:type="string">1</item>
+                <item name="magmodules_channable_marketplace/item/enable" xsi:type="string">1</item>
+                <item name="magmodules_channable_marketplace/item/webhook" xsi:type="string">1</item>
+                <item name="magmodules_channable_marketplace/item/invalidation_modus" xsi:type="string">1</item>
+                <item name="magmodules_channable_marketplace/item/cron" xsi:type="string">1</item>
+                <item name="magmodules_channable_marketplace/item/custom_frequency" xsi:type="string">1</item>
+                <item name="magmodules_channable_marketplace/item/log" xsi:type="string">1</item>
+                <item name="magmodules_channable_marketplace/general/enable" xsi:type="string">1</item>
+                <item name="magmodules_channable_marketplace/order/log" xsi:type="string">1</item>
+                <item name="magmodules_channable_marketplace/returns/enable" xsi:type="string">1</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
