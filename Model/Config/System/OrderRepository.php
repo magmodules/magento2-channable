@@ -184,6 +184,14 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     /**
      * @inheritDoc
      */
+    public function isCompanyRequired(int $storeId = null): bool
+    {
+        return $this->getStoreValue(self::XML_PATH_IS_COMPANY_REQUIRED, $storeId) == 'req';
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function disableStockCheckOnImport(int $storeId = null): bool
     {
         return $this->isSetFlag(self::XML_PATH_ENABLE_BACKORDERS, $storeId);

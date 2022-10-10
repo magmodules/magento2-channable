@@ -117,7 +117,7 @@ class AddressHandler
 
         $addressData = [
             'customer_id' => $customerId,
-            'company' => $this->configProvider->importCompanyName((int)$storeId) ? $address['company'] : null,
+            'company' => $this->getCompany($address['company'], (int)$storeId),
             'firstname' => $address['first_name'],
             'middlename' => $address['middle_name'],
             'lastname' => $address['last_name'],
@@ -231,5 +231,21 @@ class AddressHandler
         }
 
         $this->addressRepository->save($address);
+    }
+
+    /**
+     * Get customer company
+     *
+     * @param string|null $company
+     * @param int $storeId
+     * @return string|null
+     */
+    private function getCompany(?string $company, int $storeId): ?string
+    {
+        $company = $this->configProvider->importCompanyName((int)$storeId) ? $company : null;
+        if (!$company && $this->configProvider->isCompanyRequired($storeId)) {
+            $company = '-';
+        }
+        return $company;
     }
 }

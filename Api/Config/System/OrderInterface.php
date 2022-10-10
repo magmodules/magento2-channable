@@ -36,6 +36,7 @@ interface OrderInterface extends ReturnsInterface
     const XML_PATH_ORDERID_PREFIX = 'magmodules_channable_marketplace/order/orderid_prefix';
     const XML_PATH_ORDERID_ALPHANUMERIC = 'magmodules_channable_marketplace/order/orderid_alphanumeric';
     const XML_PATH_IMPORT_COMPANY_NAME = 'magmodules_channable_marketplace/order/import_company_name';
+    const XML_PATH_IS_COMPANY_REQUIRED = 'customer/address/company_show';
     const XML_PATH_ENABLE_BACKORDERS = 'magmodules_channable_marketplace/order/backorders';
     const XML_PATH_LVB_ENABLED = 'magmodules_channable_marketplace/order/lvb';
     const XML_PATH_LVB_SKIP_STOCK = 'magmodules_channable_marketplace/order/lvb_stock';
@@ -222,6 +223,15 @@ interface OrderInterface extends ReturnsInterface
      * @return bool
      */
     public function importCompanyName(int $storeId = null): bool;
+
+    /**
+     * Check if company is a required field
+     *
+     * @param null|int $storeId
+     *
+     * @return bool
+     */
+    public function isCompanyRequired(int $storeId = null): bool;
 
     /**
      * Disable stock check on order import. Default Magento logic will check if products
