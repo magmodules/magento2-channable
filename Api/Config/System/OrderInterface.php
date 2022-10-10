@@ -47,6 +47,8 @@ interface OrderInterface extends ReturnsInterface
     const XML_PATH_CARRIER_OVERWRITE_TITLE = 'carriers/channable/overwrite_title';
     const XML_PATH_CARRIER_NAME = 'carriers/channable/name';
     const XML_PATH_CARRIER_OVERWRITE_NAME = 'carriers/channable/overwrite_name';
+    const XML_PATH_ENABLE_GROUPED_PRODUCTS = 'magmodules_channable_marketplace/order/import_grouped_products';
+    const XML_PATH_ENABLE_BUNDLE_PRODUCTS = 'magmodules_channable_marketplace/order/import_bundle_products';
 
     /**
      * Enabled flag for Order Import.
@@ -345,4 +347,22 @@ interface OrderInterface extends ReturnsInterface
      * @return bool
      */
     public function getDefaultManageStock($storeId = null): bool;
+
+    /**
+     * Allow import of grouped products in orders
+     *
+     * @param null|int $storeId
+     *
+     * @return bool
+     */
+    public function importGroupedProducts(int $storeId = null): bool;
+
+    /**
+     * Allow import of bundle products in orders
+     *
+     * @param null|int $storeId
+     *
+     * @return bool
+     */
+    public function importBundleProducts(int $storeId = null): bool;
 }

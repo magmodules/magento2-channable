@@ -13,6 +13,8 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DataObject\Factory as ObjectFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
 use Magento\Quote\Model\Quote;
@@ -34,37 +36,34 @@ class Add
     public const EMPTY_ITEMS_EXCEPTION = 'No products found in order';
     public const PRODUCT_NOT_FOUND_EXCEPTION = 'Product "%1" not found in catalog (ID: %2)';
     public const PRODUCT_EXCEPTION = 'Product "%1" => %2';
-
+    /**
+     * @var ObjectFactory
+     */
+    protected $objectFactory;
     /**
      * @var ConfigProvider
      */
     private $configProvider;
-
     /**
      * @var ProductRepositoryInterface
      */
     private $productRepository;
-
     /**
      * @var StockRegistryInterface
      */
     private $stockRegistry;
-
     /**
      * @var CheckoutSession
      */
     private $checkoutSession;
-
     /**
      * @var TaxCalculation
      */
     private $taxCalculation;
-
     /**
      * @var ResourceConnection
      */
     private $resourceConnection;
-
     /**
      * @var Item
      */
@@ -77,7 +76,6 @@ class Add
      * @param CheckoutSession $checkoutSession
      * @param ResourceConnection $resourceConnection
      * @param TaxCalculation $taxCalculation
-     * @param Item $itemResourceModel
      */
     public function __construct(
         ConfigProvider $configProvider,
@@ -86,6 +84,7 @@ class Add
         CheckoutSession $checkoutSession,
         ResourceConnection $resourceConnection,
         TaxCalculation $taxCalculation,
+        ObjectFactory $objectFactory,
         Item $itemResourceModel
     ) {
         $this->configProvider = $configProvider;
@@ -94,6 +93,7 @@ class Add
         $this->checkoutSession = $checkoutSession;
         $this->resourceConnection = $resourceConnection;
         $this->taxCalculation = $taxCalculation;
+        $this->objectFactory = $objectFactory;
         $this->itemResourceModel = $itemResourceModel;
     }
 
@@ -122,9 +122,30 @@ class Add
                 $product = $this->getProductById((int)$item['id'], (int)$store->getStoreId());
                 $price = $this->getProductPrice($item, $product, $store, $quote);
                 $product = $this->setProductData($product, $price, $store, $lvbOrder);
-                $item = $quote->addProduct($product, (int)$item['quantity']);
-                $item->setOriginalCustomPrice($price);
-                $this->itemResourceModel->save($item);
+
+                switch ($product->getTypeId()) {
+                    case 'grouped':
+                        if (!$this->configProvider->importGroupedProducts()) {
+                            throw new CouldNotImportOrder(__('Import grouped products is not enabled'));
+                        }
+                        $addedItem = $this->addGroupedProduct($quote, $product, (int)$item['quantity']);
+                        break;
+                    case 'bundle':
+                        if (!$this->configProvider->importBundleProducts()) {
+                            throw new CouldNotImportOrder(__('Import bundle products is not enabled'));
+                        }
+                        $addedItem = $this->addBundleProduct($quote, $product, (int)$item['quantity']);
+                        break;
+                    default:
+                        $addedItem = $quote->addProduct($product, (int)$item['quantity']);
+                }
+
+                if (is_string($addedItem)) {
+                    throw new CouldNotImportOrder(__($addedItem));
+                }
+
+                $addedItem->setOriginalCustomPrice($price);
+                $this->itemResourceModel->save($addedItem);
                 $qty += (int)$item['quantity'];
             }
         } catch (Exception $exception) {
@@ -264,6 +285,64 @@ class Add
             ->setSpecialToDate(null);
 
         return $product;
+    }
+
+    /**
+     * @param Quote $quote
+     * @param ProductInterface $product
+     * @param int $qty
+     * @return Quote\Item|string
+     * @throws LocalizedException
+     */
+    private function addGroupedProduct(Quote $quote, ProductInterface $product, int $qty)
+    {
+        $superGroup = ['super_group' => []];
+        foreach ($product->getTypeInstance(true)->getAssociatedProducts($product) as $child) {
+            $superGroup['super_group'][$child->getId()] = $child->getQty() * $qty;
+        }
+
+        if (!array_sum($superGroup['super_group'])) {
+            throw new CouldNotImportOrder(
+                __(
+                    'No default quantities found for grouped product "%1"',
+                    $product->getSku()
+                )
+            );
+        }
+
+        $request = $this->objectFactory->create($superGroup);
+        return $quote->addProduct($product, $request);
+    }
+
+    /**
+     * @param Quote $quote
+     * @param ProductInterface $product
+     * @param int $qty
+     * @return Quote\Item|string
+     * @throws LocalizedException
+     */
+    private function addBundleProduct(Quote $quote, ProductInterface $product, int $qty)
+    {
+        $selectionCollection = $product->getTypeInstance()
+            ->getSelectionsCollection(
+                $product->getTypeInstance()->getOptionsIds($product),
+                $product
+            );
+
+        $bundleOptions = [];
+        foreach ($selectionCollection as $selection) {
+            if ($selection->getIsDefault()) {
+                $bundleOptions[$selection->getOptionId()][] = $selection->getSelectionId();
+            }
+        }
+
+        $request = $this->objectFactory->create([
+            'product' => $product->getId(),
+            'bundle_option' => $bundleOptions,
+            'qty' => $qty
+        ]);
+
+        return $quote->addProduct($product, $request);
     }
 
     /**

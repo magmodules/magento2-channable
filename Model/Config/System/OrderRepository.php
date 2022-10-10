@@ -309,4 +309,20 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     {
         return $this->getStoreValueArray(self::XML_PATH_RETURN_LABEL_REGEXP, $storeId);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function importGroupedProducts(int $storeId = null): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_ENABLE_GROUPED_PRODUCTS, $storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function importBundleProducts(int $storeId = null): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_ENABLE_BUNDLE_PRODUCTS, $storeId);
+    }
 }
