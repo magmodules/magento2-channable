@@ -38,7 +38,10 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
      */
     public function getCustomShippingMethodLogic(int $storeId = null): array
     {
-        return explode(';', (string)$this->getStoreValue(self::XML_PATH_SHIPPING_CUSTOM, $storeId));
+        $shippingMethodCustom = (string)$this->getStoreValue(self::XML_PATH_SHIPPING_CUSTOM, $storeId);
+        $shippingMethodCustom = preg_replace('/\s+/', '', $shippingMethodCustom);
+        $prioritizedMethods = array_flip(array_reverse(explode(';', $shippingMethodCustom)));
+        return $prioritizedMethods;
     }
 
     /**
@@ -184,6 +187,14 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     /**
      * @inheritDoc
      */
+    public function isCompanyRequired(int $storeId = null): bool
+    {
+        return $this->getStoreValue(self::XML_PATH_IS_COMPANY_REQUIRED, $storeId) == 'req';
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function disableStockCheckOnImport(int $storeId = null): bool
     {
         return $this->isSetFlag(self::XML_PATH_ENABLE_BACKORDERS, $storeId);
@@ -300,5 +311,21 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     public function getReturnLabelRegexp(int $storeId = null): array
     {
         return $this->getStoreValueArray(self::XML_PATH_RETURN_LABEL_REGEXP, $storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function importGroupedProducts(int $storeId = null): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_ENABLE_GROUPED_PRODUCTS, $storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function importBundleProducts(int $storeId = null): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_ENABLE_BUNDLE_PRODUCTS, $storeId);
     }
 }

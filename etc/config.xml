@@ -12,7 +12,7 @@
             <general>
                 <enable>0</enable>
                 <limit>250</limit>
-                <version>v1.11.0</version>
+                <version>v1.12.0</version>
             </general>
             <data>
                 <name_attribute>name</name_attribute>
@@ -49,6 +49,8 @@
                 <import_company_name>1</import_company_name>
                 <invoice_order_email>0</invoice_order_email>
                 <deduct_fpt>0</deduct_fpt>
+                <import_grouped_products>0</import_grouped_products>
+                <import_bundle_products>0</import_bundle_products>
             </order>
             <item>
                 <enable>0</enable>

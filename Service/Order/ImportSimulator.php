@@ -255,13 +255,21 @@ class ImportSimulator
      */
     private function getRandomProduct(): DataObject
     {
+        $productTypes = [Type::TYPE_SIMPLE];
+        if ($this->configProvider->importGroupedProducts()) {
+            $productTypes[] = 'grouped';
+        }
+        if ($this->configProvider->importBundleProducts()) {
+            $productTypes[] = 'bundle';
+        }
+
         $collection = $this->productCollection->create();
         $collection->addAttributeToSelect(['entity_id', 'sku', 'name'])
             ->addStoreFilter($this->storeId)
             ->addPriceData()
             ->addAttributeToFilter(
                 'type_id',
-                Type::TYPE_SIMPLE
+                ['in' => $productTypes]
             )
             ->addAttributeToFilter(
                 'status',

@@ -207,6 +207,22 @@
                     <field id="return_label">regex</field>
                 </depends>
             </field>
+            <field id="heading_product_types" translate="label comment" type="text" sortOrder="75" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Grouped and Bundled Types Support (experimental)</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <comment><![CDATA[Because of the complexity, the possibility to enable the order import for Grouped and Bundled products is currently an experimental function.  <br><br><strong>Note:</strong> The order import for these product types will only work if there is a fixed price, available QTY for the related items, and a default selected option within these product type settings. ]]></comment>
+            </field>
+            <field id="import_grouped_products" translate="label" type="select" sortOrder="76" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Grouped products</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/order/import_grouped_products</config_path>
+            </field>
+            <field id="import_bundle_products" translate="label" type="select" sortOrder="77" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Bundle Products</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/order/import_bundle_products</config_path>
+            </field>
             <field id="heading_log" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Logging</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>

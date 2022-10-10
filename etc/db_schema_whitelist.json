@@ -24,7 +24,9 @@
             "attempts": true
         },
         "index": {
-            "FTI_489FA236241E26B3CF278097F9ADE3E4": true
+            "FTI_489FA236241E26B3CF278097F9ADE3E4": true,
+            "CHANNABLE_ORDERS_CHANNABLE_ID": true,
+            "CHANNABLE_ORDERS_MAGENTO_ORDER_ID": true
         },
         "constraint": {
             "PRIMARY": true
@@ -50,7 +52,9 @@
             "last_call": true
         },
         "index": {
-            "CHANNABLE_ITEMS_STORE_ID_ID_NEEDS_UPDATE_UPDATED_AT": true
+            "CHANNABLE_ITEMS_STORE_ID_ID_NEEDS_UPDATE_UPDATED_AT": true,
+            "CHANNABLE_ITEMS_STORE_ID": true,
+            "CHANNABLE_ITEMS_NEEDS_UPDATE": true
         },
         "constraint": {
             "PRIMARY": true
@@ -78,7 +82,9 @@
             "id": true
         },
         "index": {
-            "IDX_8C173AFD5BA1C589364EB29DBD02F16B": true
+            "IDX_8C173AFD5BA1C589364EB29DBD02F16B": true,
+            "CHANNABLE_RETURNS_CHANNABLE_ID": true,
+            "CHANNABLE_RETURNS_MAGENTO_ORDER_ID": true
         },
         "constraint": {
             "PRIMARY": true

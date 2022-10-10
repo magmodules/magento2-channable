@@ -242,13 +242,15 @@ class Import
             $order = $this->quoteManagement->submit($quote);
             $order->setTransactionFee($quote->getTransactionFee());
 
-            if (isset($orderData['price']['discount']) && $orderData['price']['discount']) {
+            if (isset($orderData['price']['discount']) && !empty((float)$orderData['price']['discount'])) {
+                $discountAmount = (float)$orderData['price']['discount'];
                 $order->setDiscountDescription(__('Channable discount'));
-                $order->setBaseDiscountAmount($orderData['price']['discount']);
-                $order->setGrandTotal($order->getGrandTotal() - $orderData['price']['discount']);
-                $order->setBaseGrandTotal($order->getBaseGrandTotal() - $orderData['price']['discount']);
-                $order->setDiscountAmount($orderData['price']['discount']);
+                $order->setBaseDiscountAmount($discountAmount);
+                $order->setDiscountAmount($discountAmount);
+                $order->setGrandTotal($order->getGrandTotal() - $discountAmount);
+                $order->setBaseGrandTotal($order->getBaseGrandTotal() - $discountAmount);
             }
+
             $store->setCurrentCurrencyCode($store->getBaseCurrencyCode());
 
             if ($shippingDescription = $this->getShippingDescription->execute($order, $orderData)) {
