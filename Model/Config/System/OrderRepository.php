@@ -38,7 +38,10 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
      */
     public function getCustomShippingMethodLogic(int $storeId = null): array
     {
-        return explode(';', (string)$this->getStoreValue(self::XML_PATH_SHIPPING_CUSTOM, $storeId));
+        $shippingMethodCustom = (string)$this->getStoreValue(self::XML_PATH_SHIPPING_CUSTOM, $storeId);
+        $shippingMethodCustom = preg_replace('/\s+/', '', $shippingMethodCustom);
+        $prioritizedMethods = array_flip(array_reverse(explode(';', $shippingMethodCustom)));
+        return $prioritizedMethods;
     }
 
     /**
