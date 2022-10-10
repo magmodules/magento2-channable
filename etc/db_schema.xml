@@ -39,6 +39,12 @@
             <column name="shipping"/>
             <column name="magento_increment_id"/>
         </index>
+        <index referenceId="CHANNABLE_RETURNS_CHANNABLE_ID" indexType="btree">
+            <column name="channable_id"/>
+        </index>
+        <index referenceId="CHANNABLE_RETURNS_MAGENTO_ORDER_ID" indexType="btree">
+            <column name="magento_order_id"/>
+        </index>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="entity_id"/>
         </constraint>
@@ -62,15 +68,15 @@
         <column name="created_at" xsi:type="timestamp" on_update="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
         <column name="updated_at" xsi:type="timestamp" on_update="true" default="CURRENT_TIMESTAMP" comment="Updated At"/>
         <column name="last_call" xsi:type="timestamp" on_update="false" comment="Updated At"/>
-        <index referenceId="CHANNABLE_ITEMS" indexType="btree">
-            <column name="store_id"/>
-            <column name="id"/>
-            <column name="needs_update"/>
-            <column name="updated_at"/>
-        </index>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="item_id"/>
         </constraint>
+        <index referenceId="CHANNABLE_ITEMS_STORE_ID" indexType="btree">
+            <column name="store_id"/>
+        </index>
+        <index referenceId="CHANNABLE_ITEMS_NEEDS_UPDATE" indexType="btree">
+            <column name="needs_update"/>
+        </index>
     </table>
 
     <!-- Declaration Schema of Channable Returns Table-->
@@ -96,13 +102,11 @@
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="entity_id"/>
         </constraint>
-        <index referenceId="CHANNABLE_RETURNS" indexType="btree">
-            <column name="store_id"/>
-            <column name="order_id"/>
+        <index referenceId="CHANNABLE_RETURNS_CHANNABLE_ID" indexType="btree">
+            <column name="channable_id"/>
+        </index>
+        <index referenceId="CHANNABLE_RETURNS_MAGENTO_ORDER_ID" indexType="btree">
             <column name="magento_order_id"/>
-            <column name="magento_increment_id"/>
-            <column name="created_at"/>
-            <column name="status"/>
         </index>
     </table>
 
