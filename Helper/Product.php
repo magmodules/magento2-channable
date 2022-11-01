@@ -699,6 +699,7 @@ class Product extends AbstractHelper
      */
     public function getValue($attribute, $product)
     {
+        static $memory = [];
         try {
             if ($attribute['type'] == 'media_image') {
                 if ($url = $product->getData($attribute['source'])) {
@@ -708,20 +709,29 @@ class Product extends AbstractHelper
             if ($attribute['type'] == 'select') {
                 if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                     $value = $product->getData($attribute['source']);
-                    $data = $attr->getSource()->getOptionText($value);
-                    if (!is_array($data)) {
-                        return (string)$data;
-                    }
+                    $key = $attr->getStoreId() . $attribute['source'] . $value;
+                    if (!isset($memory[$key]) && !array_key_exists($key, $memory)) {
+                        $data = $attr->getSource()->getOptionText($value);
+                        if (!is_array($data)) {
+                            $memory[$key] = (string)$data;
+                        }
+                     }
+                    return $memory[$key];
                 }
             }
             if ($attribute['type'] == 'multiselect') {
                 if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                     $value_text = [];
-                    $values = explode(',', (string)$product->getData($attribute['source']));
-                    foreach ($values as $value) {
-                        $value_text[] = $attr->getSource()->getOptionText($value);
+                    $value = (string)$product->getData($attribute['source']);
+                    $key = $attr->getStoreId() . $attribute['source'] . $value;
+                    if (!isset($memory[$key]) && !array_key_exists($key, $memory)) {
+                        $values = explode(',', (string)$product->getData($attribute['source']));
+                        foreach ($values as $value) {
+                            $value_text[] = $attr->getSource()->getOptionText($value);
+                        }
+                        $memory[$key] = implode('/', $value_text);
                     }
-                    return implode('/', $value_text);
+                    return $memory[$key];
                 }
             }
         } catch (\Exception $e) {
