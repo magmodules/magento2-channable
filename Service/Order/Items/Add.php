@@ -23,6 +23,7 @@ use Magento\Store\Api\Data\StoreInterface;
 use Magento\Tax\Model\Calculation as TaxCalculation;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Exceptions\CouldNotImportOrder;
+use Magento\Bundle\Model\Product\Price;
 
 /**
  * Add items to quote
@@ -341,7 +342,8 @@ class Add
             'bundle_option' => $bundleOptions,
             'qty' => $qty
         ]);
-
+        $product->setPriceType(Price::PRICE_TYPE_FIXED);
+        
         return $quote->addProduct($product, $request);
     }
 
