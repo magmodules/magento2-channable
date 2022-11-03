@@ -343,7 +343,7 @@ class Add
             'qty' => $qty
         ]);
         $product->setPriceType(Price::PRICE_TYPE_FIXED);
-        
+
         return $quote->addProduct($product, $request);
     }
 
