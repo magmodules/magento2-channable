@@ -19,6 +19,7 @@ use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
  */
 class AddressHandler
 {
+    private const PATTERN_NAME = '/(?:[\p{L}\p{M}\,\-\_\.\'’`\s\d]){1,255}+/u';
 
     /**
      * @var ConfigProvider
@@ -118,9 +119,9 @@ class AddressHandler
         $addressData = [
             'customer_id' => $customerId,
             'company' => $this->getCompany($address['company'], (int)$storeId),
-            'firstname' => $address['first_name'],
-            'middlename' => $address['middle_name'],
-            'lastname' => $address['last_name'],
+            'firstname' => $this->validateName($address['first_name']),
+            'middlename' => $this->validateName($address['middle_name']),
+            'lastname' => $this->validateName($address['last_name']),
             'street' => $this->getStreet($address, (int)$storeId),
             'city' => $address['city'],
             'country_id' => $address['country_code'],
@@ -154,7 +155,33 @@ class AddressHandler
     }
 
     /**
-     * Format address lines based on 'sperate housenumber' and on the number of streerlines there are available.
+     * Get customer company
+     *
+     * @param string|null $company
+     * @param int $storeId
+     * @return string|null
+     */
+    private function getCompany(?string $company, int $storeId): ?string
+    {
+        $company = $this->configProvider->importCompanyName((int)$storeId) ? $company : null;
+        if (!$company && $this->configProvider->isCompanyRequired($storeId)) {
+            $company = '-';
+        }
+        return $company;
+    }
+
+    /**
+     * @param string $nameValue
+     * @return string
+     */
+    private function validateName(string $nameValue): string
+    {
+        preg_match_all(self::PATTERN_NAME, $nameValue, $matches);
+        return implode($matches[0]);
+    }
+
+    /**
+     * Format address lines based on 'separate house-number' and on the number of streert lines there are available.
      * This number is configurable via 'customer/address/street_lines'.
      *
      * @param array $address
@@ -231,21 +258,5 @@ class AddressHandler
         }
 
         $this->addressRepository->save($address);
-    }
-
-    /**
-     * Get customer company
-     *
-     * @param string|null $company
-     * @param int $storeId
-     * @return string|null
-     */
-    private function getCompany(?string $company, int $storeId): ?string
-    {
-        $company = $this->configProvider->importCompanyName((int)$storeId) ? $company : null;
-        if (!$company && $this->configProvider->isCompanyRequired($storeId)) {
-            $company = '-';
-        }
-        return $company;
     }
 }
