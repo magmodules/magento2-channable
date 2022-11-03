@@ -108,7 +108,7 @@ class Attributes implements ArrayInterface
      */
     public function getLabel($attribute)
     {
-        return str_replace("'", '', $attribute->getFrontendLabel());
+        return str_replace("'", '', $attribute->getFrontendLabel() ?? '');
     }
 
     /**
