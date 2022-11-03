@@ -24,6 +24,8 @@ use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 class CustomerHandler
 {
 
+    private const PATTERN_NAME = '/(?:[\p{L}\p{M}\,\-\_\.\'’`\s\d]){1,255}+/u';
+
     /**
      * @var ConfigProvider
      */
@@ -76,9 +78,9 @@ class CustomerHandler
         if (!$this->configProvider->createCustomerOnImport((int)$storeId)) {
             $quote->setCustomerId(0);
             $quote->setCustomerEmail($email);
-            $quote->setCustomerFirstname($orderData['customer']['first_name']);
-            $quote->setCustomerMiddlename($orderData['customer']['middle_name']);
-            $quote->setCustomerLastname($orderData['customer']['last_name']);
+            $quote->setCustomerFirstname($this->validateName($orderData['customer']['first_name']));
+            $quote->setCustomerMiddlename($this->validateName($orderData['customer']['middle_name']));
+            $quote->setCustomerLastname($this->validateName($orderData['customer']['last_name']));
             $quote->setCustomerIsGuest(1);
             $quote->setCustomerGroupId(GroupInterface::NOT_LOGGED_IN_ID);
             $quote->setCheckoutMethod(CartManagementInterface::METHOD_GUEST);
@@ -91,9 +93,9 @@ class CustomerHandler
         } catch (NoSuchEntityException $exception) {
             $customer = $this->customerFactory->create();
             $customer->setWebsiteId($websiteId);
-            $customer->setFirstname($orderData['customer']['first_name']);
-            $customer->setMiddlename($orderData['customer']['middle_name']);
-            $customer->setLastname($orderData['customer']['last_name']);
+            $customer->setFirstname($this->validateName($orderData['customer']['first_name']));
+            $customer->setMiddlename($this->validateName($orderData['customer']['middle_name']));
+            $customer->setLastname($this->validateName($orderData['customer']['last_name']));
             $customer->setEmail($email);
             $customer->setGroupId($this->configProvider->customerGroupForOrderImport((int)$storeId));
             $this->customerRepository->save($customer);
@@ -117,5 +119,15 @@ class CustomerHandler
     private function cleanEmail(string $email): string
     {
         return str_replace([':'], '', $email);
+    }
+
+    /**
+     * @param string $nameValue
+     * @return string
+     */
+    private function validateName(string $nameValue): string
+    {
+        preg_match_all(self::PATTERN_NAME, $nameValue, $matches);
+        return implode($matches[0]);
     }
 }

@@ -88,6 +88,11 @@ class Product extends AbstractHelper
      * @var LogRepository
      */
     private $logger;
+    /**
+     * Array to save attribute options value
+     * @var array
+     */
+    private $attributeOptions = [];
 
     /**
      * Product constructor.
@@ -708,20 +713,29 @@ class Product extends AbstractHelper
             if ($attribute['type'] == 'select') {
                 if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                     $value = $product->getData($attribute['source']);
-                    $data = $attr->getSource()->getOptionText($value);
-                    if (!is_array($data)) {
-                        return (string)$data;
+                    $key = $attr->getStoreId() . $attribute['source'] . $value;
+                    if (!isset($this->attributeOptions[$key]) && !array_key_exists($key, $this->attributeOptions)) {
+                        $data = $attr->getSource()->getOptionText($value);
+                        if (!is_array($data)) {
+                            $this->attributeOptions[$key] = (string)$data;
+                        }
                     }
+                    return $this->attributeOptions[$key];
                 }
             }
             if ($attribute['type'] == 'multiselect') {
                 if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                     $value_text = [];
-                    $values = explode(',', (string)$product->getData($attribute['source']));
-                    foreach ($values as $value) {
-                        $value_text[] = $attr->getSource()->getOptionText($value);
+                    $value = (string)$product->getData($attribute['source']);
+                    $key = $attr->getStoreId() . $attribute['source'] . $value;
+                    if (!isset($this->attributeOptions[$key]) && !array_key_exists($key, $this->attributeOptions)) {
+                        $values = explode(',', (string)$product->getData($attribute['source']));
+                        foreach ($values as $value) {
+                            $value_text[] = $attr->getSource()->getOptionText($value);
+                        }
+                        $this->attributeOptions[$key] = implode('/', $value_text);
                     }
-                    return implode('/', $value_text);
+                    return $this->attributeOptions[$key];
                 }
             }
         } catch (\Exception $e) {

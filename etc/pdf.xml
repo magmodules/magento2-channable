@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © Magmodules.eu. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Sales:etc/pdf_file.xsd">
+    <totals>
+        <total name="transaction_fee">
+            <title translate="true">Marketplace Transaction Fee</title>
+            <source_field>transaction_fee</source_field>
+            <font_size>7</font_size>
+            <display_zero>false</display_zero>
+            <model>Magento\Sales\Model\Order\Pdf\Total\DefaultTotal</model>
+            <sort_order>500</sort_order>
+        </total>
+    </totals>
+</config>

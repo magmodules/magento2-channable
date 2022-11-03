@@ -11,4 +11,14 @@
             <item name="transaction_fee" instance="Magmodules\Channable\Model\Total\TransactionFee" sort_order="100"/>
         </group>
     </section>
+    <section name="order_invoice">
+        <group name="totals">
+            <item name="fee" instance="Magmodules\Channable\Model\Total\TransactionFeeInvoice" sort_order="110"/>
+        </group>
+    </section>
+    <section name="order_creditmemo">
+        <group name="totals">
+            <item name="fee" instance="Magmodules\Channable\Model\Total\TransactionFeeCreditmemo" sort_order="120"/>
+        </group>
+    </section>
 </config>

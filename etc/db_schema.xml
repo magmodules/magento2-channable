@@ -127,4 +127,14 @@
         <column name="channel_name" xsi:type="varchar" length="255" comment="Channable: Channel Name"/>
         <column name="channel_label" xsi:type="varchar" length="255" comment="Channable: Channel Label"/>
     </table>
+
+    <!-- Declaration Schema for transaction_fee column in sales_invoice Table -->
+    <table name="sales_invoice">
+        <column name="transaction_fee" xsi:type="decimal" precision="20" scale="4" nullable="true" comment="Channable Transaction Fee"/>
+    </table>
+
+    <!-- Declaration Schema for transaction_fee column in sales_invoice Table -->
+    <table name="sales_creditmemo">
+        <column name="transaction_fee" xsi:type="decimal" precision="20" scale="4" nullable="true" comment="Channable Transaction Fee"/>
+    </table>
 </schema>
