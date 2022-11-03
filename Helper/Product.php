@@ -88,6 +88,11 @@ class Product extends AbstractHelper
      * @var LogRepository
      */
     private $logger;
+    /**
+     * Array to save attribute options value
+     * @var array
+     */
+    private $attributeOptions = [];
 
     /**
      * Product constructor.
@@ -699,7 +704,6 @@ class Product extends AbstractHelper
      */
     public function getValue($attribute, $product)
     {
-        static $memory = [];
         try {
             if ($attribute['type'] == 'media_image') {
                 if ($url = $product->getData($attribute['source'])) {
@@ -710,13 +714,13 @@ class Product extends AbstractHelper
                 if ($attr = $product->getResource()->getAttribute($attribute['source'])) {
                     $value = $product->getData($attribute['source']);
                     $key = $attr->getStoreId() . $attribute['source'] . $value;
-                    if (!isset($memory[$key]) && !array_key_exists($key, $memory)) {
+                    if (!isset($this->attributeOptions[$key]) && !array_key_exists($key, $this->attributeOptions)) {
                         $data = $attr->getSource()->getOptionText($value);
                         if (!is_array($data)) {
-                            $memory[$key] = (string)$data;
+                            $this->attributeOptions[$key] = (string)$data;
                         }
-                     }
-                    return $memory[$key];
+                    }
+                    return $this->attributeOptions[$key];
                 }
             }
             if ($attribute['type'] == 'multiselect') {
@@ -724,14 +728,14 @@ class Product extends AbstractHelper
                     $value_text = [];
                     $value = (string)$product->getData($attribute['source']);
                     $key = $attr->getStoreId() . $attribute['source'] . $value;
-                    if (!isset($memory[$key]) && !array_key_exists($key, $memory)) {
+                    if (!isset($this->attributeOptions[$key]) && !array_key_exists($key, $this->attributeOptions)) {
                         $values = explode(',', (string)$product->getData($attribute['source']));
                         foreach ($values as $value) {
                             $value_text[] = $attr->getSource()->getOptionText($value);
                         }
-                        $memory[$key] = implode('/', $value_text);
+                        $this->attributeOptions[$key] = implode('/', $value_text);
                     }
-                    return $memory[$key];
+                    return $this->attributeOptions[$key];
                 }
             }
         } catch (\Exception $e) {
