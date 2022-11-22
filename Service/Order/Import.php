@@ -219,6 +219,12 @@ class Import
                 ->collectShippingRates()
                 ->setShippingMethod($shippingMethod);
 
+            foreach ($shippingAddress->getShippingRatesCollection() as $rate) {
+                /** @var \Magento\Quote\Model\Quote\Address\Rate $rate */
+                $rate->setPrice($shippingPrice);
+                $rate->setCost($shippingPrice);
+            }
+
             $quote->setPaymentMethod('channable');
             $quote->setInventoryProcessed(false);
             $quote->getPayment()->importData(['method' => 'channable']);
