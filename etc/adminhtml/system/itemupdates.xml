@@ -25,7 +25,8 @@
             <field id="limit" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Products per run</label>
                 <config_path>magmodules_channable_marketplace/item/limit</config_path>
-                <comment><![CDATA[Set a limit on the number of products for each update with a maximum value of <strong>50</strong.>]]></comment>
+                <validate>validate-number validate-number-range number-range-0-200</validate>
+                <comment><![CDATA[Set a limit on the number of products for each update with a maximum value of <strong>200</strong>, recommend setting: <strong>50</strong>.]]></comment>
             </field>
             <field id="webhook" translate="label" type="text" sortOrder="2" showInDefault="0" showInWebsite="0" showInStore="1">
                 <label>Webhook</label>
@@ -65,6 +66,8 @@
             <field id="cron" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Enable</label>
                 <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <comment><![CDATA[<strong>Please note:</strong> If option is disabled no item updates will be synced with Channable!]]></comment>
+                <config_path>magmodules_channable_marketplace/item/cron</config_path>
             </field>
             <field id="cron_frequency" translate="label" type="select" sortOrder="22" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Frequency</label>

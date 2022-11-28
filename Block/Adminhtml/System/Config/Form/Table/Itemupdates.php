@@ -98,10 +98,10 @@ class Itemupdates extends Template implements RendererInterface
                 $configData[$storeId] = [
                     'name'      => $store->getName(),
                     'is_active' => $store->getIsActive(),
-                    'enabled'   => $this->configProvider->isItemupdateEnabled($storeId)
+                    'enabled'   => $this->configProvider->isItemUpdateEnabled($storeId)
                         ? __('Enabled')->render()
                         : __('Disabled')->render(),
-                    'webhook'   => $this->configProvider->getItemupdateWebhookUrl($storeId)
+                    'webhook'   => $this->configProvider->getItemUpdateWebhookUrl($storeId)
                         ? __('Set')->render()
                         : __('Not Set')->render(),
                     'qty'       => $this->getQtyByStoreId($storeId)

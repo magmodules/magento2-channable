@@ -1,23 +1,21 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 namespace Magmodules\Channable\Console\Command;
 
+use Magento\Framework\App\State as AppState;
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Model\ItemFactory as ItemFactory;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Magmodules\Channable\Model\ItemFactory as ItemFactory;
-use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magento\Framework\App\State as AppState;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class ItemUpdate
- *
- * @package Magmodules\Channable\Console\Command
+ * CLI command to execute item updates
  */
 class ItemUpdate extends Command
 {
@@ -31,34 +29,32 @@ class ItemUpdate extends Command
      */
     private $itemFactory;
     /**
-     * @var GeneralHelper
+     * @var ConfigProvider
      */
-    private $generalHelper;
+    private $configProvider;
     /**
      * @var AppState
      */
     private $appState;
 
     /**
-     * ItemUpdate constructor.
-     *
-     * @param ItemFactory   $itemFactory
-     * @param GeneralHelper $generalHelper
-     * @param AppState      $appState
+     * @param ItemFactory $itemFactory
+     * @param ConfigProvider $configProvider
+     * @param AppState $appState
      */
     public function __construct(
         ItemFactory $itemFactory,
-        GeneralHelper $generalHelper,
+        ConfigProvider $configProvider,
         AppState $appState
     ) {
         $this->itemFactory = $itemFactory;
-        $this->generalHelper = $generalHelper;
+        $this->configProvider = $configProvider;
         $this->appState = $appState;
         parent::__construct();
     }
 
     /**
-     *  {@inheritdoc}
+     * @inheritdoc
      */
     public function configure()
     {
@@ -74,37 +70,35 @@ class ItemUpdate extends Command
     }
 
     /**
-     *  {@inheritdoc}
+     * @inheritdoc
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $storeId = $input->getOption('store-id');
         $this->appState->setAreaCode('frontend');
         $itemModel = $this->itemFactory->create();
 
-        if (empty($storeId) || !is_numeric($storeId)) {
-            $output->writeln('<info>Running All Stores</info>');
-            $storeIds = $this->generalHelper->getEnabledArray('magmodules_channable_marketplace/item/enable');
-            foreach ($storeIds as $storeId) {
-                $result = $itemModel->updateByStore($storeId);
-                $msg = sprintf(
+        foreach ($this->getSelectedStoreIds($input) as $storeId) {
+            $output->writeln("<info>Running Store {$storeId}</info>");
+            $result = $itemModel->updateAll((int)$storeId);
+            $output->writeln(
+                sprintf(
                     'Store ID: %s - %s - Products: %s',
                     $storeId,
-                    $result['status'],
-                    $result['qty']
-                );
-                $output->writeln($msg);
-            }
-        } else {
-            $output->writeln('<info>Running Store ' . $storeId . '</info>');
-            $result = $itemModel->updateByStore($storeId);
-            $msg = sprintf(
-                'Store ID: %s - %s - Products: %s',
-                $storeId,
-                $result['status'],
-                $result['qty']
+                    $result[$storeId]['status'] ?? 'Unknown Status',
+                    $result[$storeId]['qty'] ?? 0
+                )
             );
-            $output->writeln($msg);
         }
+    }
+
+    /**
+     * @return void
+     */
+    private function getSelectedStoreIds(InputInterface $input): array
+    {
+        $storeId = (int)$input->getOption('store-id');
+        return $storeId
+            ? [$input->getOption('store-id')]
+            : $this->configProvider->getItemUpdateStoreIds();
     }
 }
