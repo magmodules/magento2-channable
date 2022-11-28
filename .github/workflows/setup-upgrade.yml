@@ -30,4 +30,4 @@ jobs:
         run: docker cp $(pwd) magento-project-community-edition:/data/extensions/ && docker exec magento-project-community-edition composer require magmodules/magento2-channable:dev-continuous-integration-test-branch
 
       - name: Activate the extension and run setup:upgrade and setup:di:compile
-        run: docker exec magento-project-community-edition bash -c "php bin/magento module:enable Magmodules_Channable && php bin/magento setup:upgrade && php bin/magento setup:di:compile"
+        run: docker exec magento-project-community-edition bash -c "rm -rf /data/generated/code && php bin/magento module:enable Magmodules_Channable && php bin/magento setup:upgrade && php bin/magento setup:di:compile"
