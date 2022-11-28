@@ -57,7 +57,7 @@ class ImportSimulator
      * @var int
      */
     private $productId;
-    
+
     /**
      * @var ImportReturn
      */
@@ -173,7 +173,7 @@ class ImportSimulator
 
         return [
             'id'    => $product->getId(),
-            'price' => $product->getPrice(),
+            'price' => $product->getFinalPrice(),
             'sku'   => $product->getSku(),
             'name'  => $product->getName(),
         ];

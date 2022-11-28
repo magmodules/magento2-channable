@@ -242,7 +242,7 @@ class ImportSimulator
 
         return [
             'id' => $product->getId(),
-            'price' => $product->getPrice(),
+            'price' => $product->getFinalPrice(),
             'sku' => $product->getSku(),
             'name' => $product->getName(),
         ];
