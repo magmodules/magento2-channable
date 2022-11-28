@@ -90,6 +90,11 @@ class Import
     private $createInvoice;
 
     /**
+     * @var Process\SendOrderEmail
+     */
+    private $sendOrderEmail;
+
+    /**
      * @var Process\CreateShipment
      */
     private $createShipment;
@@ -108,11 +113,6 @@ class Import
      * @var ChannableOrderRepository
      */
     private $channableOrderRepository;
-
-    /**
-     * @var Json
-     */
-    private $json;
 
     /**
      * @var Shipping\GetDescription
@@ -144,7 +144,6 @@ class Import
      * @param Process\GetCustomIncrementId $getCustomIncrementId
      * @param ChannableOrderRepository $channableOrderRepository
      * @param LoggerRepository $logger
-     * @param Json $json
      */
     public function __construct(
         ConfigProvider $configProvider,
@@ -158,13 +157,13 @@ class Import
         Shipping\CalculatePrice $calculateShippingPrice,
         Shipping\GetMethod $getShippingMethod,
         Shipping\GetDescription $getShippingDescription,
+        Process\SendOrderEmail $sendOrderEmail,
         Process\CreateInvoice $createInvoice,
         Process\CreateShipment $createShipment,
         Process\AddPaymentData $addPaymentData,
         Process\GetCustomIncrementId $getCustomIncrementId,
         ChannableOrderRepository $channableOrderRepository,
-        LoggerRepository $logger,
-        Json $json
+        LoggerRepository $logger
     ) {
         $this->configProvider = $configProvider;
         $this->storeManager = $storeManager;
@@ -177,13 +176,13 @@ class Import
         $this->calculateShippingPrice = $calculateShippingPrice;
         $this->getShippingMethod = $getShippingMethod;
         $this->getShippingDescription = $getShippingDescription;
+        $this->sendOrderEmail = $sendOrderEmail;
         $this->createInvoice = $createInvoice;
         $this->createShipment = $createShipment;
         $this->addPaymentData = $addPaymentData;
         $this->getCustomIncrementId = $getCustomIncrementId;
         $this->channableOrderRepository = $channableOrderRepository;
         $this->logger = $logger;
-        $this->json = $json;
     }
 
     /**
@@ -299,10 +298,12 @@ class Import
     private function afterOrderImport(OrderInterface $order, int $storeId, bool $lvbOrder)
     {
         try {
+            if ($this->configProvider->sendOrderEmailOnImport($storeId)) {
+                $this->sendOrderEmail->execute($order);
+            }
             if ($this->configProvider->autoInvoiceOrderOnImport($storeId)) {
                 $this->createInvoice->execute($order);
             }
-
             if ($lvbOrder && $this->configProvider->autoShipLvbOrders($storeId)) {
                 $this->createShipment->execute($order, self::LVB_AUTO_SHIP_MESSAGE);
             }
