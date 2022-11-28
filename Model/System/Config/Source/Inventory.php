@@ -34,6 +34,7 @@ class Inventory implements ArrayInterface
                 ['value' => 'min_sale_qty', 'label' => __('Minimum Sales QTY')],
                 ['value' => 'qty_increments', 'label' => __('QTY Increments')],
                 ['value' => 'manage_stock', 'label' => __('Manage Stock')],
+                ['value' => 'backorders', 'label' => __('Backorder Enabled')],
             ];
         }
         return $this->options;

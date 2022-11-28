@@ -9,21 +9,11 @@ namespace Magmodules\Channable\Controller\Item;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Item as ItemHelper;
 
-/**
- * Class Webhook
- *
- * @package Magmodules\Channable\Controller\Item
- */
 class Webhook extends Action
 {
 
-    /**
-     * @var GeneralHelper
-     */
-    private $generalHelper;
     /**
      * @var ItemHelper
      */
@@ -36,18 +26,15 @@ class Webhook extends Action
     /**
      * Webhook constructor.
      *
-     * @param Context       $context
-     * @param GeneralHelper $generalHelper
-     * @param ItemHelper    $itemHelper
-     * @param JsonFactory   $resultJsonFactory
+     * @param Context $context
+     * @param ItemHelper $itemHelper
+     * @param JsonFactory $resultJsonFactory
      */
     public function __construct(
         Context $context,
-        GeneralHelper $generalHelper,
         ItemHelper $itemHelper,
         JsonFactory $resultJsonFactory
     ) {
-        $this->generalHelper = $generalHelper;
         $this->itemHelper = $itemHelper;
         $this->resultJsonFactory = $resultJsonFactory;
         parent::__construct($context);

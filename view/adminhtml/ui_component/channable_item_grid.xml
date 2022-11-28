@@ -19,6 +19,12 @@
                 <item name="class" xsi:type="string">primary</item>
                 <item name="url" xsi:type="string">*/*/runQue</item>
             </item>
+            <item name="flush" xsi:type="array">
+                <item name="name" xsi:type="string">flush</item>
+                <item name="label" xsi:type="string">Flush All Items</item>
+                <item name="class" xsi:type="string">secondary</item>
+                <item name="url" xsi:type="string">*/*/flush</item>
+            </item>
         </item>
     </argument>
     <dataSource name="channable_item_grid_data_source">

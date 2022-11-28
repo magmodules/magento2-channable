@@ -45,7 +45,7 @@ class GetReturnStatus
         $selectReturn = $connection->select()->from(
             $this->resource->getTableName('channable_returns'),
             'status'
-        )->where('id = ?', $id);
+        )->where('entity_id = ?', $id);
         $status = $connection->fetchOne($selectReturn);
         if ($status !== false) {
             return [

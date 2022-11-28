@@ -106,7 +106,7 @@ class ItemUpdate
     {
         $names = [];
         foreach ($this->storeManager->getStores() as $store) {
-            if ($this->configProvider->isItemupdateEnabled((int)$store->getStoreId())) {
+            if ($this->configProvider->isItemUpdateEnabled((int)$store->getStoreId())) {
                 $names[] = sprintf('"%s"', $store->getName());
             }
         }

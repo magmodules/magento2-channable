@@ -1,25 +1,27 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 namespace Magmodules\Channable\Model;
 
-use Magento\Framework\Model\Context;
-use Magento\Framework\Registry;
-use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\App\Area;
 use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\HTTP\Adapter\CurlFactory;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\Registry;
+use Magento\Store\Model\App\Emulation;
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Helper\General as GeneralHelper;
+use Magmodules\Channable\Helper\Item as ItemHelper;
+use Magmodules\Channable\Helper\Product as ProductHelper;
 use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magmodules\Channable\Model\Collection\Products as ProductsModel;
-use Magmodules\Channable\Helper\Product as ProductHelper;
-use Magmodules\Channable\Helper\Item as ItemHelper;
-use Magento\Framework\App\Area;
-use Magento\Store\Model\App\Emulation;
-use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class Item
@@ -64,23 +66,28 @@ class Item extends AbstractModel
      * @var CurlFactory
      */
     private $curlFactory;
+    /**
+     * @var ConfigProvider
+     */
+    private $configProvider;
 
     /**
      * Item constructor.
      *
-     * @param ItemFactory           $itemFactory
-     * @param GeneralHelper         $generalHelper
-     * @param ProductsModel         $productModel
-     * @param ProductHelper         $productHelper
-     * @param ItemHelper            $itemHelper
-     * @param SourceHelper          $sourceHelper
-     * @param Emulation             $appEmulation
-     * @param CurlFactory           $curlFactory
-     * @param Context               $context
-     * @param Registry              $registry
+     * @param ItemFactory $itemFactory
+     * @param GeneralHelper $generalHelper
+     * @param ProductsModel $productModel
+     * @param ProductHelper $productHelper
+     * @param ItemHelper $itemHelper
+     * @param SourceHelper $sourceHelper
+     * @param Emulation $appEmulation
+     * @param CurlFactory $curlFactory
+     * @param ConfigProvider $configProvider
+     * @param Context $context
+     * @param Registry $registry
      * @param AbstractResource|null $resource
-     * @param AbstractDb|null       $resourceCollection
-     * @param array                 $data
+     * @param AbstractDb|null $resourceCollection
+     * @param array $data
      */
     public function __construct(
         ItemFactory $itemFactory,
@@ -91,6 +98,7 @@ class Item extends AbstractModel
         SourceHelper $sourceHelper,
         Emulation $appEmulation,
         CurlFactory $curlFactory,
+        ConfigProvider $configProvider,
         Context $context,
         Registry $registry,
         AbstractResource $resource = null,
@@ -105,6 +113,7 @@ class Item extends AbstractModel
         $this->itemHelper = $itemHelper;
         $this->appEmulation = $appEmulation;
         $this->curlFactory = $curlFactory;
+        $this->configProvider = $configProvider;
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
 
@@ -146,17 +155,39 @@ class Item extends AbstractModel
     }
 
     /**
+     * @param $data
+     * @param $type
+     */
+    public function addToLog($type, $data)
+    {
+        $this->itemHelper->addTolog($type, $data);
+    }
+
+    /**
+     * @param int|null $storeId
      * @return array
      * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function updateAll()
+    public function updateAll(?int $storeId = null): array
     {
         $result = [];
-
         $this->runProductUpdateCheck();
-        $storeIds = $this->itemHelper->getStoreIds();
+        $storeIds = $storeId ? [$storeId] : $this->configProvider->getItemUpdateStoreIds();
+
         foreach ($storeIds as $storeId) {
-            $result[$storeId] = $this->updateByStore($storeId);
+            $qtyItemsToUpdate = $this->configProvider->getRunLimit();
+            $result[$storeId]['qty'] = 0;
+            while ($result[$storeId]['qty'] < $qtyItemsToUpdate) {
+                $updateResult = $this->updateByStore($storeId);
+                $result[$storeId]['status'] = $updateResult['status'];
+                $result[$storeId]['message'] = $updateResult['message'] ?? '';
+                if ($updateResult['qty'] != 0) {
+                    $result[$storeId]['qty'] = $result[$storeId]['qty'] + $updateResult['qty'];
+                } else {
+                    break;
+                }
+            }
         }
 
         return $result;
@@ -188,7 +219,6 @@ class Item extends AbstractModel
     public function invalidateProduct($productId, $type)
     {
         $log = $this->itemHelper->isLoggingEnabled();
-        /** @var \Magmodules\Channable\Model\ResourceModel\Item\Collection $items */
         $items = $this->itemFactory->create()
             ->getCollection()
             ->addFieldToFilter(['id', 'parent_id'], [['eq' => $productId], ['eq' => $productId]]);
@@ -200,15 +230,6 @@ class Item extends AbstractModel
                 $this->addTolog('invalidate', $msg);
             }
         }
-    }
-
-    /**
-     * @param $data
-     * @param $type
-     */
-    public function addToLog($type, $data)
-    {
-        $this->itemHelper->addTolog($type, $data);
     }
 
     /**
@@ -227,33 +248,35 @@ class Item extends AbstractModel
         if (!empty($config['api']['webhook'])) {
             $items = $this->itemFactory->create()->getCollection()
                 ->addFieldToFilter('store_id', $storeId)
-                ->setOrder('updated_at', 'ASC')
-                ->setPageSize($config['api']['limit']);
-
+                ->setOrder('updated_at', 'ASC');
             if ($itemIds !== null) {
                 $items->addFieldToFilter('item_id', ['in' => $itemIds]);
             } else {
                 $items->addFieldToFilter('needs_update', 1);
             }
 
+            $items->setPageSize(50);
+            $items->setCurPage(1)->load();
             $items->getSelect()->order('last_call', 'ASC');
+
             if (!$items->getSize()) {
                 $result = [
-                    'status'   => 'success',
+                    'status' => 'success',
                     'store_id' => $storeId,
-                    'qty'      => 0,
-                    'date'     => $this->generalHelper->getDateTime()
+                    'qty' => 0,
+                    'date' => $this->generalHelper->getDateTime(),
+                    'items_left' => false
                 ];
             } else {
                 $result = $this->updateCollection($items, $storeId, $config);
             }
         } else {
             $result = [
-                'status'   => 'error',
-                'msg'      => 'No webhook set for this store',
+                'status' => 'error',
+                'msg' => 'No webhook set for this store',
                 'store_id' => $storeId,
-                'qty'      => 0,
-                'date'     => $this->generalHelper->getDateTime()
+                'qty' => 0,
+                'date' => $this->generalHelper->getDateTime()
             ];
         }
 
@@ -295,7 +318,7 @@ class Item extends AbstractModel
      * @return array
      * @throws LocalizedException
      */
-    public function getProductData($items, $config)
+    public function getProductData($items, $config): array
     {
         $productData = [];
 

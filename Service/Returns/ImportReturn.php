@@ -64,7 +64,7 @@ class ImportReturn
             ->setReason($item['reason'])
             ->setComment($item['comment']);
 
-        if ($salesOrderGridData = $this->getMagentoOrder((int)$returnData['channel_id'])) {
+        if ($salesOrderGridData = $this->getMagentoOrder((int)$returnData['channable_id'])) {
             $returns->setMagentoOrderId((int)$salesOrderGridData['entity_id']);
             $returns->setMagentoIncrementId((string)$salesOrderGridData['increment_id']);
         }

@@ -50,6 +50,7 @@ class Source extends AbstractHelper
     const XPATH_MIN_SALES_QTY = 'cataloginventory/item_options/min_sale_qty';
     const XPATH_QTY_INCREMENTS = 'cataloginventory/item_options/qty_increments';
     const XPATH_QTY_INC_ENABLED = 'cataloginventory/item_options/enable_qty_increments';
+    const XPATH_ENABLE_BACKORDERS = 'cataloginventory/item_options/backorders';
     const XPATH_CATEGORY_FILTER = 'magmodules_channable/filter/category_enabled';
     const XPATH_CATEGORY_FILTER_TYPE = 'magmodules_channable/filter/category_type';
     const XPATH_CATEGORY_IDS = 'magmodules_channable/filter/category';
@@ -584,18 +585,29 @@ class Source extends AbstractHelper
             ];
 
             if ($inventory) {
-                $attributes['min_sale_qty'] = [
-                    'label'   => 'min_sale_qty',
-                    'source'  => 'min_sale_qty',
-                    'actions' => ['number'],
-                    'default' => '1.00',
-                ];
-                $attributes['qty_increments'] = [
-                    'label'   => 'qty_increments',
-                    'source'  => 'qty_increments',
-                    'actions' => ['number'],
-                    'default' => '1.00',
-                ];
+                $inventoryData = explode(',', (string)$this->getStoreValue(self::XPATH_INVENTORY_DATA));
+                if (in_array('min_sale_qty', $inventoryData)) {
+                    $attributes['min_sale_qty'] = [
+                        'label' => 'min_sale_qty',
+                        'source' => 'min_sale_qty',
+                        'actions' => ['number'],
+                        'default' => '1.00',
+                    ];
+                }
+                if (in_array('qty_increments', $inventoryData)) {
+                    $attributes['qty_increments'] = [
+                        'label' => 'qty_increments',
+                        'source' => 'qty_increments',
+                        'actions' => ['number'],
+                        'default' => '1.00',
+                    ];
+                }
+                if (in_array('backorders', $inventoryData)) {
+                    $attributes['backorders'] = [
+                        'label'   => 'backorders',
+                        'source'  => 'backorders'
+                    ];
+                }
             }
             $attributes['weight'] = [
                 'label'   => 'shipping_weight',
@@ -764,6 +776,11 @@ class Source extends AbstractHelper
         if (in_array('min_sale_qty', $invAtt['attributes'])) {
             $invAtt['attributes'][] = 'use_config_min_sale_qty';
             $invAtt['config_min_sale_qty'] = $this->getStoreValue(self::XPATH_MIN_SALES_QTY);
+        }
+
+        if (in_array('backorders', $invAtt['attributes'])) {
+            $invAtt['attributes'][] = 'use_config_backorders';
+            $invAtt['config_backorders'] = $this->getStoreValue(self::XPATH_ENABLE_BACKORDERS);
         }
 
         $websiteCode = $this->storeManager->getWebsite()->getCode();
