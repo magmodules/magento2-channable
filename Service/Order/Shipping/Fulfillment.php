@@ -62,7 +62,7 @@ class Fulfillment
      * Check if tracking entry should be used as a return tracking label
      *
      * @param ShipmentTrackInterface $track
-     * @param int                    $storeId
+     * @param int $storeId
      *
      * @return bool
      */
@@ -76,7 +76,7 @@ class Fulfillment
                     ) {
                         return false;
                     }
-                    if (strpos($track->getTitle(), $conditions['title_regexp']) !== false) {
+                    if (strpos((string)$track->getTitle(), (string)$conditions['title_regexp']) !== false) {
                         return true;
                     }
                 }

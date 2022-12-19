@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field;
 
-use Magento\Framework\DataObject;
 use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
+use Magento\Framework\DataObject;
 use Magento\Framework\View\Element\BlockInterface;
 
 /**
@@ -32,7 +32,8 @@ class ReturnLabel extends AbstractFieldArray
             'renderer' => $this->getCarrierRenderer()
         ]);
         $this->addColumn('title_regexp', [
-            'label'    => __('Title should contain'),
+            'label' => __('Title should contain'),
+            'class' => 'input-select required-entry'
         ]);
         $this->_addAfter = false;
         $this->_addButtonLabel = __('Add');
