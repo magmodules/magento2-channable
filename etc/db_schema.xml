@@ -118,6 +118,7 @@
     <!-- Declaration Schema for transaction_fee column in sales_order Table -->
     <table name="sales_order">
         <column name="transaction_fee" xsi:type="decimal" precision="20" scale="4" nullable="true" comment="Channable Transaction Fee"/>
+        <column name="channable_pickup_location" xsi:type="varchar" length="255" nullable="true" comment="Channable Pickup Location"/>
     </table>
 
     <!-- Declaration Schema for extra columns in sales_order_grid Table -->

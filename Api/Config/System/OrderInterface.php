@@ -323,7 +323,7 @@ interface OrderInterface extends ReturnsInterface
     public function useReturnLabel(int $storeId = null): ?string;
 
     /**
-     * Retruns array of carrier_code and regex to determine is label is return label
+     * Returns array of carrier_code and regex to determine is label is return label
      *
      * @param null|int $storeId
      * @return array

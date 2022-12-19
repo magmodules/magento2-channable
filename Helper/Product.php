@@ -934,7 +934,7 @@ class Product extends AbstractHelper
 
                 break;
             default:
-                if (floatval($product->getFinalPrice()) !== 0) {
+                if (intval($product->getFinalPrice()) !== 0) {
                     $price = $product->getPrice();
                     $finalPrice = $product->getFinalPrice();
                     $specialPrice = $product->getSpecialPrice();

@@ -6,15 +6,17 @@
 
 namespace Magmodules\Channable\Model;
 
+use Magento\Catalog\Model\Product;
 use Magento\Framework\App\Area;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\HTTP\Adapter\CurlFactory;
+use Magento\Framework\HTTP\ClientInterface as Curl;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
+use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Store\Model\App\Emulation;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Helper\General as GeneralHelper;
@@ -63,9 +65,13 @@ class Item extends AbstractModel
      */
     private $appEmulation;
     /**
-     * @var CurlFactory
+     * @var Curl
      */
-    private $curlFactory;
+    private $curl;
+    /**
+     * @var Json
+     */
+    private $json;
     /**
      * @var ConfigProvider
      */
@@ -81,7 +87,7 @@ class Item extends AbstractModel
      * @param ItemHelper $itemHelper
      * @param SourceHelper $sourceHelper
      * @param Emulation $appEmulation
-     * @param CurlFactory $curlFactory
+     * @param Curl $curl
      * @param ConfigProvider $configProvider
      * @param Context $context
      * @param Registry $registry
@@ -97,7 +103,8 @@ class Item extends AbstractModel
         ItemHelper $itemHelper,
         SourceHelper $sourceHelper,
         Emulation $appEmulation,
-        CurlFactory $curlFactory,
+        Curl $curl,
+        Json $json,
         ConfigProvider $configProvider,
         Context $context,
         Registry $registry,
@@ -112,7 +119,8 @@ class Item extends AbstractModel
         $this->sourceHelper = $sourceHelper;
         $this->itemHelper = $itemHelper;
         $this->appEmulation = $appEmulation;
-        $this->curlFactory = $curlFactory;
+        $this->curl = $curl;
+        $this->json = $json;
         $this->configProvider = $configProvider;
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
@@ -329,11 +337,11 @@ class Item extends AbstractModel
             $parents = $this->productModel->getParents($parentRelations, $config);
 
             foreach ($products as $product) {
-                /** @var \Magento\Catalog\Model\Product $product */
+                /** @var Product $product */
                 $parent = null;
                 if (!empty($parentRelations[$product->getEntityId()])) {
                     foreach ($parentRelations[$product->getEntityId()] as $parentId) {
-                        /** @var \Magento\Catalog\Model\Product $parent */
+                        /** @var Product $parent */
                         if ($parent = $parents->getItemById($parentId)) {
                             continue;
                         }
@@ -359,31 +367,26 @@ class Item extends AbstractModel
      *
      * @return array
      */
-    public function getPostData($items, $productData)
+    public function getPostData($items, $productData): array
     {
         $postData = [];
         foreach ($items as $item) {
             $id = $item->getData('id');
-
             if (!$item->getTitle()) {
                 continue;
             }
 
-            if (isset($productData[$id])) {
-                $product = $productData[$id];
-            } else {
-                $product = [];
-            }
+            $product = $productData[$id] ?? [];
 
             $update = [];
             $update['item_id'] = $item->getItemId();
             $update['id'] = $id;
-            $update['title'] = isset($product['title']) ? $product['title'] : $item->getTitle();
-            $update['gtin'] = isset($product['ean']) ? $product['ean'] : $item->getGtin();
+            $update['title'] = $product['title'] ?? $item->getTitle();
+            $update['gtin'] = $product['ean'] ?? $item->getGtin();
             $update['stock'] = isset($product['qty']) ? round($product['qty']) : 0;
-            $update['availability'] = isset($product['availability']) ? $product['availability'] : 0;
-            $update['price'] = isset($product['price']) ? $product['price'] : number_format($item->getPrice(), 2);
-            $update['discount_price'] = isset($product['sale_price']) ? $product['sale_price'] : '';
+            $update['availability'] = $product['availability'] ?? 0;
+            $update['price'] = $product['price'] ?? number_format($item->getPrice(), 2);
+            $update['discount_price'] = $product['sale_price'] ?? '';
 
             $postData[] = $update;
         }
@@ -395,36 +398,28 @@ class Item extends AbstractModel
      * @param $postData
      * @param $config
      *
-     * @return mixed
+     * @return array
      */
-    public function postData($postData, $config)
+    public function postData($postData, $config): array
     {
-        $httpHeader = [
-            'X-MAGMODULES-TOKEN: ' . $config['api']['token'],
-            'Content-Type:application/json'
-        ];
-
         try {
-            /** @var \Magento\Framework\HTTP\Adapter\Curl $curl */
-            $curl = $this->curlFactory->create();
-            $curl->setConfig(['timeout' => self::CURL_TIMEOUT]);
-            $curl->write(
-                \Zend_Http_Client::POST,
+            $this->curl->setOption(CURLOPT_TIMEOUT, self::CURL_TIMEOUT);
+            $this->curl->addHeader('X-MAGMODULES-TOKEN',  $config['api']['token']);
+            $this->curl->addHeader('Content-Type', 'application/json');
+            $this->curl->post(
                 $config['api']['webhook'],
-                '1.1',
-                $httpHeader,
-                json_encode($postData)
+                $this->json->serialize($postData)
             );
 
-            $response = $curl->read();
-            $responseCode = \Zend_Http_Response::extractCode($response);
-            $responseBody = \Zend_Http_Response::extractBody($response);
-            $result = json_decode($responseBody, true);
-            $results['status'] = isset($result['status']) ? $result['status'] : 'error';
-            $results['result'] = $result;
-            $results['message'] = isset($result['message']) ? $result['message'] : null;
+            $result = $this->json->unserialize(
+                $this->curl->getBody()
+            );
 
-            if (!isset($result['message']) && $responseCode == '401') {
+            $results['result'] = $result;
+            $results['status'] = $result['status'] ?? 'error';
+            $results['message'] = $result['message'] ?? null;
+
+            if (!isset($result['message']) && $this->curl->getStatus() == '401') {
                 $results['message'] = __('401 Unauthorized Webhook')->render();
                 $results['status'] = 'unauthorized';
             }
@@ -488,7 +483,7 @@ class Item extends AbstractModel
      * @return array
      * @throws LocalizedException
      */
-    public function updateByItemIds($itemIds)
+    public function updateByItemIds($itemIds): array
     {
         $result = [];
 

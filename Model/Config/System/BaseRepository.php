@@ -108,7 +108,7 @@ class BaseRepository
         if (empty($storeId)) {
             $storeId = $this->getStore()->getId();
         }
-        return $this->scopeConfig->getValue($path, $scope, $storeId);
+        return (string)$this->scopeConfig->getValue($path, $scope, $storeId);
     }
 
     /**

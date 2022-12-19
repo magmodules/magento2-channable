@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
 declare(strict_types=1);
@@ -16,8 +16,8 @@ use Magmodules\Channable\Service\Order\Shipping\Fulfillment;
 class OrderStatus
 {
 
-    const NO_ORDER_FOUND = 'No order found with Increment ID: %s';
-    const NO_CHANNABLE_ORDER = 'Order with Increment ID %s is not a Channable Order';
+    private const NO_ORDER_FOUND = 'No order found with Increment ID: %s';
+    private const NO_CHANNABLE_ORDER = 'Order with Increment ID %s is not a Channable Order';
 
     /**
      * @var OrderRepositoryInterface
@@ -35,6 +35,7 @@ class OrderStatus
     /**
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param OrderRepositoryInterface $orderRepository
+     * @param Fulfillment $fulfillment
      */
     public function __construct(
         SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -61,16 +62,16 @@ class OrderStatus
         $order = reset($orders);
 
         if (!$order) {
-            return  [
+            return [
                 'validated' => 'false',
                 'errors' => sprintf(self::NO_ORDER_FOUND, $incrementId)
             ];
         }
 
         if ($order->getPayment()->getMethod() !== Channable::CODE) {
-            return  [
+            return [
                 'validated' => 'false',
-                'errors' => sprintf(self::NO_CHANNABLE_ORDER. $incrementId)
+                'errors' => sprintf(self::NO_CHANNABLE_ORDER, $incrementId)
             ];
         }
 
@@ -79,8 +80,8 @@ class OrderStatus
             'status' => $order->getStatus()
         ];
 
-        if ($fulfillments = $this->getFulfillment($order)) {
-            $response['fulfillment'] = $fulfillments;
+        if ($fulfillment = $this->getFulfillment($order)) {
+            $response['fulfillment'] = $fulfillment;
         }
 
         return $response;
