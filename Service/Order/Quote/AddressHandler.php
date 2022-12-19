@@ -78,6 +78,11 @@ class AddressHandler
         $quote->getShippingAddress()->addData(
             $this->getAddressData('shipping', $orderData, $quote)
         );
+        if (isset($orderData['shipping']['pickup_point_name']) && $orderData['shipping']['pickup_point_name']) {
+            $extensionAttributes = $quote->getShippingAddress()->getExtensionAttributes();
+            $extensionAttributes->setChannablePickupLocation($orderData['shipping']['pickup_point_name']);
+            $quote->getShippingAddress()->setExtensionAttributes($extensionAttributes);
+        }
 
         return $quote;
     }
