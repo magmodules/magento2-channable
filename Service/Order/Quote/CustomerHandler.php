@@ -78,9 +78,9 @@ class CustomerHandler
         if (!$this->configProvider->createCustomerOnImport((int)$storeId)) {
             $quote->setCustomerId(0);
             $quote->setCustomerEmail($email);
-            $quote->setCustomerFirstname($this->validateName($orderData['customer']['first_name']));
-            $quote->setCustomerMiddlename($this->validateName($orderData['customer']['middle_name']));
-            $quote->setCustomerLastname($this->validateName($orderData['customer']['last_name']));
+            $quote->setCustomerFirstname($this->validateName($orderData['customer']['first_name'], 'first_name'));
+            $quote->setCustomerMiddlename($this->validateName($orderData['customer']['middle_name'], 'middle_name'));
+            $quote->setCustomerLastname($this->validateName($orderData['customer']['last_name'], 'last_name'));
             $quote->setCustomerIsGuest(1);
             $quote->setCustomerGroupId(GroupInterface::NOT_LOGGED_IN_ID);
             $quote->setCheckoutMethod(CartManagementInterface::METHOD_GUEST);
@@ -93,9 +93,9 @@ class CustomerHandler
         } catch (NoSuchEntityException $exception) {
             $customer = $this->customerFactory->create();
             $customer->setWebsiteId($websiteId);
-            $customer->setFirstname($this->validateName($orderData['customer']['first_name']));
-            $customer->setMiddlename($this->validateName($orderData['customer']['middle_name']));
-            $customer->setLastname($this->validateName($orderData['customer']['last_name']));
+            $customer->setFirstname($this->validateName($orderData['customer']['first_name'], 'first_name'));
+            $customer->setMiddlename($this->validateName($orderData['customer']['middle_name'], 'middle_name'));
+            $customer->setLastname($this->validateName($orderData['customer']['last_name'], 'last_name'));
             $customer->setEmail($email);
             $customer->setGroupId($this->configProvider->customerGroupForOrderImport((int)$storeId));
             $this->customerRepository->save($customer);
@@ -123,10 +123,14 @@ class CustomerHandler
 
     /**
      * @param string $nameValue
+     * @param string $type
      * @return string
      */
-    private function validateName(string $nameValue): string
+    private function validateName(string $nameValue, string $type): string
     {
+        if (!$nameValue && ($type != 'middle_name')) {
+            return '-';
+        }
         preg_match_all(self::PATTERN_NAME, $nameValue, $matches);
         return implode($matches[0]);
     }

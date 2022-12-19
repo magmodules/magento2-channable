@@ -124,9 +124,9 @@ class AddressHandler
         $addressData = [
             'customer_id' => $customerId,
             'company' => $this->getCompany($address['company'], (int)$storeId),
-            'firstname' => $this->validateName($address['first_name']),
-            'middlename' => $this->validateName($address['middle_name']),
-            'lastname' => $this->validateName($address['last_name']),
+            'firstname' => $this->validateName($address['first_name'], 'first_name'),
+            'middlename' => $this->validateName($address['middle_name'], 'middle_name'),
+            'lastname' => $this->validateName($address['last_name'], 'last_name'),
             'street' => $this->getStreet($address, (int)$storeId),
             'city' => $address['city'],
             'country_id' => $address['country_code'],
@@ -177,10 +177,14 @@ class AddressHandler
 
     /**
      * @param string $nameValue
+     * @param string $type
      * @return string
      */
-    private function validateName(string $nameValue): string
+    private function validateName(string $nameValue, string $type): string
     {
+        if (!$nameValue && ($type != 'middle_name')) {
+            return '-';
+        }
         preg_match_all(self::PATTERN_NAME, $nameValue, $matches);
         return implode($matches[0]);
     }
