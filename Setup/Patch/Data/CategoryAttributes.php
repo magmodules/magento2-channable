@@ -7,12 +7,10 @@
 namespace Magmodules\Channable\Setup\Patch\Data;
 
 use Magento\Catalog\Model\Category;
-use Magento\Eav\Setup\EavSetup;
+use Magento\Eav\Model\Entity\Attribute\Source\Boolean;
 use Magento\Eav\Setup\EavSetupFactory;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Zend_Validate_Exception;
 
 /**
  * Setup data patch class for adding Category Attributes
@@ -43,32 +41,10 @@ class CategoryAttributes implements DataPatchInterface
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public static function getDependencies()
-    {
-        return [];
-    }
-
-    /**
-     * @return DataPatchInterface|void
-     * @throws LocalizedException
-     * @throws Zend_Validate_Exception
+     * @inheritdoc
      */
     public function apply()
     {
-        $this->moduleDataSetup->getConnection()->startSetup();
-        $this->addDisableExportAttributes();
-        $this->moduleDataSetup->getConnection()->endSetup();
-    }
-
-    /**
-     * @throws LocalizedException
-     * @throws Zend_Validate_Exception
-     */
-    public function addDisableExportAttributes()
-    {
-        /** @var EavSetup $eavSetup */
         $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
         if (!$eavSetup->getAttributeId(Category::ENTITY, 'channable_cat_disable_export')) {
             $eavSetup->addAttribute(
@@ -78,7 +54,7 @@ class CategoryAttributes implements DataPatchInterface
                     'type' => 'int',
                     'label' => 'Disable Category from export',
                     'input' => 'select',
-                    'source' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class,
+                    'source' => Boolean::class,
                     'global' => 1,
                     'visible' => true,
                     'required' => false,
@@ -90,10 +66,12 @@ class CategoryAttributes implements DataPatchInterface
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getAliases()
+    {
+        return [];
+    }
+
+    public static function getDependencies()
     {
         return [];
     }
