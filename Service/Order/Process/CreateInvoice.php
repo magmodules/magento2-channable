@@ -13,6 +13,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\InvoiceInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Config as OrderConfig;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Service\InvoiceService;
@@ -24,7 +25,6 @@ use Throwable;
  */
 class CreateInvoice
 {
-
     /**
      * @var InvoiceService
      */
@@ -51,6 +51,11 @@ class CreateInvoice
     private $configProvider;
 
     /**
+     * @var OrderConfig
+     */
+    private $orderConfig;
+
+    /**
      * CreateInvoice constructor.
      *
      * @param InvoiceService $invoiceService
@@ -64,13 +69,15 @@ class CreateInvoice
         Transaction $transaction,
         InvoiceSender $invoiceSender,
         OrderCommentHistory $orderCommentHistory,
-        ConfigProvider $configProvider
+        ConfigProvider $configProvider,
+        OrderConfig $orderConfig
     ) {
         $this->invoiceService = $invoiceService;
         $this->transaction = $transaction;
         $this->invoiceSender = $invoiceSender;
         $this->orderCommentHistory = $orderCommentHistory;
         $this->configProvider = $configProvider;
+        $this->orderConfig = $orderConfig;
     }
 
     /**
@@ -96,7 +103,10 @@ class CreateInvoice
                 && $status = $this->configProvider->getOrderProcessingStatus((int)$order->getStoreId())) {
                 $order->setStatus($status);
             } else {
-                $order->setStatus(Order::STATE_PROCESSING);
+                $order->setStatus(
+                    $this->orderConfig->getStateDefaultStatus(Order::STATE_PROCESSING)
+                        ?: Order::STATE_PROCESSING
+                );
             }
 
             $this->transaction->addObject($order)->save();
