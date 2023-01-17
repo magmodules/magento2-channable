@@ -248,7 +248,7 @@ class Product extends AbstractHelper
         $filters = $config['filters'];
         if (!empty($parent)) {
             if (!empty($filters['stock'])) {
-                if (!$parent->getIsInStock()) {
+                if (!$parent->isAvailable()) {
                     return false;
                 }
             }
