@@ -278,6 +278,13 @@ class Product extends AbstractHelper
         return (bool)$parent->getIsInStock();
 
     }
+
+    /**
+     * @param \Magento\Catalog\Model\Product $parent
+     * @param                                $config
+     *
+     * @return bool
+     */
     public function getManageStock($parent, $config): bool
     {
         if ($parent->getUseConfigManageStock()) {
