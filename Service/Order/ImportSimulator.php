@@ -67,11 +67,6 @@ class ImportSimulator
     private $storeId;
 
     /**
-     * @var int
-     */
-    private $productId;
-
-    /**
      * @var ChannableOrderRepository
      */
     private $channableOrderRepository;
@@ -138,9 +133,7 @@ class ImportSimulator
     public function getTestData(array $params): array
     {
         $country = !empty($params['country']) ? $params['country'] : 'NL';
-        $this->productId = !empty($params['product_id']) ? $params['product_id'] : null;
-
-        $product = $this->getProductData();
+        $product = $this->getProductData($params);
         $random = $this->random->getRandomString(5, '0123456789');
 
         return [
@@ -230,20 +223,24 @@ class ImportSimulator
     /**
      * Get product data array
      *
+     * @param array $params
      * @return array
      * @throws NoSuchEntityException
      */
-    private function getProductData(): array
+    private function getProductData(array $params): array
     {
-        if ($this->productId) {
-            $product = $this->productRepository->getById($this->productId);
+        $productId = !empty($params['product_id']) ? (int)$params['product_id'] : null;
+        $fixedPrice = !empty($params['price']) ? (float)$params['price'] : null;
+
+        if ($productId) {
+            $product = $this->productRepository->getById($productId);
         } else {
             $product = $this->getRandomProduct();
         }
 
         return [
             'id' => $product->getId(),
-            'price' => $product->getFinalPrice(),
+            'price' => $this->getPrice($product, $fixedPrice),
             'sku' => $product->getSku(),
             'name' => $product->getName(),
         ];
@@ -265,7 +262,7 @@ class ImportSimulator
         }
 
         $collection = $this->productCollection->create();
-        $collection->addAttributeToSelect(['entity_id', 'sku', 'name'])
+        $collection->addAttributeToSelect(['entity_id', 'sku', 'name', 'type_id'])
             ->addStoreFilter($this->storeId)
             ->addPriceData()
             ->addAttributeToFilter(
@@ -281,5 +278,23 @@ class ImportSimulator
         $collection->getSelect()->orderRand();
 
         return $collection->getFirstItem();
+    }
+
+    /**
+     * @param $product
+     * @param $fixedPrice
+     * @return mixed
+     */
+    private function getPrice($product, $fixedPrice)
+    {
+        if ($fixedPrice !== null) {
+            return $fixedPrice;
+        }
+
+        if ($product->getTypeId() == \Magento\Bundle\Model\Product\Type::TYPE_CODE) {
+            return $product->getPriceInfo()->getPrice('regular_price')->getMaximalPrice()->getValue();
+        }
+
+        return $product->getFinalPrice();
     }
 }

@@ -211,6 +211,7 @@
                 <item name="ChannableSelftest" xsi:type="object">Magmodules\Channable\Console\Command\Selftest</item>
                 <item name="ChannableSOrderSimulate" xsi:type="object">Magmodules\Channable\Console\Command\OrderSimulate</item>
                 <item name="ChannableItemUpdate" xsi:type="object">Magmodules\Channable\Console\Command\ItemUpdate</item>
+                <item name="ChannableGenerateToken" xsi:type="object">Magmodules\Channable\Console\Command\GenerateToken</item>
             </argument>
         </arguments>
     </type>

@@ -12,7 +12,6 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Filesystem\Driver\File as FilesystemDriver;
-use Magento\Store\Model\StoreManagerInterface;
 use Magmodules\Channable\Api\Order\RepositoryInterface as ChannableOrderRepository;
 use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 use Magmodules\Channable\Service\Order\Import as OrderImport;
@@ -57,7 +56,6 @@ class Hook extends Action
      * @param JsonFactory $resultJsonFactory
      * @param FilesystemDriver $driver
      * @param LogRepository $logRepository
-     * @param StoreManagerInterface $storeManager
      * @param ChannableOrderRepository $channableOrderRepository
      */
     public function __construct(

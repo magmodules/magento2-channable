@@ -747,23 +747,21 @@ class Source extends AbstractHelper
         $invAtt = [];
         $enabled = $this->getStoreValue(self::XPATH_INVENTORY);
         $fields = $this->getStoreValue(self::XPATH_INVENTORY_DATA);
+        $invAtt['attributes'][] = 'is_in_stock';
+        $invAtt['attributes'][] = 'manage_stock';
+        $invAtt['attributes'][] = 'use_config_manage_stock';
+        $invAtt['config_manage_stock'] = $this->getStoreValue(self::XPATH_MANAGE_STOCK);
 
         if (!$enabled || empty($fields)) {
-            $invAtt['attributes'][] = 'is_in_stock';
+
             if ($type == 'api') {
                 $invAtt['attributes'][] = 'qty';
             }
             return $invAtt;
         }
 
-        $invAtt['attributes'] = explode(',', (string)$fields);
-        $invAtt['attributes'][] = 'is_in_stock';
+        $invAtt['attributes'] = array_merge($invAtt['attributes'], explode(',', (string)$fields));
         $invAtt['attributes'][] = 'qty';
-
-        if (in_array('manage_stock', $invAtt['attributes'])) {
-            $invAtt['attributes'][] = 'use_config_manage_stock';
-            $invAtt['config_manage_stock'] = $this->getStoreValue(self::XPATH_MANAGE_STOCK);
-        }
 
         if (in_array('qty_increments', $invAtt['attributes'])) {
             $invAtt['attributes'][] = 'use_config_qty_increments';

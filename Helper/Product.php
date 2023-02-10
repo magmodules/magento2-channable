@@ -248,7 +248,7 @@ class Product extends AbstractHelper
         $filters = $config['filters'];
         if (!empty($parent)) {
             if (!empty($filters['stock'])) {
-                if (!$parent->getIsInStock()) {
+                if (!$this->getIsInStock($parent, $config)) {
                     return false;
                 }
             }
@@ -263,6 +263,36 @@ class Product extends AbstractHelper
         return true;
     }
 
+    /**
+     * @param \Magento\Catalog\Model\Product $parent
+     * @param                                $config
+     *
+     * @return bool
+     */
+    public function getIsInStock($parent, $config): bool
+    {
+        if (!$this->getManageStock($parent, $config)){
+            return true;
+        }
+
+        return (bool)$parent->getIsInStock();
+
+    }
+
+    /**
+     * @param \Magento\Catalog\Model\Product $parent
+     * @param                                $config
+     *
+     * @return bool
+     */
+    public function getManageStock($parent, $config): bool
+    {
+        if ($parent->getUseConfigManageStock()) {
+            return (bool)$config['inventory']['config_manage_stock'];
+        }
+
+        return (bool)$parent->getManageStock();
+    }
     /**
      * @param                                $type
      * @param                                $attribute
@@ -334,7 +364,7 @@ class Product extends AbstractHelper
         }
 
         if (!empty($value)) {
-            if (!empty($attribute['actions']) || !empty($attribute['max'])) {
+            if ((!empty($attribute['actions']) || !empty($attribute['max'])) && !is_array($value)) {
                 $value = $this->getFormat($value, $attribute, $config, $product);
             }
             if (!empty($attribute['suffix'])) {
