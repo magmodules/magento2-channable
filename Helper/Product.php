@@ -364,7 +364,7 @@ class Product extends AbstractHelper
         }
 
         if (!empty($value)) {
-            if (!empty($attribute['actions']) || !empty($attribute['max'])) {
+            if ((!empty($attribute['actions']) || !empty($attribute['max'])) && !is_array($value)) {
                 $value = $this->getFormat($value, $attribute, $config, $product);
             }
             if (!empty($attribute['suffix'])) {
