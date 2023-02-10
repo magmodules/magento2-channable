@@ -180,13 +180,13 @@ class AddressHandler
      * @param string $type
      * @return string
      */
-    private function validateName(string $nameValue, string $type): string
+    private function validateName(string $nameValue, string $type): ?string
     {
-        if (!$nameValue && ($type != 'middle_name')) {
-            return '-';
+        if (preg_match_all(self::PATTERN_NAME, $nameValue, $matches)) {
+            return implode($matches[0]);
         }
-        preg_match_all(self::PATTERN_NAME, $nameValue, $matches);
-        return implode($matches[0]);
+
+        return $type != 'middle_name' ? '-' : null;
     }
 
     /**
