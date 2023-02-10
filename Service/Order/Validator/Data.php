@@ -125,7 +125,7 @@ class Data
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function validateOrderData($orderData, $request)
+    public function validateOrderData(string $orderData, array $request)
     {
         $test = $request['test'] ?? 0;
         $storeId = $request['store'] ?? null;
@@ -143,7 +143,8 @@ class Data
             $params = [
                 'product_id' => $request['product_id'] == '0' ? null : $request['product_id'],
                 'country' => $request['country'],
-                'lvb' => $request['lvb']
+                'lvb' => $request['lvb'],
+                'price' => $request['price'] ?? null
             ];
             $data = $this->importSimulator->getTestData($params);
         } else {
