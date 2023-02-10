@@ -8,7 +8,7 @@ namespace Magmodules\Channable\Setup\Patch\Data;
 
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Service\Token\Generate;
 
 /**
  * Setup data patch class to create token
@@ -17,27 +17,28 @@ class CreateToken implements DataPatchInterface
 {
 
     /**
-     * @var ConfigProvider
+     * @var Generate
      */
-    private $configProvider;
+    private $generateToken;
     /**
      * @var ModuleDataSetupInterface
      */
     private $moduleDataSetup;
 
     /**
-     * @param ConfigProvider $configProvider
+     * @param Generate $generateToken
+     * @param ModuleDataSetupInterface $moduleDataSetup
      */
     public function __construct(
-        ConfigProvider $configProvider,
+        Generate $generateToken,
         ModuleDataSetupInterface $moduleDataSetup
     ) {
-        $this->configProvider = $configProvider;
+        $this->generateToken = $generateToken;
         $this->moduleDataSetup = $moduleDataSetup;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public static function getDependencies()
     {
@@ -45,35 +46,17 @@ class CreateToken implements DataPatchInterface
     }
 
     /**
-     * @return DataPatchInterface|void
+     * @inheritdoc
      */
     public function apply()
     {
         $this->moduleDataSetup->getConnection()->startSetup();
-        if (!$this->configProvider->getToken()) {
-           $this->configProvider->setToken(
-               $this->getRandomString()
-           );
-        }
+        $this->generateToken->execute();
         $this->moduleDataSetup->getConnection()->endSetup();
     }
 
     /**
-     * @return string
-     */
-    private function getRandomString(): string
-    {
-        $token = '';
-        $chars = str_split("abcdefghijklmnopqrstuvwxyz0123456789");
-        for ($i = 0; $i < 64; $i++) {
-            $token .= $chars[array_rand($chars)];
-        }
-
-        return (string)$token;
-    }
-
-    /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getAliases()
     {
