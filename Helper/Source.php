@@ -532,6 +532,10 @@ class Source extends AbstractHelper
             'label'  => 'availability',
             'source' => 'is_in_stock'
         ];
+        $attributes['price_type'] = [
+            'label'  => 'price_type',
+            'source' => 'price_type'
+        ];
 
         if ($type != 'api') {
             $attributes['created_at'] = [
