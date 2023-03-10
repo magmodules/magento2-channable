@@ -7,6 +7,7 @@
 namespace Magmodules\Channable\Console\Command;
 
 use Magento\Framework\App\State as AppState;
+use Magento\Framework\Console\Cli;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Model\ItemFactory as ItemFactory;
 use Symfony\Component\Console\Command\Command;
@@ -89,6 +90,7 @@ class ItemUpdate extends Command
                 )
             );
         }
+        return Cli::RETURN_SUCCESS;
     }
 
     /**

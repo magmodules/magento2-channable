@@ -963,6 +963,20 @@ class Product extends AbstractHelper
                 }
 
                 break;
+            case 'bundle':
+                $price = $product->getPrice();
+                $finalPrice = $product->getFinalPrice();
+                $specialPrice = $product->getSpecialPrice();
+                $rulePrice = $this->ruleFactory->create()->getRulePrice(
+                    $config['timestamp'],
+                    $config['website_id'],
+                    '',
+                    $product->getId()
+                );
+                if ($rulePrice !== null && $rulePrice !== false) {
+                    $finalPrice = min($finalPrice, $rulePrice);
+                }
+                break;
             default:
                 if (intval($product->getFinalPrice()) !== 0) {
                     $price = $product->getPrice();
