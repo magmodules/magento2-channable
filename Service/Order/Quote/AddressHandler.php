@@ -97,7 +97,7 @@ class AddressHandler
      * @return array
      * @throws LocalizedException
      */
-    private function getAddressData(string $type, array $orderData, Quote $quote): array
+    public function getAddressData(string $type, array $orderData, Quote $quote): array
     {
         $storeId = $quote->getStoreId();
         $customerId = $quote->getCustomerId();
@@ -198,7 +198,7 @@ class AddressHandler
      *
      * @return string
      */
-    private function getStreet(array $address, int $storeId): string
+    public function getStreet(array $address, int $storeId): string
     {
         $seperateHousenumber = $this->configProvider->seperateHousenumber((int)$storeId);
         $numberOfStreetLines = $this->configProvider->getCustomerStreetLines((int)$storeId);
