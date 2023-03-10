@@ -248,7 +248,7 @@ class Import
             $order->setTransactionFee($quote->getTransactionFee());
 
             if (isset($orderData['price']['discount']) && !empty((float)$orderData['price']['discount'])) {
-                $discountAmount = (float)$orderData['price']['discount'];
+                $discountAmount = abs((float)$orderData['price']['discount']);
                 $order->setDiscountDescription(__('Channable discount'));
                 $order->setBaseDiscountAmount($discountAmount);
                 $order->setDiscountAmount($discountAmount);
