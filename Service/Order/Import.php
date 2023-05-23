@@ -12,6 +12,7 @@ use Magento\CatalogInventory\Observer\ItemsForReindex;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -120,6 +121,11 @@ class Import
     private $getShippingDescription;
 
     /**
+     * @var CartRepositoryInterface
+     */
+    protected $quoteRepository;
+
+    /**
      * @var LoggerRepository
      */
     private $logger;
@@ -138,11 +144,13 @@ class Import
      * @param Shipping\CalculatePrice $calculateShippingPrice
      * @param Shipping\GetMethod $getShippingMethod
      * @param Shipping\GetDescription $getShippingDescription
+     * @param Process\SendOrderEmail $sendOrderEmail
      * @param Process\CreateInvoice $createInvoice
      * @param Process\CreateShipment $createShipment
      * @param Process\AddPaymentData $addPaymentData
      * @param Process\GetCustomIncrementId $getCustomIncrementId
      * @param ChannableOrderRepository $channableOrderRepository
+     * @param CartRepositoryInterface $quoteRepository
      * @param LoggerRepository $logger
      */
     public function __construct(
@@ -163,6 +171,7 @@ class Import
         Process\AddPaymentData $addPaymentData,
         Process\GetCustomIncrementId $getCustomIncrementId,
         ChannableOrderRepository $channableOrderRepository,
+        CartRepositoryInterface $quoteRepository,
         LoggerRepository $logger
     ) {
         $this->configProvider = $configProvider;
@@ -182,6 +191,7 @@ class Import
         $this->addPaymentData = $addPaymentData;
         $this->getCustomIncrementId = $getCustomIncrementId;
         $this->channableOrderRepository = $channableOrderRepository;
+        $this->quoteRepository = $quoteRepository;
         $this->logger = $logger;
     }
 
@@ -237,7 +247,7 @@ class Import
                 $quote->setReservedOrderId($customIncrementId);
             }
 
-            $quote->save();
+            $this->quoteRepository->save($quote);
 
             if ($lvbOrder && $this->configProvider->disableStockMovementForLvbOrders($storeId)) {
                 $quote->setInventoryProcessed(true);
