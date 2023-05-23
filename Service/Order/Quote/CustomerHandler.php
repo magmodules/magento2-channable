@@ -76,7 +76,6 @@ class CustomerHandler
         $email = $this->cleanEmail($orderData['customer']['email']);
 
         if (!$this->configProvider->createCustomerOnImport((int)$storeId)) {
-            $quote->setCustomerId(0);
             $quote->setCustomerEmail($email);
             $quote->setCustomerFirstname($this->validateName($orderData['customer']['first_name'], 'first_name'));
             $quote->setCustomerMiddlename($this->validateName($orderData['customer']['middle_name'], 'middle_name'));
