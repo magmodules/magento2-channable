@@ -44,6 +44,16 @@ $specificInfo = $block->getSpecificInformation();
                 <td><?= $channelCustomerNumber; ?></td>
             </tr>
         <?php endif; ?>
+        <?php if ($externalArticleNumbers = $this->getInfo()->getAdditionalInformation('external_article_numbers')): ?>
+            <tr>
+                <th><?= __('External Article Number(s)'); ?></th>
+                <td>
+                    <a href="#" class="channable-tooltip"><?= __('Show Numbers'); ?>
+                        <span><?= nl2br($externalArticleNumbers); ?></span>
+                    </a>
+                </td>
+            </tr>
+        <?php endif; ?>
         <?php if ($channableId = $this->getInfo()->getAdditionalInformation('channable_id')): ?>
             <tr>
                 <th><?= __('Channable ID'); ?></th>
