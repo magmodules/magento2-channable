@@ -76,7 +76,6 @@ class CustomerHandler
         $email = $this->cleanEmail($orderData['customer']['email']);
 
         if (!$this->configProvider->createCustomerOnImport((int)$storeId)) {
-            $quote->setCustomerId(0);
             $quote->setCustomerEmail($email);
             $quote->setCustomerFirstname($this->validateName($orderData['customer']['first_name'], 'first_name'));
             $quote->setCustomerMiddlename($this->validateName($orderData['customer']['middle_name'], 'middle_name'));
@@ -122,16 +121,16 @@ class CustomerHandler
     }
 
     /**
-     * @param string $nameValue
+     * @param string|null $nameValue
      * @param string $type
      * @return string
      */
-    private function validateName(string $nameValue, string $type): string
+    private function validateName(?string $nameValue, string $type): string
     {
         if (!$nameValue && ($type != 'middle_name')) {
             return '-';
         }
-        preg_match_all(self::PATTERN_NAME, $nameValue, $matches);
+        preg_match_all(self::PATTERN_NAME, (string)$nameValue, $matches);
         return implode($matches[0]);
     }
 }

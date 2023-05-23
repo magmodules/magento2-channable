@@ -176,13 +176,13 @@ class AddressHandler
     }
 
     /**
-     * @param string $nameValue
+     * @param string|null $nameValue
      * @param string $type
-     * @return string
+     * @return string|null
      */
-    private function validateName(string $nameValue, string $type): ?string
+    private function validateName(?string $nameValue, string $type): ?string
     {
-        if (preg_match_all(self::PATTERN_NAME, $nameValue, $matches)) {
+        if (preg_match_all(self::PATTERN_NAME, (string)$nameValue, $matches)) {
             return implode($matches[0]);
         }
 
@@ -190,7 +190,7 @@ class AddressHandler
     }
 
     /**
-     * Format address lines based on 'separate house-number' and on the number of streert lines there are available.
+     * Format address lines based on 'separate house-number' and on the number of street lines there are available.
      * This number is configurable via 'customer/address/street_lines'.
      *
      * @param array $address
