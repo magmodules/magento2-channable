@@ -121,16 +121,16 @@ class CustomerHandler
     }
 
     /**
-     * @param string $nameValue
+     * @param string|null $nameValue
      * @param string $type
      * @return string
      */
-    private function validateName(string $nameValue, string $type): string
+    private function validateName(?string $nameValue, string $type): string
     {
         if (!$nameValue && ($type != 'middle_name')) {
             return '-';
         }
-        preg_match_all(self::PATTERN_NAME, $nameValue, $matches);
+        preg_match_all(self::PATTERN_NAME, (string)$nameValue, $matches);
         return implode($matches[0]);
     }
 }
