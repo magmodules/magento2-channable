@@ -1,21 +1,27 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Cron;
 
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 use Magmodules\Channable\Model\Item as ItemModel;
-use Magmodules\Channable\Helper\Item as ItemHelper;
 
 class ItemUpdate
 {
 
     /**
-     * @var ItemHelper
+     * @var ConfigProvider
      */
-    private $itemHelper;
+    private $configProvider;
+    /**
+     * @var LogRepository
+     */
+    private $logRepository;
     /**
      * @var ItemModel
      */
@@ -24,14 +30,17 @@ class ItemUpdate
     /**
      * ItemUpdate constructor.
      *
-     * @param ItemModel  $itemModel
-     * @param ItemHelper $itemHelper
+     * @param ItemModel $itemModel
+     * @param ConfigProvider $configProvider
+     * @param LogRepository $logRepository
      */
     public function __construct(
         ItemModel $itemModel,
-        ItemHelper $itemHelper
+        ConfigProvider $configProvider,
+        LogRepository $logRepository
     ) {
-        $this->itemHelper = $itemHelper;
+        $this->configProvider = $configProvider;
+        $this->logRepository = $logRepository;
         $this->itemModel = $itemModel;
     }
 
@@ -41,14 +50,11 @@ class ItemUpdate
     public function execute()
     {
         try {
-            $cronEnabled = $this->itemHelper->isCronEnabled();
-            if ($cronEnabled) {
+            if ($this->configProvider->isItemCronEnabled()) {
                 $this->itemModel->updateAll();
             }
         } catch (\Exception $e) {
-            $this->itemHelper->addTolog('Cron ItemUpdate', $e->getMessage());
+            $this->logRepository->addErrorLog('Cron ItemUpdate', $e->getMessage());
         }
-
-        return $this;
     }
 }

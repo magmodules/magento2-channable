@@ -73,7 +73,7 @@
                 <label>Frequency</label>
                 <source_model>Magmodules\Channable\Model\System\Config\Source\CronFrequency</source_model>
                 <backend_model>Magmodules\Channable\Model\Config\Backend\Cron</backend_model>
-                <config_path>magmodules_channable_marketplace/item/cron</config_path>
+                <config_path>magmodules_channable_marketplace/item/cron_frequency</config_path>
                 <depends>
                     <field id="cron">1</field>
                 </depends>

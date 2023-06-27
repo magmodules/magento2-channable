@@ -1,26 +1,27 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Cron;
 
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 use Magmodules\Channable\Model\Item as ItemModel;
-use Magmodules\Channable\Helper\Item as ItemHelper;
 
-/**
- * Class ItemCleanup
- *
- * @package Magmodules\Channable\Cron
- */
 class ItemCleanup
 {
 
     /**
-     * @var ItemHelper
+     * @var ConfigProvider
      */
-    private $itemHelper;
+    private $configProvider;
+    /**
+     * @var LogRepository
+     */
+    private $logRepository;
     /**
      * @var ItemModel
      */
@@ -29,14 +30,17 @@ class ItemCleanup
     /**
      * ItemUpdate constructor.
      *
-     * @param ItemModel  $itemModel
-     * @param ItemHelper $itemHelper
+     * @param ItemModel $itemModel
+     * @param ConfigProvider $configProvider
+     * @param LogRepository $logRepository
      */
     public function __construct(
         ItemModel $itemModel,
-        ItemHelper $itemHelper
+        ConfigProvider $configProvider,
+        LogRepository $logRepository
     ) {
-        $this->itemHelper = $itemHelper;
+        $this->configProvider = $configProvider;
+        $this->logRepository = $logRepository;
         $this->itemModel = $itemModel;
     }
 
@@ -45,14 +49,12 @@ class ItemCleanup
      */
     public function execute()
     {
-        if (!$this->itemHelper->isCronEnabled()) {
-            return;
-        }
-
         try {
-            $this->itemModel->cleanOldEntries();
+            if ($this->configProvider->isItemCronEnabled()) {
+                $this->itemModel->cleanOldEntries();
+            }
         } catch (\Exception $e) {
-            $this->itemHelper->addTolog('Cron ItemCleanup', $e->getMessage());
+            $this->logRepository->addErrorLog('Cron ItemCleanup', $e->getMessage());
         }
     }
 }
