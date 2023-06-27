@@ -1,31 +1,28 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Model\Config\Backend;
 
-use Magento\Framework\App\Config\Value;
-use Magento\Framework\Model\Context;
-use Magento\Framework\Registry;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\Config\ReinitableConfigInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Config\Value;
 use Magento\Framework\App\Config\ValueFactory;
-use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\App\Config\ReinitableConfigInterface;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\Registry;
 
-/**
- * Class Cron
- *
- * @package Magmodules\Channable\Model\Config\Backend
- */
 class Cron extends Value
 {
 
     const CRON_STRING_PATH = 'crontab/default/jobs/channable_item_update/schedule/cron_expr';
+
     /**
      * @var ValueFactory
      */
@@ -38,16 +35,16 @@ class Cron extends Value
     /**
      * Cron constructor.
      *
-     * @param Context                   $context
-     * @param Registry                  $registry
-     * @param ScopeConfigInterface      $config
+     * @param Context $context
+     * @param Registry $registry
+     * @param ScopeConfigInterface $config
      * @param ReinitableConfigInterface $reinitConfig
-     * @param TypeListInterface         $cacheTypeList
-     * @param ValueFactory              $configValueFactory
-     * @param AbstractResource|null     $resource
-     * @param AbstractDb|null           $resourceCollection
-     * @param string                    $runModelPath
-     * @param array                     $data
+     * @param TypeListInterface $cacheTypeList
+     * @param ValueFactory $configValueFactory
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
+     * @param string $runModelPath
+     * @param array $data
      */
     public function __construct(
         Context $context,
@@ -67,23 +64,17 @@ class Cron extends Value
     }
 
     /**
-     * @return \Magento\Framework\App\Config\Value
+     * @return Value
      * @throws LocalizedException
      */
-    public function afterSave()
+    public function afterSave(): Value
     {
-        $expression = $this->getData('groups/item/fields/cron_frequency/value');
-
-        if ($expression == 'custom') {
-            $expression = trim($this->getData('groups/item/fields/custom_frequency/value'));
-        }
-
         try {
             $this->configValueFactory->create()->load(
                 self::CRON_STRING_PATH,
                 'path'
             )->setValue(
-                $expression
+                $this->getExpression()
             )->setPath(
                 self::CRON_STRING_PATH
             )->save();
@@ -93,5 +84,15 @@ class Cron extends Value
 
         $this->reinitConfig->reinit();
         return parent::afterSave();
+    }
+
+    /**
+     * @return string|null
+     */
+    private function getExpression(): ?string
+    {
+        return $this->getData('groups/item/fields/cron_frequency/value') == 'custom'
+            ? trim($this->getData('groups/item/fields/custom_frequency/value'))
+            : $this->getData('groups/item/fields/cron_frequency/value');
     }
 }
