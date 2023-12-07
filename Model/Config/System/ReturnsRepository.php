@@ -31,4 +31,21 @@ class ReturnsRepository extends ItemupdateRepository implements ReturnsInterface
         $url = $this->storeManager->getStore((int)$storeId)->getBaseUrl();
         return $url . sprintf('channable/returns/hook/store/%s/code/%s', $storeId, $this->getToken());
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function autoUpdateReturnsOnCreditmemo(int $storeId = null): bool
+    {
+        return (bool)$this->getStoreValue(self::XML_PATH_RETURNS_AUTO_MATCH, (int)$storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function showOnCreditmemoCreation(int $storeId = null): bool
+    {
+        return $this->getStoreValue(self::XML_PATH_RETURNS_CREDITMEMO, $storeId)
+            && $this->isReturnsEnabled($storeId);
+    }
 }

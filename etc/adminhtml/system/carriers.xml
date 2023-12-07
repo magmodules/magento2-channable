@@ -11,7 +11,7 @@
             <label>Channable</label>
             <field id="heading_title" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Title</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
             </field>
             <field id="title" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                 <label>Title</label>
@@ -23,7 +23,7 @@
             </field>
             <field id="heading_name" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Name</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
             </field>
             <field id="name" translate="label" type="text" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                 <label>Name</label>

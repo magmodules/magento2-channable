@@ -74,7 +74,7 @@ class Cron
     /**
      * @return array
      */
-    public function execute()
+    public function execute(): array
     {
         $scheduledAt = '';
         $result = [

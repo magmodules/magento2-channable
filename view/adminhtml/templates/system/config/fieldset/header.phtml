@@ -3,37 +3,57 @@
  * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  *
- * @var $block Magmodules\Channable\Block\Adminhtml\Magmodules\Header
+ * @var $block Magmodules\Channable\Block\Adminhtml\Design\Header
  */
+
+ $logo = $block->getViewFileUrl('Magmodules_Channable/images/channable-logo.png');
 ?>
-<div class="mm-block-channable" style="background-image: url(<?= $block->escapeUrl($block->getImage()); ?>)">
-    <a class="helpbutton" href="<?= $block->escapeUrl($block->getSupportLink()); ?>" target="_blank">
-        <?= $block->escapeHtml(__('Extension Manual')); ?>
-    </a>
-    <p>
-        <strong><?= $block->escapeHtml(__('Developed by Magmodules.')); ?></strong>
-        <?= $block->escapeHtml(__('A Magento only eCommerce Agency located in the Netherlands.')); ?>
-    </p>
-    <table>
-        <tbody>
-            <tr>
-                <td>
-                    <div class="icon2"></div>
-                    <a href="https://www.magmodules.eu/" target="_blank">Magmodules.eu</a>
-                </td>
-                <td>
-                    <div class="icon1"></div>
-                    <a href="<?= $block->escapeUrl($block->getContactLink()); ?>" target="_blank">
-                        <?= $block->escapeHtml(__('Contact')); ?>
-                    </a>
-                </td>
-                <td>
-                    <div class="icon3"></div>
-                    <a href="https://support.channable.com/hc/en-us" target="_blank">
-                        <?= $block->escapeHtml(__('Channable Support')); ?>
-                    </a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+
+<div class="mm-ui-header" style="background-image: url(<?= $block->escapeHTML($logo); ?>)">
+    <div class="mm-ui-header-text">
+        <strong>
+            <?= $block->escapeHTML(__('Plugin Development by Magmodules')); ?>
+        </strong>
+        <div>
+            <?= $block->escapeHTML(__('Your premium plugin partner for Magento & Shopware located in the Netherlands.')); ?> <?php // phpcs:ignore ?>
+        </div>
+    </div>
+    <div class="mm-ui-header-actions">
+        <a id="mm-ui-button_support" href="<?= $block->escapeUrl($block->getChannableSupportLink()); ?>"
+           target="_blank">
+           <i class="mm-ui-icon__question-circled">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.47a.75.75 0 001-.708V4.262a.75.75 0 00-.5-.707A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" />
+                </svg>
+            </i>
+            <span><?= $block->escapeHTML(__('Channable Support')); ?></span>
+        </a>
+        <a id="mm-ui-button_help" href="<?= $block->escapeUrl($block->getSupportLink()); ?>"
+           target="_blank">
+            <i class="mm-ui-icon__question-circled">
+                <svg version="1.1" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#fff" d="m512 1000.5c-268.41 0-488.02-217.66-488.02-489 0-268.41 219.61-488.02 488.02-488.02s488.02 219.61 488.02 488.02c0 271.34-219.61 489-488.02 489zm0-917.48c-236.2 0-428.48 192.28-428.48 428.48 0 237.18 192.28 429.46 428.48 429.46s429.46-192.28 429.46-429.46c0-236.2-193.26-428.48-429.46-428.48zm122.01 436.29-28.306 23.424c-17.568 12.688-27.329 26.352-32.214 43.923-3.904 10.736-5.856 22.448-5.856 44.899h-114.2c0.976-46.851 4.88-76.131 12.688-92.723 7.808-19.52 27.329-40.019 57.587-63.443l30.26-24.4c9.76-7.808 17.568-15.616 22.448-24.4 11.712-15.616 17.568-33.191 17.568-49.779 0-21.472-5.856-41.971-18.544-59.539-11.712-16.592-35.139-26.352-67.347-26.352s-54.659 11.712-68.323 32.214c-15.616 22.448-21.472 41.971-21.472 64.419h-122.01c3.904-80.035 33.191-132.74 83.939-164.95 32.214-23.424 74.179-33.191 122.01-33.191 63.443 0 116.15 15.616 158.12 45.875s65.395 91.746 65.395 150.31c0 37.091-11.712 49.779-30.26 75.155-9.76 14.64-31.237 36.115-61.491 58.563zm-60.515 295.74h-122.01v-122.01h122.01z"/> <?php // phpcs:ignore ?>
+                </svg>
+            </i>
+            <span><?= $block->escapeHTML(__('Manual & Support')); ?></span>
+        </a>
+        <button id="mm-ui-button_test" title="<?= $block->escapeHTML(__('Run Self-test')); ?>"
+                type="button">
+            <i class="mm-ui-icon__list-unordered-four">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <?php // phpcs:ignore ?>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /> <?php // phpcs:ignore ?>
+                </svg>
+            </i>
+            <span><?= $block->escapeUrl(__('Run Self-test')); ?></span>
+        </button>
+    </div>
 </div>
+
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "Magmodules_Channable/js/button-functions": {},
+            "Magmodules_Channable/js/show-more": {}
+        }
+    }
+</script>

@@ -87,8 +87,10 @@
         <column name="channel_name" xsi:type="varchar" length="255" comment="Channel Name"/>
         <column name="channel_id" xsi:type="varchar" length="255" comment="Channel ID"/>
         <column name="channable_id" xsi:type="int" padding="10" identity="false" nullable="false" unsigned="true" comment="Channable ID"/>
-        <column name="magento_order_id" xsi:type="int" padding="10" identity="false" nullable="false" unsigned="true" comment="Magento Order ID"/>
+        <column name="magento_order_id" xsi:type="int" padding="10" identity="false" nullable="true" unsigned="true" comment="Magento Order ID"/>
         <column name="magento_increment_id" xsi:type="varchar" length="255" comment="Magento Increment Id"/>
+        <column name="magento_creditmemo_id" xsi:type="int" padding="10" identity="false" nullable="true" unsigned="true" comment="Magento Creditmemo ID"/>
+        <column name="magento_creditmemo_increment_id" xsi:type="varchar" length="255" comment="Magento Creditmemo Increment Id"/>
         <column name="item" xsi:type="text" comment="Item Info"/>
         <column name="customer_name" xsi:type="varchar" length="255" comment="Customer Name"/>
         <column name="customer" xsi:type="text" comment="Customer Info"/>

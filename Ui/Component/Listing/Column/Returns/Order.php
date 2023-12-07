@@ -15,7 +15,7 @@ use Magento\Ui\Component\Listing\Columns\Column;
 class Order extends Column
 {
 
-    const ORDER_URL = '<a href="%s">%s</a>';
+    const ORDER_URL = '<a href="%s">#%s</a>';
 
     /**
      * Prepare Data Source

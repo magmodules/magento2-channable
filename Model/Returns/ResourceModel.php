@@ -26,17 +26,6 @@ class ResourceModel extends AbstractDb
     public const PRIMARY = 'entity_id';
 
     /**
-     * Serializable fields: item, customer & address
-     *
-     * @var array
-     */
-    protected $_serializableFields = [
-        'item'     => [[], []],
-        'customer' => [[], []],
-        'address'  => [[], []],
-    ];
-
-    /**
      * @inheritDoc
      */
     public function _construct()

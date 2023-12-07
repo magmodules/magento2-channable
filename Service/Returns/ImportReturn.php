@@ -25,7 +25,7 @@ class ImportReturn
 
     /**
      * @param ResourceConnection $resource
-     * @param ReturnsRepository  $returnsRepository
+     * @param ReturnsRepository $returnsRepository
      */
     public function __construct(
         ResourceConnection $resource,
@@ -39,7 +39,7 @@ class ImportReturn
      * Import return data
      *
      * @param array $returnData
-     * @param int   $storeId
+     * @param int $storeId
      *
      * @return array
      */
@@ -49,6 +49,7 @@ class ImportReturn
         $item = $returnData['item'] ?? [];
         $customer = $returnData['customer'] ?? [];
         $address = $returnData['address'] ?? [];
+        $orderIncrementId = $item['order_id'] ?? null;
 
         $returns = $this->returnsRepository->create();
         $returns->setStoreId($storeId)
@@ -62,11 +63,11 @@ class ImportReturn
             ->setAddress($address)
             ->setStatus($returnData['status'])
             ->setReason($item['reason'])
-            ->setComment($item['comment']);
+            ->setComment($item['comment'])
+            ->setMagentoIncrementId((string)$orderIncrementId);
 
-        if ($salesOrderGridData = $this->getMagentoOrder((int)$returnData['channable_id'])) {
+        if ($orderIncrementId && $salesOrderGridData = $this->getMagentoOrder((string)$orderIncrementId)) {
             $returns->setMagentoOrderId((int)$salesOrderGridData['entity_id']);
-            $returns->setMagentoIncrementId((string)$salesOrderGridData['increment_id']);
         }
 
         try {
@@ -82,19 +83,19 @@ class ImportReturn
     }
 
     /**
-     * Get Magento order by channable id
+     * Get Magento order by increment id
      *
-     * @param int $channableId
+     * @param string $incrementId
      *
      * @return mixed
      */
-    private function getMagentoOrder(int $channableId)
+    public function getMagentoOrder(string $incrementId)
     {
         $connection = $this->resource->getConnection();
         $select = $connection->select()
             ->from($this->resource->getTableName('sales_order_grid'))
-            ->where('channable_id = :channable_id');
-        $bind = [':channable_id' => $channableId];
+            ->where('increment_id = :increment_id');
+        $bind = [':increment_id' => $incrementId];
         return $connection->fetchRow($select, $bind);
     }
 }

@@ -12,7 +12,7 @@
         <resource>Magmodules_Channable::config_itemupdates</resource>
         <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Branding</label>
-            <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Header</frontend_model>
+            <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Header</frontend_model>
         </group>
         <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>General</label>
@@ -37,12 +37,15 @@
             </field>
             <field id="heading_item_stores" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Enabled Stores</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>You can only activate and or set the Webhook per specific Store View. You can select the Store Views using the dropdown on the top of the left.</comment>
             </field>
             <field id="item_stores" translate="label" type="text" sortOrder="41" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label></label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Table\Itemupdates</frontend_model>
+            </field>
+            <field id="selftest" translate="label" type="button" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Button\Selftest</frontend_model>
             </field>
         </group>
         <group id="item" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -50,7 +53,7 @@
             <attribute type="expanded">0</attribute>
             <field id="heading_invalidation" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Invalidation Type</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Log Product movements using Observer or Cron.</comment>
             </field>
             <field id="invalidation_modus" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="0" showInStore="0">
@@ -60,7 +63,7 @@
             </field>
             <field id="heading_settings" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Cron</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Configure the Item update with the values below, we highly recommend you to check your Magento cron job functionality to make sure all your items are updated frequently.</comment>
             </field>
             <field id="cron" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="0" showInStore="0">

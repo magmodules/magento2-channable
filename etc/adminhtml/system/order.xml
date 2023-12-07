@@ -12,7 +12,7 @@
         <resource>Magmodules_Channable::config_order</resource>
         <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Branding</label>
-            <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Header</frontend_model>
+            <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Header</frontend_model>
         </group>
         <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>General</label>
@@ -22,13 +22,16 @@
                 <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 <config_path>magmodules_channable_marketplace/general/enable</config_path>
             </field>
+            <field id="selftest" translate="label" type="button" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Button\Selftest</frontend_model>
+            </field>
         </group>
         <group id="order" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Settings</label>
             <comment>Configure the settings on how to import the orders from the Channable Marketplaces into your Magento store.</comment>
             <field id="heading_shipment" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Shipping Method</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Select the shipping method that you want to use on the order import.</comment>
             </field>
             <field id="shipping_method" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -51,7 +54,7 @@
             </field>
             <field id="heading_customer" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Customers</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Select if you want to add customers to your Magento store.</comment>
             </field>
             <field id="import_customer" translate="label" type="select" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -69,7 +72,7 @@
             </field>
             <field id="heading_customer_address" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Address &amp; Invoice</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Configure the way the addresses and invoices are handled in the order import.</comment>
             </field>
             <field id="seperate_housenumber" translate="label" type="select" sortOrder="41" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -149,7 +152,7 @@
             </field>
             <field id="heading_order_advanced" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Advanced</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment><![CDATA[Advanced options]]></comment>
             </field>
             <field id="backorders" translate="label" type="select" sortOrder="61" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -182,6 +185,12 @@
                     <field id="lvb">1</field>
                 </depends>
             </field>
+            <field id="transaction_fee" translate="label" type="select" sortOrder="64" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Include transaction fee for CDiscount orders</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/order/transaction_fee</config_path>
+                <comment><![CDATA[When set to Yes, the available transaction fee will be included into the total amount. Applicable to CDiscount Marketplace orders only.]]></comment>
+            </field>
             <field id="deduct_fpt" translate="label" type="select" sortOrder="64" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Deduct fees/fixed product taxes (FPT) before import.</label>
                 <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -190,7 +199,7 @@
             </field>
             <field id="heading_returns" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Return Labels</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Enable this option if you are using the default Magento Track and Trace method within a shipment to enter your returns so Channable can get this information and share this with the Marketplaces.</comment>
             </field>
             <field id="return_label" translate="label" type="select" sortOrder="71" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -210,7 +219,7 @@
             <field id="heading_product_types" translate="label comment" type="text" sortOrder="75" showInDefault="1"
                    showInWebsite="1" showInStore="1">
                 <label>Grouped and Bundled Types Support (experimental)</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment><![CDATA[Because of the complexity, the possibility to enable the order import for Grouped and Bundled products is currently an experimental function.  <br><br><strong>Note:</strong> The order import for these product types will only work if there is a fixed price, available QTY for the related items, and a default selected option within these product type settings. ]]></comment>
             </field>
             <field id="import_grouped_products" translate="label" type="select" sortOrder="76" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -225,18 +234,18 @@
             </field>
             <field id="heading_log" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Logging</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Enable the Order Logging option to log all the incoming orders from the connected Marketplaces.</comment>
             </field>
             <field id="log" translate="label" type="select" sortOrder="81" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Enable</label>
                 <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 <config_path>magmodules_channable_marketplace/order/log</config_path>
-                <comment model="Magmodules\Channable\Block\Adminhtml\Magmodules\Log" />
+                <comment model="Magmodules\Channable\Block\Adminhtml\Design\Log" />
             </field>
             <field id="heading_order_stores" translate="label comment" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Webhooks</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment><![CDATA[Copy and paste the Webhook URL to configure your Magento Store in your Channable Marketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.<br><br>You can simulate a test order by adding /test/{productID} to the end of the Webhook.]]></comment>
             </field>
             <field id="order_stores" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="1">

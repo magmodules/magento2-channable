@@ -48,9 +48,15 @@ $specificInfo = $block->getSpecificInformation();
             <tr>
                 <th><?= __('External Article Number(s)'); ?></th>
                 <td>
-                    <a href="#" class="channable-tooltip"><?= __('Show Numbers'); ?>
-                        <span><?= nl2br($externalArticleNumbers); ?></span>
-                    </a>
+                    <div class="channable-tooltip"><?= __('Show Numbers'); ?>
+                        <span>
+                            <table class="channable-delivery-info-table">
+                                <tr>
+                                    <td><?= nl2br($externalArticleNumbers); ?></td>
+                                </tr>
+                            </table>
+                        </span>
+                    </div>
                 </td>
             </tr>
         <?php endif; ?>
@@ -70,7 +76,7 @@ $specificInfo = $block->getSpecificInformation();
             <tr>
                 <th><?= __('Delivery'); ?></th>
                 <td>
-                    <a href="#" class="channable-tooltip"><?= __('Show Delivery Periods'); ?>
+                    <div class="channable-tooltip"><?= __('Show Delivery Periods'); ?>
                         <span>
 						<table class="channable-delivery-info-table">
 							<?php foreach ($delivery as $item): ?>
@@ -82,7 +88,7 @@ $specificInfo = $block->getSpecificInformation();
                             <?php endforeach; ?>
 						</table>
 					    </span>
-                    </a>
+                    </div>
                 </td>
             </tr>
         <?php endif; ?>
@@ -90,9 +96,15 @@ $specificInfo = $block->getSpecificInformation();
             <tr>
                 <th><?= __('Memo'); ?></th>
                 <td>
-                    <a href="#" class="channable-tooltip"><?= __('Show Memo Data'); ?>
-                        <span><?= nl2br($memo); ?></span>
-                    </a>
+                    <div class="channable-tooltip"><?= __('Show Memo Data'); ?>
+                        <span>
+                            <table class="channable-delivery-info-table">
+                                <tr>
+                                    <td><?= nl2br($memo); ?></td>
+                                </tr>
+                            </table>
+                        </span>
+                    </div>
                 </td>
             </tr>
         <?php endif; ?>

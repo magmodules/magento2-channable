@@ -49,7 +49,8 @@ class Billing extends AbstractOrder
         }
 
         return sprintf(
-            '%s <a href="#" class="grid-more-info">(i)<span>%s</span></a>',
+            '<i class="grid-more-info">%s<div><header>%s</header><span>%s</span></div></i>',
+            $this->getCustomerName($billingData),
             $this->getCustomerName($billingData),
             $this->getFormattedTable($billingData)
         );

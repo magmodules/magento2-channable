@@ -24,6 +24,8 @@ interface DataInterface extends ExtensibleDataInterface
     public const CHANNABLE_ID = 'channable_id';
     public const MAGENTO_ORDER_ID = 'magento_order_id';
     public const MAGENTO_INCREMENT_ID = 'magento_increment_id';
+    public const MAGENTO_CREDITMEMO_ID = 'magento_creditmemo_id';
+    public const MAGENTO_CREDITMEMO_INCREMENT_ID = 'magento_creditmemo_increment_id';
     public const ITEM = 'item';
     public const CUSTOMER_NAME = 'customer_name';
     public const CUSTOMER = 'customer';
@@ -84,7 +86,7 @@ interface DataInterface extends ExtensibleDataInterface
     public function setChannelId($channelId): self;
 
     /**
-     * @return string
+     * @return int
      */
     public function getChannableId(): int;
 
@@ -95,15 +97,15 @@ interface DataInterface extends ExtensibleDataInterface
     public function setChannableId(int $channableId): self;
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getMagentoOrderId(): int;
+    public function getMagentoOrderId(): ?int;
 
     /**
-     * @param int $magentoOrderId
+     * @param int|null $magentoOrderId
      * @return $this
      */
-    public function setMagentoOrderId(int $magentoOrderId): self;
+    public function setMagentoOrderId(?int $magentoOrderId): self;
 
     /**
      * @return string
@@ -115,6 +117,28 @@ interface DataInterface extends ExtensibleDataInterface
      * @return $this
      */
     public function setMagentoIncrementId(string $magentoIncrementId): self;
+
+    /**
+     * @return int|null
+     */
+    public function getMagentoCreditmemoId(): ?int;
+
+    /**
+     * @param int|null $magentoCreditmemoId
+     * @return $this
+     */
+    public function setMagentoCreditmemoId(?int $magentoCreditmemoId): self;
+
+    /**
+     * @return string
+     */
+    public function getMagentoCreditmemoIncrementId(): string;
+
+    /**
+     * @param string $magentoIncrementId
+     * @return $this
+     */
+    public function setMagentoCreditmemoIncrementId(string $magentoIncrementId): self;
 
     /**
      * @return array

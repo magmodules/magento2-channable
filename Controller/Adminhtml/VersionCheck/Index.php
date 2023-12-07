@@ -8,13 +8,17 @@ declare(strict_types=1);
 namespace Magmodules\Channable\Controller\Adminhtml\VersionCheck;
 
 use Magento\Backend\App\Action;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigRepository;
 
 /**
+ * Class index
+ *
  * AJAX controller to check latest extension version
  */
 class Index extends Action
@@ -24,17 +28,14 @@ class Index extends Action
      * @var JsonFactory
      */
     private $resultJsonFactory;
-
     /**
      * @var ConfigRepository
      */
     private $configRepository;
-
     /**
      * @var JsonSerializer
      */
     private $json;
-
     /**
      * @var File
      */
@@ -71,21 +72,26 @@ class Index extends Action
         $resultJson = $this->resultJsonFactory->create();
         $result = $this->getVersions();
         $current = $latest = preg_replace('/^v/', '', $this->configRepository->getExtensionVersion());
+        $changeLog = [];
         if ($result) {
             $data = $this->json->unserialize($result);
             $versions = array_keys($data);
             $latest = preg_replace('/^v/', '', reset($versions));
+            foreach ($data as $version => $changes) {
+                if (version_compare(preg_replace('/^v/', '', $version), $current) == 0) {
+                    break;
+                }
+                $changeLog[] = [
+                    $version => $changes['changelog']
+                ];
+            }
         }
-
-        return $resultJson->setData(
-            [
-                'result' =>
-                    [
-                        'current_verion' => 'v' . $current,
-                        'last_version' => 'v' . $latest
-                    ]
-            ]
-        );
+        $data = [
+            'current_version' => 'v' . $current,
+            'last_version' => 'v' . $latest,
+            'changelog' => $changeLog,
+        ];
+        return $resultJson->setData(['result' => $data]);
     }
 
     /**

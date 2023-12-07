@@ -11,6 +11,9 @@
     <body>
         <referenceContainer name="content">
             <uiComponent name="channable_order_grid"/>
+
+            <block  class="Magento\Framework\View\Element\Template" name="order.table.tooltip.js" 
+                    template="Magmodules_Channable::order/table-tooltip-js.phtml" />
         </referenceContainer>
     </body>
 </page>

@@ -11,7 +11,6 @@ use Exception;
 use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Block\Widget\Button;
 use Magento\Config\Block\System\Config\Form\Field;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magmodules\Channable\Model\Config\Repository as ConfigRepository;
 
@@ -29,10 +28,6 @@ class VersionCheck extends Field
      * @var ConfigRepository
      */
     private $configRepository;
-    /**
-     * @var RequestInterface
-     */
-    private $request;
 
     /**
      * VersionCheck constructor.
@@ -46,14 +41,13 @@ class VersionCheck extends Field
         array $data = []
     ) {
         $this->configRepository = $configRepository;
-        $this->request = $context->getRequest();
         parent::__construct($context, $data);
     }
 
     /**
      * @return string
      */
-    public function getVersion()
+    public function getVersion(): string
     {
         return $this->configRepository->getExtensionVersion();
     }
@@ -63,7 +57,7 @@ class VersionCheck extends Field
      *
      * @return string
      */
-    public function render(AbstractElement $element)
+    public function render(AbstractElement $element): string
     {
         $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue();
         return parent::render($element);
@@ -74,7 +68,7 @@ class VersionCheck extends Field
      *
      * @return string
      */
-    public function _getElementHtml(AbstractElement $element)
+    public function _getElementHtml(AbstractElement $element): string
     {
         return $this->_toHtml();
     }
@@ -82,31 +76,33 @@ class VersionCheck extends Field
     /**
      * @return string
      */
-    public function getVersionCheckUrl()
+    public function getVersionCheckUrl(): string
     {
-        return $this->getUrl('channable/versioncheck/index');
+        return $this->getUrl('channable/versionCheck/index');
     }
 
     /**
      * @return string
      */
-    public function getChangeLogUrl()
+    public function getChangeLogUrl(): string
     {
-        return $this->getUrl('channable/versioncheck/changelog');
+        return $this->getUrl('channable/versionCheck/changelog');
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getButtonHtml()
+    public function getButtonHtml(): string
     {
         try {
             return $this->getLayout()
                 ->createBlock(Button::class)
-                ->setData(['id' => 'mm-channable-button_version', 'label' => __('Check for latest versions')])
-                ->toHtml();
+                ->setData([
+                    'id' => 'mm-ui-button_version',
+                    'label' => __('Check for latest versions')
+                ])->toHtml();
         } catch (Exception $e) {
-            return false;
+            return '';
         }
     }
 }

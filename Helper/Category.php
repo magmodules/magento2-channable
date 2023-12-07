@@ -113,7 +113,6 @@ class Category extends AbstractHelper
             }
             if (!$exclude) {
                 $categories[$key] = [
-                    'name'   => $category['name'],
                     'level'  => $level,
                     'path'   => $pathText,
                     'custom' => $custom

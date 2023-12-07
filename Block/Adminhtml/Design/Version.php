@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magmodules\Channable\Block\Adminhtml\Magmodules;
+namespace Magmodules\Channable\Block\Adminhtml\Design;
 
 use Magento\Backend\Block\Template\Context;
 use Magento\Config\Block\System\Config\Form\Field;
@@ -15,7 +15,7 @@ use Magmodules\Channable\Helper\General as GeneralHelper;
 /**
  * Class Version
  *
- * @package Magmodules\Channable\Block\Adminhtml\Magmodules
+ * @package Magmodules\Channable\Block\Adminhtml\Design
  */
 class Version extends Field
 {

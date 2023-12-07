@@ -11,9 +11,6 @@ use Magento\Backend\App\Action;
 use Magento\Backend\Model\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 
-/**
- * Returns Index controller
- */
 class Index extends Action
 {
     /**
@@ -41,16 +38,17 @@ class Index extends Action
     }
 
     /**
-     * @return \Magento\Framework\View\Result\Page
+     * @return Page
      */
-    public function execute()
+    public function execute(): Page
     {
-        $resultPage = $this->resultPageFactory->create();
         /** @var Page $resultPage */
+        $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('Magmodules_Channable::general_returns');
         $resultPage->getConfig()->getTitle()->prepend(__('Channable - Returns'));
         $resultPage->addBreadcrumb(__('Channable'), __('Channable'));
         $resultPage->addBreadcrumb(__('Returns'), __('Returns'));
+
         return $resultPage;
     }
 }

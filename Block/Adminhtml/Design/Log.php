@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magmodules\Channable\Block\Adminhtml\Magmodules;
+namespace Magmodules\Channable\Block\Adminhtml\Design;
 
 use Magento\Config\Model\Config\CommentInterface;
 use Magento\Framework\Exception\FileSystemException;

@@ -12,6 +12,7 @@ use Magento\Framework\Api\ExtensibleDataInterface;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Registry;
+use Magento\Framework\Serialize\Serializer\Json;
 use Magmodules\Channable\Api\Returns\Data\DataInterface as ChannableReturnsData;
 use Magmodules\Channable\Api\Returns\Data\DataInterfaceFactory;
 
@@ -33,29 +34,36 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
      * @var DataInterfaceFactory
      */
     private $itemDataFactory;
+    /**
+     * @var Json
+     */
+    private $json;
 
     /**
      * DataModel constructor.
      *
-     * @param Context              $context
-     * @param Registry             $registry
+     * @param Context $context
+     * @param Registry $registry
      * @param DataInterfaceFactory $itemDataFactory
-     * @param DataObjectHelper     $dataObjectHelper
-     * @param ResourceModel        $resource
-     * @param Collection           $collection
-     * @param array                $data
+     * @param DataObjectHelper $dataObjectHelper
+     * @param Json $json
+     * @param ResourceModel $resource
+     * @param Collection $collection
+     * @param array $data
      */
     public function __construct(
         Context $context,
         Registry $registry,
         DataInterfaceFactory $itemDataFactory,
         DataObjectHelper $dataObjectHelper,
+        Json $json,
         ResourceModel $resource,
         Collection $collection,
         array $data = []
     ) {
         $this->itemDataFactory = $itemDataFactory;
         $this->dataObjectHelper = $dataObjectHelper;
+        $this->json = $json;
         parent::__construct($context, $registry, $resource, $collection, $data);
     }
 
@@ -168,15 +176,17 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
-    public function getMagentoOrderId(): int
+    public function getMagentoOrderId(): ?int
     {
-        return (int)$this->getData(self::MAGENTO_ORDER_ID);
+        return $this->getData(self::MAGENTO_ORDER_ID)
+            ? (int)$this->getData(self::MAGENTO_ORDER_ID)
+            : null;
     }
 
     /**
      * @inheritDoc
      */
-    public function setMagentoOrderId(int $magentoOrderId): ChannableReturnsData
+    public function setMagentoOrderId(?int $magentoOrderId): ChannableReturnsData
     {
         return $this->setData(self::MAGENTO_ORDER_ID, $magentoOrderId);
     }
@@ -200,9 +210,53 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
+    public function getMagentoCreditmemoId(): ?int
+    {
+        return $this->getData(self::MAGENTO_CREDITMEMO_ID)
+            ? (int)$this->getData(self::MAGENTO_CREDITMEMO_ID)
+            : null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setMagentoCreditmemoId(?int $magentoCreditmemoId): ChannableReturnsData
+    {
+        return $this->setData(self::MAGENTO_CREDITMEMO_ID, $magentoCreditmemoId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMagentoCreditmemoIncrementId(): string
+    {
+        return (string)$this->getData(self::MAGENTO_CREDITMEMO_INCREMENT_ID);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setMagentoCreditmemoIncrementId(string $magentoIncrementId): ChannableReturnsData
+    {
+        return $this->setData(self::MAGENTO_CREDITMEMO_INCREMENT_ID, $magentoIncrementId);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getItem(): array
     {
-        return $this->getData(self::ITEM);
+        $items = $this->getData(self::ITEM);
+
+        try {
+            while (is_string($items)) {
+                $items = $this->json->unserialize($items);
+            }
+        } catch (\Exception $exception) {
+            $items = [];
+        }
+
+        return $items;
     }
 
     /**
@@ -210,7 +264,10 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
      */
     public function setItem(array $item): ChannableReturnsData
     {
-        return $this->setData(self::ITEM, $item);
+        return $this->setData(
+            self::ITEM,
+            $this->json->serialize($item)
+        );
     }
 
     /**
@@ -234,7 +291,17 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
      */
     public function getCustomer(): array
     {
-        return $this->getData(self::CUSTOMER);
+        $customer = $this->getData(self::CUSTOMER);
+
+        try {
+            while (is_string($customer)) {
+                $customer = $this->json->unserialize($customer);
+            }
+        } catch (\Exception $exception) {
+            $customer = [];
+        }
+
+        return $customer;
     }
 
     /**
@@ -242,7 +309,10 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
      */
     public function setCustomer(array $customer): ChannableReturnsData
     {
-        return $this->setData(self::CUSTOMER, $customer);
+        return $this->setData(
+            self::CUSTOMER,
+            $this->json->serialize($customer)
+        );
     }
 
     /**
@@ -250,7 +320,17 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
      */
     public function getAddress(): array
     {
-        return $this->getData(self::ADDRESS);
+        $address = $this->getData(self::ADDRESS);
+
+        try {
+            while (is_string($address)) {
+                $address = $this->json->unserialize($address);
+            }
+        } catch (\Exception $exception) {
+            $address = [];
+        }
+
+        return $address;
     }
 
     /**
@@ -258,7 +338,10 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
      */
     public function setAddress(array $address): ChannableReturnsData
     {
-        return $this->setData(self::ADDRESS, $address);
+        return $this->setData(
+            self::ADDRESS,
+            $this->json->serialize($address)
+        );
     }
 
     /**

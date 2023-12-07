@@ -117,6 +117,28 @@ class Returns extends Template implements RendererInterface
      */
     public function getTestReturnsUrl(int $storeId): string
     {
-        return $this->urlBuilder->getUrl('channable/returns/simulate', ['store_id' => $storeId]);
+        return $this->urlBuilder->getUrl(
+            'channable/returns/simulate',
+            [
+                'store_id' => $storeId
+            ]
+        );
+    }
+
+    /**
+     * Url builder for returns simulator with order import
+     *
+     * @param int $storeId
+     * @return string
+     */
+    public function getTestReturnsWithOrderUrl(int $storeId): string
+    {
+        return $this->urlBuilder->getUrl(
+            'channable/returns/simulate',
+            [
+                'store_id' => $storeId,
+                'import_order' => true
+            ]
+        );
     }
 }
