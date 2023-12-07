@@ -52,21 +52,6 @@ class ProcessReturn
             return $result;
         }
 
-        if ($params['type'] == 'delete') {
-            try {
-                $this->returnsRepository->deleteById((int)$params['id']);
-                return [
-                    'status' => 'success',
-                    'msg' => __('Return deleted')
-                ];
-            } catch (Exception $e) {
-                return [
-                    'status' => 'error',
-                    'msg' => $e->getMessage()
-                ];
-            }
-        }
-
         try {
             $return = $this->returnsRepository->get((int)$params['id']);
         } catch (Exception $e) {

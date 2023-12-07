@@ -10,6 +10,8 @@ namespace Magmodules\Channable\Api\Returns;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magmodules\Channable\Model\Returns\Collection;
+use Magmodules\Channable\Model\Returns\DataModel;
 use Magmodules\Channable\Api\Returns\Data\DataInterface as ChannableReturnsData;
 use Magmodules\Channable\Api\Returns\Data\SearchResultsInterface;
 
@@ -39,19 +41,19 @@ interface RepositoryInterface
     /**
      * Loads a specified Return
      *
-     * @param int $id
+     * @param int $entityId
      *
      * @return ChannableReturnsData
      * @throws LocalizedException
      */
-    public function get(int $id): ChannableReturnsData;
+    public function get(int $entityId): ChannableReturnsData;
 
     /**
      * Return Channable Returns object
      *
      * @return ChannableReturnsData
      */
-    public function create();
+    public function create(): ChannableReturnsData;
 
     /**
      * Retrieves a Channable Returns matching the specified criteria.
@@ -95,4 +97,14 @@ interface RepositoryInterface
     public function save(
         ChannableReturnsData $entity
     ): ChannableReturnsData;
+
+    /**
+     * Get data collection by set of attribute values
+     *
+     * @param array $dataSet
+     * @param bool $getFirst
+     *
+     * @return Collection|DataModel
+     */
+    public function getByDataSet(array $dataSet, bool $getFirst = false);
 }

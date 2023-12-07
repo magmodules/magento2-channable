@@ -11,7 +11,6 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
-use Magmodules\Channable\Api\Returns\RepositoryInterface as Repository;
 use Magmodules\Channable\Service\Returns\JsonResponse;
 use Magmodules\Channable\Service\Returns\GetReturnStatus;
 
@@ -25,10 +24,6 @@ class Status extends Action
      * @var ConfigProvider
      */
     private $configProvider;
-    /**
-     * @var Repository
-     */
-    private $returnsRepository;
     /**
      * @var JsonFactory
      */
@@ -47,7 +42,6 @@ class Status extends Action
      *
      * @param Context $context
      * @param ConfigProvider $configProvider
-     * @param Repository $returnsRepository
      * @param JsonResponse $jsonResponse
      * @param JsonFactory $resultJsonFactory
      * @param GetReturnStatus $getReturnStatus
@@ -55,13 +49,11 @@ class Status extends Action
     public function __construct(
         Context $context,
         ConfigProvider $configProvider,
-        Repository $returnsRepository,
         JsonResponse $jsonResponse,
         JsonFactory $resultJsonFactory,
         GetReturnStatus $getReturnStatus
     ) {
         $this->configProvider = $configProvider;
-        $this->returnsRepository = $returnsRepository;
         $this->jsonResponse = $jsonResponse;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->getReturnStatus = $getReturnStatus;

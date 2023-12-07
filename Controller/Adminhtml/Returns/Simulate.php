@@ -9,7 +9,6 @@ namespace Magmodules\Channable\Controller\Adminhtml\Returns;
 
 use Exception;
 use Magento\Backend\App\Action;
-use Magento\Backend\App\Action\Context;
 use Magento\Backend\Model\View\Result\Redirect;
 use Magento\Framework\App\Response\RedirectInterface;
 use Magento\Framework\Controller\ResultFactory;
@@ -38,11 +37,12 @@ class Simulate extends Action
     /**
      * Simulate constructor.
      *
-     * @param Context         $context
+     * @param Action\Context $context
      * @param ImportSimulator $importSimulator
+     * @param RedirectInterface $redirect
      */
     public function __construct(
-        Context $context,
+        Action\Context $context,
         ImportSimulator $importSimulator,
         RedirectInterface $redirect
     ) {
@@ -56,7 +56,7 @@ class Simulate extends Action
      *
      * @return Redirect
      */
-    public function execute()
+    public function execute(): Redirect
     {
         /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);

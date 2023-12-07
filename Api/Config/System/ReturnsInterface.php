@@ -16,6 +16,8 @@ interface ReturnsInterface extends ItemupdateInterface
 {
 
     public const XML_PATH_RETURNS_ENABLE = 'magmodules_channable_marketplace/returns/enable';
+    public const XML_PATH_RETURNS_CREDITMEMO = 'magmodules_channable_marketplace/returns/show_on_creditmemo';
+    public const XML_PATH_RETURNS_AUTO_MATCH = 'magmodules_channable_marketplace/returns/auto_update';
 
     /**
      * Check whether returns are enabled
@@ -27,6 +29,15 @@ interface ReturnsInterface extends ItemupdateInterface
     public function isReturnsEnabled(int $storeId = null): bool;
 
     /**
+     * Check whether we should show option to accept returns on creditmemo creation
+     *
+     * @param int|null $storeId
+     *
+     * @return bool
+     */
+    public function showOnCreditmemoCreation(int $storeId = null): bool;
+
+    /**
      * Returns webhook url builder
      *
      * @param int $storeId
@@ -35,4 +46,13 @@ interface ReturnsInterface extends ItemupdateInterface
      * @throws NoSuchEntityException
      */
     public function getReturnsWebhookUrl(int $storeId): string;
+
+    /**
+     * Check whether returns should be automatically accepted on creditmemo creation
+     *
+     * @param int|null $storeId
+     *
+     * @return bool
+     */
+    public function autoUpdateReturnsOnCreditmemo(int $storeId = null): bool;
 }

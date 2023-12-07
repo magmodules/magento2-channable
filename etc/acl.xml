@@ -17,8 +17,10 @@
                     </resource>
                     <resource id="Magmodules_Channable::general_item" title="Item Updates" sortOrder="110"/>
                     <resource id="Magmodules_Channable::general_returns" title="Returns" sortOrder="120">
-                        <resource id="Magmodules_Channable::returns_view" title="Channable Returns View" sortOrder="100"/>
-                        <resource id="Magmodules_Channable::returns_process" title="Channable Returns Process" sortOrder="100"/>
+                        <resource id="Magmodules_Channable::returns_view" title="Channable Returns - View" sortOrder="100"/>
+                        <resource id="Magmodules_Channable::returns_process" title="Channable Returns - Process" sortOrder="101"/>
+                        <resource id="Magmodules_Channable::returns_creditmemo" title="Channable Returns - Creditmemo" sortOrder="102"/>
+                        <resource id="Magmodules_Channable::returns_delete" title="Channable Returns - Delete" sortOrder="103"/>
                     </resource>
                 </resource>
                 <resource id="Magento_Backend::stores">

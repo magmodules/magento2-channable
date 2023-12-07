@@ -34,6 +34,10 @@
                             <a href="<?= $block->escapeUrl($block->getTestReturnsUrl((int)$store['store_id'])); ?>">
                                 <?= $block->escapeHtml(__('Import Test Return')) ?>
                             </a>
+                            <br/>
+                            <a href="<?= $block->escapeUrl($block->getTestReturnsWithOrderUrl((int)$store['store_id'])); ?>">
+                                <?= $block->escapeHtml(__('Import Test Return with new Order')) ?>
+                            </a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

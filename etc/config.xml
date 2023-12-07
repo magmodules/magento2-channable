@@ -52,6 +52,10 @@
                 <import_grouped_products>0</import_grouped_products>
                 <import_bundle_products>0</import_bundle_products>
             </order>
+            <returns>
+                <show_on_creditmemo>1</show_on_creditmemo>
+                <auto_match>1</auto_match>
+            </returns>
             <item>
                 <enable>0</enable>
                 <limit>50</limit>
