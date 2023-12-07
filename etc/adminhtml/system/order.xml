@@ -185,6 +185,12 @@
                     <field id="lvb">1</field>
                 </depends>
             </field>
+            <field id="transaction_fee" translate="label" type="select" sortOrder="64" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Include transaction fee for CDiscount orders</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/order/transaction_fee</config_path>
+                <comment><![CDATA[When set to Yes, the available transaction fee will be included into the total amount. Applicable to CDiscount Marketplace orders only.]]></comment>
+            </field>
             <field id="deduct_fpt" translate="label" type="select" sortOrder="64" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Deduct fees/fixed product taxes (FPT) before import.</label>
                 <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

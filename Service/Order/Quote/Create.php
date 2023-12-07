@@ -15,6 +15,7 @@ use Magento\Framework\Exception\State\InputMismatchException;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Store\Api\Data\StoreInterface;
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigRepository;
 
 /**
  * Create quote (guest or customer)
@@ -38,20 +39,28 @@ class Create
     private $addressHandler;
 
     /**
+     * @var ConfigRepository
+     */
+    private $configRepository;
+
+    /**
      * QuoteCreation constructor.
      *
      * @param QuoteFactory $quoteFactory
      * @param CustomerHandler $customerHandler
      * @param AddressHandler $addressHandler
+     * @param ConfigRepository $configRepository
      */
     public function __construct(
         QuoteFactory $quoteFactory,
         CustomerHandler $customerHandler,
-        AddressHandler $addressHandler
+        AddressHandler $addressHandler,
+        ConfigRepository $configRepository
     ) {
         $this->quoteFactory = $quoteFactory;
         $this->customerHandler = $customerHandler;
         $this->addressHandler = $addressHandler;
+        $this->configRepository = $configRepository;
     }
 
     /**
@@ -78,7 +87,8 @@ class Create
 
         $quote->setInventoryProcessed(false);
 
-        if (strtolower($orderData['channel_name']) == 'cdiscount') {
+        if ((strtolower($orderData['channel_name']) == 'cdiscount') &&
+            $this->configRepository->isTransactionFeeEnabled((int)$quote->getStoreId())) {
             $quote->setTransactionFee($orderData['price']['transaction_fee']);
         }
 

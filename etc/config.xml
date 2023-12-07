@@ -49,6 +49,7 @@
                 <import_company_name>1</import_company_name>
                 <invoice_order_email>0</invoice_order_email>
                 <deduct_fpt>0</deduct_fpt>
+                <transaction_fee>1</transaction_fee>
                 <import_grouped_products>0</import_grouped_products>
                 <import_bundle_products>0</import_bundle_products>
             </order>
