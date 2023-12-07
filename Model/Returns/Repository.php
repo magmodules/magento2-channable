@@ -45,9 +45,9 @@ class Repository implements RepositoryInterface
      * Repository constructor.
      *
      * @param SearchResultsInterfaceFactory $searchResultFactory
-     * @param CollectionFactory             $collectionFactory
-     * @param ResourceModel                 $resource
-     * @param DataInterfaceFactory          $dataFactory
+     * @param CollectionFactory $collectionFactory
+     * @param ResourceModel $resource
+     * @param DataInterfaceFactory $dataFactory
      */
     public function __construct(
         SearchResultsInterfaceFactory $searchResultFactory,
@@ -64,14 +64,6 @@ class Repository implements RepositoryInterface
     /**
      * @inheritDoc
      */
-    public function create()
-    {
-        return $this->dataFactory->create();
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface
     {
         $collection = $this->collectionFactory->create();
@@ -79,6 +71,14 @@ class Repository implements RepositoryInterface
             ->setSearchCriteria($searchCriteria)
             ->setItems($collection->getItems())
             ->setTotalCount($collection->getSize());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function create(): DataInterface
+    {
+        return $this->dataFactory->create();
     }
 
     /**
@@ -139,5 +139,28 @@ class Repository implements RepositoryInterface
             ));
         }
         return $entity;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getByDataSet(array $dataSet, bool $getFirst = false)
+    {
+        /* @var Collection $collection */
+        $collection = $this->collectionFactory->create();
+        foreach ($dataSet as $attribute => $value) {
+            if ($value === null) {
+                $collection->addFieldToFilter($attribute, ['null' => true]);
+            } elseif (is_array($value)) {
+                $collection->addFieldToFilter($attribute, ['in' => $value]);
+            } else {
+                $collection->addFieldToFilter($attribute, $value);
+            }
+        }
+        if ($getFirst) {
+            return $collection->getFirstItem();
+        } else {
+            return $collection;
+        }
     }
 }

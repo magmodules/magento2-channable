@@ -145,18 +145,17 @@
     <!-- Channable Order Block End -->
 
     <!-- Channable Returns Block Start -->
-    <preference for="Magmodules\Channable\Api\Returns\RepositoryInterface"
-                type="Magmodules\Channable\Model\Returns\Repository"/>
-    <preference for="Magmodules\Channable\Api\Returns\Data\DataInterface"
-                type="Magmodules\Channable\Model\Returns\DataModel"/>
-    <preference for="Magmodules\Channable\Api\Returns\Data\SearchResultsInterface"
-                type="Magento\Framework\Api\SearchResults"/>
-    <virtualType name="Magmodules\Channable\Model\Returns\ResourceModel\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+    <preference for="Magmodules\Channable\Api\Returns\RepositoryInterface" type="Magmodules\Channable\Model\Returns\Repository"/>
+    <preference for="Magmodules\Channable\Api\Returns\Data\DataInterface" type="Magmodules\Channable\Model\Returns\DataModel"/>
+    <preference for="Magmodules\Channable\Api\Returns\Data\SearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+
+    <type name="Magmodules\Channable\Model\Returns\ResourceModel\Grid\Collection">
         <arguments>
             <argument name="mainTable" xsi:type="string">channable_returns</argument>
             <argument name="resourceModel" xsi:type="string">Magmodules\Channable\Model\Returns\ResourceModel</argument>
         </arguments>
-    </virtualType>
+    </type>
+
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
@@ -234,4 +233,9 @@
             </argument>
         </arguments>
     </type>
+
+    <type name="Magento\Sales\Api\CreditmemoRepositoryInterface">
+        <plugin name="creditmemo-check-returns" type="Magmodules\Channable\Plugin\CreditmemoSaveAfter" sortOrder="100" />
+    </type>
+
 </config>

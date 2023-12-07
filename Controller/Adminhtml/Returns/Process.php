@@ -8,12 +8,8 @@ declare(strict_types=1);
 namespace Magmodules\Channable\Controller\Adminhtml\Returns;
 
 use Magento\Backend\App\Action;
-use Magmodules\Channable\Api\Returns\RepositoryInterface as ReturnsRepository;
 use Magmodules\Channable\Service\Returns\ProcessReturn;
 
-/**
- * Returns Process controller
- */
 class Process extends Action
 {
     /**
@@ -21,10 +17,6 @@ class Process extends Action
      */
     const ADMIN_RESOURCE = 'Magmodules_Channable::returns_process';
 
-    /**
-     * @var ReturnsRepository
-     */
-    private $returnsRepository;
     /**
      * @var ProcessReturn
      */
@@ -34,16 +26,13 @@ class Process extends Action
      * Process constructor.
      *
      * @param Action\Context $context
-     * @param ReturnsRepository $returnsRepository
      * @param ProcessReturn $processReturn
      */
     public function __construct(
         Action\Context $context,
-        ReturnsRepository $returnsRepository,
         ProcessReturn $processReturn
     ) {
         parent::__construct($context);
-        $this->returnsRepository = $returnsRepository;
         $this->processReturn = $processReturn;
     }
 
@@ -67,7 +56,7 @@ class Process extends Action
             if (!empty($result['msg'])) {
                 $this->messageManager->addErrorMessage($result['msg']);
             } else {
-                $this->messageManager->addErrorMessage(__('Unkown Error'));
+                $this->messageManager->addErrorMessage(__('Unknown Error'));
             }
         }
 

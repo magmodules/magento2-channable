@@ -11,11 +11,13 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Type;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
+use Magento\Framework\App\Area;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Math\Random;
 use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Store\Model\App\Emulation;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Api\Order\RepositoryInterface as ChannableOrderRepository;
 use Magmodules\Channable\Exceptions\CouldNotImportOrder;
@@ -37,39 +39,38 @@ class ImportSimulator
     private const ORDER_IMPORT_DISABLED = 'Order import not enabled for this store (Store ID: %1)';
 
     /**
+     * @var int
+     */
+    private $storeId = null;
+
+    /**
      * @var Import
      */
     private $import;
-
     /**
      * @var ProductRepositoryInterface
      */
     private $productRepository;
-
     /**
      * @var ProductCollectionFactory
      */
     private $productCollection;
-
     /**
      * @var ConfigProvider
      */
     private $configProvider;
-
     /**
      * @var Random
      */
     private $random;
-
-    /**
-     * @var int
-     */
-    private $storeId;
-
     /**
      * @var ChannableOrderRepository
      */
     private $channableOrderRepository;
+    /**
+     * @var Emulation
+     */
+    private $appEmulation;
 
     /**
      * @param Import $import
@@ -78,6 +79,7 @@ class ImportSimulator
      * @param ConfigProvider $configProvider
      * @param Random $random
      * @param ChannableOrderRepository $channableOrderRepository
+     * @param Emulation $appEmulation
      */
     public function __construct(
         Import $import,
@@ -85,7 +87,8 @@ class ImportSimulator
         ProductCollectionFactory $productCollection,
         ConfigProvider $configProvider,
         Random $random,
-        ChannableOrderRepository $channableOrderRepository
+        ChannableOrderRepository $channableOrderRepository,
+        Emulation $appEmulation
     ) {
         $this->import = $import;
         $this->productRepository = $productRepository;
@@ -93,6 +96,7 @@ class ImportSimulator
         $this->configProvider = $configProvider;
         $this->random = $random;
         $this->channableOrderRepository = $channableOrderRepository;
+        $this->appEmulation = $appEmulation;
     }
 
     /**
@@ -118,7 +122,15 @@ class ImportSimulator
             $storeId
         );
 
-        return $this->import->execute($channableOrder);
+        try {
+            $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
+            return $this->import->execute($channableOrder);
+        } catch (\Exception $exception) {
+            $errorMsg = $exception->getMessage();
+            throw new CouldNotImportOrder(__($errorMsg));
+        } finally {
+            $this->appEmulation->stopEnvironmentEmulation();
+        }
     }
 
     /**

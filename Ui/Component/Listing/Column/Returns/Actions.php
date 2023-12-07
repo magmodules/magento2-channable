@@ -16,7 +16,8 @@ use Magento\Ui\Component\Listing\Columns\Column;
 class Actions extends Column
 {
 
-    const URL = 'channable/returns/process';
+    private const URL = 'channable/returns/process';
+    private const DELETE_URL = 'channable/returns/delete';
 
     /**
      * Prepare Data Source
@@ -81,19 +82,18 @@ class Actions extends Column
                             'message' => $this->getConfirm('Cancelled')
                         ],
                     ];
-                } else {
-                    $item[$name]['delete'] = [
-                        'href' => $this->context->getUrl(self::URL, ['id' => $item['entity_id'], 'type' => 'delete']),
-                        'label' => __('Delete'),
-                        'confirm' => [
-                            'title' => __("Delete return #{$item['entity_id']}?"),
-                            'message' => __(
-                                'Are you sure you want to delete this return?
-                                This action can not be undone and will not update the status on Channable!'
-                            )
-                        ],
-                    ];
                 }
+                $item[$name]['delete'] = [
+                    'href' => $this->context->getUrl(self::DELETE_URL, ['id' => $item['entity_id']]),
+                    'label' => __('Delete'),
+                    'confirm' => [
+                        'title' => __("Delete return #{$item['entity_id']}?"),
+                        'message' => __(
+                            'Are you sure you want to delete this return?
+                                This action can not be undone and will not update the status on Channable!'
+                        )
+                    ],
+                ];
             }
         }
 

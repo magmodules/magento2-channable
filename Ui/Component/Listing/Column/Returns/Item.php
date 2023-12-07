@@ -58,7 +58,7 @@ class Item extends Column
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
                 try {
-                    $itemData = !empty($item['item']) ? $this->json->unserialize($item['item']) : null;
+                    $itemData = !empty($item['item']) ? $this->unserialize($item['item']) : null;
                 } catch (InvalidArgumentException $exception) {
                     $itemData = [];
                 }
@@ -73,5 +73,13 @@ class Item extends Column
             }
         }
         return $dataSource;
+    }
+
+    private function unserialize($item)
+    {
+        while (is_string($item)) {
+            $item = $this->json->unserialize($item);
+        }
+        return $item;
     }
 }

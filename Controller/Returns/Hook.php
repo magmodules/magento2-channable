@@ -26,10 +26,6 @@ class Hook extends Action
 {
 
     /**
-     * @var ReturnsRepository
-     */
-    private $returnsRepository;
-    /**
      * @var FilesystemDriver
      */
     private $filesystemDriver;
@@ -73,7 +69,6 @@ class Hook extends Action
      */
     public function __construct(
         Context $context,
-        ReturnsRepository $returnsRepository,
         JsonFactory $resultJsonFactory,
         FilesystemDriver $filesystemDriver,
         ValidateRequestData $validateRequestData,
@@ -82,7 +77,6 @@ class Hook extends Action
         ImportReturn $importReturn,
         LogRepository $logRepository
     ) {
-        $this->returnsRepository = $returnsRepository;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->filesystemDriver = $filesystemDriver;
         $this->validateRequestData = $validateRequestData;
@@ -98,7 +92,7 @@ class Hook extends Action
      *
      * @return Json
      */
-    public function execute()
+    public function execute(): Json
     {
         $returnData = null;
         $request = $this->getRequest();

@@ -7,32 +7,49 @@
 -->
 <include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
-    <section id="channable_returns" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+    <section id="channable_returns" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
         <label>Returns</label>
         <tab>channable</tab>
         <resource>Magmodules_Channable::config_returns</resource>
-        <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+        <group id="branding" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Branding</label>
             <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Header</frontend_model>
         </group>
-        <group id="returns" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+        <group id="returns" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Returns</label>
             <comment>In order to use the Channable Item API, you have to set the API settings on the store level where you want to import the orders from Channable. The settings are only visible when you have the right store-view selected through the store switcher on the top left.</comment>
-            <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+            <field id="enable" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Enable</label>
                 <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 <config_path>magmodules_channable_marketplace/returns/enable</config_path>
             </field>
-            <field id="heading_returns_stores" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+            <field id="heading_returns_stores" translate="label comment" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Webhooks</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment><![CDATA[Copy and paste the Webhook URL to configure your Magento Store in your ChannableMarketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.]]></comment>
             </field>
-            <field id="order_stores" translate="label" type="text" sortOrder="71" showInDefault="1" showInWebsite="1" showInStore="1">
+            <field id="order_stores" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Stores</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Table\Returns</frontend_model>
             </field>
-            <field id="selftest" translate="label" type="button" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
+            <field id="heading_automation" translate="label comment" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Magento Credits and Channable Returns</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
+                <comment><![CDATA[Within this function, you have the ability to associate Channable Returns with Magento Credit Memos for orders processed through Channable. This facilitates a more efficient management of credit memos and refunds. With the options provided below, you can customize and configure this automation process according to your specific requirements.]]></comment>
+            </field>
+            <field id="show_on_creditmemo" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Show return block on credit memo page</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/returns/show_on_creditmemo</config_path>
+                <comment>Enabling this option will incorporate a return block into the credit memo creation page specifically for Channable orders that have an associated Channable return.</comment>
+            </field>
+            <field id="auto_update" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Automatically match Returns</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/returns/auto_update</config_path>
+                <comment>Activating this option will automatically approve 'pending' returns upon the creation of a credit memo for the respective order. This action will override the return block selection option from the if it is enabled. Enable this feature when you have established processes in place to automate your credit memo workflow.</comment>
+            </field>
+            <field id="selftest" translate="label" type="button" sortOrder="14" showInDefault="1" showInWebsite="0" showInStore="1">
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Button\Selftest</frontend_model>
             </field>
         </group>

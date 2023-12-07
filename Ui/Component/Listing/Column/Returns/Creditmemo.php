@@ -12,7 +12,7 @@ use Magento\Ui\Component\Listing\Columns\Column;
 /**
  * Order Column class for Returns Grid
  */
-class Order extends Column
+class Creditmemo extends Column
 {
 
     const ORDER_URL = '<a href="%s">#%s</a>';
@@ -28,17 +28,15 @@ class Order extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-                $incrementId = !empty($item['magento_increment_id']) ? $item['magento_increment_id'] : null;
-                $orderId = !empty($item['magento_order_id']) ? $item['magento_order_id'] : null;
-                if ($orderId > 0) {
+                if ($item['magento_creditmemo_id']) {
                     $orderUrl = $this->context->getUrl(
-                        'sales/order/view/',
-                        ['order_id' => $orderId]
+                        'sales/creditmemo/view/',
+                        ['creditmemo_id' => $item['magento_creditmemo_id']]
                     );
-                    $item['magento_increment_id'] = sprintf(
+                    $item['magento_creditmemo_increment_id'] = sprintf(
                         self::ORDER_URL,
                         $orderUrl,
-                        $incrementId
+                        $item['magento_creditmemo_increment_id']
                     );
                 }
             }
