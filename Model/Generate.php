@@ -131,6 +131,7 @@ class Generate
                     }
                 }
                 if (!empty($productIds)) {
+                    $product->unsetData('extension_attributes');
                     $feed['product_source'] = $product->getData();
                     if (!empty($parent)) {
                         $feed['parent_source'] = $parent->getData();

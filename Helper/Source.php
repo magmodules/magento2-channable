@@ -205,7 +205,7 @@ class Source extends AbstractHelper
     public function getProductFilters($type)
     {
         $filters = [];
-        $filters['type_id'] = ['simple', 'downloadable', 'virtual'];
+        $filters['type_id'] = ['simple', 'downloadable', 'virtual', 'giftcard'];
         $filters['relations'] = [];
         $filters['exclude_parents'] = [];
         $filters['nonvisible'] = [];
