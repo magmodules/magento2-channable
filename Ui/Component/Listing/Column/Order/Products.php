@@ -51,7 +51,8 @@ class Products extends AbstractOrder
         $products = [];
         foreach ($productData as $product) {
             $products[] = sprintf(
-                '%s <a href="#" class="grid-more-info">(i)<span>%s</span></a>',
+                '<i class="grid-more-info">%s<div><header>%s</header><span>%s</span></div></i>',
+                $this->getFormattedProduct($product),
                 $this->getFormattedProduct($product),
                 $this->getFormattedTable($product)
             );

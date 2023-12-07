@@ -1,0 +1,42 @@
+<?php
+/**
+ * Copyright © Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+use Magmodules\Channable\Block\Adminhtml\System\Config\Button\Log;
+
+/**
+ * @see \Magmodules\Channable\Block\Adminhtml\System\Config\Button\Log
+ * @var Log $block
+ */
+?>
+
+<div class="mm-ui-debug-button-wrapper">
+    <div id="mm-ui-result_debug-modal"
+         data-mm-ui-endpoind-url="<?= $block->escapeUrl($block->getDownloadUrl('debug')) ?>">
+        <div id="mm-ui-result_debug">
+            <div class="result"></div>
+        </div>
+    </div>
+    <div class="mm-ui-button-wrapper">
+        <?= $block->getButtonHtml('debug') ?>
+        <svg xmlns="http://www.w3.org/2000/svg" width="26.644" height="26.644" viewBox="0 0 26.644 26.644"
+             class="_debug">
+            <path d="M27.206,13.884A13.322,13.322,0,1,1,13.884.563,13.321,13.321,0,0,1,27.206,13.884ZM14.242,4.967A6.958,6.958,0,0,0,7.981,8.392a.645.645,0,0,0,.146.873l1.864,1.413a.644.644,0,0,0,.9-.114c.96-1.217,1.618-1.923,3.078-1.923,1.1,0,2.455.706,2.455,1.77,0,.8-.664,1.218-1.748,1.825-1.264.708-2.936,1.59-2.936,3.8v.215a.645.645,0,0,0,.645.645h3.008a.645.645,0,0,0,.645-.645v-.072c0-1.529,4.468-1.593,4.468-5.73C20.5,7.331,17.27,4.967,14.242,4.967Zm-.357,13.322a2.471,2.471,0,1,0,2.471,2.471A2.474,2.474,0,0,0,13.884,18.289Z" transform="translate(-0.563 -0.563)"/> <?php // phpcs:ignore ?>
+        </svg>
+    </div>
+    <div id="mm-ui-result_error-modal"
+         data-mm-ui-endpoind-url="<?= $block->escapeUrl($block->getDownloadUrl('error')) ?>">
+        <div id="mm-ui-result_error">
+            <div class="result"></div>
+        </div>
+    </div>
+    <div class="mm-ui-button-wrapper">
+        <?= $block->getButtonHtml('error') ?>
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" class="_error">
+            <path d="M18,3A15,15,0,1,0,33,18,15.005,15.005,0,0,0,18,3Zm1.5,22.5h-3v-3h3Zm0-6h-3v-9h3Z"
+                  transform="translate(-3 -3)"/> <?php // phpcs:ignore ?>
+        </svg>
+    <div>
+</div>

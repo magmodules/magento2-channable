@@ -13,7 +13,7 @@
         <resource>Magmodules_Channable::config_returns</resource>
         <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Branding</label>
-            <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Header</frontend_model>
+            <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Header</frontend_model>
         </group>
         <group id="returns" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Returns</label>
@@ -25,12 +25,15 @@
             </field>
             <field id="heading_returns_stores" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Webhooks</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment><![CDATA[Copy and paste the Webhook URL to configure your Magento Store in your ChannableMarketplace account. Make sure that you copy the complete URL as the URL is partly hidden because of the length.]]></comment>
             </field>
             <field id="order_stores" translate="label" type="text" sortOrder="71" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Stores</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Table\Returns</frontend_model>
+            </field>
+            <field id="selftest" translate="label" type="button" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Button\Selftest</frontend_model>
             </field>
         </group>
     </section>

@@ -34,7 +34,7 @@ class ItemUpdate
     /**
      * Message on test success
      */
-    const SUCCESS_MSG = 'Enabled Storeview(s): %s';
+    const SUCCESS_MSG = 'Enabled Store-view(s): %s';
 
     /**
      * Message on test failed
@@ -76,7 +76,7 @@ class ItemUpdate
     /**
      * @return array
      */
-    public function execute()
+    public function execute(): array
     {
         $result = [
             'type'    => self::TYPE,

@@ -1,0 +1,120 @@
+//
+//  [ Buttons ]
+//  ---------------------------------------------
+
+form[action*="channable"] {
+    .magmodules-channable-variables();
+
+    .buttons() {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        min-width: 130px;
+        padding: 1.2rem 1.6rem;
+
+        border: 0;
+        border-radius: 8px;
+        font: @font-weight__bold 1.4rem @font-family__base;
+        text-decoration: none;
+        transition: .3s;
+
+        i[class*="icon"] {
+            width: 25px;
+            height: 25px;
+            transition: .3s;
+        }
+    }
+
+    // Buttons
+    #mm-ui-button_help {
+        .buttons();
+
+        background-color: @mm-ui-channable1;
+        color: @mm-ui-color1;
+
+        &:hover {
+            background-color: darken(@mm-ui-channable1, 5%);
+        }
+    }
+
+    #mm-ui-button_test {
+        .buttons();
+
+        background-color: @mm-ui-channable2;
+        color: @mm-ui-color1;
+
+        &:hover {
+            background-color: darken(@mm-ui-channable2, 5%);
+        }
+    }
+
+    #mm-ui-button_debug,
+    #mm-ui-button_error,
+    #mm-ui-button_version {
+        .buttons();
+
+        padding: .8rem 1.6rem;
+        border: 1px solid fade(@mm-ui-color3, 80%);
+        background-color: transparent;
+        color: darken(@mm-ui-color3, 15%);
+        font: @font-weight__semibold 1.3rem @font-family__base;
+
+        &:hover {
+            color: @mm-ui-color4;
+        }
+    }
+
+    // Link buttons
+    #mm-ui-button_changelog {
+        display: inline;
+        padding: 0;
+
+        border: none;
+        background: transparent;
+
+        color: fade(@mm-ui-color4, 70%);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        transition: .3s;
+
+        &:hover {
+            color: @mm-ui-color4;
+        }
+    }
+
+    .mm-ui-debug-button-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 32px;
+    }
+    
+    .mm-ui-button-wrapper {
+        position: relative;
+    }
+
+    #mm-ui-button_debug,
+    #mm-ui-button_error {
+        padding: 1rem 1.6rem 1rem 4.2rem;
+
+        & + svg {
+            position: absolute;
+            top: 10px;
+            left: 14px;
+            fill: fade(@mm-ui-color4, 70%);
+            width: 20px;
+            height: 20px;
+            transition: .3s;
+            pointer-events: none;
+        }
+
+        &:hover + svg._debug {
+            fill: darken(@mm-ui-color8, 20%);
+        }
+
+        &:hover + svg._error {
+            fill: @mm-ui-color7;
+        }
+    }
+}

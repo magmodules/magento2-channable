@@ -36,12 +36,12 @@ class ProductFeed
     /**
      * Message on test success
      */
-    const SUCCESS_MSG = 'Enabled Storeview(s): %s';
+    const SUCCESS_MSG = 'Enabled Store-view(s): %s';
 
     /**
      * Message on test failed
      */
-    const FAILED_MSG = 'No Storeviews(s) Enabled';
+    const FAILED_MSG = 'No Store-views(s) Enabled';
 
     /**
      * Expected result
@@ -59,36 +59,20 @@ class ProductFeed
     private $feedHelper;
 
     /**
-     * @var GenerateModel
-     */
-    private $generateModel;
-
-    /**
-     * @var GeneralHelper
-     */
-    private $generalHelper;
-
-    /**
      * Feed constructor.
      *
      * @param FeedHelper $feedHelper
-     * @param GenerateModel $generateModel
-     * @param GeneralHelper $generalHelper
      */
     public function __construct(
-        FeedHelper $feedHelper,
-        GenerateModel $generateModel,
-        GeneralHelper $generalHelper
+        FeedHelper $feedHelper
     ) {
         $this->feedHelper = $feedHelper;
-        $this->generateModel = $generateModel;
-        $this->generalHelper = $generalHelper;
     }
 
     /**
      * @return array
      */
-    public function execute()
+    public function execute(): array
     {
         $result = [
             'type' => self::TYPE,

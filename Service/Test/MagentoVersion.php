@@ -38,7 +38,7 @@ class MagentoVersion
     /**
      * Message on test failed
      */
-    const FAILED_MSG = 'Minumum required Magento 2 version is %s, curent version is %s.';
+    const FAILED_MSG = 'Minimum required Magento 2 version is %s, current version is %s.';
 
     /**
      * Link to get support
@@ -69,7 +69,7 @@ class MagentoVersion
     /**
      * @return array
      */
-    public function execute()
+    public function execute(): array
     {
         $result = [
             'type' => self::TYPE,

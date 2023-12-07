@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magmodules\Channable\Service\Test;
 
 use Exception;
-use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigRepository;
@@ -55,21 +54,15 @@ class ExtensionVersion
      */
     const SUPPORT_LINK = 'https://www.magmodules.eu/help/magento2/update-extension.html';
 
-    /**
-     * @var JsonFactory
-     */
-    private $resultJsonFactory;
 
     /**
      * @var ConfigRepository
      */
     private $configRepository;
-
     /**
      * @var JsonSerializer
      */
     private $json;
-
     /**
      * @var File
      */
@@ -82,20 +75,17 @@ class ExtensionVersion
     /**
      * ExtensionVersion constructor.
      *
-     * @param JsonFactory $resultJsonFactory
      * @param ConfigRepository $configRepository
      * @param LogRepository $logRepository
      * @param JsonSerializer $json
      * @param File $file
      */
     public function __construct(
-        JsonFactory $resultJsonFactory,
         ConfigRepository $configRepository,
         LogRepository $logRepository,
         JsonSerializer $json,
         File $file
     ) {
-        $this->resultJsonFactory = $resultJsonFactory;
         $this->configRepository = $configRepository;
         $this->logRepository = $logRepository;
         $this->json = $json;
@@ -105,7 +95,7 @@ class ExtensionVersion
     /**
      * @return array
      */
-    public function execute()
+    public function execute(): array
     {
         $result = [
             'type' => self::TYPE,

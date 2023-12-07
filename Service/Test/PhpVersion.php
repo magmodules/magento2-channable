@@ -41,7 +41,7 @@ class PhpVersion
     /**
      * Expected result
      */
-    const EXPECTED = '7.1';
+    const EXPECTED = '7.4';
 
     /**
      * Link to get support
@@ -51,7 +51,7 @@ class PhpVersion
     /**
      * @return array
      */
-    public function execute()
+    public function execute(): array
     {
         $result = [
             'type' => self::TYPE,

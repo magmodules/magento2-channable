@@ -11,14 +11,19 @@ use Magmodules\Channable\Block\Adminhtml\System\Config\Button\VersionCheck;
  * @var VersionCheck $block
  */
 ?>
-<div class="mm-channable-result_version-wrapper"
-     data-mm-channable-endpoind-url="<?= $block->escapeUrl($block->getVersionCheckUrl()) ?>">
+
+<div class="mm-ui-result_version-wrapper"
+     data-mm-ui-endpoind-url="<?= $block->escapeUrl($block->getVersionCheckUrl()) ?>">
     <span><?= $block->escapeHtml($block->getVersion()); ?></span>
-    <?= $block->getButtonHtml() ?>
-    <div id="mm-channable-result_version"></div>
-    <div id="mm-channable-result_changelog-modal"
-         data-mm-channable-endpoind-url="<?= $block->escapeUrl($block->getChangeLogUrl()) ?>">
-        <div id="mm-channable-result_changelog">
+
+    <div class="button-wrapper">
+        <?= $block->getButtonHtml() ?>
+    </div>
+
+    <div id="mm-ui-result_version"></div>
+    <div id="mm-ui-result_changelog-modal"
+         data-mm-ui-endpoind-url="<?= $block->escapeUrl($block->getChangeLogUrl()) ?>">
+        <div id="mm-ui-result_changelog">
             <ul class="result"></ul>
         </div>
     </div>

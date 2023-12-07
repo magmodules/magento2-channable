@@ -46,15 +46,17 @@ class Error extends AbstractOrder
                 return $item['error_msg'];
             } else {
                 return sprintf(
-                    '%s... <a href="#" class="grid-more-info">(i)<span>%s</span></a>',
+                    '<i class="grid-more-info">%s<div><header>%s</header><span>%s</span></div></i>',
                     substr($item['error_msg'], 0, 30),
-                    $item['error_msg']
+                    substr($item['error_msg'], 0, 30),
+                    substr($item['error_msg'], 30, strlen($item['error_msg']))
                 );
             }
         }
         $shortMessage = array_shift($message);
         return sprintf(
-            '%s <a href="#" class="grid-more-info">(i)<span>%s</span></a>',
+            '<i class="grid-more-info">%s<div><header>%s</header><span>%s</span></div></i>',
+            $shortMessage,
             $shortMessage,
             implode(',', $message)
         );

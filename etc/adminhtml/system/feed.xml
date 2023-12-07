@@ -12,7 +12,7 @@
         <resource>Magmodules_Channable::config_feed</resource>
         <group id="branding" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Branding</label>
-            <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Header</frontend_model>
+            <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Header</frontend_model>
         </group>
         <group id="general" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>General</label>
@@ -26,13 +26,16 @@
                 <config_path>magmodules_channable/general/limit</config_path>
                 <comment>Limits the amount of product Channable will import per run. This setting will not limit the total products sent to Channable but will lower the load.</comment>
             </field>
+            <field id="selftest" translate="label" type="button" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Button\Selftest</frontend_model>
+            </field>
         </group>
         <group id="data" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Product Data</label>
             <comment>Connect the right attributes for the basic product values to the Channable feed.</comment>
             <field id="heading_general" translate="label comment" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General Fields</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
             </field>
             <field id="name_attribute" translate="label comment" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Name</label>
@@ -60,7 +63,7 @@
             </field>
             <field id="heading_images" translate="label comment" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Image Source</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>It is recommended that you select all images if they are available, so that any additional images are also exported.</comment>
             </field>
             <field id="image" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -87,7 +90,7 @@
             </field>
             <field id="heading_extra" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Miscellaneous fields</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>It is recommended to provide the following product information for each unique item you submit if it exists.</comment>
             </field>
             <field id="sku_attribute" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -121,7 +124,7 @@
             <comment><![CDATA[Configure the three different product types to make sure that you are using the right attribute values for the different product types.]]></comment>
             <field id="heading_configurable" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Configurable Products</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment><![CDATA[For configurable products, we recommend to only add the simple products to the configuration as a ‘configurable product’ by itself cannot be purchased. Choose the attribute(s) that you want to use from the parent relation configurable product.]]></comment>
             </field>
             <field id="configurable" translate="label comment" type="select" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -168,7 +171,7 @@
             </field>
             <field id="heading_bundle" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Bundle Products</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment><![CDATA[For Bundle Products, we recommend to only add the Bundle product by itself as this is the item that can be purchased.<br>]]></comment>
             </field>
             <field id="bundle" translate="label comment" type="select" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -215,7 +218,7 @@
             </field>
             <field id="heading_grouped" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Grouped Products</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment><![CDATA[For Group Products, we recommend to only add the Grouped Product by itself as that is the product that can be purchased. <br>]]></comment>
             </field>
             <field id="grouped" translate="label comment" type="select" sortOrder="41" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -274,7 +277,7 @@
             <comment>This option allows you to include/exclude products from the Channable feed based on the product visibility or stock information.</comment>
             <field id="heading_status" translate="label comment" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Filter on Status</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>By default only enabled products are added.</comment>
             </field>
             <field id="add_disabled" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -284,7 +287,7 @@
             </field>
             <field id="heading_visibility" translate="label comment" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Filter on Visibility</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Include or exclude products based on the visibility.</comment>
             </field>
             <field id="visbility_enabled" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -303,7 +306,7 @@
             </field>
             <field id="heading_category" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Filter by Category</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Include or Exclude products based on the category.</comment>
             </field>
             <field id="category_enabled" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -330,7 +333,7 @@
             </field>
             <field id="heading_stock" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Exclude Out of Stock</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Exclude products that are out of stock in your store.</comment>
             </field>
             <field id="stock" translate="label" type="select" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -340,7 +343,7 @@
             </field>
             <field id="heading_filters" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Advanced Filters</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
             </field>
             <field id="filters" translate="label" type="select" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Enabled</label>
@@ -362,7 +365,7 @@
             <comment>We recommend adding as many attributes as possible to Channable as this will improve the quality of your data. In this section you can add extra fields, set the right inventory data and configure the fallback on your configurable &amp; grouped and bundled products.</comment>
             <field id="heading_extra" translate="label comment" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Extra Fields</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>You can add custom fields with your attributes to enrich your data in Channable. Click the Add button to add an attribute with a custom fieldname as reference.</comment>
             </field>
             <field id="extra_fields" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -373,7 +376,7 @@
             </field>
             <field id="heading_stock" translate="label comment" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Inventory Data</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Select the inventory data that you want to export to Channable using the multi-select below.</comment>
             </field>
             <field id="inventory" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -400,7 +403,7 @@
             </field>
             <field id="heading_delivery" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Delivery Time</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Set the delivery time for your products using the table below or use your own attribute in the extra field table.</comment>
             </field>
             <field id="delivery_time" translate="label" type="select" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -411,7 +414,7 @@
             </field>
             <field id="heading_tax" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Tax</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
             </field>
             <field id="tax" translate="label" type="select" sortOrder="41" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Tax calculation</label>
@@ -426,7 +429,7 @@
             </field>
             <field id="heading_content_staging" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Content Staging</label>
-                <frontend_model>Magmodules\Channable\Block\Adminhtml\Magmodules\Heading</frontend_model>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
                 <comment>Content Staging gives the ability to easily create, preview, and schedule a wide range of content updates. This is available in Magento Commerce only.</comment>
             </field>
             <field id="use_row_id" translate="label" type="select" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">

@@ -69,7 +69,7 @@ class OrderImport
     /**
      * @return array
      */
-    public function execute()
+    public function execute(): array
     {
         $result = [
             'type' => self::TYPE,
