@@ -120,6 +120,8 @@ class Generate
             $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
             $parents = $this->productModel->getParents($parentRelations, $config);
 
+            $this->prefetchData($products->getColumnValues('sku'), $config);
+
             foreach ($products as $product) {
                 /** @var Product $product */
                 $parent = null;
@@ -207,5 +209,18 @@ class Generate
         }
 
         return null;
+    }
+
+    /**
+     * Prefetches data to reduce amount of queries required.
+     * This increases performance by a lot for environments with >1ms latency to database.
+     *
+     * @param array $skus
+     * @param array $config
+     * @return void
+     */
+    private function prefetchData(array $skus, array $config)
+    {
+        $this->productHelper->getInventoryData()->load($skus, $config);
     }
 }

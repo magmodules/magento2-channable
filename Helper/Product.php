@@ -1313,4 +1313,12 @@ class Product extends AbstractHelper
 
         return array_unique($parentIds);
     }
+
+    /**
+     * @return InventoryData
+     */
+    public function getInventoryData()
+    {
+        return $this->inventoryData;
+    }
 }
