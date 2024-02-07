@@ -20,6 +20,16 @@ class InventoryData
     private $resourceConnection;
 
     /**
+     * @var array
+     */
+    private $inventory;
+
+    /**
+     * @var array
+     */
+    private $reservation;
+
+    /**
      * InventoryData constructor.
      *
      * @param ResourceConnection $resourceConnection
@@ -40,8 +50,8 @@ class InventoryData
      */
     public function getSalableQty(ProductInterface $product, int $stockId): float
     {
-        $inventoryData = $this->getInventoryData($product->getSku(), $stockId);
-        $reservations = $this->getReservations($product->getSku(), $stockId);
+        $inventoryData = $this->inventory[$stockId][$product->getSku()] ?? [];
+        $reservations = $this->reservation[$stockId][$product->getSku()] ?? 0;
 
         $qty = isset($inventoryData['quantity'])
             ? $inventoryData['quantity'] - $reservations
@@ -53,26 +63,28 @@ class InventoryData
     /**
      * Get Inventory Data by SKU and StockID
      *
-     * @param string $sku
+     * @param array $skus
      * @param int $stockId
      *
-     * @return mixed
+     * @return void
      */
-    private function getInventoryData(string $sku, int $stockId)
+    private function getInventoryData(array $skus, int $stockId): void
     {
         $connection = $this->resourceConnection->getConnection();
         $tableName = $this->resourceConnection->getTableName('inventory_stock_' . $stockId);
 
         if (!$connection->isTableExists($tableName)) {
-            return [];
+            return;
         }
 
         $select = $connection->select()
             ->from($tableName)
-            ->where('sku = ?', $sku)
-            ->limit(1);
+            ->where('sku IN (?)', $skus);
 
-        return $connection->fetchRow($select);
+        $inventoryData = $connection->fetchAll($select);
+        foreach ($inventoryData as $data) {
+            $this->inventory[$stockId][$data['sku']] = $data;
+        }
     }
 
     /**
@@ -83,24 +95,38 @@ class InventoryData
      *
      * @return float
      */
-    private function getReservations(string $sku, int $stockId): float
+    private function getReservations(array $skus, int $stockId): void
     {
         $connection = $this->resourceConnection->getConnection();
         $tableName = $this->resourceConnection->getTableName('inventory_reservation');
 
         if (!$connection->isTableExists($tableName)) {
-            return 0;
+            return;
         }
 
         $select = $connection->select()
-            ->from($tableName, ['quantity' => 'SUM(quantity)'])
-            ->where('sku = ?', $sku)
+            ->from($tableName, ['sku', 'quantity' => 'SUM(quantity)'])
+            ->where('sku IN (?)', $skus)
             ->where('stock_id' . ' = ?', $stockId)
-            ->limit(1);
+            ->group('sku');
 
-        return ($reservationQty = $connection->fetchOne($select))
-            ? max(0, ($reservationQty * -1))
-            : 0;
+        $reservations = $connection->fetchAll($select);
+        foreach ($reservations as $reservation) {
+            $this->reservation[$stockId][$reservation['sku']] = $reservation['quantity'];
+        }
+    }
+
+    /**
+     * Loads all stock information into memory, only requiring 2 queries to the database
+     * instead of the page_size * 2
+     *
+     * @param array $skus
+     * @param array $config
+     * @return void
+     */
+    public function load(array $skus, array $config) {
+        $this->getInventoryData($skus, (int)$config['inventory']['stock_id']);
+        $this->getReservations($skus, (int)$config['inventory']['stock_id']);
     }
 
     /**
@@ -119,8 +145,8 @@ class InventoryData
             return $product;
         }
 
-        $inventoryData = $this->getInventoryData($product->getSku(), $config['inventory']['stock_id']);
-        $reservations = $this->getReservations($product->getSku(), $config['inventory']['stock_id']);
+        $inventoryData = $this->inventory[$config['inventory']['stock_id']][$product->getSku()] ?? [];
+        $reservations = $this->reservation[$config['inventory']['stock_id']][$product->getSku()] ?? 0;
 
         $qty = isset($inventoryData['quantity']) ? $inventoryData['quantity'] - $reservations : 0;
         $isSalable = $inventoryData['is_salable'] ?? 0;
