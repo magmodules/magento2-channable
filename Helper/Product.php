@@ -23,6 +23,7 @@ use Magento\GroupedProduct\Model\ResourceModel\Product\Link as GroupedResource;
 use Magento\Bundle\Model\ResourceModel\Selection as BundleResource;
 use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 use Magmodules\Channable\Service\Product\InventoryData;
+use Magmodules\Channable\Service\Product\MediaData;
 
 /**
  * Class Product
@@ -84,6 +85,12 @@ class Product extends AbstractHelper
      * @var CatalogPrice
      */
     private $commonPriceModel;
+
+    /**
+     * @var MediaData
+     */
+    private $mediaData;
+
     /**
      * @var LogRepository
      */
@@ -128,6 +135,7 @@ class Product extends AbstractHelper
         ConfigurableResource $catalogProductTypeConfigurable,
         CatalogPrice $commonPriceModel,
         InventoryData $inventoryData,
+        MediaData $mediaData,
         LogRepository $logger
     ) {
         $this->galleryReadHandler = $galleryReadHandler;
@@ -143,6 +151,7 @@ class Product extends AbstractHelper
         $this->catalogProductTypeBundle = $catalogProductTypeBundle;
         $this->commonPriceModel = $commonPriceModel;
         $this->inventoryData = $inventoryData;
+        $this->mediaData = $mediaData;
         $this->logger = $logger;
         parent::__construct($context);
     }
@@ -519,8 +528,13 @@ class Product extends AbstractHelper
                     }
                 }
             }
-            $this->galleryReadHandler->execute($product);
+
             $galleryImages = $product->getMediaGallery('images');
+            if (!$galleryImages) {
+                $this->galleryReadHandler->execute($product);
+                $galleryImages = $product->getMediaGallery('images');
+            }
+
             foreach ($galleryImages as $image) {
                 if (empty($image['disabled']) || !empty($config['inc_hidden_image'])) {
                     $images[] = $this->catalogProductMediaConfig->getMediaUrl($image['file']);
@@ -1320,5 +1334,13 @@ class Product extends AbstractHelper
     public function getInventoryData()
     {
         return $this->inventoryData;
+    }
+
+    /**
+     * @return MediaData
+     */
+    public function getMediaData()
+    {
+        return $this->mediaData;
     }
 }

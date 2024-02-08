@@ -2,7 +2,6 @@
     "name": "loavies/magento2-channable",
     "description": "Channable integration for Magento 2",
     "type": "magento2-module",
-    "version": "1.16.0",
     "license": "BSD-2-Clause",
     "homepage": "https://github.com/loavies/magento2-channable",
     "require": {
