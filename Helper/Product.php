@@ -622,9 +622,15 @@ class Product extends AbstractHelper
      */
     public function getAttributeSetName($product)
     {
+        static $attributeSets = [];
+
         try {
-            $attributeSetRepository = $this->attributeSet->get($product->getAttributeSetId());
-            return $attributeSetRepository->getAttributeSetName();
+            if (!isset($attributeSets[$product->getAttributeSetId()])) {
+                $attributeSetName = $this->attributeSet->get($product->getAttributeSetId())->getAttributeSetName();
+                $attributeSets[$product->getAttributeSetId()] = $attributeSetName;
+            }
+
+            return $attributeSets[$product->getAttributeSetId()];
         } catch (\Exception $e) {
             $this->logger->addErrorLog('getAttributeSetName', $e->getMessage());
         }
