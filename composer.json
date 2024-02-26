@@ -1,9 +1,9 @@
 {
-    "name": "loavies/magento2-channable",
+    "name": "magmodules/magento2-channable",
     "description": "Channable integration for Magento 2",
     "type": "magento2-module",
     "license": "BSD-2-Clause",
-    "homepage": "https://github.com/loavies/magento2-channable",
+    "homepage": "https://github.com/magmodules/magento2-channable",
     "require": {
         "magento/framework": ">=102.0.3",
         "ext-json": "*"
