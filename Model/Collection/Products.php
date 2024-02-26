@@ -7,6 +7,7 @@
 namespace Magmodules\Channable\Model\Collection;
 
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
+use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory as ProductAttributeCollectionFactory;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Catalog\Model\Indexer\Product\Flat\StateFactory;
@@ -27,6 +28,10 @@ class Products
      * @var ProductCollectionFactory
      */
     private $productCollectionFactory;
+    /**
+     * @var ProductCollection
+     */
+    private $productCollection;
     /**
      * @var ProductAttributeCollectionFactory
      */
@@ -70,6 +75,7 @@ class Products
      */
     public function __construct(
         ProductCollectionFactory $productCollectionFactory,
+        ProductCollection $productCollection,
         ProductAttributeCollectionFactory $productAttributeCollectionFactory,
         EavConfig $eavConfig,
         StockHelper $stockHelper,
@@ -79,6 +85,7 @@ class Products
         ResourceConnection $resource
     ) {
         $this->productCollectionFactory = $productCollectionFactory;
+        $this->productCollection = $productCollection;
         $this->productAttributeCollectionFactory = $productAttributeCollectionFactory;
         $this->eavConfig = $eavConfig;
         $this->productFlatState = $productFlatState;
@@ -373,49 +380,52 @@ class Products
      * @param $parentRelations
      * @param $config
      *
-     * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
+     * @return ProductCollection
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getParents($parentRelations, $config)
+    public function getParents($parentRelations, $config): ProductCollection
     {
-        if (!empty($parentRelations)) {
-            $filters = $config['filters'];
-
-            if (!$config['flat']) {
-                $productFlatState = $this->productFlatState->create(['isAvailable' => false]);
-            } else {
-                $productFlatState = $this->productFlatState->create(['isAvailable' => true]);
-            }
-
-            $entityField = $this->generalHelper->getLinkField();
-            $attributes = $this->getAttributes($config['attributes']);
-
-            $collection = $this->productCollectionFactory
-                ->create(['catalogProductFlatState' => $productFlatState])
-                ->addStoreFilter($config['store_id'])
-                ->addAttributeToFilter($entityField, ['in' => array_values($parentRelations)])
-                ->addAttributeToSelect($attributes)
-                ->addUrlRewrite()
-                ->setRowIdFieldName($entityField);
-
-            if (!empty($filters['category_ids'])) {
-                if (!empty($filters['category_type'])) {
-                    $collection->addCategoriesFilter([$filters['category_type'] => $filters['category_ids']]);
-                }
-            }
-
-            if (!empty($filters['visibility'])) {
-                $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
-            }
-
-            if (!empty($config['inventory']['attributes'])) {
-                $this->joinCatalogInventoryLeft($collection, $config);
-            }
-
-            $this->addFilters($filters, $collection, 'parent');
-            $this->joinPriceIndexLeft($collection, $config['website_id']);
-            return $collection->load();
+        if (empty($parentRelations)) {
+            return $this->productCollection; //return empty product collection
         }
+
+        $filters = $config['filters'];
+
+        if (!$config['flat']) {
+            $productFlatState = $this->productFlatState->create(['isAvailable' => false]);
+        } else {
+            $productFlatState = $this->productFlatState->create(['isAvailable' => true]);
+        }
+
+        $entityField = $this->generalHelper->getLinkField();
+        $attributes = $this->getAttributes($config['attributes']);
+
+        $collection = $this->productCollectionFactory
+            ->create(['catalogProductFlatState' => $productFlatState])
+            ->addStoreFilter($config['store_id'])
+            ->addAttributeToFilter($entityField, ['in' => array_values($parentRelations)])
+            ->addAttributeToSelect($attributes)
+            ->addUrlRewrite()
+            ->setRowIdFieldName($entityField);
+
+        if (!empty($filters['category_ids'])) {
+            if (!empty($filters['category_type'])) {
+                $collection->addCategoriesFilter([$filters['category_type'] => $filters['category_ids']]);
+            }
+        }
+
+        if (!empty($filters['visibility'])) {
+            $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
+        }
+
+        if (!empty($config['inventory']['attributes'])) {
+            $this->joinCatalogInventoryLeft($collection, $config);
+        }
+
+        $this->addFilters($filters, $collection, 'parent');
+        $this->joinPriceIndexLeft($collection, $config['website_id']);
+        return $collection->load();
+
     }
 
     /**
