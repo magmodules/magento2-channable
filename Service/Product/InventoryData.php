@@ -41,26 +41,6 @@ class InventoryData
     }
 
     /**
-     * Get Salable QTY for a product by StockID
-     *
-     * @param ProductInterface $product
-     * @param int $stockId
-     *
-     * @return float|int|mixed
-     */
-    public function getSalableQty(ProductInterface $product, int $stockId): float
-    {
-        $inventoryData = $this->inventory[$stockId][$product->getSku()] ?? [];
-        $reservations = $this->reservation[$stockId][$product->getSku()] ?? 0;
-
-        $qty = isset($inventoryData['quantity'])
-            ? $inventoryData['quantity'] - $reservations
-            : 0;
-
-        return !empty($inventoryData['is_salable']) ? $qty : 0;
-    }
-
-    /**
      * Get Inventory Data by SKU and StockID
      *
      * @param array $skus
@@ -90,10 +70,10 @@ class InventoryData
     /**
      * Returns number of reservations by SKU & StockId
      *
-     * @param string $sku
+     * @param array $skus
      * @param int $stockId
      *
-     * @return float
+     * @return void
      */
     private function getReservations(array $skus, int $stockId): void
     {
@@ -117,16 +97,18 @@ class InventoryData
     }
 
     /**
-     * Loads all stock information into memory, only requiring 2 queries to the database
-     * instead of the page_size * 2
+     * Loads all stock information into memory
      *
      * @param array $skus
      * @param array $config
      * @return void
      */
-    public function load(array $skus, array $config) {
-        $this->getInventoryData($skus, (int)$config['inventory']['stock_id']);
-        $this->getReservations($skus, (int)$config['inventory']['stock_id']);
+    public function load(array $skus, array $config): void
+    {
+        if (isset($config['inventory']['stock_id'])) {
+            $this->getInventoryData($skus, (int)$config['inventory']['stock_id']);
+            $this->getReservations($skus, (int)$config['inventory']['stock_id']);
+        }
     }
 
     /**
