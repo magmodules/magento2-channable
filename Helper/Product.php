@@ -254,6 +254,11 @@ class Product extends AbstractHelper
             }
         }
 
+        $visibilityFilter = $config['filters']['visibility'] ?? [];
+        if (!empty($visibilityFilter) && in_array($product->getVisibility(), $visibilityFilter)) {
+            return true;
+        }
+
         if ($product->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
             if (empty($parent)) {
                 return false;
