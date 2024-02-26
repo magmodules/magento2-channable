@@ -7,6 +7,7 @@
 namespace Magmodules\Channable\Model;
 
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Framework\Exception\LocalizedException;
 use Magmodules\Channable\Model\Collection\Products as ProductsModel;
 use Magmodules\Channable\Model\Item as ItemModel;
@@ -120,6 +121,8 @@ class Generate
             $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
             $parents = $this->productModel->getParents($parentRelations, $config);
 
+            $this->prefetchData($products, $parents, $parentRelations, $config);
+
             foreach ($products as $product) {
                 /** @var Product $product */
                 $parent = null;
@@ -207,5 +210,25 @@ class Generate
         }
 
         return null;
+    }
+
+    /**
+     * Prefetches data to reduce amount of queries required.
+     * This increases performance by a lot for environments with >1ms latency to database.
+     *
+     * @param ProductCollection $products
+     * @param ProductCollection $parents
+     * @param array $parentRelations
+     * @param array $config
+     * @return void
+     */
+    private function prefetchData(
+        ProductCollection $products,
+        ProductCollection $parents,
+        array $parentRelations,
+        array $config
+    ) {
+        $this->productHelper->getInventoryData()->load($products->getColumnValues('sku'), $config);
+        $this->productHelper->getMediaData()->load($products, $parents);
     }
 }
