@@ -9,6 +9,7 @@ namespace Magmodules\Channable\Service\Returns;
 
 use Exception;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Stdlib\ArrayManager;
 use Magmodules\Channable\Api\Returns\RepositoryInterface as ReturnsRepository;
 
 class ImportReturn
@@ -22,17 +23,24 @@ class ImportReturn
      * @var ResourceConnection
      */
     private $resource;
+    /**
+     * @var ArrayManager
+     */
+    private $arrayManager;
 
     /**
      * @param ResourceConnection $resource
      * @param ReturnsRepository $returnsRepository
+     * @param ArrayManager $arrayManager
      */
     public function __construct(
         ResourceConnection $resource,
-        ReturnsRepository $returnsRepository
+        ReturnsRepository $returnsRepository,
+        ArrayManager $arrayManager
     ) {
         $this->returnsRepository = $returnsRepository;
         $this->resource = $resource;
+        $this->arrayManager = $arrayManager;
     }
 
     /**
@@ -68,6 +76,22 @@ class ImportReturn
 
         if ($orderIncrementId && $salesOrderGridData = $this->getMagentoOrder((string)$orderIncrementId)) {
             $returns->setMagentoOrderId((int)$salesOrderGridData['entity_id']);
+        }
+
+        if ($channelReturnId = $this->arrayManager->get('meta/channel_return_id', $returnData)) {
+            $returns->setChannelReturnId($channelReturnId);
+        }
+
+        if ($channelOrderId = $this->arrayManager->get('meta/channel_order_id', $returnData)) {
+            $returns->setChannelOrderId($channelOrderId);
+        }
+
+        if ($channelOrderIdInternal = $this->arrayManager->get('meta/channel_order_id_internal', $returnData)) {
+            $returns->setChannelOrderIdInternal($channelOrderIdInternal);
+        }
+
+        if ($platformOrderId = $this->arrayManager->get('meta/platform_order_id', $returnData)) {
+            $returns->setPlatformOrderId($platformOrderId);
         }
 
         try {

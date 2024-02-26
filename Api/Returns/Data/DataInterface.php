@@ -33,6 +33,10 @@ interface DataInterface extends ExtensibleDataInterface
     public const REASON = 'reason';
     public const COMMENT = 'comment';
     public const STATUS = 'status';
+    public const CHANNEL_RETURN_ID = 'channel_return_id';
+    public const CHANNEL_ORDER_ID = 'channel_order_id';
+    public const CHANNEL_ORDER_ID_INTERNAL = 'channel_order_id_internal';
+    public const PLATFORM_ORDER_ID = 'platform_order_id';
     public const CREATED_AT = 'created_at';
     public const UPDATED_AT = 'updated_at';
 
@@ -216,6 +220,50 @@ interface DataInterface extends ExtensibleDataInterface
      * @return $this
      */
     public function setStatus(string $status): self;
+
+    /**
+     * @return string|null
+     */
+    public function getChannelReturnId(): ?string;
+
+    /**
+     * @param string|null $channelReturnId
+     * @return $this
+     */
+    public function setChannelReturnId(?string $channelReturnId): self;
+
+    /**
+     * @return string|null
+     */
+    public function getChannelOrderId(): ?string;
+
+    /**
+     * @param string|null $channelOrderId
+     * @return $this
+     */
+    public function setChannelOrderId(?string $channelOrderId): self;
+
+    /**
+     * @return string|null
+     */
+    public function getChannelOrderIdInternal(): ?string;
+
+    /**
+     * @param string|null $channelOrderIdInternal
+     * @return $this
+     */
+    public function setChannelOrderIdInternal(?string $channelOrderIdInternal): self;
+
+    /**
+     * @return string|null
+     */
+    public function getPlatformOrderId(): ?string;
+
+    /**
+     * @param string|null $platformOrderId
+     * @return $this
+     */
+    public function setPlatformOrderId(?string $platformOrderId): self;
 
     /**
      * @return string
