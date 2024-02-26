@@ -116,6 +116,10 @@ class Products
             ->addUrlRewrite()
             ->setOrder('product_website.product_id', 'ASC');
 
+        if (in_array('tier_price', $attributes)) {
+            $collection->addTierPriceData();
+        }
+
         if (!empty($filters['visibility'])) {
             $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
         }
