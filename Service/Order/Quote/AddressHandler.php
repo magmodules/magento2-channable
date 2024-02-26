@@ -138,6 +138,9 @@ class AddressHandler
             'vat_id' => !empty($address['vat_id']) ? $address['vat_id'] : null,
             'email' => $email
         ];
+        if (isset($address['vat_number']) && $this->configProvider->isBusinessOrderEnabled()) {
+            $addressData['vat_id'] = $address['vat_number'];
+        }
 
         if ($this->configProvider->createCustomerOnImport((int)$storeId)) {
             $this->saveAddress($addressData, $customerId, $type);

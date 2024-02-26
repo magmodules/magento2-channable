@@ -42,6 +42,7 @@ interface OrderInterface extends ReturnsInterface
     const XML_PATH_LVB_SKIP_STOCK = 'magmodules_channable_marketplace/order/lvb_stock';
     const XML_PATH_LVB_AUTO_SHIP = 'magmodules_channable_marketplace/order/lvb_ship';
     const XML_PATH_DEDUCT_FPT = 'magmodules_channable_marketplace/order/deduct_fpt';
+    const XML_PATH_BUSINESS_ORDER = 'magmodules_channable_marketplace/order/business_order';
     const XML_PATH_TRANSACTION_FEE = 'magmodules_channable_marketplace/order/transaction_fee';
     const XML_PATH_LOG = 'magmodules_channable_marketplace/order/log';
     const XML_PATH_CARRIER_TITLE = 'carriers/channable/title';
@@ -284,6 +285,15 @@ interface OrderInterface extends ReturnsInterface
      * @return bool
      */
     public function deductFptTax(int $storeId = null): bool;
+
+    /**
+     * Check if business orders enabled.
+     *
+     * @param null|int $storeId
+     *
+     * @return bool
+     */
+    public function isBusinessOrderEnabled(int $storeId = null): bool;
 
     /**
      * Check if need to add transaction fee

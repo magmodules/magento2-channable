@@ -167,6 +167,7 @@ class ImportSimulator
                 "middle_name" => "From",
                 "last_name" => "Channable",
                 "company" => "TestCompany",
+                "business_order" => false,
             ],
             "billing" => [
                 "first_name" => "Test",
@@ -185,6 +186,7 @@ class ImportSimulator
                 "country_code" => $country,
                 "state" => $country == "US" ? "Texas" : "",
                 "state_code" => $country == "US" ? "TX" : "",
+                "vat_number" => "NL123456790B01"
             ],
             "shipping" => [
                 "first_name" => "Test",

@@ -54,6 +54,10 @@ class CalculatePrice
     {
         $taxCalculation = $this->configProvider->getNeedsTaxCalulcation('shipping', (int)$store->getId());
         $shippingPriceCal = (float) $orderData['price']['shipping'];
+        $isBusinessOrder = isset($data['customer']['business_order']) && ($data['customer']['business_order'] == true);
+        if ($this->configProvider->isBusinessOrderEnabled((int)$store->getId()) && $isBusinessOrder) {
+            return $shippingPriceCal;
+        }
 
         if (empty($taxCalculation)) {
             $shippingAddress = $quote->getShippingAddress();
