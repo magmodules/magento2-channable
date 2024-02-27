@@ -117,12 +117,17 @@ class Add
             $exceptionMsg = self::EMPTY_ITEMS_EXCEPTION;
             throw new CouldNotImportOrder(__($exceptionMsg));
         }
+        $isBusinessOrder = $this->configProvider->isBusinessOrderEnabled((int)$store->getId()) &&
+            isset($data['customer']['business_order']) && ($data['customer']['business_order'] == true);
 
         try {
             foreach ($data['products'] as $item) {
                 $product = $this->getProductById((int)$item['id'], (int)$store->getStoreId());
-                $price = $this->getProductPrice($item, $product, $store, $quote);
+                $price = $this->getProductPrice($item, $product, $store, $quote, $isBusinessOrder);
                 $product = $this->setProductData($product, $price, $store, $lvbOrder);
+                if ($isBusinessOrder) {
+                    $product->setTaxClassId(0);
+                }
 
                 switch ($product->getTypeId()) {
                     case 'grouped':
@@ -200,8 +205,16 @@ class Add
      *
      * @return float
      */
-    private function getProductPrice(array $item, ProductInterface $product, StoreInterface $store, Quote $quote): float
-    {
+    private function getProductPrice(
+        array $item,
+        ProductInterface $product,
+        StoreInterface $store,
+        Quote $quote,
+        bool $isBusinessOrder
+    ): float {
+        if ($isBusinessOrder) {
+            return (float)$item['price'];
+        }
         $price = (float)$item['price'] - $this->getProductWeeTax($product, $quote);
         if (!$this->configProvider->getNeedsTaxCalulcation('price', (int)$store->getId())) {
             $request = $this->taxCalculation->getRateRequest(

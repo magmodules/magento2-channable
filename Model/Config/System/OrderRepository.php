@@ -131,6 +131,14 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     /**
      * @inheritDoc
      */
+    public function isBusinessOrderEnabled(int $storeId = null): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_BUSINESS_ORDER, $storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function isTransactionFeeEnabled(int $storeId = null): bool
     {
         return $this->isSetFlag(self::XML_PATH_TRANSACTION_FEE, $storeId);

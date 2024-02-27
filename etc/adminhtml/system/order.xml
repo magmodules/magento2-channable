@@ -197,6 +197,12 @@
                 <config_path>magmodules_channable_marketplace/order/deduct_fpt</config_path>
                 <comment><![CDATA[Enable this option to deduct fees/fixed product taxes (FPT) on products before adding them to the cart.]]></comment>
             </field>
+            <field id="business_order" translate="label" type="select" sortOrder="64" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Enable business orders.</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/order/business_order</config_path>
+                <comment><![CDATA[Enable this option to set zero taxes in case of business order.]]></comment>
+            </field>
             <field id="heading_returns" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Return Labels</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>

@@ -844,7 +844,11 @@ class Source extends AbstractHelper
             if (!empty($categories[$catId])) {
                 $category = $categories[$catId];
                 if (!empty($category['path'])) {
-                    $path[] = ['level' => $category['level'], 'path' => implode(' > ', $category['path'])];
+                    $path[] = [
+                        'level' => $category['level'],
+                        'id' => $catId,
+                        'path' => implode(' > ', $category['path'])
+                    ];
                 }
             }
         }

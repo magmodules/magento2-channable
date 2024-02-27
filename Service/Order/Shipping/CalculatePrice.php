@@ -9,8 +9,10 @@ namespace Magmodules\Channable\Service\Order\Shipping;
 
 use Magento\Quote\Model\Quote;
 use Magento\Store\Api\Data\StoreInterface;
-use Magento\Tax\Model\Calculation as TaxCalculationn;
+use Magento\Tax\Model\Calculation as TaxCalculation;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
 
 /**
  * Get shipping price for quote
@@ -22,23 +24,36 @@ class CalculatePrice
      * @var ConfigProvider
      */
     private $configProvider;
-
     /**
-     * @var TaxCalculationn
+     * @var TaxCalculation
      */
     private $taxCalculation;
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+    /**
+     * @var PriceCurrencyInterface
+     */
+    private $priceManager;
 
     /**
      * CalculatePrice constructor.
      * @param ConfigProvider $configProvider
-     * @param TaxCalculationn $taxCalculation
+     * @param TaxCalculation $taxCalculation
+     * @param StoreManagerInterface $storeManager
+     * @param PriceCurrencyInterface $priceManager
      */
     public function __construct(
         ConfigProvider $configProvider,
-        TaxCalculationn $taxCalculation
+        TaxCalculation $taxCalculation,
+        StoreManagerInterface $storeManager,
+        PriceCurrencyInterface $priceManager
     ) {
         $this->configProvider = $configProvider;
         $this->taxCalculation = $taxCalculation;
+        $this->storeManager = $storeManager;
+        $this->priceManager = $priceManager;
     }
 
     /**
@@ -53,7 +68,13 @@ class CalculatePrice
     public function execute(Quote $quote, array $orderData, StoreInterface $store): float
     {
         $taxCalculation = $this->configProvider->getNeedsTaxCalulcation('shipping', (int)$store->getId());
-        $shippingPriceCal = (float) $orderData['price']['shipping'];
+
+        $amount = (float)$orderData['price']['shipping'];
+        $baseCurrency = $this->storeManager->getStore($quote->getStoreId())->getBaseCurrencyCode();
+        if ($baseCurrency != $orderData['price']['currency']) {
+            $rate = $this->priceManager->convert($amount, $quote->getStoreId()) / $amount;
+            $amount = $amount / $rate;
+        }
 
         if (empty($taxCalculation)) {
             $shippingAddress = $quote->getShippingAddress();
@@ -61,9 +82,9 @@ class CalculatePrice
             $taxRateId = $this->configProvider->getTaxClassShipping((int)$store->getId());
             $request = $this->taxCalculation->getRateRequest($shippingAddress, $billingAddress, null, $store);
             $percent = $this->taxCalculation->getRate($request->setData('product_tax_class_id', $taxRateId));
-            $shippingPriceCal = ($orderData['price']['shipping'] / (100 + $percent) * 100);
+            $amount = ($amount / (100 + $percent) * 100);
         }
 
-        return $shippingPriceCal;
+        return $amount;
     }
 }

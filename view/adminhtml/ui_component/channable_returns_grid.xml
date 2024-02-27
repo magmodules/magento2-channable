@@ -143,6 +143,34 @@
                 <bodyTmpl>ui/grid/cells/html</bodyTmpl>
             </settings>
         </column>
+        <column name="channel_return_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Channel Return ID</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="channel_order_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Channel Order ID</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="channel_order_id_internal">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Channel Order ID (int)</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="platform_order_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Platform Order ID</label>
+                <visible>false</visible>
+            </settings>
+        </column>
         <column name="customer_name">
             <settings>
                 <filter>text</filter>

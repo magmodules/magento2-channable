@@ -395,6 +395,70 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
+    public function getChannelReturnId(): ?string
+    {
+        return $this->getData(self::CHANNEL_RETURN_ID);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setChannelReturnId(?string $channelReturnId): ChannableReturnsData
+    {
+        return $this->setData(self::CHANNEL_RETURN_ID, $channelReturnId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getChannelOrderId(): ?string
+    {
+        return $this->getData(self::CHANNEL_ORDER_ID);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setChannelOrderId(?string $channelOrderId): ChannableReturnsData
+    {
+        return $this->setData(self::CHANNEL_ORDER_ID, $channelOrderId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getChannelOrderIdInternal(): ?string
+    {
+        return $this->getData(self::CHANNEL_ORDER_ID_INTERNAL);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setChannelOrderIdInternal(?string $channelOrderIdInternal): ChannableReturnsData
+    {
+        return $this->setData(self::CHANNEL_ORDER_ID_INTERNAL, $channelOrderIdInternal);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPlatformOrderId(): ?string
+    {
+        return $this->getData(self::PLATFORM_ORDER_ID);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setPlatformOrderId(?string $platformOrderId): ChannableReturnsData
+    {
+        return $this->setData(self::PLATFORM_ORDER_ID, $platformOrderId);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getCreatedAt(): string
     {
         return (string)$this->getData(self::CREATED_AT);

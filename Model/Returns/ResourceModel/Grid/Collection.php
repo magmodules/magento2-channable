@@ -31,6 +31,6 @@ class Collection extends SearchResult
             [
                 'qty_creditmemos' => new Zend_Db_Expr('count(sales_creditmemo.entity_id)'),
             ]
-        )->group('main_table.magento_order_id');
+        )->group('main_table.entity_id');
     }
 }

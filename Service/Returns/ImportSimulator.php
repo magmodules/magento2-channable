@@ -140,7 +140,7 @@ class ImportSimulator
             'channable_id' => $random,
             'item' => [
                 'id' => $product['id'],
-                'order_id' => 9999,
+                'order_id' => null,
                 'gtin' => $product['sku'],
                 'title' => $product['name'],
                 'quantity' => 1,
@@ -164,6 +164,12 @@ class ImportSimulator
                 'city' => 'Test',
                 'country_code' => 'NL',
                 'zip_code' => '1234 AB',
+            ],
+            'meta' => [
+                'channel_return_id' => $random . '-some-return',
+                'channel_order_id' => $random . '-some-order',
+                'channel_order_id_internal' => $random . '-order-id',
+                'platform_order_id' => $random,
             ]
         ];
     }
@@ -211,6 +217,12 @@ class ImportSimulator
                 'city' => $address->getCity(),
                 'country_code' => $address->getCountryId(),
                 'zip_code' => $address->getPostcode()
+            ],
+            'meta' => [
+                'channel_return_id' => $order->getIncrementId() . '-some-return',
+                'channel_order_id' => $order->getIncrementId() . '-some-order',
+                'channel_order_id_internal' => $order->getIncrementId() . '-order-id',
+                'platform_order_id' => $order->getIncrementId() . '-platform',
             ]
         ];
     }
