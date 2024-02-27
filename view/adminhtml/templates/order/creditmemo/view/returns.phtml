@@ -1,43 +1,40 @@
 <?php
 /**
- * Copyright © Magmodules.eu. All rights reserved.
- * See COPYING.txt for license details.
+ * @see \Magmodules\Channable\Block\Adminhtml\Order\Creditmemo\View\Returns
+ * @var \Magmodules\Channable\Block\Adminhtml\Order\Creditmemo\View\Returns $block
  */
 
-use Magmodules\Channable\Block\Adminhtml\Order\Creditmemo\View\Returns;
-
-/**
- * @see Returns
- * @var Returns $block
- */
+$autoAccTxt = 'The items below will automatically identified and marked as returned within the Channable platform.';
 ?>
 <?php $autoAccepted = $block->autoUpdateReturnsOnCreditmemo(); ?>
 <?php if ($block->showOnCreditmemoCreation() && $returns = $block->checkForReturns()): ?>
     <div class="admin__page-section-content channable-credit-memo"">
-        <div class="admin__page-section-title">
-            <span class="title"><?= $block->escapeHtml(__('Open Channable Returns')) ?></span>
-
-            <?php if ($autoAccepted): ?>
-                These are auto matched  ...
+    <div class="admin__page-section-title">
+            <span class="title" style="display: contents;">
+                <?= $block->escapeHtml(__('Available Channable Returns')) ?>
+            </span>
+        <?php if ($autoAccepted): ?>
+            <p style=" display: block; margin-top: 10px;">
+                <?= $block->escapeHtml(__($autoAccTxt)) ?>
+            </p>
+        <?php endif; ?>
+    </div>
+    <div class="field choice admin__field admin__field-option field-channable-returns">
+        <?php foreach ($returns as $sku => $return): ?>
+            <?php if (!$autoAccepted): ?>
+                <input
+                        id="channable_return[<?= $sku; ?>]"
+                        class="admin__control-checkbox"
+                        type="checkbox"
+                        value="<?= $sku; ?>"
+                        name="channable_return[<?= $sku; ?>]"/>
+            <?php else: ?>
+                <b>Automatched Items</b><br>
             <?php endif; ?>
-
-        </div>
-        <div class="field choice admin__field admin__field-option field-channable-returns">
-            <?php foreach ($returns as $sku => $return): ?>
-                <?php if (!$autoAccepted): ?>
-                    <input
-                            id="channable_return[<?= $sku; ?>]"
-                            class="admin__control-checkbox"
-                            type="checkbox"
-                            value="<?= $sku; ?>"
-                            name="channable_return[<?= $sku; ?>]"/>
-                <?php else: ?>
-                    [ auto match ]
-                <?php endif; ?>
-                <label for="channable_return[<?= $sku; ?>]" class="admin__field-label">
-                    <span><?= $block->escapeHtml(__('Accept Return for: %1 (QTY 1)', $sku)) ?></span>
-                </label>
-            <?php endforeach; ?>
-        </div>
+            <label for="channable_return[<?= $sku; ?>]" class="admin__field-label">
+                <span><?= $block->escapeHtml(__('Accept Return for: %1 (QTY 1)', $sku)) ?></span>
+            </label>
+        <?php endforeach; ?>
+    </div>
     </div>
 <?php endif; ?>
