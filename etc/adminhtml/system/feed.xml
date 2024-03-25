@@ -401,6 +401,14 @@
                     <field id="inventory">1</field>
                 </depends>
             </field>
+            <field id="inventory_source_items" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Include Inventory Sources</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable/advanced/inventory_source_items</config_path>
+                <depends>
+                    <field id="inventory">1</field>
+                </depends>
+            </field>
             <field id="heading_delivery" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Delivery Time</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>

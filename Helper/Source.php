@@ -44,6 +44,7 @@ class Source extends AbstractHelper
     const XPATH_INVENTORY = 'magmodules_channable/advanced/inventory';
     const XPATH_INVENTORY_DATA = 'magmodules_channable/advanced/inventory_fields';
     const XPATH_FORCE_NON_MSI = 'magmodules_channable/advanced/force_non_msi';
+    const XPATH_INVENTORY_SOURCE_ITEMS = 'magmodules_channable/advanced/inventory_source_items';
     const XPATH_TAX = 'magmodules_channable/advanced/tax';
     const XPATH_TAX_INCLUDE_BOTH = 'magmodules_channable/advanced/tax_include_both';
     const XPATH_MANAGE_STOCK = 'cataloginventory/item_options/manage_stock';
@@ -612,6 +613,14 @@ class Source extends AbstractHelper
                         'source'  => 'backorders'
                     ];
                 }
+
+                if ($this->getStoreValue(self::XPATH_INVENTORY_SOURCE_ITEMS)) {
+                    $attributes['inventory_source_items'] = [
+                        'label'   => 'inventory_source_items',
+                        'source'  => 'inventory_source_items'
+                    ];
+                }
+
             }
             $attributes['weight'] = [
                 'label'   => 'shipping_weight',
@@ -791,6 +800,7 @@ class Source extends AbstractHelper
             $invAtt['stock_id'] = null;
         } else {
             $invAtt['stock_id'] = $this->inventorySource->execute($websiteCode);
+            $invAtt['inventory_source_items'] = (bool)$this->getStoreValue(self::XPATH_INVENTORY_SOURCE_ITEMS);
         }
 
         return $invAtt;
