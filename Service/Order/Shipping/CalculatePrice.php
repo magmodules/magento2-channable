@@ -67,15 +67,18 @@ class CalculatePrice
      */
     public function execute(Quote $quote, array $orderData, StoreInterface $store): float
     {
-        $taxCalculation = $this->configProvider->getNeedsTaxCalulcation('shipping', (int)$store->getId());
-
         $amount = (float)$orderData['price']['shipping'];
-        $baseCurrency = $this->storeManager->getStore($quote->getStoreId())->getBaseCurrencyCode();
-        if ($baseCurrency != $orderData['price']['currency']) {
+        if ($amount == 0) {
+            return $amount;
+        }
+
+        $baseCurrency = $this->getBaseCurrency($quote);
+        if ($baseCurrency && $baseCurrency != $orderData['price']['currency']) {
             $rate = $this->priceManager->convert($amount, $quote->getStoreId()) / $amount;
             $amount = $amount / $rate;
         }
 
+        $taxCalculation = $this->configProvider->getNeedsTaxCalulcation('shipping', (int)$store->getId());
         if (empty($taxCalculation)) {
             $shippingAddress = $quote->getShippingAddress();
             $billingAddress = $quote->getBillingAddress();
@@ -86,5 +89,18 @@ class CalculatePrice
         }
 
         return $amount;
+    }
+
+    /**
+     * @param Quote $quote
+     * @return string|null
+     */
+    private function getBaseCurrency(Quote $quote): ?string
+    {
+        try {
+            return $this->storeManager->getStore($quote->getStoreId())->getBaseCurrencyCode();
+        } catch (\Exception $exception) {
+            return null;
+        }
     }
 }
