@@ -48,4 +48,13 @@ class ReturnsRepository extends ItemupdateRepository implements ReturnsInterface
         return $this->getStoreValue(self::XML_PATH_RETURNS_CREDITMEMO, $storeId)
             && $this->isReturnsEnabled($storeId);
     }
+
+    /**
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getGtinAttribute(int $storeId = null): string
+    {
+        return $this->getStoreValue(self::XML_PATH_GTIN_ATTRIBUTE, (int)$storeId) ?: 'sku';
+    }
 }
