@@ -108,10 +108,10 @@ class Generate
 
         $config = $this->sourceHelper->getConfig($storeId, $type, $currency);
         $productCollection = $this->productModel->getCollection($config, $page, $productIds);
-        $size = $this->productModel->getCollectionCountWithFilters($productCollection);
+        $size = $productCollection->getSize();
 
         if (($config['filters']['limit'] > 0) && empty($productIds)) {
-            $productCollection->setPage($page, $config['filters']['limit'])->getCurPage();
+            $productCollection->setPage($page, $config['filters']['limit']);
             $pages = ceil($size / $config['filters']['limit']);
         }
 
