@@ -1008,8 +1008,8 @@ class Product extends AbstractHelper
                     $finalPrice = $product->getFinalPrice();
                     $specialPrice = $product->getSpecialPrice();
                 } else {
-                    $finalPrice = $product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue();
-                    $price = $product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue();
+                    $finalPrice = $product->getPriceInfo()->getPrice('final_price')->getValue();
+                    $price = $product->getPriceInfo()->getPrice('regular_price')->getValue();
                     $product['min_price'] = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getBaseAmount();
                     $product['max_price'] = $product->getPriceInfo()->getPrice('final_price')->getMaximalPrice()->getBaseAmount();
                 }
