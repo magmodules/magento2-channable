@@ -335,6 +335,9 @@ class Product extends AbstractHelper
         if (!empty($attribute['source']) && ($attribute['source'] == 'category_ids')) {
             $type = 'category_ids';
         }
+        if (!empty($attribute['source']) && ($attribute['source'] == 'tier_price')) {
+            $type = 'tier_price';
+        }
 
         switch ($type) {
             case 'link':
@@ -371,6 +374,9 @@ class Product extends AbstractHelper
                 break;
             case 'category_ids':
                 $value = $product->getCategoryIds();
+                break;
+            case 'tier_price':
+                $value = $this->processTierPrice($product, $config);
                 break;
             default:
                 $value = $this->getValue($attribute, $product);
@@ -1159,6 +1165,36 @@ class Product extends AbstractHelper
         }
 
         return ['min_price' => $minPrice, 'max_price' => $maxPrice, 'total_price' => $totalPrice];
+    }
+
+    /**
+     * @param $product
+     * @param array $config
+     * @return array|null
+     */
+    public function processTierPrice($product, array $config): ?array
+    {
+        if (!$product->getData('tier_price')) {
+            return null;
+        }
+
+        $reformattedTierPriced = [];
+        foreach ($product->getData('tier_price') as $priceTier) {
+            $price = $priceTier['percentage_value']
+                ? $product->getPrice() * ($priceTier['percentage_value'] / 100)
+                : $priceTier['value'];
+
+            $reformattedTierPriced[] = [
+                'price_id' => $priceTier['value_id'],
+                'website_id' => $priceTier['website_id'],
+                'all_groups' => $priceTier['all_groups'],
+                'cust_group' => $priceTier['customer_group_id'],
+                'qty' => $priceTier['qty'],
+                'price' => $this->formatPrice($price, $config)
+            ];
+        }
+
+        return $reformattedTierPriced;
     }
 
     /**

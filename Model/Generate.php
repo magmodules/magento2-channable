@@ -8,15 +8,16 @@ namespace Magmodules\Channable\Model;
 
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
+use Magento\Framework\App\Area;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Store\Model\App\Emulation;
+use Magmodules\Channable\Helper\Feed as FeedHelper;
+use Magmodules\Channable\Helper\General as GeneralHelper;
+use Magmodules\Channable\Helper\Product as ProductHelper;
+use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magmodules\Channable\Model\Collection\Products as ProductsModel;
 use Magmodules\Channable\Model\Item as ItemModel;
-use Magmodules\Channable\Helper\Source as SourceHelper;
-use Magmodules\Channable\Helper\Product as ProductHelper;
-use Magmodules\Channable\Helper\General as GeneralHelper;
-use Magmodules\Channable\Helper\Feed as FeedHelper;
-use Magento\Framework\App\Area;
-use Magento\Store\Model\App\Emulation;
+use Magmodules\Channable\Service\Product\TierPriceData;
 
 class Generate
 {
@@ -49,6 +50,10 @@ class Generate
      */
     private $feedHelper;
     /**
+     * @var TierPriceData
+     */
+    private $tierPriceData;
+    /**
      * @var Emulation
      */
     private $appEmulation;
@@ -57,12 +62,13 @@ class Generate
      * Generate constructor.
      *
      * @param ProductsModel $productModel
-     * @param Item          $itemModel
-     * @param SourceHelper  $sourceHelper
+     * @param Item $itemModel
+     * @param SourceHelper $sourceHelper
      * @param ProductHelper $productHelper
      * @param GeneralHelper $generalHelper
-     * @param FeedHelper    $feedHelper
-     * @param Emulation     $appEmulation
+     * @param FeedHelper $feedHelper
+     * @param TierPriceData $tierPriceData
+     * @param Emulation $appEmulation
      */
     public function __construct(
         ProductsModel $productModel,
@@ -71,6 +77,7 @@ class Generate
         ProductHelper $productHelper,
         GeneralHelper $generalHelper,
         FeedHelper $feedHelper,
+        TierPriceData $tierPriceData,
         Emulation $appEmulation
     ) {
         $this->productModel = $productModel;
@@ -79,6 +86,7 @@ class Generate
         $this->sourceHelper = $sourceHelper;
         $this->generalHelper = $generalHelper;
         $this->feedHelper = $feedHelper;
+        $this->tierPriceData = $tierPriceData;
         $this->appEmulation = $appEmulation;
     }
 
@@ -121,7 +129,7 @@ class Generate
             $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
             $parents = $this->productModel->getParents($parentRelations, $config);
 
-            $this->prefetchData($products, $parents, $parentRelations, $config);
+            $this->prefetchData($products, $parents, $config);
 
             foreach ($products as $product) {
                 /** @var Product $product */
@@ -218,17 +226,18 @@ class Generate
      *
      * @param ProductCollection $products
      * @param ProductCollection $parents
-     * @param array $parentRelations
      * @param array $config
      * @return void
      */
     private function prefetchData(
         ProductCollection $products,
         ProductCollection $parents,
-        array $parentRelations,
         array $config
     ) {
         $this->productHelper->getInventoryData()->load($products->getColumnValues('sku'), $config);
         $this->productHelper->getMediaData()->load($products, $parents);
+        if (in_array('tier_price', array_column($config['attributes'], 'source'))) {
+            $this->tierPriceData->load($products, $parents, $config['website_id']);
+        }
     }
 }
