@@ -89,6 +89,9 @@ class CreditmemoSaveAfter
         }
 
         foreach ($creditmemo->getItems() as $creditmemoItem) {
+            if (!$creditmemoItem->getQty()) {
+                continue;
+            }
             if (!array_key_exists($creditmemoItem->getSku(), $selectedReturns) && !$automate) {
                 continue;
             }

@@ -121,11 +121,7 @@ class Products
             ->addStoreFilter($config['store_id'])
             ->addAttributeToSelect($attributes)
             ->addUrlRewrite()
-            ->setOrder('product_website.product_id', 'ASC');
-
-        if (in_array('tier_price', $attributes)) {
-            $collection->addTierPriceData();
-        }
+            ->setOrder('entity_id', 'ASC');
 
         if (!empty($filters['visibility'])) {
             $collection->addAttributeToFilter('visibility', ['in' => $filters['visibility']]);
