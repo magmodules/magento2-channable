@@ -4,15 +4,20 @@
  * See COPYING.txt for license details.
  */
 
+
 namespace Magmodules\Channable\Controller\Feed;
+
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
+use Magmodules\Channable\Block\Adminhtml\Design\Log;
 use Magmodules\Channable\Model\Generate as GenerateModel;
 use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
+use Magmodules\Channable\Service\Product\InventoryData;
+
 
 /**
  * Class Json
@@ -21,6 +26,7 @@ use Magmodules\Channable\Helper\Feed as FeedHelper;
  */
 class Json extends Action
 {
+
 
     /**
      * @var GenerateModel
@@ -44,30 +50,41 @@ class Json extends Action
     private $remoteAddress;
 
     /**
+     * @var InventoryData
+     */
+    private $inventoryData;
+
+
+    /**
      * Json constructor.
      *
-     * @param Context       $context
+     * @param Context $context
      * @param GeneralHelper $generalHelper
      * @param GenerateModel $generateModel
-     * @param FeedHelper    $feedHelper
-     * @param JsonFactory   $resultJsonFactory
+     * @param FeedHelper $feedHelper
+     * @param JsonFactory $resultJsonFactory
      * @param RemoteAddress $remoteAddress
+     * @param InventoryData $inventoryData
      */
     public function __construct(
-        Context $context,
+        Context       $context,
         GeneralHelper $generalHelper,
         GenerateModel $generateModel,
-        FeedHelper $feedHelper,
-        JsonFactory $resultJsonFactory,
-        RemoteAddress $remoteAddress
-    ) {
+        FeedHelper    $feedHelper,
+        JsonFactory   $resultJsonFactory,
+        RemoteAddress $remoteAddress,
+        InventoryData $inventoryData
+    )
+    {
         $this->generateModel = $generateModel;
         $this->generalHelper = $generalHelper;
         $this->feedHelper = $feedHelper;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->remoteAddress = $remoteAddress;
+        $this->inventoryData = $inventoryData;
         parent::__construct($context);
     }
+
 
     /**
      * Execute function for Channable JSON output
@@ -79,11 +96,12 @@ class Json extends Action
         $currency = $this->getRequest()->getParam('currency');
         $token = $this->getRequest()->getParam('token');
 
-        if (empty($storeId) || empty($token)) {
+        if ((!is_numeric($storeId) && empty($storeId)) || empty($token)) {
             return false;
         }
 
         $enabled = $this->generalHelper->getEnabled($storeId);
+
 
         if (!$enabled) {
             return false;
@@ -99,12 +117,15 @@ class Json extends Action
             $productId = null;
         }
 
+
         $ip = $this->remoteAddress->getRemoteAddress();
         $this->feedHelper->setLastFetched($storeId, $ip);
+
 
         try {
             if ($data = $this->generateModel->generateByStore($storeId, $page, $productId, $currency)) {
                 $result = $this->resultJsonFactory->create();
+
                 return $result->setData($data);
             }
         } catch (\Exception $e) {
@@ -112,6 +133,7 @@ class Json extends Action
             $result = $this->resultJsonFactory->create();
             return $result->setData(json_encode($e->getMessage()));
         }
+
 
         return '';
     }

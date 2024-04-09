@@ -68,7 +68,7 @@ class InventoryData
      *
      * @return void
      */
-    private function getInventoryData(array $skus, int $stockId): void
+    public function getInventoryData(array $skus, int $stockId): void
     {
         $connection = $this->resourceConnection->getConnection();
         $tableName = $this->resourceConnection->getTableName('inventory_stock_' . $stockId);
@@ -85,6 +85,9 @@ class InventoryData
         foreach ($inventoryData as $data) {
             $this->inventory[$stockId][$data['sku']] = $data;
         }
+
+
+//        print_r((string)$select);
     }
 
     /**
@@ -148,8 +151,9 @@ class InventoryData
         $inventoryData = $this->inventory[$config['inventory']['stock_id']][$product->getSku()] ?? [];
         $reservations = $this->reservation[$config['inventory']['stock_id']][$product->getSku()] ?? 0;
 
-        $qty = isset($inventoryData['quantity']) ? $inventoryData['quantity'] - $reservations : 0;
+        $qty = isset($inventoryData['quantity']) ? $inventoryData['quantity'] + $reservations : 0;
         $isSalable = $inventoryData['is_salable'] ?? 0;
+        $isSalable = $qty <= 0 ? "0" : $isSalable;
 
         return $product->setQty($qty)
             ->setIsSalable($isSalable)
