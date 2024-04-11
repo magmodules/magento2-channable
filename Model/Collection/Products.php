@@ -385,10 +385,7 @@ class Products
      */
     public function getParents($parentRelations, $config): ProductCollection
     {
-        if (empty($parentRelations)) {
-            return $this->productCollection; //return empty product collection
-        }
-
+        $parentRelations = $parentRelations ?: [0];
         $filters = $config['filters'];
 
         if (!$config['flat']) {
