@@ -136,8 +136,8 @@ class Generate
                 $parent = null;
                 if (!empty($parentRelations[$product->getEntityId()])) {
                     foreach ($parentRelations[$product->getEntityId()] as $parentId) {
-                        if ($parent = $parents->getItemById($parentId)) {
-                            continue;
+                        if ($foundParent = $parents->getItemById($parentId)) {
+                            $parent = $foundParent;
                         }
                     }
                 }
