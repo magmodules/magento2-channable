@@ -48,19 +48,19 @@ class AbstractOrder extends Column
     }
 
     /**
-     * Returs imploded customer name
+     * Returns imploded customer name
      *
      * @param array $data
      * @return string
      */
-    public function getCustomerName($data): string
+    public function getCustomerName(array $data): string
     {
         return implode(
             ' ',
             [
-                $data['first_name'],
-                $data['middle_name'],
-                $data['last_name'],
+                $data['first_name'] ?? '-',
+                $data['middle_name'] ?? '',
+                $data['last_name'] ?? '-',
             ]
         );
     }
