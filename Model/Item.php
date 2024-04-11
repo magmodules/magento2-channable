@@ -333,6 +333,7 @@ class Item extends AbstractModel
         try {
             $productIds = $this->itemHelper->getProductIdsFromCollection($items);
             $products = $this->productModel->getCollection($config, '', $productIds);
+            $this->productHelper->getInventoryData()->load($products->getColumnValues('sku'), $config);
             $parentRelations = $this->productHelper->getParentsFromCollection($products, $config);
             $parents = $this->productModel->getParents($parentRelations, $config);
 
@@ -342,8 +343,8 @@ class Item extends AbstractModel
                 if (!empty($parentRelations[$product->getEntityId()])) {
                     foreach ($parentRelations[$product->getEntityId()] as $parentId) {
                         /** @var Product $parent */
-                        if ($parent = $parents->getItemById($parentId)) {
-                            continue;
+                        if ($foundParent = $parents->getItemById($parentId)) {
+                            $parent = $foundParent;
                         }
                     }
                 }
