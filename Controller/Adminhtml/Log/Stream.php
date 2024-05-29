@@ -23,7 +23,7 @@ class Stream extends Action
      *
      * @see _isAllowed()
      */
-    public const ADMIN_RESOURCE = 'Magmodules_Channable::config';
+    public const ADMIN_RESOURCE = 'Magmodules_Channable::configuration';
 
     /**
      * @var JsonFactory
