@@ -125,7 +125,7 @@ class Add
                 $product = $this->getProductById((int)$item['id'], (int)$store->getStoreId());
                 $price = $this->getProductPrice($item, $product, $store, $quote, $isBusinessOrder);
                 $product = $this->setProductData($product, $price, $store, $lvbOrder);
-                if ($isBusinessOrder) {
+                if ($isBusinessOrder && (isset($item['price_tax']) && $item['price_tax'] == 0)) {
                     $product->setTaxClassId(0);
                 }
 
