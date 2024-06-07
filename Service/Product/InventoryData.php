@@ -119,7 +119,7 @@ class InventoryData
 
         $reservations = $connection->fetchAll($select);
         foreach ($reservations as $reservation) {
-            $this->reservation[$stockId][$reservation['sku']] = $reservation['quantity'];
+            $this->reservation[$stockId][$reservation['sku']] = max(0, $reservation['quantity'] * -1);
         }
     }
 
