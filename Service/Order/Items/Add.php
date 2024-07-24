@@ -216,12 +216,14 @@ class Add
             return (float)$item['price'];
         }
         $price = (float)$item['price'] - $this->getProductWeeTax($product, $quote);
+
         if (!$this->configProvider->getNeedsTaxCalulcation('price', (int)$store->getId())) {
             $request = $this->taxCalculation->getRateRequest(
                 $quote->getShippingAddress(),
                 $quote->getBillingAddress(),
-                null,
-                $store
+                $quote->getCustomerTaxClassId(),
+                $store,
+                $quote->getCustomerId()
             );
             $percent = $this->taxCalculation->getRate(
                 $request->setData('product_class_id', $product->getData('tax_class_id'))
