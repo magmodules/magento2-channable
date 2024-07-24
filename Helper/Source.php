@@ -10,7 +10,6 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Catalog\Model\Product\Visibility;
 use Magento\Framework\Exception\LocalizedException;
 use Magmodules\Channable\Service\Product\InventorySource;
 
@@ -88,10 +87,6 @@ class Source extends AbstractHelper
      */
     private $itemHelper;
     /**
-     * @var Category
-     */
-    private $categoryHelper;
-    /**
      * @var StoreManagerInterface
      */
     private $storeManager;
@@ -104,22 +99,10 @@ class Source extends AbstractHelper
      */
     private $storeId = null;
 
-    /**
-     * Source constructor.
-     *
-     * @param Context               $context
-     * @param StoreManagerInterface $storeManager
-     * @param General               $generalHelper
-     * @param Category              $categoryHelper
-     * @param Product               $productHelper
-     * @param InventorySource       $inventorySource
-     * @param Item                  $itemHelper
-     */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
         General $generalHelper,
-        Category $categoryHelper,
         Product $productHelper,
         InventorySource $inventorySource,
         Item $itemHelper
@@ -127,7 +110,6 @@ class Source extends AbstractHelper
         $this->generalHelper = $generalHelper;
         $this->productHelper = $productHelper;
         $this->itemHelper = $itemHelper;
-        $this->categoryHelper = $categoryHelper;
         $this->storeManager = $storeManager;
         $this->inventorySource = $inventorySource;
         parent::__construct($context);
@@ -163,12 +145,6 @@ class Source extends AbstractHelper
                 $config += [
                     'base_url' => $this->storeManager->getStore()->getBaseUrl(),
                     'weight_unit' => ' ' . $this->getStoreValue(self::XPATH_WEIGHT_UNIT),
-                    'categories' => $this->categoryHelper->getCollection(
-                        $storeId,
-                        '',
-                        '',
-                        'channable_cat_disable_export'
-                    ),
                     'item_updates' =>  $this->itemHelper->isEnabled($storeId),
                     'delivery' => $this->getStoreValue(self::XPATH_DELIVERY_TIME)
                 ];
@@ -858,7 +834,8 @@ class Source extends AbstractHelper
                     $path[] = [
                         'level' => $category['level'],
                         'id' => $catId,
-                        'path' => implode(' > ', $category['path'])
+                        'path' => $category['path'],
+                        'url' => $category['url'],
                     ];
                 }
             }

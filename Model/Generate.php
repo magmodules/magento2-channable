@@ -18,12 +18,10 @@ use Magmodules\Channable\Helper\Source as SourceHelper;
 use Magmodules\Channable\Model\Collection\Products as ProductsModel;
 use Magmodules\Channable\Model\Item as ItemModel;
 use Magmodules\Channable\Service\Product\TierPriceData;
+use Magmodules\Channable\Service\Category\CategoryData;
 
 class Generate
 {
-
-    public const XPATH_FEED_RESULT = 'magmodules_channable/feeds/results';
-    public const XPATH_GENERATE = 'magmodules_channable/generate/enable';
 
     /**
      * @var ProductsModel
@@ -53,6 +51,12 @@ class Generate
      * @var TierPriceData
      */
     private $tierPriceData;
+
+    /**
+     * @var CategoryData
+     */
+    private $categoryData;
+
     /**
      * @var Emulation
      */
@@ -68,6 +72,7 @@ class Generate
      * @param GeneralHelper $generalHelper
      * @param FeedHelper $feedHelper
      * @param TierPriceData $tierPriceData
+     * @param CategoryData $categoryData
      * @param Emulation $appEmulation
      */
     public function __construct(
@@ -78,6 +83,7 @@ class Generate
         GeneralHelper $generalHelper,
         FeedHelper $feedHelper,
         TierPriceData $tierPriceData,
+        CategoryData $categoryData,
         Emulation $appEmulation
     ) {
         $this->productModel = $productModel;
@@ -87,6 +93,7 @@ class Generate
         $this->generalHelper = $generalHelper;
         $this->feedHelper = $feedHelper;
         $this->tierPriceData = $tierPriceData;
+        $this->categoryData = $categoryData;
         $this->appEmulation = $appEmulation;
     }
 
@@ -130,6 +137,7 @@ class Generate
             $parents = $this->productModel->getParents($parentRelations, $config);
 
             $this->prefetchData($products, $parents, $config);
+            $config['categories'] = $this->categoryData->load($products, $parents, $storeId);
 
             foreach ($products as $product) {
                 /** @var Product $product */
