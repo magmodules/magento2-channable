@@ -80,10 +80,14 @@ class CalculatePrice
 
         $taxCalculation = $this->configProvider->getNeedsTaxCalulcation('shipping', (int)$store->getId());
         if (empty($taxCalculation)) {
-            $shippingAddress = $quote->getShippingAddress();
-            $billingAddress = $quote->getBillingAddress();
             $taxRateId = $this->configProvider->getTaxClassShipping((int)$store->getId());
-            $request = $this->taxCalculation->getRateRequest($shippingAddress, $billingAddress, null, $store);
+            $request = $this->taxCalculation->getRateRequest(
+                $quote->getShippingAddress(),
+                $quote->getBillingAddress(),
+                $quote->getCustomerTaxClassId(),
+                $store,
+                $quote->getCustomerId()
+            );
             $percent = $this->taxCalculation->getRate($request->setData('product_tax_class_id', $taxRateId));
             $amount = ($amount / (100 + $percent) * 100);
         }
