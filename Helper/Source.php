@@ -631,6 +631,7 @@ class Source extends AbstractHelper
             $attributes['item_group_id'] = [
                 'label'  => 'item_group_id',
                 'source' => $attributes['id']['source'],
+                'parent_selection_disabled' => 1,
                 'parent' => 2
             ];
             $attributes['is_bundle'] = [
