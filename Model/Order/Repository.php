@@ -169,6 +169,12 @@ class Repository implements ChannableOrderRepository
         if ($channableOrderId) {
             $channableOrder = $this->get((int)$channableOrderId);
             $channableOrder->setAttempts($channableOrder->getAttempts() + 1);
+
+            // Add some non-saved data back to orders array
+            $channableOrder['channable_channel_label'] = $orderData['channable_channel_label'];
+            $channableOrder['shipment_method'] = $orderData['shipment_method'];
+            $channableOrder['shipment_promise'] = $orderData['shipment_promise'];
+            $channableOrder['memo'] = $orderData['memo'];
         } else {
             $orderData['attempts'] = 1;
             $orderData['store_id'] = $storeId;
