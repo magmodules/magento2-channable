@@ -7,11 +7,8 @@ declare(strict_types=1);
 
 namespace Magmodules\Channable\Service\Returns;
 
-use Magento\Catalog\Model\ProductFactory;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\Order;
-use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
-use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 use Magmodules\Channable\Api\Returns\Data\DataInterface as ReturnsDataInterface;
 use Magmodules\Channable\Api\Returns\RepositoryInterface as ReturnsRepository;
 
@@ -19,48 +16,25 @@ class GetByOrder
 {
 
     /**
-     * @var string
-     */
-    private $gtinAttribute;
-    /**
      * @var ReturnsRepository
      */
     private $returnsRepository;
     /**
-     * @var ProductFactory
-     */
-    private $productFactory;
-    /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-    /**
-     * @var LogRepository
-     */
-    private $logRepository;
-    /**
      * @var Json
      */
     private $json;
-
     /**
-     * @param ReturnsRepository $returnsRepository
-     * @param ProductFactory $productFactory
-     * @param ConfigProvider $configProvider
-     * @param LogRepository $logRepository
-     * @param Json $json
+     * @var GetSkuFromGtin
      */
+    private $getSkuFromGtin;
+
     public function __construct(
         ReturnsRepository $returnsRepository,
-        ProductFactory $productFactory,
-        ConfigProvider $configProvider,
-        LogRepository $logRepository,
+        GetSkuFromGtin $getSkuFromGtin,
         Json $json
     ) {
         $this->returnsRepository = $returnsRepository;
-        $this->productFactory = $productFactory;
-        $this->configProvider = $configProvider;
-        $this->logRepository = $logRepository;
+        $this->getSkuFromGtin = $getSkuFromGtin;
         $this->json = $json;
     }
 
@@ -101,55 +75,14 @@ class GetByOrder
     private function getSkuFromReturnData($itemData, int $storeId): ?string
     {
         if (is_array($itemData)) {
-            return $this->getSkuFromGtin($itemData['gtin'] ?? null, $storeId);
+            return $this->getSkuFromGtin->execute($itemData['gtin'] ?? null, $storeId);
         }
 
         try {
             $itemData = $this->json->unserialize($itemData);
-            return $this->getSkuFromGtin($itemData['gtin'] ?? null, $storeId);
+            return $this->getSkuFromGtin->execute($itemData['gtin'] ?? null, $storeId);
         } catch (\Exception $exception) {
             return null;
         }
-    }
-
-    /**
-     * @param string $gtin
-     * @param int $storeId
-     * @return string|null
-     */
-    private function getSkuFromGtin(string $gtin, int $storeId): ?string
-    {
-        $gtinAttribute = $this->getGtinAttributeCode($storeId);
-        if ($gtinAttribute == 'sku' || $gtinAttribute == null) {
-            return $gtin;
-        }
-
-        try {
-            if ($gtinAttribute == 'id') {
-                if ($product = $this->productFactory->create()->load($gtin)) {
-                    return $product->getSku();
-                }
-            }
-            if ($product = $this->productFactory->create()->loadByAttribute($gtinAttribute, $gtin)) {
-                return $product->getSku();
-            }
-        } catch (\Exception $exception) {
-            $this->logRepository->addErrorLog('getSkuFromGtin', $exception->getMessage());
-        }
-
-        return $gtin;
-    }
-
-    /**
-     * @param int $storeId
-     * @return string
-     */
-    private function getGtinAttributeCode(int $storeId): string
-    {
-        if (!$this->gtinAttribute) {
-            $this->gtinAttribute = $this->configProvider->getGtinAttribute($storeId);
-        }
-
-        return $this->gtinAttribute;
     }
 }
