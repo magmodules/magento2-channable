@@ -10,6 +10,7 @@ namespace Magmodules\Channable\Service\Category;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\StoreManagerInterface;
 
 class CategoryData
@@ -44,6 +45,7 @@ class CategoryData
      * @param ProductCollection $parents
      * @param int $storeId
      * @return array
+     * @throws LocalizedException
      */
     public function load(ProductCollection $products, ProductCollection $parents, int $storeId): array
     {
@@ -68,12 +70,19 @@ class CategoryData
     private function getCategoryIdsForCollection(array $productIds): array
     {
         $connection = $this->resourceConnection->getConnection();
-        $tableName = $this->resourceConnection->getTableName('catalog_category_product');
+        $ccpTable = $this->resourceConnection->getTableName('catalog_category_product');
 
         $select = $connection->select()
-            ->from($tableName, 'category_id')
+            ->from($ccpTable, 'category_id')
             ->where('product_id IN (?)', $productIds)
             ->group('category_id');
+
+        $categoryIds = $connection->fetchCol($select);
+
+        $cceTable = $this->resourceConnection->getTableName('catalog_category_entity');
+        $select = $connection->select()
+            ->from($cceTable, 'entity_id')
+            ->where('entity_id IN (?) OR parent_id IN (?)', $categoryIds);
 
         return $connection->fetchCol($select);
     }
@@ -82,13 +91,17 @@ class CategoryData
      * @param array $categoryIds
      * @param int $storeId
      * @return array
+     * @throws LocalizedException
      */
     private function getCategoryTree(array $categoryIds, int $storeId): array
     {
         $collection = $this->categoryCollectionFactory->create()
             ->setStoreId($storeId)
             ->addAttributeToSelect(['name', 'level', 'path', 'url_path', self::EXCLUDE_ATTRIBUTE])
-            ->addFieldToFilter('entity_id', ['in' => $categoryIds])
+            ->addFieldToFilter([
+                ['attribute' => 'entity_id', 'in' => $categoryIds],
+                ['attribute' => 'parent_id', 'in' => $categoryIds]
+            ])
             ->addFieldToFilter('is_active', ['eq' => 1]);
 
         try {
