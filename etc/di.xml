@@ -86,6 +86,10 @@
         <plugin name="channable_pickup_location" type="Magmodules\Channable\Plugin\AfterGetShippingDescription"/>
     </type>
 
+    <type name="Magento\Sales\Model\Order\Invoice">
+        <plugin name="channable_add_discount_to_invoice" type="Magmodules\Channable\Plugin\AddDiscountToInvoice"/>
+    </type>
+
     <preference for="Magmodules\Channable\Api\Config\RepositoryInterface"
                 type="Magmodules\Channable\Model\Config\Repository"/>
     <preference for="Magmodules\Channable\Api\Config\System\OrderInterface"

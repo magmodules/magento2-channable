@@ -260,8 +260,8 @@ class Import
             if (isset($orderData['price']['discount']) && !empty((float)$orderData['price']['discount'])) {
                 $discountAmount = abs((float)$orderData['price']['discount']);
                 $order->setDiscountDescription(__('Channable discount'));
-                $order->setBaseDiscountAmount($discountAmount);
-                $order->setDiscountAmount($discountAmount);
+                $order->setBaseDiscountAmount($discountAmount * -1);
+                $order->setDiscountAmount($discountAmount * -1);
                 $order->setGrandTotal($order->getGrandTotal() - $discountAmount);
                 $order->setBaseGrandTotal($order->getBaseGrandTotal() - $discountAmount);
             }
