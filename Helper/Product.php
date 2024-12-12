@@ -217,7 +217,8 @@ class Product extends AbstractHelper
                 $value = $this->getCondition(
                     $attribute['condition'],
                     $productData,
-                    $attribute
+                    $attribute,
+                    $value
                 );
             }
 
@@ -900,10 +901,10 @@ class Product extends AbstractHelper
      *
      * @return string
      */
-    public function getCondition($conditions, $product, $attribute)
+    public function getCondition($conditions, $product, $attribute, $value = null)
     {
         $data = null;
-        $value = $product->getData($attribute['source']);
+        $value = $value ?? $product->getData($attribute['source']);
         if ($attribute['source'] == 'is_in_stock') {
             $value = $this->getAvailability($product);
         }
