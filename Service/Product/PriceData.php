@@ -290,48 +290,63 @@ class PriceData
     }
 
     /**
-     * @param $price
-     * @param $config
+     * Format a price based on the provided configuration.
      *
-     * @return string
+     * @param float|string $price The price value to be formatted.
+     * @param array $config Configuration options for formatting.
+     * @return string The formatted price.
      */
-    public function formatPrice($price, $config): string
+    public function formatPrice($price, array $config): string
     {
-        $decimal = isset($config['decimal_point']) ? $config['decimal_point'] : '.';
-        $price = number_format(floatval(str_replace(',', '.', (string)$price)), 2, $decimal, '');
-        if (!empty($config['use_currency']) && ($price >= 0)) {
-            $price .= ' ' . $config['currency'];
+        $decimalPoint = $config['decimal_point'] ?? '.';
+        $currency = $config['currency'] ?? '';
+        $useCurrency = !empty($config['use_currency']);
+
+        // Ensure the price is converted to a float.
+        $formattedPrice = number_format(
+            floatval(str_replace(',', '.', (string)$price)),
+            2,
+            $decimalPoint,
+            ''
+        );
+
+        // Append currency if configured.
+        if ($useCurrency && $formattedPrice >= 0) {
+            $formattedPrice .= ' ' . $currency;
         }
-        return $price;
+
+        return $formattedPrice;
     }
 
     /**
-     * @param Product $product
-     * @param array $config
-     * @return array|null
+     * Process tier pricing for a product.
+     *
+     * @param Product $product The product instance.
+     * @param array $config Configuration for price formatting.
+     * @return array|null An array of reformatted tier prices or null if none exist.
      */
     public function processTierPrice(Product $product, array $config): ?array
     {
-        if (!$product->getData('tier_price')) {
+        if (!$tierPrices = $product->getData('tier_price')) {
             return null;
         }
 
-        $reformattedTierPriced = [];
-        foreach ($product->getData('tier_price') as $priceTier) {
-            $price = $priceTier['percentage_value']
-                ? $product->getPrice() * ($priceTier['percentage_value'] / 100)
+        $reformattedTierPrices = [];
+        foreach ($tierPrices as $priceTier) {
+            $price = !empty($priceTier['percentage_value'])
+                ? $product->getPrice() * (1 - ($priceTier['percentage_value'] / 100)) // Subtract discount
                 : $priceTier['value'];
 
-            $reformattedTierPriced[] = [
-                'price_id' => $priceTier['value_id'],
-                'website_id' => $priceTier['website_id'],
-                'all_groups' => $priceTier['all_groups'],
-                'cust_group' => $priceTier['customer_group_id'],
-                'qty' => $priceTier['qty'],
+            $reformattedTierPrices[] = [
+                'price_id' => $priceTier['value_id'] ?? null,
+                'website_id' => $priceTier['website_id'] ?? null,
+                'all_groups' => $priceTier['all_groups'] ?? 0,
+                'cust_group' => $priceTier['customer_group_id'] ?? null,
+                'qty' => $priceTier['qty'] ?? 0,
                 'price' => $this->formatPrice($price, $config)
             ];
         }
 
-        return $reformattedTierPriced;
+        return $reformattedTierPrices;
     }
 }
