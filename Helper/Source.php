@@ -515,6 +515,10 @@ class Source extends AbstractHelper
         ];
 
         if ($type != 'api') {
+            $attributes['updated_at'] = [
+                'label'  => 'updated_at',
+                'source' => 'updated_at',
+            ];
             $attributes['created_at'] = [
                 'label'  => 'created_at',
                 'source' => 'created_at',

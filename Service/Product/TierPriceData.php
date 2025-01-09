@@ -43,6 +43,7 @@ class TierPriceData
     /**
      * @param ProductCollection $products
      * @param ProductCollection $parents
+     * @param $websiteId
      * @return void
      */
     public function load(ProductCollection $products, ProductCollection $parents, $websiteId)

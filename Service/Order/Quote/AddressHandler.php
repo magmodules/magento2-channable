@@ -135,18 +135,44 @@ class AddressHandler
                 : null,
             'postcode' => $address['zip_code'],
             'telephone' => $telephone,
-            'vat_id' => !empty($address['vat_id']) ? $address['vat_id'] : null,
+            'vat_id' => $this->getVatId($type, $orderData, $storeId),
             'email' => $email
         ];
-        if (isset($address['vat_number']) && $this->configProvider->isBusinessOrderEnabled()) {
-            $addressData['vat_id'] = $address['vat_number'];
-        }
 
         if ($this->configProvider->createCustomerOnImport((int)$storeId)) {
             $this->saveAddress($addressData, $customerId, $type);
         }
 
         return $addressData;
+    }
+
+    /**
+     * Channable only sets VAT ID on billing address
+     * In some cases we also need this on shipping address (due to OSS/MOSS)
+     *
+     * @param string $type
+     * @param array $orderData
+     * @param int $storeId
+     * @return string|null
+     */
+    private function getVatId(string $type, array $orderData, int $storeId): ?string
+    {
+        if (!$this->configProvider->isBusinessOrderEnabled($storeId)) {
+            return null;
+        }
+
+        $vatId = !empty($orderData['billing']['vat_number']) ? $orderData['billing']['vat_number'] : null;
+        if ($type == 'billing' || !$vatId) {
+            return $vatId;
+        }
+
+        if (empty($orderData['customer']['business_order']) || !$this->configProvider->importCompanyName($storeId)) {
+            return null;
+        }
+
+        return $orderData['billing']['company'] == $orderData['shipping']['company']
+            ? $vatId
+            : null;
     }
 
     /**

@@ -212,11 +212,10 @@ class Add
         Quote $quote,
         bool $isBusinessOrder
     ): float {
+        $price = (float)$item['price'];
         if ($isBusinessOrder) {
-            return (float)$item['price'];
+            return $price;
         }
-        $price = (float)$item['price'] - $this->getProductWeeTax($product, $quote);
-
         if (!$this->configProvider->getNeedsTaxCalulcation('price', (int)$store->getId())) {
             $request = $this->taxCalculation->getRateRequest(
                 $quote->getShippingAddress(),
@@ -231,7 +230,7 @@ class Add
             $price = $price / (100 + $percent) * 100;
         }
 
-        return $price;
+        return $price - $this->getProductWeeTax($product, $quote);
     }
 
     /**

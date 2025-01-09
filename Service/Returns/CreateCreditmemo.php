@@ -43,27 +43,25 @@ class CreateCreditmemo
      * @var CreditmemoRepositoryInterface
      */
     private $creditmemoRepositoryInterface;
-
     /**
-     * ProcessReturn constructor.
-     * @param ReturnsRepository $returnsRepository
-     * @param ResourceConnection $resource
-     * @param RefundOrder $refundOrder
-     * @param ItemCreationFactory $itemCreationFactory
-     * @param CreditmemoRepositoryInterface $creditmemoRepositoryInterface
+     * @var GetSkuFromGtin
      */
+    private $getSkuFromGtin;
+
     public function __construct(
         ReturnsRepository $returnsRepository,
         ResourceConnection $resource,
         RefundOrder $refundOrder,
         ItemCreationFactory $itemCreationFactory,
-        CreditmemoRepositoryInterface $creditmemoRepositoryInterface
+        CreditmemoRepositoryInterface $creditmemoRepositoryInterface,
+        GetSkuFromGtin $getSkuFromGtin
     ) {
         $this->returnsRepository = $returnsRepository;
         $this->resource = $resource;
         $this->refundOrder = $refundOrder;
         $this->itemCreationFactory = $itemCreationFactory;
         $this->creditmemoRepositoryInterface = $creditmemoRepositoryInterface;
+        $this->getSkuFromGtin = $getSkuFromGtin;
     }
 
     /**
@@ -81,9 +79,14 @@ class CreateCreditmemo
         }
 
         $item = $return->getItem();
-        $itemId = $this->findOrderItemId($item, $orderId);
+        $sku = $this->getSkuFromGtin->execute($item['gtin'] ?? null, (int)$return->getStoreId());
+        if (!$sku) {
+            throw new InputException(__('Unable to find SKU for GTIN.'));
+        }
+
+        $itemId = $this->findOrderItemId($sku, $orderId);
         if (!$itemId) {
-            throw new InputException(__('Unable to locate the order Item-ID if imported return.'));
+            throw new InputException(__('Unable to locate the order Item-ID for imported return.'));
         }
 
         $creditmemoItem = $this->itemCreationFactory->create();
@@ -99,11 +102,11 @@ class CreateCreditmemo
     }
 
     /**
-     * @param array $item
+     * @param string $sku
      * @param int $orderId
      * @return ?int
      */
-    private function findOrderItemId(array $item, int $orderId): ?int
+    private function findOrderItemId(string $sku, int $orderId): ?int
     {
         $connection = $this->resource->getConnection();
 
@@ -113,7 +116,7 @@ class CreateCreditmemo
             ->where('order_id = :order_id');
 
         $bind = [
-            ':sku' => $item['gtin'],
+            ':sku' => $sku,
             ':order_id' => $orderId
         ];
 
