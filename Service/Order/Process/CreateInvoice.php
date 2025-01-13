@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magmodules\Channable\Service\Order\Process;
 
 use Magento\Framework\DB\Transaction;
+use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\InvoiceInterface;
@@ -56,6 +57,11 @@ class CreateInvoice
     private $orderConfig;
 
     /**
+     * @var ManagerInterface
+     */
+    private $eventManager;
+
+    /**
      * CreateInvoice constructor.
      *
      * @param InvoiceService $invoiceService
@@ -70,7 +76,8 @@ class CreateInvoice
         InvoiceSender $invoiceSender,
         OrderCommentHistory $orderCommentHistory,
         ConfigProvider $configProvider,
-        OrderConfig $orderConfig
+        OrderConfig $orderConfig,
+        ManagerInterface $eventManager
     ) {
         $this->invoiceService = $invoiceService;
         $this->transaction = $transaction;
@@ -78,6 +85,7 @@ class CreateInvoice
         $this->orderCommentHistory = $orderCommentHistory;
         $this->configProvider = $configProvider;
         $this->orderConfig = $orderConfig;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -116,6 +124,7 @@ class CreateInvoice
 
             $this->transaction->addObject($order)->save();
             $this->sendInvoice($invoice, $order);
+            $this->eventManager->dispatch('sales_order_payment_pay', ['payment' => $order->getPayment(), 'invoice' => $invoice]);
         }
     }
 
