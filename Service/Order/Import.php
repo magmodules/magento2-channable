@@ -10,6 +10,7 @@ namespace Magmodules\Channable\Service\Order;
 use Exception;
 use Magento\CatalogInventory\Observer\ItemsForReindex;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -126,6 +127,11 @@ class Import
     protected $quoteRepository;
 
     /**
+     * @var ManagerInterface
+     */
+    private $eventManager;
+
+    /**
      * @var LoggerRepository
      */
     private $logger;
@@ -151,6 +157,7 @@ class Import
      * @param Process\GetCustomIncrementId $getCustomIncrementId
      * @param ChannableOrderRepository $channableOrderRepository
      * @param CartRepositoryInterface $quoteRepository
+     * @param ManagerInterface $eventManager
      * @param LoggerRepository $logger
      */
     public function __construct(
@@ -172,6 +179,7 @@ class Import
         Process\GetCustomIncrementId $getCustomIncrementId,
         ChannableOrderRepository $channableOrderRepository,
         CartRepositoryInterface $quoteRepository,
+        ManagerInterface $eventManager,
         LoggerRepository $logger
     ) {
         $this->configProvider = $configProvider;
@@ -192,6 +200,7 @@ class Import
         $this->getCustomIncrementId = $getCustomIncrementId;
         $this->channableOrderRepository = $channableOrderRepository;
         $this->quoteRepository = $quoteRepository;
+        $this->eventManager = $eventManager;
         $this->logger = $logger;
     }
 
@@ -246,13 +255,15 @@ class Import
             if ($customIncrementId = $this->getCustomIncrementId->execute($orderData, $store)) {
                 $quote->setReservedOrderId($customIncrementId);
             }
-
+            
             $this->quoteRepository->save($quote);
 
             if ($lvbOrder && $this->configProvider->disableStockMovementForLvbOrders($storeId)) {
                 $quote->setInventoryProcessed(true);
                 $this->itemsForReindex->clear();
             }
+
+            $this->eventManager->dispatch('checkout_submit_before', ['quote' => $quote]);
 
             $order = $this->quoteManagement->submit($quote);
             $order->setTransactionFee($quote->getTransactionFee());
@@ -276,6 +287,9 @@ class Import
             $this->afterOrderImport($order, $storeId, $lvbOrder);
             $this->setChannableOrderImportSuccess($channableOrder, $order);
             $this->orderRepository->save($order);
+
+            $this->eventManager->dispatch('checkout_submit_all_after', ['order' => $order, 'quote' => $quote]);
+
             return $order;
         } catch (Exception $exception) {
             $couldNotImportMsg = self::COULD_NOT_IMPORT_ORDER;
