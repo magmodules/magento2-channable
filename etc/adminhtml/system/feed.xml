@@ -216,6 +216,16 @@
                     <field id="bundle" separator=",">simple,both</field>
                 </depends>
             </field>
+
+            <field id="bundle_stock_calculation" translate="label comment" type="select" sortOrder="36" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Enable Bundle Stock Calculation</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable/types/bundle_stock_calculation</config_path>
+                <comment><![CDATA[<strong>Recommended:</strong> Yes. This option calculates the stock of the parent bundle product based on the lowest available stock of associated simple products, adjusted by the selection quantity (selection_qty). Useful for ensuring the availability of bundles reflects the actual stock of their components.]]></comment>
+                <depends>
+                    <field id="bundle" separator=",">parent,both</field>
+                </depends>
+            </field>
             <field id="heading_grouped" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Grouped Products</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
