@@ -147,7 +147,7 @@ class Products
 
         $this->addFilters($filters, $collection);
         $this->joinPriceIndexLeft($collection, $config['website_id']);
-
+        
         return $collection;
     }
 
@@ -281,7 +281,7 @@ class Products
             if ($attribute == 'quantity_and_stock_status') {
                 if ((isset($cType[$condition])) && is_numeric($value)) {
                     $collection->getSelect()->where(
-                        'cataloginventory_stock_item.qty ' . $cType[$condition] . ' ' . $value
+                        'cataloginventory.qty ' . $cType[$condition] . ' ' . $value
                     );
                 }
                 continue;
@@ -290,7 +290,7 @@ class Products
             if ($attribute == 'min_sale_qty') {
                 if ((isset($cType[$condition])) && is_numeric($value)) {
                     $collection->getSelect()->where(
-                        'cataloginventory_stock_item.min_sale_qty ' . $cType[$condition] . ' ' . $value
+                        'cataloginventory.min_sale_qty ' . $cType[$condition] . ' ' . $value
                     );
                 }
                 continue;
