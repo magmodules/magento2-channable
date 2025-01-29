@@ -52,6 +52,17 @@
                 <source_model>Magento\Shipping\Model\Config\Source\Allmethods</source_model>
                 <config_path>magmodules_channable_marketplace/order/shipping_method_fallback</config_path>
             </field>
+            <field id="heading_advanced_shipping_mapping" translate="label comment" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Advanced Shipping Methods Mapping</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>
+                <comment>The Shipping Mapping table allows you to connect shipping methods from a marketplace (e.g., eBay) with specific carriers (e.g., UPS) and Magento shipping methods (e.g., Flatrate). This ensures that orders imported from the marketplace are assigned the correct shipping method within Magento for accurate processing and fulfillment.</comment>
+            </field>
+            <field id="advanced_shipment_mapping" translate="label" type="select" sortOrder="26" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Mapping</label>
+                <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Form\Field\AdvancedShipmentMapping</frontend_model>
+                <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                <config_path>magmodules_channable_marketplace/order/advanced_shipment_mapping</config_path>
+            </field>
             <field id="heading_customer" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Customers</label>
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\Design\Heading</frontend_model>

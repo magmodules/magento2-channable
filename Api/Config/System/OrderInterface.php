@@ -22,6 +22,7 @@ interface OrderInterface extends ReturnsInterface
     const XML_PATH_SHIPPING_METHOD = 'magmodules_channable_marketplace/order/shipping_method';
     const XML_PATH_SHIPPING_CUSTOM = 'magmodules_channable_marketplace/order/shipping_method_custom';
     const XML_PATH_SHIPPING_METHOD_FALLBACK = 'magmodules_channable_marketplace/order/shipping_method_fallback';
+    const XML_PATH_ADVANCED_SHIPPING_MAPPING = 'magmodules_channable_marketplace/order/advanced_shipment_mapping';
     const XML_PATH_RETURN_LABEL = 'magmodules_channable_marketplace/order/return_label';
     const XML_PATH_RETURN_LABEL_REGEXP = 'magmodules_channable_marketplace/order/return_label_regexp';
     const XML_PATH_IMPORT_CUSTOMER = 'magmodules_channable_marketplace/order/import_customer';
@@ -91,6 +92,14 @@ interface OrderInterface extends ReturnsInterface
     public function getFallbackShippingMethod(int $storeId = null): ?string;
 
     /**
+     * Retrieve the advanced shipping mapping for a given store.
+     *
+     * @param int|null $storeId
+     * @return array|null
+     */
+    public function getAdvancedShippingMapping(?int $storeId = null): ?array;
+
+    /**
      * Create customer on order import
      *
      * @param null|int $storeId
@@ -109,8 +118,8 @@ interface OrderInterface extends ReturnsInterface
     public function customerGroupForOrderImport(int $storeId = null): ?string;
 
     /**
-     * Seperate housenumber into 'streets'. Option is used when second steet
-     * is used as housenumber field.
+     * Separate house number into 'streets'. Option is used when second street
+     * is used as house number field.
      *
      * @param null|int $storeId
      *
@@ -269,7 +278,7 @@ interface OrderInterface extends ReturnsInterface
 
     /**
      * Create shipment for LVB/FBV orders on order import.
-     * As these orders are shipped directly by the channel no handeling should be done on Magento side.
+     * As these orders are shipped directly by the channel no handling should be done on Magento side.
      *
      * @param null|int $storeId
      *
