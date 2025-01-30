@@ -6,6 +6,7 @@
 
 namespace Magmodules\Channable\Helper;
 
+use Magento\Catalog\Model\Product\TypeFactory;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -95,6 +96,10 @@ class Source extends AbstractHelper
      */
     private $inventorySource;
     /**
+     * @var TypeFactory
+     */
+    private $typeFactory;
+    /**
      * @var
      */
     private $storeId = null;
@@ -105,11 +110,13 @@ class Source extends AbstractHelper
         General $generalHelper,
         Product $productHelper,
         InventorySource $inventorySource,
+        TypeFactory $typeFactory,
         Item $itemHelper
     ) {
         $this->generalHelper = $generalHelper;
         $this->productHelper = $productHelper;
         $this->itemHelper = $itemHelper;
+        $this->typeFactory = $typeFactory;
         $this->storeManager = $storeManager;
         $this->inventorySource = $inventorySource;
         parent::__construct($context);
@@ -174,21 +181,28 @@ class Source extends AbstractHelper
         return $this->storeId;
     }
 
+    private function getAllProductTypeIds(): array
+    {
+        $typeInstance = $this->typeFactory->create();
+        return array_keys($typeInstance->getOptionArray());
+    }
+
     /**
      * @param $type
      *
      * @return array
      */
-    public function getProductFilters($type)
+    public function getProductFilters($type): array
     {
-        $filters = [];
-        $filters['type_id'] = ['simple', 'downloadable', 'virtual', 'giftcard'];
-        $filters['relations'] = [];
-        $filters['exclude_parents'] = [];
-        $filters['nonvisible'] = [];
-        $filters['parent_attributes'] = [];
-        $filters['image'] = [];
-        $filters['link'] = [];
+        $filters = [
+            'type_id' => array_diff($this->getAllProductTypeIds(), ['configurable', 'bundle', 'grouped']),
+            'relations' => [],
+            'exclude_parents' => [],
+            'nonvisible' => [],
+            'parent_attributes' => [],
+            'image' => [],
+            'link' => [],
+        ];
 
         $configurabale = $this->getStoreValue(self::XPATH_CONFIGURABLE);
         switch ($configurabale) {
