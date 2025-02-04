@@ -31,7 +31,7 @@ class RemoveCsp implements ObserverInterface
         if (!$response || !$request) {
             return;
         }
-        /** @todo When php7 support is dropped replace 'str_starts_with($request->getFullActionName(), 'channable_')' */
+        /** @todo When php7 support is dropped replace with: 'str_starts_with($request->getFullActionName(), 'channable_')' */
         if (strpos($request->getFullActionName(), 'channable_') === 0) {
             $response->clearHeader('content-security-policy-report-only')
                 ->clearHeader('Content-Security-Policy-Report-Only')
