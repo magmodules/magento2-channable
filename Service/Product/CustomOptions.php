@@ -102,13 +102,12 @@ class CustomOptions
 
         $groupedValues = [];
         foreach ($values as $value) {
-            $groupedValues[$value['option_id']][] = [
-                'option_value_id' => $value['option_type_id'],
-                'option_value_title' => $value['value_title'] ?? '',
-                'option_value_price' => $value['value_price'] ?? '',
-                'option_value_price_type' => $value['price_type'] ?? 'fixed',
-                'option_value_sku' => $value['sku'] ?? '',
-            ];
+            $optionId = $value['option_id'];
+            $groupedValues[$optionId]['option_value_id'][] = $value['option_type_id'];
+            $groupedValues[$optionId]['option_value_title'][] = $value['value_title'] ?? '';
+            $groupedValues[$optionId]['option_value_price'][] = $value['value_price'] ?? '';
+            $groupedValues[$optionId]['option_value_price_type'][] = $value['price_type'] ?? 'fixed';
+            $groupedValues[$optionId]['option_value_sku'][] = $value['sku'] ?? '';
         }
 
         $customOptions = [];
