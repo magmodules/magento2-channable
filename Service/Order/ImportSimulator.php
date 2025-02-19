@@ -23,64 +23,23 @@ use Magmodules\Channable\Api\Order\RepositoryInterface as ChannableOrderReposito
 use Magmodules\Channable\Exceptions\CouldNotImportOrder;
 
 /**
- * Import test order with random product
+ * Simulates an order import with a randomly selected product.
  */
 class ImportSimulator
 {
 
-    /**
-     * Available options
-     */
-    public const PARAMS = ['country', 'lvb', 'product_id', 'qty'];
-
-    /**
-     * Exception message
-     */
+    public const PARAMS = ['country', 'lvb', 'product_id', 'qty', 'discount'];
     private const ORDER_IMPORT_DISABLED = 'Order import not enabled for this store (Store ID: %1)';
 
-    /**
-     * @var int
-     */
-    private $storeId = null;
+    private Import $import;
+    private ProductRepositoryInterface $productRepository;
+    private ProductCollectionFactory $productCollection;
+    private ConfigProvider $configProvider;
+    private Random $random;
+    private ChannableOrderRepository $channableOrderRepository;
+    private Emulation $appEmulation;
+    private ?int $storeId = null;
 
-    /**
-     * @var Import
-     */
-    private $import;
-    /**
-     * @var ProductRepositoryInterface
-     */
-    private $productRepository;
-    /**
-     * @var ProductCollectionFactory
-     */
-    private $productCollection;
-    /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-    /**
-     * @var Random
-     */
-    private $random;
-    /**
-     * @var ChannableOrderRepository
-     */
-    private $channableOrderRepository;
-    /**
-     * @var Emulation
-     */
-    private $appEmulation;
-
-    /**
-     * @param Import $import
-     * @param ProductRepositoryInterface $productRepository
-     * @param ProductCollectionFactory $productCollection
-     * @param ConfigProvider $configProvider
-     * @param Random $random
-     * @param ChannableOrderRepository $channableOrderRepository
-     * @param Emulation $appEmulation
-     */
     public function __construct(
         Import $import,
         ProductRepositoryInterface $productRepository,
@@ -146,6 +105,7 @@ class ImportSimulator
     {
         $country = !empty($params['country']) ? $params['country'] : 'NL';
         $product = $this->getProductData($params);
+        $discount = !empty($params['discount']) ? (float)$params['discount'] : 0;
         $random = $this->random->getRandomString(5, '0123456789');
 
         return [
@@ -211,8 +171,8 @@ class ImportSimulator
                 "subtotal" => $product['price'],
                 "payment" => 0,
                 "shipping" => 0,
-                "discount" => 0,
-                "total" => $product['price'],
+                "discount" => $discount,
+                "total" => $product['price'] - $discount,
                 "transaction_fee" => 0,
                 "commission" => round($product['price'] * 0.10, 2),
             ],
@@ -242,31 +202,27 @@ class ImportSimulator
      */
     private function getProductData(array $params): array
     {
-        $productId = !empty($params['product_id']) ? (int)$params['product_id'] : null;
+        $productId = $params['product_id'] ?? null;
         $fixedPrice = !empty($params['price']) ? (float)$params['price'] : null;
-
-        if ($productId) {
-            $product = $this->productRepository->getById($productId);
-        } else {
-            $product = $this->getRandomProduct();
-        }
+        $product = $productId ? $this->productRepository->getById((int) $productId) : $this->getRandomProduct();
 
         return [
-            'id' => $product->getId(),
+            'id' => (int) $product->getId(),
             'price' => $this->getPrice($product, $fixedPrice),
-            'sku' => $product->getSku(),
-            'name' => $product->getName(),
+            'sku' => (string) $product->getSku(),
+            'name' => (string) $product->getName(),
         ];
     }
 
     /**
-     * Get random enabled simple product
+     * Selects a random enabled product from the catalog.
      *
-     * @return DataObject
+     * @return DataObject A randomly selected product.
      */
     private function getRandomProduct(): DataObject
     {
         $productTypes = [Type::TYPE_SIMPLE];
+
         if ($this->configProvider->importGroupedProducts()) {
             $productTypes[] = 'grouped';
         }
@@ -274,40 +230,35 @@ class ImportSimulator
             $productTypes[] = 'bundle';
         }
 
-        $collection = $this->productCollection->create();
-        $collection->addAttributeToSelect(['entity_id', 'sku', 'name', 'type_id'])
+        $collection = $this->productCollection->create()
             ->addStoreFilter($this->storeId)
+            ->addAttributeToFilter('type_id', ['in' => $productTypes])
+            ->addAttributeToFilter('status', Status::STATUS_ENABLED)
+            ->addAttributeToSelect(['entity_id', 'sku', 'name', 'type_id'])
             ->addPriceData()
-            ->addAttributeToFilter(
-                'type_id',
-                ['in' => $productTypes]
-            )
-            ->addAttributeToFilter(
-                'status',
-                Status::STATUS_ENABLED
-            )
             ->setPageSize(1);
 
         $collection->getSelect()->orderRand();
-
         return $collection->getFirstItem();
     }
 
     /**
+     * Determines the correct price for a product.
+     *
      * @param $product
-     * @param $fixedPrice
-     * @return mixed
+     * @param float|null $fixedPrice Optional fixed price override.
+     * @return float The product's price.
      */
-    private function getPrice($product, $fixedPrice)
+    private function getPrice($product, ?float $fixedPrice = null): float
     {
         if ($fixedPrice !== null) {
             return $fixedPrice;
         }
 
-        if ($product->getTypeId() == \Magento\Bundle\Model\Product\Type::TYPE_CODE) {
-            return $product->getPriceInfo()->getPrice('regular_price')->getMaximalPrice()->getValue();
+        if ($product->getTypeId() === Type::TYPE_BUNDLE) {
+            return (float) $product->getPriceInfo()->getPrice('regular_price')->getMaximalPrice()->getValue();
         }
 
-        return $product->getFinalPrice();
+        return (float) $product->getFinalPrice();
     }
 }

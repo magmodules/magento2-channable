@@ -93,9 +93,6 @@ class CreateInvoice
             $invoice = $this->invoiceService->prepareInvoice($order);
             $invoice->setRequestedCaptureCase(Invoice::CAPTURE_OFFLINE);
             $invoice->setTransactionFee($order->getTransactionFee());
-            $invoice->setDiscountAmount($order->getDiscountAmount());
-            $invoice->setBaseDiscountAmount($order->getDiscountAmount());
-            $invoice->setDiscountDescription($order->getDiscountDescription());
             $invoice->setGrandTotal($order->getGrandTotal());
             $invoice->setBaseGrandTotal($order->getBaseGrandTotal());
             $invoice->register();
