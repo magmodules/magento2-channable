@@ -108,8 +108,8 @@ class Item extends AbstractModel
         ConfigProvider $configProvider,
         Context $context,
         Registry $registry,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->itemFactory = $itemFactory;
