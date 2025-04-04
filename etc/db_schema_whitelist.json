@@ -21,7 +21,8 @@
             "error_msg": true,
             "created_at": true,
             "updated_at": true,
-            "attempts": true
+            "attempts": true,
+            "shipment_method": true
         },
         "index": {
             "FTI_489FA236241E26B3CF278097F9ADE3E4": true,

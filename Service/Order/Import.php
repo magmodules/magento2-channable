@@ -81,9 +81,9 @@ class Import
     private $calculateShippingPrice;
 
     /**
-     * @var Shipping\GetMethod
+     * @var Shipping\SetShippingMethod
      */
-    private $getShippingMethod;
+    private $setShippingMethod;
 
     /**
      * @var Process\CreateInvoice
@@ -130,29 +130,6 @@ class Import
      */
     private $logger;
 
-    /**
-     * Import constructor.
-     *
-     * @param ConfigProvider $configProvider
-     * @param StoreManagerInterface $storeManager
-     * @param QuoteManagement $quoteManagement
-     * @param OrderRepositoryInterface $orderRepository
-     * @param CheckoutSession $checkoutSession
-     * @param ItemsForReindex $itemsForReindex
-     * @param Items\Add $addItems
-     * @param Quote\Create $createQuote
-     * @param Shipping\CalculatePrice $calculateShippingPrice
-     * @param Shipping\GetMethod $getShippingMethod
-     * @param Shipping\GetDescription $getShippingDescription
-     * @param Process\SendOrderEmail $sendOrderEmail
-     * @param Process\CreateInvoice $createInvoice
-     * @param Process\CreateShipment $createShipment
-     * @param Process\AddPaymentData $addPaymentData
-     * @param Process\GetCustomIncrementId $getCustomIncrementId
-     * @param ChannableOrderRepository $channableOrderRepository
-     * @param CartRepositoryInterface $quoteRepository
-     * @param LoggerRepository $logger
-     */
     public function __construct(
         ConfigProvider $configProvider,
         StoreManagerInterface $storeManager,
@@ -163,7 +140,7 @@ class Import
         Items\Add $addItems,
         Quote\Create $createQuote,
         Shipping\CalculatePrice $calculateShippingPrice,
-        Shipping\GetMethod $getShippingMethod,
+        Shipping\SetShippingMethod $setShippingMethod,
         Shipping\GetDescription $getShippingDescription,
         Process\SendOrderEmail $sendOrderEmail,
         Process\CreateInvoice $createInvoice,
@@ -183,7 +160,7 @@ class Import
         $this->addItems = $addItems;
         $this->createQuote = $createQuote;
         $this->calculateShippingPrice = $calculateShippingPrice;
-        $this->getShippingMethod = $getShippingMethod;
+        $this->setShippingMethod = $setShippingMethod;
         $this->getShippingDescription = $getShippingDescription;
         $this->sendOrderEmail = $sendOrderEmail;
         $this->createInvoice = $createInvoice;
@@ -215,24 +192,13 @@ class Import
             $store->setCurrentCurrencyCode($orderData['price']['currency']);
             $lvbOrder = $orderData['order_status'] == 'shipped';
             $quote = $this->createQuote->createCustomerQuote($orderData, $store);
-            $itemCount = $this->addItems->execute($quote, $orderData, $store, $lvbOrder);
+            $this->addItems->execute($quote, $orderData, $store, $lvbOrder);
 
             $shippingPrice = $this->calculateShippingPrice->execute($quote, $orderData, $store);
             $quote->collectTotals();
 
             $this->setCheckoutSessionData((float)$shippingPrice);
-
-            $shippingMethod = $this->getShippingMethod->execute($quote, $store, $itemCount, $shippingPrice);
-            $shippingAddress = $quote->getShippingAddress();
-            $shippingAddress->setCollectShippingRates(true)
-                ->collectShippingRates()
-                ->setShippingMethod($shippingMethod);
-
-            foreach ($shippingAddress->getShippingRatesCollection() as $rate) {
-                /** @var \Magento\Quote\Model\Quote\Address\Rate $rate */
-                $rate->setPrice($shippingPrice);
-                $rate->setCost($shippingPrice);
-            }
+            $this->setShippingMethod->execute($quote, $shippingPrice, $channableOrder);
 
             $quote->setPaymentMethod('channable');
             $quote->setInventoryProcessed(false);

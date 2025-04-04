@@ -20,6 +20,7 @@ interface DataInterface extends ExtensibleDataInterface
     const CHANNABLE_ID = 'channable_id';
     const CHANNEL_ID = 'channel_id';
     const CHANNEL_NAME = 'channel_name';
+    const SHIPMENT_METHOD = 'shipment_method';
     const CHANNEL_LABEL = 'channel_label';
     const CHANNABLE_ORDER_STATUS = 'channable_order_status';
     const IS_TEST = 'is_test';
@@ -80,6 +81,17 @@ interface DataInterface extends ExtensibleDataInterface
      * @return $this
      */
     public function setChannelName(string $channelName): self;
+
+    /**
+     * @return string|null
+     */
+    public function getShipmentMethod(): string;
+
+    /**
+     * @param string|null $method
+     * @return $this
+     */
+    public function setShipmentMethod(?string $method): self;
 
     /**
      * @return string

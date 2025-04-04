@@ -55,6 +55,15 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     /**
      * @inheritDoc
      */
+    public function getAdvancedShippingMapping(int $storeId = null): ?array
+    {
+        $mapping = $this->getStoreValueArray(self::XML_PATH_ADVANCED_SHIPPING_MAPPING, $storeId);
+        return $mapping ?: null;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function createCustomerOnImport(int $storeId = null): bool
     {
         return $this->isSetFlag(self::XML_PATH_IMPORT_CUSTOMER, $storeId);
