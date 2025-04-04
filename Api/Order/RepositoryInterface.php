@@ -23,19 +23,19 @@ interface RepositoryInterface
     /**
      * Input exception text
      */
-    const INPUT_EXCEPTION = 'An ID is needed. Set the ID and try again.';
+    public const INPUT_EXCEPTION = 'An ID is needed. Set the ID and try again.';
     /**
      * "No such entity" exception text
      */
-    const NO_SUCH_ENTITY_EXCEPTION = 'The order with id "%1" does not exist.';
+    public const NO_SUCH_ENTITY_EXCEPTION = 'The order with id "%1" does not exist.';
     /**
      * "Could not delete" exception text
      */
-    const COULD_NOT_DELETE_EXCEPTION = 'Could not delete the order: %1';
+    public const COULD_NOT_DELETE_EXCEPTION = 'Could not delete the order: %1';
     /**
      * "Could not save" exception text
      */
-    const COULD_NOT_SAVE_EXCEPTION = 'Could not save the order: %1';
+    public const COULD_NOT_SAVE_EXCEPTION = 'Could not save the order: %1';
 
     /**
      * Loads a specified Return

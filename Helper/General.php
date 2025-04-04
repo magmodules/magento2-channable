@@ -285,11 +285,7 @@ class General extends AbstractHelper
      */
     public function getEnabled($storeId = null)
     {
-        if (isset($storeId)) {
-            return $this->getStoreValue(self::XPATH_EXTENSION_ENABLED, $storeId);
-        } else {
-            return $this->getStoreValue(self::XPATH_EXTENSION_ENABLED);
-        }
+        return $this->getStoreValue(self::XPATH_EXTENSION_ENABLED, $storeId);
     }
 
     /**

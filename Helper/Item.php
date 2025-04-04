@@ -280,7 +280,7 @@ class Item extends AbstractHelper
         if (empty($url)) {
             $this->generalHelper->setConfigData('', self::XPATH_WEBHOOK_ITEM, $storeId);
             $this->generalHelper->setConfigData(0, self::XPATH_ITEM_ENABLED, $storeId);
-            $response['msg'] = sprintf('Removed webhook and disabled update', $url);
+            $response['msg'] = 'Removed webhook and disabled update';
         } else {
             $this->generalHelper->setConfigData($url, self::XPATH_WEBHOOK_ITEM, $storeId);
             $this->generalHelper->setConfigData(1, self::XPATH_ITEM_ENABLED, $storeId);

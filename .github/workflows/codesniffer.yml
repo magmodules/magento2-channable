@@ -12,4 +12,5 @@ jobs:
           docker run
           --volume $(pwd)/:/app/workdir
           michielgerritsen/magento-coding-standard:latest
-          --severity=10
+          --severity=8
+          -s

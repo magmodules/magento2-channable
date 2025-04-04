@@ -50,7 +50,7 @@ class ItemupdateRepository extends FeedRepository implements ItemupdateInterface
     /**
      * @inheritDoc
      */
-    public function isItemUpdateEnabled(int $storeId = null): bool
+    public function isItemUpdateEnabled(?int $storeId = null): bool
     {
         return (bool)$this->getStoreValue(self::XML_PATH_ITEM_UPDATE_ENABLE, $storeId);
     }

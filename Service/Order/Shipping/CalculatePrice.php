@@ -78,7 +78,7 @@ class CalculatePrice
             $amount = $amount / $rate;
         }
 
-        $taxCalculation = $this->configProvider->getNeedsTaxCalulcation('shipping', (int)$store->getId());
+        $taxCalculation = $this->configProvider->getNeedsTaxCalculation('shipping', (int)$store->getId());
         if (empty($taxCalculation)) {
             $taxRateId = $this->configProvider->getTaxClassShipping((int)$store->getId());
             $request = $this->taxCalculation->getRateRequest(

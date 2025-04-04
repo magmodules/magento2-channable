@@ -8,25 +8,24 @@ declare(strict_types=1);
 namespace Magmodules\Channable\Api\Config\System;
 
 /**
- * Itemupdate group interface
+ * Item update group interface
  */
 interface ItemupdateInterface extends FeedInterface
 {
 
     /** General Group */
-    const XML_PATH_ITEM_UPDATE_ENABLE = 'magmodules_channable_marketplace/item/enable';
-    const XML_PATH_ITEM_UPDATE_WEBHOOK = 'magmodules_channable_marketplace/item/webhook';
-    const XML_PATH_ITEM_UPDATE_CRON = 'magmodules_channable_marketplace/item/cron';
-    const XML_PATH_ITEM_UPDATE_LIMIT = 'magmodules_channable_marketplace/item/limit';
+    public const XML_PATH_ITEM_UPDATE_ENABLE = 'magmodules_channable_marketplace/item/enable';
+    public const XML_PATH_ITEM_UPDATE_WEBHOOK = 'magmodules_channable_marketplace/item/webhook';
+    public const XML_PATH_ITEM_UPDATE_CRON = 'magmodules_channable_marketplace/item/cron';
+    public const XML_PATH_ITEM_UPDATE_LIMIT = 'magmodules_channable_marketplace/item/limit';
 
     /**
      * Enabled flag for Item update Import.
      *
      * @param null|int $storeId
-     *
      * @return bool
      */
-    public function isItemUpdateEnabled(int $storeId = null): bool;
+    public function isItemUpdateEnabled(?int $storeId = null): bool;
 
     /**
      * Return array of store ids where item update is enabled
@@ -53,7 +52,6 @@ interface ItemupdateInterface extends FeedInterface
      * Returns webhook url
      *
      * @param int $storeId
-     *
      * @return null|string
      */
     public function getItemUpdateWebhookUrl(int $storeId): ?string;
