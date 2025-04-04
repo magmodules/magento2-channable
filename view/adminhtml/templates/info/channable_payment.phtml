@@ -36,6 +36,13 @@ $info = $block->getInfo();
             </tr>
         <?php endif; ?>
 
+        <?php if ($shippingCenterId = $info->getAdditionalInformation('shipping_center_id')): ?>
+            <tr>
+                <th><?= $escaper->escapeHtml(__('Service Point ID')); ?></th>
+                <td><?= $escaper->escapeHtml($shippingCenterId); ?></td>
+            </tr>
+        <?php endif; ?>
+
         <?php if ($shipmentPromise = $info->getAdditionalInformation('shipment_promise')): ?>
             <tr>
                 <th><?= $escaper->escapeHtml(__('Shipment Promise')); ?></th>
