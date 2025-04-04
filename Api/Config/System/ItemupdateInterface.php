@@ -10,7 +10,7 @@ namespace Magmodules\Channable\Api\Config\System;
 /**
  * Itemupdate group interface
  */
-interface ItemupdateInterface
+interface ItemupdateInterface extends FeedInterface
 {
 
     /** General Group */

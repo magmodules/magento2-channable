@@ -12,7 +12,7 @@ use Magmodules\Channable\Api\Config\System\ItemupdateInterface;
 /**
  * Item Update provider class
  */
-class ItemupdateRepository extends BaseRepository implements ItemupdateInterface
+class ItemupdateRepository extends FeedRepository implements ItemupdateInterface
 {
 
     /**

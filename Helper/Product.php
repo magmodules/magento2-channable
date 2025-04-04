@@ -622,7 +622,7 @@ class Product extends AbstractHelper
      */
     private function getQtyValue($product)
     {
-        if (in_array($product->getTypeId(), ['bundle','configurable','grouped'])) {
+        if (in_array($product->getTypeId(), ['configurable','grouped'])) {
             return null;
         }
 
