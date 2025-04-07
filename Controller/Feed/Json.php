@@ -1,8 +1,9 @@
 <?php
 /**
- * Copyright © 2019 Magmodules.eu. All rights reserved.
+ * Copyright © Magmodules.eu. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magmodules\Channable\Controller\Feed;
 
@@ -10,18 +11,13 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
-use Magmodules\Channable\Model\Generate as GenerateModel;
-use Magmodules\Channable\Helper\General as GeneralHelper;
 use Magmodules\Channable\Helper\Feed as FeedHelper;
+use Magmodules\Channable\Helper\General as GeneralHelper;
+use Magmodules\Channable\Model\Generate as GenerateModel;
+use Magento\Framework\App\Response\Http as HttpResponse;
 
-/**
- * Class Json
- *
- * @package Magmodules\Channable\Controller\Feed
- */
 class Json extends Action
 {
-
     /**
      * @var GenerateModel
      */
@@ -43,16 +39,6 @@ class Json extends Action
      */
     private $remoteAddress;
 
-    /**
-     * Json constructor.
-     *
-     * @param Context       $context
-     * @param GeneralHelper $generalHelper
-     * @param GenerateModel $generateModel
-     * @param FeedHelper    $feedHelper
-     * @param JsonFactory   $resultJsonFactory
-     * @param RemoteAddress $remoteAddress
-     */
     public function __construct(
         Context $context,
         GeneralHelper $generalHelper,
@@ -61,17 +47,14 @@ class Json extends Action
         JsonFactory $resultJsonFactory,
         RemoteAddress $remoteAddress
     ) {
+        parent::__construct($context);
         $this->generateModel = $generateModel;
         $this->generalHelper = $generalHelper;
         $this->feedHelper = $feedHelper;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->remoteAddress = $remoteAddress;
-        parent::__construct($context);
     }
 
-    /**
-     * Execute function for Channable JSON output
-     */
     public function execute()
     {
         $storeId = (int)$this->getRequest()->getParam('id');
@@ -79,40 +62,45 @@ class Json extends Action
         $currency = $this->getRequest()->getParam('currency');
         $token = $this->getRequest()->getParam('token');
 
+        $result = $this->resultJsonFactory->create();
+        $this->setNoCacheHeaders();
+
         if (empty($storeId) || empty($token)) {
-            return false;
+            return $result->setData([]);
         }
 
-        $enabled = $this->generalHelper->getEnabled($storeId);
-
-        if (!$enabled) {
-            return false;
+        if (!$this->generalHelper->getEnabled($storeId)) {
+            return $result->setData([]);
         }
 
-        if ($token != $this->generalHelper->getToken()) {
-            return false;
+        if ($token !== $this->generalHelper->getToken()) {
+            return $result->setData([]);
         }
 
-        if ($productId = $this->getRequest()->getParam('pid')) {
-            $productId = [$productId];
-        } else {
-            $productId = null;
-        }
+        $productId = $this->getRequest()->getParam('pid');
+        $productIds = $productId ? [$productId] : null;
 
         $ip = $this->remoteAddress->getRemoteAddress();
         $this->feedHelper->setLastFetched($storeId, $ip);
 
         try {
-            if ($data = $this->generateModel->generateByStore($storeId, $page, $productId, $currency)) {
-                $result = $this->resultJsonFactory->create();
-                return $result->setData($data);
-            }
+            $data = $this->generateModel->generateByStore($storeId, $page, $productIds, $currency);
+            return $result->setData($data ?: []);
         } catch (\Exception $e) {
             $this->generalHelper->addTolog('Generate', $e->getMessage());
-            $result = $this->resultJsonFactory->create();
-            return $result->setData(json_encode($e->getMessage()));
+            return $result->setData(['error' => $e->getMessage()]);
         }
+    }
 
-        return '';
+    /**
+     * Add headers to prevent caching by Varnish or browser
+     */
+    private function setNoCacheHeaders(): void
+    {
+        /** @var HttpResponse $response */
+        $response = $this->getResponse();
+        $response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0', true);
+        $response->setHeader('Pragma', 'no-cache', true);
+        $response->setHeader('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT', true);
     }
 }

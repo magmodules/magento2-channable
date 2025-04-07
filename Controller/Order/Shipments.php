@@ -63,7 +63,7 @@ class Shipments extends Action
         $token = $this->configProvider->getToken();
         $code = $this->getRequest()->getParam('code');
         if ($token && $code && $code == $token) {
-            $timespan = intval($this->getRequest()->getParam('timespan'));
+            $timespan = (int)$this->getRequest()->getParam('timespan');
             if ($timespan >= 1 && $timespan <= 336) {
                 $response = $this->shipmentsCollector->execute($timespan);
             } else {

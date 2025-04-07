@@ -57,6 +57,10 @@ class AddPaymentData
             $payment->setAdditionalInformation('shipment_promise', $orderData['shipment_promise']);
         }
 
+        if (!empty($orderData['shipping']['shipping_center_id'])) {
+            $payment->setAdditionalInformation('shipping_center_id', $orderData['shipping']['shipping_center_id']);
+        }
+
         if ($orderData['price']['payment_method'] == 'Zalando') {
             $externalArticleNumbers = [];
             foreach ($orderData['products'] as $product) {

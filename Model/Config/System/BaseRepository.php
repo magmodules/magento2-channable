@@ -99,7 +99,7 @@ class BaseRepository
      * @param string|null $scope
      * @return string|null
      */
-    protected function getStoreValue(string $path, int $storeId = null, string $scope = null): ?string
+    protected function getStoreValue(string $path, ?int $storeId = null, ?string $scope = null): ?string
     {
         if (empty($scope)) {
             $scope = ScopeInterface::SCOPE_STORE;
@@ -134,7 +134,7 @@ class BaseRepository
      * @param string|null $scope
      * @return bool
      */
-    protected function isSetFlag(string $path, int $storeId = null, string $scope = null): bool
+    protected function isSetFlag(string $path, ?int $storeId = null, ?string $scope = null): bool
     {
         if (empty($scope)) {
             $scope = ScopeInterface::SCOPE_STORE;
@@ -154,7 +154,7 @@ class BaseRepository
      * @param string|null $scope
      * @return array
      */
-    protected function getStoreValueArray(string $path, int $storeId = null, string $scope = null): array
+    protected function getStoreValueArray(string $path, ?int $storeId = null, ?string $scope = null): array
     {
         $value = $this->getStoreValue($path, (int)$storeId, $scope);
 
@@ -177,7 +177,7 @@ class BaseRepository
      * @param int|null $storeId
      * @return mixed
      */
-    protected function setConfigData(string $value, string $key, int $storeId = null)
+    protected function setConfigData(string $value, string $key, ?int $storeId = null)
     {
         if ($storeId) {
             $this->resourceConfig->saveConfig($key, $value, 'stores', (int)$storeId);
@@ -198,7 +198,7 @@ class BaseRepository
      * @param int|null $storeId
      * @return mixed
      */
-    protected function getUncachedStoreValue(string $path, int $storeId = null)
+    protected function getUncachedStoreValue(string $path, ?int $storeId = null)
     {
         $collection = $this->configDataCollectionFactory->create()
             ->addFieldToSelect('value')

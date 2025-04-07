@@ -16,6 +16,7 @@ use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 
 /**
  * Get shipping method for quote
+ * @deprecated in favor of SetShippingMethod
  */
 class GetMethod
 {

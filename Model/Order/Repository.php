@@ -78,7 +78,7 @@ class Repository implements ChannableOrderRepository
         ChannableOrderCollectionFactory $channableOrderCollectionFactory,
         JoinProcessorInterface $extensionAttributesJoinProcessor,
         ChannableOrderResource $channableOrderResource,
-        CollectionProcessorInterface $collectionProcessor = null
+        ?CollectionProcessorInterface $collectionProcessor = null
     ) {
         $this->channableOrderResource = $channableOrderResource;
         $this->metadata = $metadata;

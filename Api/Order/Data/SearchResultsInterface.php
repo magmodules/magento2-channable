@@ -28,7 +28,6 @@ interface SearchResultsInterface extends FrameworkSearchResultsInterface
      * Sets Code Items.
      *
      * @param ChannableOrderData[] $items
-     *
      * @return $this
      */
     public function setItems(array $items): self;

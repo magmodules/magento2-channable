@@ -156,6 +156,22 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, Channa
     /**
      * @inheritDoc
      */
+    public function getShipmentMethod(): string
+    {
+        return (string)$this->getData(self::SHIPMENT_METHOD);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setShipmentMethod(?string $method): ChannableOrderData
+    {
+        return $this->setData(self::SHIPMENT_METHOD, $method);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getChannelLabel(): string
     {
         return (string)$this->getData(self::CHANNEL_LABEL);

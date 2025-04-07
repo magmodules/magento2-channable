@@ -16,26 +16,27 @@ use Magento\Framework\Api\ExtensibleDataInterface;
 interface DataInterface extends ExtensibleDataInterface
 {
 
-    const ENTITY_ID = 'entity_id';
-    const CHANNABLE_ID = 'channable_id';
-    const CHANNEL_ID = 'channel_id';
-    const CHANNEL_NAME = 'channel_name';
-    const CHANNEL_LABEL = 'channel_label';
-    const CHANNABLE_ORDER_STATUS = 'channable_order_status';
-    const IS_TEST = 'is_test';
-    const PRODUCT = 'products';
-    const CUSTOMER = 'customer';
-    const BILLING = 'billing';
-    const SHIPPING = 'shipping';
-    const PRICE = 'price';
-    const MAGENTO_ORDER_ID = 'magento_order_id';
-    const MAGENTO_INCREMENT_ID = 'magento_increment_id';
-    const STORE_ID = 'store_id';
-    const STATUS = 'status';
-    const ERROR_MSG = 'error_msg';
-    const ATTEMPTS = 'attempts';
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = 'updated_at';
+    public const ENTITY_ID = 'entity_id';
+    public const CHANNABLE_ID = 'channable_id';
+    public const CHANNEL_ID = 'channel_id';
+    public const CHANNEL_NAME = 'channel_name';
+    public const SHIPMENT_METHOD = 'shipment_method';
+    public const CHANNEL_LABEL = 'channel_label';
+    public const CHANNABLE_ORDER_STATUS = 'channable_order_status';
+    public const IS_TEST = 'is_test';
+    public const PRODUCT = 'products';
+    public const CUSTOMER = 'customer';
+    public const BILLING = 'billing';
+    public const SHIPPING = 'shipping';
+    public const PRICE = 'price';
+    public const MAGENTO_ORDER_ID = 'magento_order_id';
+    public const MAGENTO_INCREMENT_ID = 'magento_increment_id';
+    public const STORE_ID = 'store_id';
+    public const STATUS = 'status';
+    public const ERROR_MSG = 'error_msg';
+    public const ATTEMPTS = 'attempts';
+    public const CREATED_AT = 'created_at';
+    public const UPDATED_AT = 'updated_at';
 
     /**
      * @return int
@@ -80,6 +81,17 @@ interface DataInterface extends ExtensibleDataInterface
      * @return $this
      */
     public function setChannelName(string $channelName): self;
+
+    /**
+     * @return string|null
+     */
+    public function getShipmentMethod(): string;
+
+    /**
+     * @param string|null $method
+     * @return $this
+     */
+    public function setShipmentMethod(?string $method): self;
 
     /**
      * @return string
