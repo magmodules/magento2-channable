@@ -19,6 +19,7 @@ use Magmodules\Channable\Model\Collection\Products as ProductsModel;
 use Magmodules\Channable\Model\Item as ItemModel;
 use Magmodules\Channable\Service\Product\TierPriceData;
 use Magmodules\Channable\Service\Category\CategoryData;
+use Magmodules\Channable\Service\Product\CustomOptions;
 
 class Generate
 {
@@ -51,12 +52,14 @@ class Generate
      * @var TierPriceData
      */
     private $tierPriceData;
-
+    /**
+     * @var CustomOptions
+     */
+    private $customOptions;
     /**
      * @var CategoryData
      */
     private $categoryData;
-
     /**
      * @var Emulation
      */
@@ -72,6 +75,7 @@ class Generate
      * @param GeneralHelper $generalHelper
      * @param FeedHelper $feedHelper
      * @param TierPriceData $tierPriceData
+     * @param CustomOptions $customOptions
      * @param CategoryData $categoryData
      * @param Emulation $appEmulation
      */
@@ -83,6 +87,7 @@ class Generate
         GeneralHelper $generalHelper,
         FeedHelper $feedHelper,
         TierPriceData $tierPriceData,
+        CustomOptions $customOptions,
         CategoryData $categoryData,
         Emulation $appEmulation
     ) {
@@ -94,6 +99,7 @@ class Generate
         $this->feedHelper = $feedHelper;
         $this->tierPriceData = $tierPriceData;
         $this->categoryData = $categoryData;
+        $this->customOptions = $customOptions;
         $this->appEmulation = $appEmulation;
     }
 
@@ -246,6 +252,9 @@ class Generate
         $this->productHelper->getMediaData()->load($products, $parents);
         if (in_array('tier_price', array_column($config['attributes'], 'source'))) {
             $this->tierPriceData->load($products, $parents, $config['website_id']);
+        }
+        if (in_array('custom_options', array_column($config['attributes'], 'source'))) {
+            $this->customOptions->load($products, $parents, $config['store_id']);
         }
     }
 }

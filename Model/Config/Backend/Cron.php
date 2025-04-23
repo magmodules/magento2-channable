@@ -43,7 +43,6 @@ class Cron extends Value
      * @param ValueFactory $configValueFactory
      * @param AbstractResource|null $resource
      * @param AbstractDb|null $resourceCollection
-     * @param string $runModelPath
      * @param array $data
      */
     public function __construct(
@@ -53,9 +52,8 @@ class Cron extends Value
         TypeListInterface $cacheTypeList,
         ValueFactory $configValueFactory,
         ReinitableConfigInterface $reinitConfig,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
-        $runModelPath = '',
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->reinitConfig = $reinitConfig;

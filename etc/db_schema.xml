@@ -12,6 +12,7 @@
         <column name="entity_id" xsi:type="bigint" padding="20" identity="true" nullable="false" unsigned="true" comment="Entity ID"/>
         <column name="channable_id" xsi:type="int" padding="10" identity="false" nullable="false" unsigned="true" comment="Channable ID"/>
         <column name="channel_name" xsi:type="varchar" length="255" comment="Channel Name"/>
+        <column name="shipment_method" xsi:type="varchar" length="255" comment="Shipment Method"/>
         <column name="order_status" xsi:type="varchar" length="255" comment="Order Status"/>
         <column name="channel_label" xsi:type="varchar" length="255" comment="Channel Label"/>
         <column name="channel_id" xsi:type="varchar" length="255" comment="Channel ID"/>

@@ -4,55 +4,70 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
 /**
  * @var \Magmodules\Channable\Block\Info\Channable $block
- * @see \Magmodules\Channable\Block\Info\Channable
+ * @var \Magento\Framework\Escaper $escaper
  */
 $specificInfo = $block->getSpecificInformation();
+$info = $block->getInfo();
 ?>
-<?php echo $block->escapeHtml($block->getMethod()->getTitle()); ?>
-<table class="data-table admin__table-secondary channable">
-    <tbody>
-        <?php if ($channelName = $this->getInfo()->getAdditionalInformation('channel_name')): ?>
+<?= $escaper->escapeHtml($block->getMethod()->getTitle()); ?>
+
+    <table class="data-table admin__table-secondary channable">
+        <tbody>
+        <?php if ($channelName = $info->getAdditionalInformation('channel_name')): ?>
             <tr>
-                <th><?= __('Channel Name'); ?></th>
-                <td><?= $channelName; ?></td>
+                <th><?= $escaper->escapeHtml(__('Channel Name')); ?></th>
+                <td><?= $escaper->escapeHtml($channelName); ?></td>
             </tr>
         <?php endif; ?>
-        <?php if ($channelLabel = $this->getInfo()->getAdditionalInformation('channel_label')): ?>
+
+        <?php if ($channelLabel = $info->getAdditionalInformation('channel_label')): ?>
             <tr>
-                <th><?= __('Channel Label'); ?></th>
-                <td><?= $channelLabel; ?></td>
+                <th><?= $escaper->escapeHtml(__('Channel Label')); ?></th>
+                <td><?= $escaper->escapeHtml($channelLabel); ?></td>
             </tr>
         <?php endif; ?>
-        <?php if ($channelId = $this->getInfo()->getAdditionalInformation('channel_id')): ?>
+
+        <?php if ($channelId = $info->getAdditionalInformation('channel_id')): ?>
             <tr>
-                <th><?= __('Channel ID'); ?></th>
-                <td><?= $channelId; ?></td>
+                <th><?= $escaper->escapeHtml(__('Channel ID')); ?></th>
+                <td><?= $escaper->escapeHtml($channelId); ?></td>
             </tr>
         <?php endif; ?>
-        <?php if ($shipmentPromise = $this->getInfo()->getAdditionalInformation('shipment_promise')): ?>
+
+        <?php if ($shippingCenterId = $info->getAdditionalInformation('shipping_center_id')): ?>
             <tr>
-                <th><?= __('Shipment Promise'); ?></th>
-                <td><?= $shipmentPromise; ?></td>
+                <th><?= $escaper->escapeHtml(__('Service Point ID')); ?></th>
+                <td><?= $escaper->escapeHtml($shippingCenterId); ?></td>
             </tr>
         <?php endif; ?>
-        <?php if ($channelCustomerNumber = $this->getInfo()->getAdditionalInformation('channel_customer_number')): ?>
+
+        <?php if ($shipmentPromise = $info->getAdditionalInformation('shipment_promise')): ?>
             <tr>
-                <th><?= __('Channel Customer Number'); ?></th>
-                <td><?= $channelCustomerNumber; ?></td>
+                <th><?= $escaper->escapeHtml(__('Shipment Promise')); ?></th>
+                <td><?= $escaper->escapeHtml($shipmentPromise); ?></td>
             </tr>
         <?php endif; ?>
-        <?php if ($externalArticleNumbers = $this->getInfo()->getAdditionalInformation('external_article_numbers')): ?>
+
+        <?php if ($channelCustomerNumber = $info->getAdditionalInformation('channel_customer_number')): ?>
             <tr>
-                <th><?= __('External Article Number(s)'); ?></th>
+                <th><?= $escaper->escapeHtml(__('Channel Customer Number')); ?></th>
+                <td><?= $escaper->escapeHtml($channelCustomerNumber); ?></td>
+            </tr>
+        <?php endif; ?>
+
+        <?php if ($externalArticleNumbers = $info->getAdditionalInformation('external_article_numbers')): ?>
+            <tr>
+                <th><?= $escaper->escapeHtml(__('External Article Number(s)')); ?></th>
                 <td>
-                    <div class="channable-tooltip"><?= __('Show Numbers'); ?>
+                    <div class="channable-tooltip"><?= $escaper->escapeHtml(__('Show Numbers')); ?>
                         <span>
                             <table class="channable-delivery-info-table">
                                 <tr>
-                                    <td><?= nl2br($externalArticleNumbers); ?></td>
+                                    <td>
+                                        <?= /* @noEscape */ nl2br($escaper->escapeHtml($externalArticleNumbers)); ?>
+                                    </td>
                                 </tr>
                             </table>
                         </span>
@@ -60,47 +75,53 @@ $specificInfo = $block->getSpecificInformation();
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($channableId = $this->getInfo()->getAdditionalInformation('channable_id')): ?>
+
+        <?php if ($channableId = $info->getAdditionalInformation('channable_id')): ?>
             <tr>
-                <th><?= __('Channable ID'); ?></th>
-                <td><?= $channableId; ?></td>
+                <th><?= $escaper->escapeHtml(__('Channable ID')); ?></th>
+                <td><?= $escaper->escapeHtml($channableId); ?></td>
             </tr>
         <?php endif; ?>
-        <?php if ($commission = $this->getInfo()->getAdditionalInformation('commission')): ?>
+
+        <?php if ($commission = $info->getAdditionalInformation('commission')): ?>
             <tr>
-                <th><?= __('Commission'); ?></th>
-                <td><?= $commission; ?></td>
+                <th><?= $escaper->escapeHtml(__('Commission')); ?></th>
+                <td><?= $escaper->escapeHtml($commission); ?></td>
             </tr>
         <?php endif; ?>
-        <?php if ($delivery = $this->getInfo()->getAdditionalInformation('delivery')): ?>
+
+        <?php if ($delivery = $info->getAdditionalInformation('delivery')): ?>
             <tr>
-                <th><?= __('Delivery'); ?></th>
+                <th><?= $escaper->escapeHtml(__('Delivery')); ?></th>
                 <td>
-                    <div class="channable-tooltip"><?= __('Show Delivery Periods'); ?>
+                    <div class="channable-tooltip"><?= $escaper->escapeHtml(__('Show Delivery Periods')); ?>
                         <span>
-						<table class="channable-delivery-info-table">
-							<?php foreach ($delivery as $item): ?>
-                                <tr>
-									<td><?= $item['title']; ?></td>
-									<td><?= $item['ean']; ?></td>
-									<td><?= $item['delivery_period']; ?></td>
-								</tr>
-                            <?php endforeach; ?>
-						</table>
-					    </span>
+                            <table class="channable-delivery-info-table">
+                                <?php foreach ($delivery as $item): ?>
+                                    <tr>
+                                        <td><?= $escaper->escapeHtml($item['title']); ?></td>
+                                        <td><?= $escaper->escapeHtml($item['ean']); ?></td>
+                                        <td><?= $escaper->escapeHtml($item['delivery_period']); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </table>
+                        </span>
                     </div>
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($memo = $this->getInfo()->getAdditionalInformation('memo')): ?>
+
+        <?php if ($memo = $info->getAdditionalInformation('memo')): ?>
             <tr>
-                <th><?= __('Memo'); ?></th>
+                <th><?= $escaper->escapeHtml(__('Memo')); ?></th>
                 <td>
-                    <div class="channable-tooltip"><?= __('Show Memo Data'); ?>
+                    <div class="channable-tooltip"><?= $escaper->escapeHtml(__('Show Memo Data')); ?>
                         <span>
                             <table class="channable-delivery-info-table">
                                 <tr>
-                                    <td><?= nl2br($memo); ?></td>
+                                    <td>
+                                        <?= /* @noEscape */ nl2br($escaper->escapeHtml($memo)); ?>
+                                    </td>
                                 </tr>
                             </table>
                         </span>
@@ -108,6 +129,7 @@ $specificInfo = $block->getSpecificInformation();
                 </td>
             </tr>
         <?php endif; ?>
-    </tbody>
-</table>
-<?php echo $block->getChildHtml() ?>
+        </tbody>
+    </table>
+
+<?= $block->getChildHtml(); ?>

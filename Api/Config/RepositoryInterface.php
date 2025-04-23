@@ -14,11 +14,11 @@ interface RepositoryInterface extends System\OrderInterface
 {
 
     /** Extension code */
-    const EXTENSION_CODE = 'Magmodules_Channable';
+    public const EXTENSION_CODE = 'Magmodules_Channable';
 
     /** General Group */
-    const XML_PATH_EXTENSION_VERSION = 'magmodules_channable/general/version';
-    const XML_PATH_ENABLE = 'magmodules_channable/general/enable';
+    public const XML_PATH_EXTENSION_VERSION = 'magmodules_channable/general/version';
+    public const XML_PATH_ENABLE = 'magmodules_channable/general/enable';
 
     /**
      * Returns current version of module
@@ -59,13 +59,12 @@ interface RepositoryInterface extends System\OrderInterface
      * Set module token
      *
      * @param string|null $token
-     *
      * @return mixed
      */
     public function setToken(?string $token);
 
     /**
-     * Retrieve application store currenct code
+     * Retrieve application store currency code
      *
      * @return string
      */

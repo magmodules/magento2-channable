@@ -14,7 +14,7 @@ use Magento\Framework\View\Element\Template;
 use Magento\Store\Model\StoreManagerInterface;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
-use Magmodules\Channable\Model\ItemFactory as ItemFactory;
+use Magmodules\Channable\Model\ResourceModel\Item\CollectionFactory as ItemCollectionFactory;
 
 /**
  * Itemupdates Table Block for system config
@@ -42,27 +42,21 @@ class Itemupdates extends Template implements RendererInterface
      */
     private $storeManager;
     /**
-     * @var ItemFactory
+     * @var ItemCollectionFactory
      */
-    private $itemFactory;
+    private $itemCollectionFactory;
 
-    /**
-     * @param Context               $context
-     * @param StoreManagerInterface $storeManager
-     * @param ConfigProvider        $configProvider
-     * @param LogRepository         $logRepository
-     */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
         ConfigProvider $configProvider,
-        ItemFactory $itemFactory,
-        LogRepository $logRepository
+        LogRepository $logRepository,
+        ItemCollectionFactory $itemCollectionFactory
     ) {
         $this->configProvider = $configProvider;
         $this->logRepository = $logRepository;
-        $this->itemFactory = $itemFactory;
         $this->storeManager = $storeManager;
+        $this->itemCollectionFactory = $itemCollectionFactory;
         parent::__construct($context);
     }
 
@@ -72,15 +66,6 @@ class Itemupdates extends Template implements RendererInterface
     public function getCacheLifetime()
     {
         return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function render(AbstractElement $element)
-    {
-        $this->setData('element', $element);
-        return $this->toHtml();
     }
 
     /**
@@ -96,15 +81,15 @@ class Itemupdates extends Template implements RendererInterface
             $storeId = (int)$store->getStoreId();
             try {
                 $configData[$storeId] = [
-                    'name'      => $store->getName(),
+                    'name' => $store->getName(),
                     'is_active' => $store->getIsActive(),
-                    'enabled'   => $this->configProvider->isItemUpdateEnabled($storeId)
+                    'enabled' => $this->configProvider->isItemUpdateEnabled($storeId)
                         ? __('Enabled')->render()
                         : __('Disabled')->render(),
-                    'webhook'   => $this->configProvider->getItemUpdateWebhookUrl($storeId)
+                    'webhook' => $this->configProvider->getItemUpdateWebhookUrl($storeId)
                         ? __('Set')->render()
                         : __('Not Set')->render(),
-                    'qty'       => $this->getQtyByStoreId($storeId)
+                    'qty' => $this->getQtyByStoreId($storeId)
                 ];
             } catch (\Exception $e) {
                 $this->logRepository->addErrorLog('LocalizedException', $e->getMessage());
@@ -115,13 +100,18 @@ class Itemupdates extends Template implements RendererInterface
     }
 
     /**
-     * @param int $storeId
-     *
-     * @return int
+     * @inheritDoc
      */
-    private function getQtyByStoreId(int $storeId)
+    public function render(AbstractElement $element)
     {
-        $items = $this->itemFactory->create()->getCollection()->addFieldToFilter('store_id', $storeId);
+        $this->setData('element', $element);
+        return $this->toHtml();
+    }
+
+    private function getQtyByStoreId(int $storeId): int
+    {
+        $items = $this->itemCollectionFactory->create()
+            ->addFieldToFilter('store_id', $storeId);
         return (int)$items->getSize();
     }
 }

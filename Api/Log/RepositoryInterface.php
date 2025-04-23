@@ -41,11 +41,11 @@ interface RepositoryInterface
      */
     public function addDebugLog(string $type, $data): void;
 
-        /**
+    /**
      * Returns path of logfile
      *
      * @param string $type
-     * @return string
+     * @return string|null
      */
     public function getLogFilePath(string $type): ?string;
 

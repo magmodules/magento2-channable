@@ -216,7 +216,7 @@ class Add
         if ($isBusinessOrder) {
             return $price;
         }
-        if (!$this->configProvider->getNeedsTaxCalulcation('price', (int)$store->getId())) {
+        if (!$this->configProvider->getNeedsTaxCalculation('price', (int)$store->getId())) {
             $request = $this->taxCalculation->getRateRequest(
                 $quote->getShippingAddress(),
                 $quote->getBillingAddress(),

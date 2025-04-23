@@ -18,7 +18,7 @@ class ReturnsRepository extends ItemupdateRepository implements ReturnsInterface
     /**
      * {@inheritDoc}
      */
-    public function isReturnsEnabled(int $storeId = null): bool
+    public function isReturnsEnabled(?int $storeId = null): bool
     {
         return (bool)$this->getStoreValue(self::XML_PATH_RETURNS_ENABLE, (int)$storeId);
     }
@@ -35,7 +35,7 @@ class ReturnsRepository extends ItemupdateRepository implements ReturnsInterface
     /**
      * @inheritDoc
      */
-    public function autoUpdateReturnsOnCreditmemo(int $storeId = null): bool
+    public function autoUpdateReturnsOnCreditmemo(?int $storeId = null): bool
     {
         return (bool)$this->getStoreValue(self::XML_PATH_RETURNS_AUTO_MATCH, (int)$storeId);
     }
@@ -43,7 +43,7 @@ class ReturnsRepository extends ItemupdateRepository implements ReturnsInterface
     /**
      * @inheritDoc
      */
-    public function showOnCreditmemoCreation(int $storeId = null): bool
+    public function showOnCreditmemoCreation(?int $storeId = null): bool
     {
         return $this->getStoreValue(self::XML_PATH_RETURNS_CREDITMEMO, $storeId)
             && $this->isReturnsEnabled($storeId);
@@ -53,7 +53,7 @@ class ReturnsRepository extends ItemupdateRepository implements ReturnsInterface
      * @param int|null $storeId
      * @return string
      */
-    public function getGtinAttribute(int $storeId = null): string
+    public function getGtinAttribute(?int $storeId = null): string
     {
         return $this->getStoreValue(self::XML_PATH_GTIN_ATTRIBUTE, (int)$storeId) ?: 'sku';
     }
