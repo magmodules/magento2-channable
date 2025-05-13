@@ -165,13 +165,15 @@ class InventoryData
     public function load(array $skus, array $config): void
     {
         if (isset($config['inventory']['stock_id'])) {
-            $this->getInventoryData($skus, (int)$config['inventory']['stock_id']);
-            $this->getReservations($skus, (int)$config['inventory']['stock_id']);
-
             if ($this->configProvider->isBundleStockCalculationEnabled((int)$config['store_id'])) {
                 $this->getLinkedSimpleProductsFromBundle($skus);
+                $skus += array_column(
+                    array_merge(...array_values($this->bundleParentSimpleRelation)), 'sku'
+                );
             }
-
+            
+            $this->getInventoryData($skus, (int)$config['inventory']['stock_id']);
+            $this->getReservations($skus, (int)$config['inventory']['stock_id']);
             if (!empty($config['inventory']['inventory_source_items'])) {
                 $this->getInventorySourceItems($skus);
             }
