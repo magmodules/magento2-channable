@@ -8,41 +8,34 @@ declare(strict_types=1);
 namespace Magmodules\Channable\Service\Returns;
 
 use Magento\Catalog\Model\ProductFactory;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 
 class GetSkuFromGtin
 {
-    /**
-     * @var string
-     */
     private $gtinAttribute;
-    /**
-     * @var ProductFactory
-     */
-    private $productFactory;
-    /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-    /**
-     * @var LogRepository
-     */
-    private $logRepository;
+    private ProductFactory $productFactory;
+    private ConfigProvider $configProvider;
+    private LogRepository $logRepository;
+    private ProductCollectionFactory $productCollectionFactory;
 
     /**
      * @param ProductFactory $productFactory
      * @param ConfigProvider $configProvider
      * @param LogRepository $logRepository
+     * @param ProductCollectionFactory $productCollectionFactory
      */
     public function __construct(
         ProductFactory $productFactory,
         ConfigProvider $configProvider,
-        LogRepository $logRepository
+        LogRepository $logRepository,
+        ProductCollectionFactory $productCollectionFactory
     ) {
         $this->productFactory = $productFactory;
         $this->configProvider = $configProvider;
         $this->logRepository = $logRepository;
+        $this->productCollectionFactory = $productCollectionFactory;
     }
 
     /**
@@ -63,7 +56,14 @@ class GetSkuFromGtin
                     return $product->getSku();
                 }
             }
-            if ($product = $this->productFactory->create()->loadByAttribute($gtinAttribute, $gtin)) {
+            $product = $this->productCollectionFactory->create()
+                ->setStoreId($storeId)
+                ->addAttributeToSelect(['sku', $gtinAttribute])
+                ->addAttributeToFilter($gtinAttribute, $gtin)
+                ->setPageSize(1)
+                ->getFirstItem();
+
+            if ($product && $product->getId()) {
                 return $product->getSku();
             }
         } catch (\Exception $exception) {
