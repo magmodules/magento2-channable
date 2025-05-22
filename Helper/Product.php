@@ -357,7 +357,7 @@ class Product extends AbstractHelper
             if ((!empty($attribute['actions']) || !empty($attribute['max'])) && !is_array($value)) {
                 $value = $this->getFormat($value, $attribute, $config, $product);
             }
-            if (!empty($attribute['suffix'])) {
+            if (!empty($attribute['suffix']) && is_string($value)) {
                 if (!empty($config[$attribute['suffix']])) {
                     $value .= $config[$attribute['suffix']];
                 }
@@ -745,14 +745,20 @@ class Product extends AbstractHelper
      * @param $attribute
      * @param \Magento\Catalog\Model\Product $product
      *
-     * @return string
+     * @return string|array
      */
     public function getValue($attribute, $product)
     {
         try {
             $source = isset($attribute['source']) ? $attribute['source'] : '';
             $type = isset($attribute['type']) ? $attribute['type'] : '';
-            $value = (string)$product->getData($source);
+            $value = $product->getData($source);
+
+            if (is_array($value)) {
+                return $value;
+            }
+
+            $value = (string)$value;
 
             if ($type === 'media_image' && $value) {
                 return $this->catalogProductMediaConfig->getMediaUrl($value);
