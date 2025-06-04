@@ -17,10 +17,11 @@ class InventoryData
     private ResourceConnection $resourceConnection;
     private ConfigProvider $configProvider;
 
-    private array $inventory;
-    private array $inventorySourceItems;
-    private array $reservation;
-    private array $bundleParentSimpleRelation;
+    private array $inventory = [];
+    private array $inventorySourceItems = [];
+    private array $reservation = [];
+    private array $bundleParentSimpleRelation = [];
+    private array $legacyInventory = [];
 
     public function __construct(
         ResourceConnection $resourceConnection,
@@ -53,6 +54,33 @@ class InventoryData
         $inventoryData = $connection->fetchAll($select);
         foreach ($inventoryData as $data) {
             $this->inventory[$stockId][$data['sku']] = $data;
+        }
+    }
+
+    /**
+     * Get Legacy Inventory Data by SKU
+     *
+     * @param array $skus
+     * @return void
+     */
+    private function getLegacyInventoryData(array $skus): void
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $tableName = $this->resourceConnection->getTableName('cataloginventory_stock_item');
+
+        if (!$connection->isTableExists($tableName)) {
+            return;
+        }
+
+        $productTable = $this->resourceConnection->getTableName('catalog_product_entity');
+        $select = $connection->select()
+            ->from(['stock' => $tableName])
+            ->join(['cpe' => $productTable], 'stock.product_id = cpe.entity_id', ['sku'])
+            ->where('cpe.sku IN (?)', $skus);
+
+        $inventoryData = $connection->fetchAll($select);
+        foreach ($inventoryData as $data) {
+            $this->legacyInventory[$data['sku']] = $data;
         }
     }
 
@@ -164,19 +192,21 @@ class InventoryData
      */
     public function load(array $skus, array $config): void
     {
+        if ($this->configProvider->isBundleStockCalculationEnabled((int)$config['store_id'])) {
+            $this->getLinkedSimpleProductsFromBundle($skus);
+            $skus += array_column(
+                array_merge(...array_values($this->bundleParentSimpleRelation)), 'sku'
+            );
+        }
+
         if (isset($config['inventory']['stock_id'])) {
-            if ($this->configProvider->isBundleStockCalculationEnabled((int)$config['store_id'])) {
-                $this->getLinkedSimpleProductsFromBundle($skus);
-                $skus += array_column(
-                    array_merge(...array_values($this->bundleParentSimpleRelation)), 'sku'
-                );
-            }
-            
             $this->getInventoryData($skus, (int)$config['inventory']['stock_id']);
             $this->getReservations($skus, (int)$config['inventory']['stock_id']);
             if (!empty($config['inventory']['inventory_source_items'])) {
                 $this->getInventorySourceItems($skus);
             }
+        } else {
+            $this->getLegacyInventoryData($skus);
         }
     }
 
@@ -189,10 +219,6 @@ class InventoryData
      */
     public function addDataToProduct(Product $product, array $config): Product
     {
-        if (empty($config['inventory']['stock_id'])) {
-            return $product;
-        }
-
         if (!$this->isSupportedProductType($product)) {
             return $product;
         }
@@ -268,6 +294,15 @@ class InventoryData
     private function getStockDataBySku(string $sku, array $config): array
     {
         $stockId = $config['inventory']['stock_id'] ?? null;
+
+        // Legacy Inventory
+        if (!$stockId) {
+            $inventoryData = $this->legacyInventory[$sku] ?? [];
+            return [
+                'qty' => $inventoryData['qty'] ?? 0,
+                'is_salable' => $inventoryData['is_in_stock'] ?? 0
+            ];
+        }
 
         $inventoryData = $this->inventory[$stockId][$sku] ?? [];
         $reservations = $this->reservation[$stockId][$sku] ?? 0;
