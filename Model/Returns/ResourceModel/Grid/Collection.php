@@ -19,6 +19,14 @@ class Collection extends SearchResult
     {
         parent::_initSelect();
 
+        $this->addFilterToMap('status', 'main_table.status');
+        $this->addFilterToMap('entity_id', 'main_table.entity_id');
+        $this->addFilterToMap('store_id', 'main_table.store_id');
+        $this->addFilterToMap('created_at', 'main_table.created_at');
+        $this->addFilterToMap('magento_creditmemo_increment_id', 'main_table.magento_creditmemo_increment_id');
+        $this->addFilterToMap('magento_increment_id', 'main_table.magento_increment_id');
+        $this->addFilterToMap('order_status', 'sales_order.status');
+
         $this->getSelect()->joinLeft(
             ['sales_order' => $this->getTable('sales_order')],
             'main_table.magento_order_id = sales_order.entity_id',
