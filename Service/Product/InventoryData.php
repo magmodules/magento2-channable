@@ -7,9 +7,9 @@ declare(strict_types=1);
 
 namespace Magmodules\Channable\Service\Product;
 
-use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
-use Magento\Framework\App\ResourceConnection;
 use Magento\Catalog\Model\Product;
+use Magento\Framework\App\ResourceConnection;
+use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 
 class InventoryData
 {
@@ -194,9 +194,13 @@ class InventoryData
     {
         if ($this->configProvider->isBundleStockCalculationEnabled((int)$config['store_id'])) {
             $this->getLinkedSimpleProductsFromBundle($skus);
-            $skus += array_column(
-                array_merge(...array_values($this->bundleParentSimpleRelation)), 'sku'
-            );
+            $linkedSimples = [];
+            foreach ($this->bundleParentSimpleRelation as $items) {
+                foreach ($items as $item) {
+                    $linkedSimples[] = $item['sku'];
+                }
+            }
+            $skus = array_unique(array_merge($skus, $linkedSimples));
         }
 
         if (isset($config['inventory']['stock_id'])) {
@@ -269,17 +273,21 @@ class InventoryData
     private function getBundleStockData(Product $product, array $config): array
     {
         $simples = $this->bundleParentSimpleRelation[$product->getSku()] ?? [];
-        $minStockData = ['qty' => 0, 'is_salable' => 0, 'source_item' => null];
+        $minStockData = ['qty' => null, 'is_salable' => 0, 'source_item' => null];
 
         foreach ($simples as $simple) {
             $simpleStockData = $this->getStockDataBySku($simple['sku'], $config);
-            $realStock = $simple['quantity'] ? $simpleStockData['qty'] / $simple['quantity'] : $simpleStockData['qty'];
+            $realStock = (!empty($simple['quantity']) && $simple['quantity'] > 0)
+                ? floor($simpleStockData['qty'] / $simple['quantity'])
+                : $simpleStockData['qty'];
 
-            if ($realStock > $minStockData['qty']) {
-                $minStockData = $simpleStockData;
+            if (is_numeric($realStock) && ($minStockData['qty'] === null || $realStock < $minStockData['qty'])) {
                 $minStockData['qty'] = $realStock;
             }
         }
+
+        $minStockData['qty'] = (float)($minStockData['qty'] ?? 0);
+        $minStockData['is_salable'] = $minStockData['qty'] > 0 ? 1 : 0;
 
         return $minStockData;
     }
