@@ -202,7 +202,7 @@ class Add
      * @param ProductInterface $product
      * @param StoreInterface $store
      * @param Quote $quote
-     *
+     * @param bool $isBusinessOrder
      * @return float
      */
     private function getProductPrice(
@@ -213,9 +213,10 @@ class Add
         bool $isBusinessOrder
     ): float {
         $price = (float)$item['price'];
-        if ($isBusinessOrder) {
+        if ($isBusinessOrder && (isset($item['price_tax']) && $item['price_tax'] == 0)) {
             return $price;
         }
+
         if (!$this->configProvider->getNeedsTaxCalculation('price', (int)$store->getId())) {
             $request = $this->taxCalculation->getRateRequest(
                 $quote->getShippingAddress(),
