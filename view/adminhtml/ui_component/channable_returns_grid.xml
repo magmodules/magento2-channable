@@ -118,7 +118,7 @@
         </column>
         <column name="store_id" class="Magento\Search\Ui\Component\Listing\Column\StoreView">
             <settings>
-                <filter>text</filter>
+                <filter>store</filter>
                 <label translate="true">Store</label>
             </settings>
         </column>
@@ -193,9 +193,9 @@
         </column>
         <column name="qty_creditmemos">
             <settings>
-                <filter>text</filter>
                 <label translate="true">Order Creditmemos</label>
                 <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <sortable>false</sortable>
             </settings>
         </column>
         <column name="order_status" component="Magento_Ui/js/grid/columns/select">
