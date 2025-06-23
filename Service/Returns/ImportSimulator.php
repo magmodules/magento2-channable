@@ -28,50 +28,18 @@ class ImportSimulator
     /**
      * Available options
      */
-    public const PARAMS = ['product_id', 'import_order'];
+    public const PARAMS = ['product_id', 'import_order', 'status'];
 
-    /**
-     * @var int
-     */
-    private $storeId = null;
-    /**
-     * @var int
-     */
-    private $productId = null;
+    private ?int $storeId = null;
+    private ?int $productId = null;
 
-    /**
-     * @var ProductRepositoryInterface
-     */
-    private $productRepository;
-    /**
-     * @var ProductCollectionFactory
-     */
-    private $productCollection;
-    /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-    /**
-     * @var Random
-     */
-    private $random;
-    /**
-     * @var ImportReturn
-     */
-    private $importReturn;
-    /**
-     * @var OrderImportSimulator
-     */
-    private $orderImportSimulator;
+    private ProductRepositoryInterface $productRepository;
+    private ProductCollectionFactory $productCollection;
+    private ConfigProvider $configProvider;
+    private Random $random;
+    private ImportReturn $importReturn;
+    private OrderImportSimulator $orderImportSimulator;
 
-    /**
-     * @param ImportReturn $importReturn
-     * @param OrderImportSimulator $orderImportSimulator
-     * @param ProductRepositoryInterface $productRepository
-     * @param ProductCollectionFactory $productCollection
-     * @param ConfigProvider $configProvider
-     * @param Random $random
-     */
     public function __construct(
         ImportReturn $importReturn,
         OrderImportSimulator $orderImportSimulator,
@@ -93,7 +61,6 @@ class ImportSimulator
      *
      * @param int $storeId
      * @param array $params
-     *
      * @return array
      * @throws LocalizedException
      * @throws NoSuchEntityException
@@ -118,7 +85,6 @@ class ImportSimulator
      * Get test data in Channable Returns format
      *
      * @param array|null $params
-     *
      * @return array
      * @throws LocalizedException
      * @throws NoSuchEntityException
@@ -134,7 +100,7 @@ class ImportSimulator
         $random = $this->random->getRandomString(5, '0123456789');
 
         return [
-            'status' => 'new',
+            'status' => !empty($params['status']) ? $params['status'] : 'new',
             'channel_name' => 'Channable',
             'channel_id' => 'TEST-' . $random,
             'channable_id' => $random,
@@ -187,7 +153,7 @@ class ImportSimulator
         $address = $order->getBillingAddress();
 
         return [
-            'status' => 'new',
+            'status' => !empty($params['status']) ? $params['status'] : 'new',
             'channel_name' => $additional['channel_name'],
             'channel_id' => $additional['channel_id'],
             'channable_id' => $additional['channable_id'],

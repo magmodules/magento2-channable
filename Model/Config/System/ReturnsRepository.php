@@ -43,6 +43,14 @@ class ReturnsRepository extends ItemupdateRepository implements ReturnsInterface
     /**
      * @inheritDoc
      */
+    public function autoProcessCompeteReturns(?int $storeId = null): bool
+    {
+        return (bool)$this->getStoreValue(self::XML_PATH_RETURNS_AUTO_PROCESS, (int)$storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function showOnCreditmemoCreation(?int $storeId = null): bool
     {
         return $this->getStoreValue(self::XML_PATH_RETURNS_CREDITMEMO, $storeId)

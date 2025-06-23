@@ -17,36 +17,15 @@ use Magento\Sales\Model\RefundOrder;
 use Magmodules\Channable\Api\Returns\Data\DataInterface as ReturnsData;
 use Magmodules\Channable\Api\Returns\RepositoryInterface as ReturnsRepository;
 
-/**
- * Class ProcessReturn
- */
 class CreateCreditmemo
 {
 
-    /**
-     * @var ReturnsRepository
-     */
-    private $returnsRepository;
-    /**
-     * @var RefundOrder
-     */
-    private $refundOrder;
-    /**
-     * @var ItemCreationFactory
-     */
-    private $itemCreationFactory;
-    /**
-     * @var ResourceConnection
-     */
-    private $resource;
-    /**
-     * @var CreditmemoRepositoryInterface
-     */
-    private $creditmemoRepositoryInterface;
-    /**
-     * @var GetSkuFromGtin
-     */
-    private $getSkuFromGtin;
+    private ReturnsRepository $returnsRepository;
+    private ResourceConnection $resource;
+    private RefundOrder $refundOrder;
+    private ItemCreationFactory $itemCreationFactory;
+    private CreditmemoRepositoryInterface $creditmemoRepositoryInterface;
+    private GetSkuFromGtin $getSkuFromGtin;
 
     public function __construct(
         ReturnsRepository $returnsRepository,
@@ -79,20 +58,32 @@ class CreateCreditmemo
         }
 
         $item = $return->getItem();
-        $sku = $this->getSkuFromGtin->execute($item['gtin'] ?? null, (int)$return->getStoreId());
-        if (!$sku) {
+        if (!isset($item['gtin'])) {
+            throw new InputException(__('GTIN is missing in return item data.'));
+        }
+
+        if (!$sku = $this->getSkuFromGtin->execute($item['gtin'], (int)$return->getStoreId())) {
             throw new InputException(__('Unable to find SKU for GTIN.'));
         }
 
-        $itemId = $this->findOrderItemId($sku, $orderId);
+        $itemId = $this->getOrderItemIdBySku($sku, $orderId);
         if (!$itemId) {
             throw new InputException(__('Unable to locate the order Item-ID for imported return.'));
         }
 
         $creditmemoItem = $this->itemCreationFactory->create();
+
+        if (!isset($item['quantity'])) {
+            throw new InputException(__('Missing quantity for credit memo item.'));
+        }
+
+        if (!is_numeric($item['quantity']) || $item['quantity'] <= 0) {
+            throw new InputException(__('Invalid quantity value.'));
+        }
+
         $creditmemoItem->setQty($item['quantity'])->setOrderItemId($itemId);
 
-        $itemIdsToRefund[] = $creditmemoItem;
+        $itemIdsToRefund = [$creditmemoItem];
         $creditmemoId = $this->refundOrder->execute($orderId, $itemIdsToRefund);
 
         $creditmemo = $this->creditmemoRepositoryInterface->get($creditmemoId);
@@ -104,9 +95,9 @@ class CreateCreditmemo
     /**
      * @param string $sku
      * @param int $orderId
-     * @return ?int
+     * @return int|null
      */
-    private function findOrderItemId(string $sku, int $orderId): ?int
+    private function getOrderItemIdBySku(string $sku, int $orderId): ?int
     {
         $connection = $this->resource->getConnection();
 
