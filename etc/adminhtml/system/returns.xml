@@ -49,6 +49,12 @@
                 <config_path>magmodules_channable_marketplace/returns/auto_update</config_path>
                 <comment>Activating this option will automatically approve 'pending' returns upon the creation of a credit memo for the respective order. This action will override the return block selection option from the if it is enabled. Enable this feature when you have established processes in place to automate your credit memo workflow.</comment>
             </field>
+            <field id="auto_process_complete" translate="label" type="select" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Creditmemo completed returns</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>magmodules_channable_marketplace/returns/auto_process_complete</config_path>
+                <comment><![CDATA[When enabled, a credit memo will be created automatically for returns imported with the status 'complete'. These returns are handled and fulfilled directly by the marketplace.]]></comment>
+            </field>
             <field id="selftest" translate="label" type="button" sortOrder="14" showInDefault="1" showInWebsite="0" showInStore="1">
                 <frontend_model>Magmodules\Channable\Block\Adminhtml\System\Config\Button\Selftest</frontend_model>
             </field>

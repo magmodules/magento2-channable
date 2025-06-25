@@ -12,7 +12,7 @@
             <general>
                 <enable>0</enable>
                 <limit>250</limit>
-                <version>v1.21.2</version>
+                <version>v1.22.0</version>
             </general>
             <data>
                 <name_attribute>name</name_attribute>
@@ -56,6 +56,7 @@
             <returns>
                 <show_on_creditmemo>1</show_on_creditmemo>
                 <auto_match>1</auto_match>
+                <auto_process_complete>0</auto_process_complete>
             </returns>
             <item>
                 <enable>0</enable>

@@ -14,51 +14,33 @@ use Magento\Framework\Data\OptionSourceInterface;
  */
 class ReturnsStatus implements OptionSourceInterface
 {
+    public const STATUS_NEW = 'new';
+    public const STATUS_ACCEPTED = 'accepted';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_REPAIRED = 'repaired';
+    public const STATUS_EXCHANGED = 'exchanged';
+    public const STATUS_KEEPS = 'keeps';
+    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_COMPLETE = 'complete';
 
-    /**
-     * Options array
-     *
-     * @var array
-     */
-    public $options = null;
+    private const STATUSES = [
+        self::STATUS_NEW,
+        self::STATUS_ACCEPTED,
+        self::STATUS_REJECTED,
+        self::STATUS_REPAIRED,
+        self::STATUS_EXCHANGED,
+        self::STATUS_KEEPS,
+        self::STATUS_CANCELLED,
+        self::STATUS_COMPLETE,
+    ];
 
-    /**
-     * @return array
-     */
     public function toOptionArray(): array
     {
-        if (!$this->options) {
-            $this->options = [
-                [
-                    'value' => 'new',
-                    'label' => __('New')
-                ],
-                [
-                    'value' => 'accepted',
-                    'label' => __('Accepted')
-                ],
-                [
-                    'value' => 'rejected',
-                    'label' => __('Rejected')
-                ],
-                [
-                    'value' => 'repaired',
-                    'label' => __('Repaired')
-                ],
-                [
-                    'value' => 'exchanged',
-                    'label' => __('Exchanged')
-                ],
-                [
-                    'value' => 'keeps',
-                    'label' => __('Keeps')
-                ],
-                [
-                    'value' => 'cancelled',
-                    'label' => __('Cancelled')
-                ],
+        return array_map(function (string $status) {
+            return [
+                'value' => $status,
+                'label' => __(ucfirst($status)),
             ];
-        }
-        return $this->options;
+        }, self::STATUSES);
     }
 }
