@@ -161,7 +161,18 @@ class AddressHandler
             return null;
         }
 
-        $vatId = !empty($orderData['billing']['vat_number']) ? $orderData['billing']['vat_number'] : null;
+        $vatId = null;
+
+        // Attempt to retrieve VAT ID from billing data:
+        // Channable may supply this value under 'vat_number' or 'vat_id'.
+        // We prefer 'vat_number' first, then fallback to 'vat_id'.
+        foreach (['vat_number', 'vat_id'] as $vatKey) {
+            if (isset($orderData['billing'][$vatKey]) && trim($orderData['billing'][$vatKey]) !== '') {
+                $vatId = $orderData['billing'][$vatKey];
+                break;
+            }
+        }
+
         if ($type == 'billing' || !$vatId) {
             return $vatId;
         }
