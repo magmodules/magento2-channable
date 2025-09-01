@@ -82,5 +82,5 @@ Channable is a cloud based data feed management platform designed to greatly sim
 
 ## Compatibility
 
-* PHP Versions: PHP 7.2, PHP 7.3, PHP 7.4, PHP 8.1, PHP 8.2
+* PHP Versions: PHP 7.2, PHP 7.3, PHP 7.4, PHP 8.1, PHP 8.2, PHP 8.3, PHP 8.4
 * Magento Versions: Magento 2.3.3 up to Magento 2.4.7
