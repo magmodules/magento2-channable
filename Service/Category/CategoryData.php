@@ -81,10 +81,22 @@ class CategoryData
 
         $cceTable = $this->resourceConnection->getTableName('catalog_category_entity');
         $select = $connection->select()
-            ->from($cceTable, 'entity_id')
+            ->from($cceTable, ['entity_id', 'path'])
             ->where('entity_id IN (?) OR parent_id IN (?)', $categoryIds);
 
-        return $connection->fetchCol($select);
+        $categoryData = $connection->fetchPairs($select);
+
+        $allCategoryIds = [];
+        // Extract full category ancestry from path to not miss out on any subcategories.
+        foreach ($categoryData as $categoryId => $path) {
+            $pathIds = explode('/', $path);
+            foreach ($pathIds as $pathId) {
+                if (!empty($pathId) && is_numeric($pathId)) {
+                    $allCategoryIds[$pathId] = $pathId;
+                }
+            }
+        }
+        return array_values($allCategoryIds);
     }
 
     /**
