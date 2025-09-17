@@ -185,7 +185,8 @@ class ImportSimulator
                 "country_code" => $country,
                 "state" => $country == "US" ? "Texas" : "",
                 "state_code" => $country == "US" ? "TX" : "",
-                "vat_number" => "NL123456790B01"
+                "vat_number" => "",
+                "vat_id" => "NL123456790B01"
             ],
             "shipping" => [
                 "first_name" => "Test",
