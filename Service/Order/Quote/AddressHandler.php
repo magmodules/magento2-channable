@@ -143,7 +143,7 @@ class AddressHandler
      *
      * @return string|null Sanitized string or null if empty
      */
-    private function sanitize(?string $value, string $pattern, ?int $maxLength = null): ?string
+    private function sanitize(null|string|int $value, string $pattern, ?int $maxLength = null): ?string
     {
         $value = (string) $value;
 
