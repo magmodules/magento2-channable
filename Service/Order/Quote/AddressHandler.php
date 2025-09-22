@@ -137,9 +137,9 @@ class AddressHandler
      * Sanitize a string by stripping disallowed characters using a negated character-class pattern,
      * normalizing whitespace, and enforcing an optional maximum length.
      *
-     * @param string|null $value  The raw input value
-     * @param string      $pattern A negated character-class regex (e.g. '/[^0-9\\+\\-\\(\\)\\s]/u')
-     * @param int|null    $maxLength Optional hard limit on string length (applied after cleanup)
+     * @param null|string|int $value  The raw input value
+     * @param string          $pattern A negated character-class regex (e.g. '/[^0-9\\+\\-\\(\\)\\s]/u')
+     * @param int|null        $maxLength Optional hard limit on string length (applied after cleanup)
      *
      * @return string|null Sanitized string or null if empty
      */
