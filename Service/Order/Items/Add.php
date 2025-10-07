@@ -205,7 +205,7 @@ class Add
      * @param bool $isBusinessOrder
      * @return float
      */
-    private function getProductPrice(
+    public function getProductPrice(
         array $item,
         ProductInterface $product,
         StoreInterface $store,
