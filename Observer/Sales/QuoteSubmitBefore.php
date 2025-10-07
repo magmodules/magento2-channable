@@ -9,6 +9,8 @@ namespace Magmodules\Channable\Observer\Sales;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Quote\Model\Quote;
+use Magento\Sales\Model\Order;
 use Magmodules\Channable\Api\Log\RepositoryInterface as LogRepository;
 
 /**
@@ -39,15 +41,20 @@ class QuoteSubmitBefore implements ObserverInterface
     public function execute(Observer $observer)
     {
         try {
-            /** @var \Magento\Sales\Model\Order $order */
-            $order = $observer->getEvent()->getOrder();
-            /** @var \Magento\Quote\Model\Quote\ $quote */
+            /** @var Quote $quote */
             $quote = $observer->getEvent()->getQuote();
-            if ($pickupPoint = $quote->getShippingAddress()->getExtensionAttributes()->getChannablePickupLocation()) {
-                $order->setData('channable_pickup_location', $pickupPoint);
+
+            $extAttributes = $quote->getShippingAddress()->getExtensionAttributes();
+            if ($extAttributes && method_exists($extAttributes, 'getChannablePickupLocation')) {
+                $pickupPoint = $extAttributes->getChannablePickupLocation();
+                if ($pickupPoint) {
+                    /** @var Order $order */
+                    $order = $observer->getEvent()->getOrder();
+                    $order->setData('channable_pickup_location', $pickupPoint);
+                }
             }
         } catch (\Exception $e) {
-            $this->logRepository->addErrorLog('convert quote', $e->getMessage());
+            $this->logRepository->addErrorLog('Channable QuoteSubmitBefore', $e->getMessage());
         }
         return $this;
     }
