@@ -223,7 +223,7 @@ class General extends AbstractHelper
      */
     private function isSerialized($value)
     {
-        return (boolean)preg_match('/^((s|i|d|b|a|O|C):|N;)/', $value);
+        return (bool)preg_match('/^((s|i|d|b|a|O|C):|N;)/', $value);
     }
 
     /**
