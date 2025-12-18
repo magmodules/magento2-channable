@@ -289,6 +289,18 @@ class Product extends AbstractHelper
      */
     public function getAttributeValue($type, $attribute, $config, $product, $simple)
     {
+        // Handle price attributes with currency conversion actions
+        if (!empty($attribute['source']) && $attribute['source'] == 'price' && !empty($attribute['actions'])) {
+            foreach ($attribute['actions'] as $action) {
+                if (preg_match('/^currency_/', $action)) {
+                    $tempConfig = $config;
+                    $tempConfig['attributes']['rendered_price__' . $type] = $attribute;
+                    $tempConfig['attributes']['rendered_price__' . $type]['price_source'] = 'min_price';
+                    $priceData = $this->priceData->execute($tempConfig, $product);
+                    return $priceData[$type] ?? null;
+                }
+            }
+        }
 
         if (!empty($attribute['source']) && ($attribute['source'] == 'attribute_set_name')) {
             $type = 'attribute_set_name';
