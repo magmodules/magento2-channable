@@ -210,7 +210,9 @@ class Import
 
             $quote->setPaymentMethod('channable');
             $quote->setInventoryProcessed(false);
-            $quote->getPayment()->importData(['method' => 'channable']);
+            $payment = $quote->getPayment();
+            $payment->setMethod('channable');
+            $payment->importData(['method' => 'channable']);
             $totals = $quote->getTotals();
 
             $quote->setTotals($totals);
