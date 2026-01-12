@@ -9,9 +9,7 @@
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
             <item name="provider" xsi:type="string">channable_item_grid.channable_item_grid_data_source</item>
-            <item name="deps" xsi:type="string">channable_item_grid.channable_item_grid_data_source</item>
         </item>
-        <item name="spinner" xsi:type="string">channable_item_columns</item>
         <item name="buttons" xsi:type="array">
             <item name="add" xsi:type="array">
                 <item name="name" xsi:type="string">add</item>
@@ -27,247 +25,184 @@
             </item>
         </item>
     </argument>
-    <dataSource name="channable_item_grid_data_source">
-        <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
-            <argument name="name" xsi:type="string">channable_item_grid_data_source</argument>
-            <argument name="primaryFieldName" xsi:type="string">item_id</argument>
-            <argument name="requestFieldName" xsi:type="string">id</argument>
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
-                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
-                    <item name="storageConfig" xsi:type="array">
-                        <item name="indexField" xsi:type="string">item_id</item>
-                    </item>
-                </item>
-            </argument>
-        </argument>
+    <settings>
+        <spinner>channable_item_columns</spinner>
+        <deps>
+            <dep>channable_item_grid.channable_item_grid_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="channable_item_grid_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">item_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="channable_item_grid_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>item_id</primaryFieldName>
+            </settings>
+        </dataProvider>
     </dataSource>
-    <container name="listing_top">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="template" xsi:type="string">ui/grid/toolbar</item>
-                <item name="stickyTmpl" xsi:type="string">ui/grid/sticky/toolbar</item>
-            </item>
-        </argument>
-        <!--
-        <bookmark name="bookmarks">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="storageConfig" xsi:type="array">
-                        <item name="namespace" xsi:type="string">channable_item_grid</item>
-                    </item>
-                </item>
-            </argument>
-        </bookmark>
-        -->
-        <component name="columns_controls">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="columnsData" xsi:type="array">
-                        <item name="provider" xsi:type="string">channable_item_grid.channable_item_grid.channable_item_columns</item>
-                    </item>
-                    <item name="component" xsi:type="string">Magento_Ui/js/grid/controls/columns</item>
-                    <item name="displayArea" xsi:type="string">dataGridActions</item>
-                </item>
-            </argument>
-        </component>
-         <filters name="listing_filters">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="columnsProvider" xsi:type="string">channable_item_grid.channable_item_grid.channable_item_columns</item>
-                    <item name="storageConfig" xsi:type="array">
-                        <item name="provider" xsi:type="string">channable_item_grid.channable_item_grid.listing_top.bookmarks</item>
-                        <item name="namespace" xsi:type="string">current.filters</item>
-                    </item>
-                    <item name="templates" xsi:type="array">
-                        <item name="filters" xsi:type="array">
-                            <item name="select" xsi:type="array">
-                                <item name="component" xsi:type="string">Magento_Ui/js/form/element/ui-select</item>
-                                <item name="template" xsi:type="string">ui/grid/filters/elements/ui-select</item>
-                            </item>
-                        </item>
-                    </item>
-                    <item name="childDefaults" xsi:type="array">
-                        <item name="provider" xsi:type="string">channable_item_grid.channable_item_grid.listing_top.listing_filters</item>
-                        <item name="imports" xsi:type="array">
-                            <item name="visible" xsi:type="string">channable_item_grid.channable_item_grid.channable_item_columns.${ $.index }:visible</item>
-                        </item>
-                    </item>
-                </item>
-                <item name="observers" xsi:type="array">
-                    <item name="column" xsi:type="string">column</item>
-                </item>
-            </argument>
-
+    <listingToolbar name="listing_top">
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters">
+            <settings>
+                <templates>
+                    <filters>
+                        <select>
+                            <param name="template" xsi:type="string">ui/grid/filters/elements/ui-select</param>
+                            <param name="component" xsi:type="string">Magento_Ui/js/form/element/ui-select</param>
+                        </select>
+                    </filters>
+                </templates>
+            </settings>
         </filters>
         <massaction name="listing_massaction">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="selectProvider" xsi:type="string">channable_item_grid.channable_item_grid.channable_item_columns.ids</item>
-                    <item name="indexField" xsi:type="string">tag_id</item>
-                </item>
-            </argument>
             <action name="que">
-                <argument name="data" xsi:type="array">
-                    <item name="config" xsi:type="array">
-                        <item name="type" xsi:type="string">que</item>
-                        <item name="label" xsi:type="string" translate="true">Add to Update Que</item>
-                        <item name="url" xsi:type="url" path="channable/item/massQue"/>
-                        <item name="confirm" xsi:type="array">
-                            <item name="title" xsi:type="string" translate="true">Add to update Que</item>
-                            <item name="message" xsi:type="string" translate="true">Are you sure you want to add these Item to the update que?</item>
-                        </item>
-                    </item>
-                </argument>
+                <settings>
+                    <confirm>
+                        <message translate="true">Are you sure you want to add these Item to the update que?</message>
+                        <title translate="true">Add to update Que</title>
+                    </confirm>
+                    <url path="channable/item/massQue"/>
+                    <type>que</type>
+                    <label translate="true">Add to Update Que</label>
+                </settings>
             </action>
         </massaction>
-        <paging name="listing_paging">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="storageConfig" xsi:type="array">
-                        <item name="provider" xsi:type="string">channable_item_grid.channable_item_grid.listing_top.bookmarks</item>
-                        <item name="namespace" xsi:type="string">current.paging</item>
-                    </item>
-                    <item name="selectProvider" xsi:type="string">channable_item_grid.channable_item_grid.channable_item_columns.ids</item>
-                </item>
-            </argument>
-        </paging>
-    </container>
+        <paging name="listing_paging"/>
+    </listingToolbar>
     <columns name="channable_item_columns">
+        <settings>
+            <editorConfig>
+                <param name="clientConfig" xsi:type="array">
+                    <item name="saveUrl" xsi:type="url" path="*/*/inlineEdit"/>
+                    <item name="validateBeforeSave" xsi:type="boolean">false</item>
+                </param>
+                <param name="indexField" xsi:type="string">item_id</param>
+                <param name="enabled" xsi:type="boolean">true</param>
+                <param name="selectProvider" xsi:type="string">channable_item_grid.channable_item_grid.channable_item_columns.ids</param>
+            </editorConfig>
+            <childDefaults>
+                <param name="fieldAction" xsi:type="array">
+                    <item name="provider" xsi:type="string">channable_item_grid.channable_item_grid.channable_item_columns_editor</item>
+                    <item name="target" xsi:type="string">startEdit</item>
+                    <item name="params" xsi:type="array">
+                        <item name="0" xsi:type="string">${ $.$data.rowIndex }</item>
+                        <item name="1" xsi:type="boolean">true</item>
+                    </item>
+                </param>
+            </childDefaults>
+        </settings>
         <selectionsColumn name="ids">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="indexField" xsi:type="string">item_id</item>
-                </item>
-            </argument>
+            <settings>
+                <indexField>item_id</indexField>
+            </settings>
         </selectionsColumn>
         <column name="item_id">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Item ID</item>
-                    <item name="sortOrder" xsi:type="number">10</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Item ID</label>
+            </settings>
         </column>
         <column name="store_id" class="Magento\Search\Ui\Component\Listing\Column\StoreView">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Store</item>
-                    <item name="sortOrder" xsi:type="number">20</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Store</label>
+            </settings>
         </column>
         <column name="title">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Product</item>
-                    <item name="sortOrder" xsi:type="number">30</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Product</label>
+            </settings>
         </column>
         <column name="gtin">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">GTIN</item>
-                    <item name="sortOrder" xsi:type="number">35</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">GTIN</label>
+            </settings>
         </column>
         <column name="price" class="Magento\Catalog\Ui\Component\Listing\Columns\Price">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">textRange</item>
-                    <item name="label" xsi:type="string" translate="true">Price</item>
-                    <item name="sortOrder" xsi:type="number">40</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Price</label>
+            </settings>
         </column>
         <column name="discount_price" class="Magento\Catalog\Ui\Component\Listing\Columns\Price">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">textRange</item>
-                    <item name="label" xsi:type="string" translate="true">Discount Price</item>
-                    <item name="sortOrder" xsi:type="number">50</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Discount Price</label>
+            </settings>
         </column>
         <column name="qty">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Qty</item>
-                    <item name="sortOrder" xsi:type="number">60</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Qty</label>
+            </settings>
         </column>
-        <column name="is_in_stock">
-            <argument name="data" xsi:type="array">
-                <item name="options" xsi:type="object">Magento\Config\Model\Config\Source\Yesno</item>
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">select</item>
-                    <item name="editor" xsi:type="string">select</item>
-                    <item name="label" xsi:type="string" translate="true">In Stock</item>
-                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/select</item>
-                    <item name="dataType" xsi:type="string">select</item>
-                    <item name="sortOrder" xsi:type="number">70</item>
-                </item>
-            </argument>
-        </column>
-        <column name="updated_at" class="Magento\Ui\Component\Listing\Columns\Date">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="sorting" xsi:type="string">desc</item>
-                    <item name="label" xsi:type="string" translate="true">Updated At</item>
-                    <item name="sortOrder" xsi:type="number">120</item>
-                </item>
-            </argument>
-        </column>
-        <column name="last_call" class="Magento\Ui\Component\Listing\Columns\Date">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Last Call</item>
-                    <item name="sortOrder" xsi:type="number">130</item>
-                </item>
-            </argument>
+        <column name="is_in_stock" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <filter>select</filter>
+                <editor>
+                    <editorType>select</editorType>
+                </editor>
+                <label translate="true">In Stock</label>
+                <dataType>select</dataType>
+            </settings>
         </column>
         <column name="status">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Status</item>
-                    <item name="sortOrder" xsi:type="number">140</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Status</label>
+            </settings>
         </column>
         <column name="call_result">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Result</item>
-                    <item name="sortOrder" xsi:type="number">150</item>
-                </item>
-            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Result</label>
+            </settings>
         </column>
-        <column name="needs_update">
-            <argument name="data" xsi:type="array">
-                <item name="options" xsi:type="object">Magento\Config\Model\Config\Source\Yesno</item>
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">select</item>
-                    <item name="editor" xsi:type="string">select</item>
-                    <item name="label" xsi:type="string" translate="true">Needs Update</item>
-                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/select</item>
-                    <item name="dataType" xsi:type="string">select</item>
-                    <item name="sortOrder" xsi:type="number">160</item>
-                </item>
-            </argument>
+        <column name="needs_update" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <filter>select</filter>
+                <editor>
+                    <editorType>select</editorType>
+                </editor>
+                <label translate="true">Needs Update</label>
+                <dataType>select</dataType>
+            </settings>
+        </column>
+        <column name="exclude_for_update" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <filter>select</filter>
+                <editor>
+                    <editorType>select</editorType>
+                </editor>
+                <label translate="true">Exclude for Update</label>
+                <dataType>select</dataType>
+            </settings>
+        </column>
+        <column name="updated_at" class="Magento\Ui\Component\Listing\Columns\Date" component="Magento_Ui/js/grid/columns/date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <sorting>desc</sorting>
+                <label translate="true">Updated At</label>
+            </settings>
+        </column>
+        <column name="last_call" class="Magento\Ui\Component\Listing\Columns\Date" component="Magento_Ui/js/grid/columns/date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Last Call</label>
+            </settings>
         </column>
         <actionsColumn name="actions" class="Magmodules\Channable\Ui\Component\Listing\Column\Item\Actions">
             <argument name="data" xsi:type="array">
@@ -277,13 +212,4 @@
             </argument>
         </actionsColumn>
     </columns>
-    <container name="sticky">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="component" xsi:type="string">Magento_Ui/js/grid/sticky/sticky</item>
-                <item name="toolbarProvider" xsi:type="string">channable_item_grid.channable_item_grid.listing_top</item>
-                <item name="listingProvider" xsi:type="string">channable_item_grid.channable_item_grid.channable_item_columns</item>
-            </item>
-        </argument>
-    </container>
 </listing>
