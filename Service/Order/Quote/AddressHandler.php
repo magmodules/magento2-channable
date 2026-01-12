@@ -99,8 +99,9 @@ class AddressHandler
         $storeId = $quote->getStoreId();
         $customerId = $quote->getCustomerId();
 
+        $customer = $orderData['customer'];
         $address = $orderData[$type === 'billing' ? 'billing' : 'shipping'];
-        $telephone = $orderData['customer']['mobile'] ?? $orderData['customer']['phone'] ?? '000';
+        $telephone = $customer['mobile'] ?? $customer['phone'] ?? $address['phone'] ?? '000';
         $company = $this->getCompany($address['company'], (int)$storeId);
 
         $email = $this->cleanEmail($address['email']);

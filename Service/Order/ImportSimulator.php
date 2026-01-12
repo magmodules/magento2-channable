@@ -160,8 +160,8 @@ class ImportSimulator
             "shipment_promise" => "2021-09-06 23:00:00000000",
             "customer" => [
                 "gender" => "male",
-                "phone" => "01234567890",
-                "mobile" => "01234567890",
+                "phone" => "+31-(0)123456789",
+                "mobile" => "+31-(0)634567890",
                 "email" => "dontemail@me.net",
                 "first_name" => "Test",
                 "middle_name" => "From",
@@ -186,7 +186,8 @@ class ImportSimulator
                 "state" => $country == "US" ? "Texas" : "",
                 "state_code" => $country == "US" ? "TX" : "",
                 "vat_number" => "",
-                "vat_id" => "NL123456790B01"
+                "vat_id" => "NL123456790B01",
+                "phone" => "+32-0123456789",
             ],
             "shipping" => [
                 "first_name" => "Test",
@@ -204,7 +205,8 @@ class ImportSimulator
                 "country_code" => $country,
                 "state" => $country == "US" ? "Texas" : "",
                 "state_code" => $country == "US" ? "TX" : "",
-                "pickup_point_name" => null
+                "pickup_point_name" => null,
+                "phone" => "+33-0123456789",
             ],
             "price" => [
                 "payment_method" => "bol",
