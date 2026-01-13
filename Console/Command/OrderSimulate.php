@@ -154,7 +154,7 @@ class OrderSimulate extends Command
         }
 
         if ($lvb = $input->getOption(self::INPUT_KEY_LVB)) {
-            $options['lvb'] = (boolean)$lvb;
+            $options['lvb'] = (bool)$lvb;
         }
 
         if ($country = $input->getOption(self::INPUT_KEY_COUNTRY_CODE)) {

@@ -256,6 +256,7 @@ class Item extends AbstractModel
         if (!empty($config['api']['webhook'])) {
             $items = $this->itemFactory->create()->getCollection()
                 ->addFieldToFilter('store_id', $storeId)
+                ->addFieldToFilter('exclude_for_update', ['neq' => 1])
                 ->setOrder('updated_at', 'ASC');
             if ($itemIds !== null) {
                 $items->addFieldToFilter('item_id', ['in' => $itemIds]);

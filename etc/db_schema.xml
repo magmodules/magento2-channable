@@ -66,12 +66,16 @@
         <column name="call_result" xsi:type="varchar" length="255" comment="Call Result"/>
         <column name="status" xsi:type="varchar" length="255" comment="Status"/>
         <column name="needs_update" xsi:type="smallint" padding="2" nullable="true" unsigned="true" identity="false" default="0" comment="Needs Update"/>
+        <column name="exclude_for_update" xsi:type="smallint" padding="2" nullable="true" unsigned="true" identity="false" default="0" comment="Exclude for Update"/>
         <column name="created_at" xsi:type="timestamp" on_update="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
         <column name="updated_at" xsi:type="timestamp" on_update="true" default="CURRENT_TIMESTAMP" comment="Updated At"/>
         <column name="last_call" xsi:type="timestamp" on_update="false" comment="Updated At"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="item_id"/>
         </constraint>
+        <index referenceId="CHANNABLE_ITEMS_EXCLUDE_FOR_UPDATE" indexType="btree">
+            <column name="exclude_for_update"/>
+        </index>
         <index referenceId="CHANNABLE_ITEMS_STORE_ID" indexType="btree">
             <column name="store_id"/>
         </index>

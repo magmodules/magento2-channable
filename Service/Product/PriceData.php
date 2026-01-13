@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magmodules\Channable\Service\Product;
 
+use Magento\Bundle\Model\Product\Price;
 use Magento\Catalog\Helper\Data as CatalogHelper;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\CatalogPrice;
@@ -45,7 +46,7 @@ class PriceData
      * @return array
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public function execute(array $config, Product$product): array
+    public function execute(array $config, Product $product): array
     {
         switch ($product->getTypeId()) {
             case 'configurable':
@@ -90,6 +91,10 @@ class PriceData
                 break;
             case 'bundle':
                 $price = $product->getPrice();
+                if ((int)$product->getPriceType() === Price::PRICE_TYPE_DYNAMIC) {
+                    $product['min_price'] = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getBaseAmount();
+                    $product['max_price'] = $product->getPriceInfo()->getPrice('final_price')->getMaximalPrice()->getBaseAmount();
+                }
                 $finalPrice = $product->getFinalPrice();
                 $specialPrice = $product->getSpecialPrice();
                 $rulePrice = $this->ruleFactory->create()->getRulePrice(
