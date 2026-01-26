@@ -88,7 +88,9 @@ class CalculatePrice
                 $store,
                 $quote->getCustomerId()
             );
-            $percent = $this->taxCalculation->getRate($request->setData('product_tax_class_id', $taxRateId));
+            $percent = $this->taxCalculation->getRate(
+                $request->setData('product_class_id', $taxRateId)
+            );
             $amount = ($amount / (100 + $percent) * 100);
         }
 
