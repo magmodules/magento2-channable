@@ -58,11 +58,14 @@ class CreateCreditmemo
         }
 
         $item = $return->getItem();
-        if (!isset($item['gtin'])) {
-            throw new InputException(__('GTIN is missing in return item data.'));
+        $gtin = $item['gtin'] ?? null;
+        $productId = isset($item['id']) && is_numeric($item['id']) ? (int)$item['id'] : null;
+
+        if ($gtin === null && $productId === null) {
+            throw new InputException(__('GTIN and product ID are both missing in return item data.'));
         }
 
-        if (!$sku = $this->getSkuFromGtin->execute($item['gtin'], (int)$return->getStoreId())) {
+        if (!$sku = $this->getSkuFromGtin->execute($gtin, (int)$return->getStoreId(), $productId)) {
             throw new InputException(__('Unable to find SKU for GTIN.'));
         }
 
