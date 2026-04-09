@@ -527,6 +527,9 @@ class Product extends AbstractHelper
             }
 
             foreach ($galleryImages as $image) {
+                if (!empty($image['media_type']) && $image['media_type'] === 'external-video') {
+                    continue;
+                }
                 if (empty($image['disabled']) || !empty($config['inc_hidden_image'])) {
                     $images[] = $this->catalogProductMediaConfig->getMediaUrl($image['file']);
                 }
