@@ -1,0 +1,12 @@
+{
+  "name": "end-2-end-tests",
+  "version": "1.0.0",
+  "description": "End-to-end tests for Channable cross-border tax calculation",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.47.2",
+    "@types/node": "^22.7.4"
+  }
+}
