@@ -165,7 +165,7 @@ class Repository implements ChannableOrderRepository
      */
     public function createByDataArray(array $orderData, int $storeId): DataInterface
     {
-        $channableOrderId = $this->getByChannableId((int)$orderData['channable_id']);
+        $channableOrderId = $this->getByChannableId((int)$orderData['channable_id'], $storeId);
         if ($channableOrderId) {
             $channableOrder = $this->get((int)$channableOrderId);
             $channableOrder->setAttempts($channableOrder->getAttempts() + 1);
@@ -190,9 +190,9 @@ class Repository implements ChannableOrderRepository
     /**
      * {@inheritDoc}
      */
-    public function getByChannableId(int $channableId)
+    public function getByChannableId(int $channableId, ?int $storeId = null)
     {
-        return $this->channableOrderResource->getByChannableId($channableId);
+        return $this->channableOrderResource->getByChannableId($channableId, $storeId);
     }
 
     /**

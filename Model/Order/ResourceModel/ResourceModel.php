@@ -61,13 +61,19 @@ class ResourceModel extends AbstractDb
      * @param int $channableId
      * @return bool
      */
-    public function getByChannableId($channableId)
+    public function getByChannableId($channableId, ?int $storeId = null)
     {
         $connection = $this->getConnection();
         $select = $connection->select()
             ->from($this->getTable('channable_orders'), self::ID_FIELD_NAME)
             ->where('channable_id = :channable_id');
         $bind = [':channable_id' => $channableId];
+
+        if ($storeId !== null) {
+            $select->where('store_id = :store_id');
+            $bind[':store_id'] = $storeId;
+        }
+
         return $connection->fetchOne($select, $bind);
     }
 
