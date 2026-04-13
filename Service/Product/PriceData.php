@@ -202,8 +202,12 @@ class PriceData
         if ($extraRenderedPriceFields = preg_grep('/^rendered_price__/', array_keys($attributes))) {
             foreach ($extraRenderedPriceFields as $label) {
                 $field = $attributes[$label];
-                $renderCurrency = $field['actions'][0] ? explode('_', $field['actions'][0])[1] : null;
-                if ($renderCurrency !== $config['currency']) {
+                $action = $field['actions'][0] ?? null;
+                $renderCurrency = ($action && strpos($action, 'currency_') === 0)
+                    ? explode('_', $action, 2)[1]
+                    : null;
+
+                if ($renderCurrency !== null && $renderCurrency !== $config['currency']) {
                     $newConfig = $config;
                     $newConfig['currency'] = $renderCurrency;
                     $newConfig['exchange_rate'] = $config['exchange_rate_' . $renderCurrency] ?? 1;
@@ -212,16 +216,18 @@ class PriceData
                             $prices[$field['label']] = $this->processPrice($product, $price, $newConfig);
                             break;
                         case 'min_price':
-                            $price = $minPrice ?? $price;
-                            $prices[$field['label']] = $this->processPrice($product, $price, $newConfig);
+                            $prices[$field['label']] = $this->processPrice($product, $minPrice ?? $price, $newConfig);
                             break;
                         case 'max_price':
-                            $price = $maxPrice ?? $price;
-                            $prices[$field['label']] = $this->processPrice($product, $price, $newConfig);
+                            $prices[$field['label']] = $this->processPrice($product, $maxPrice ?? $price, $newConfig);
                             break;
                     }
                 } else {
-                    $prices[$field['label']] = $prices[$field['price_source']] ?? null;
+                    $value = $prices[$field['price_source']] ?? null;
+                    if ($action === 'round' && $value !== null) {
+                        $value = preg_replace('/[\d.]+/', number_format(round((float)$value), 2, '.', ''), $value, 1);
+                    }
+                    $prices[$field['label']] = $value;
                 }
             }
         }
