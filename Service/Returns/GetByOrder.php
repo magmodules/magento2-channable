@@ -74,15 +74,17 @@ class GetByOrder
      */
     private function getSkuFromReturnData($itemData, int $storeId): ?string
     {
-        if (is_array($itemData)) {
-            return $this->getSkuFromGtin->execute($itemData['gtin'] ?? null, $storeId);
+        if (!is_array($itemData)) {
+            try {
+                $itemData = $this->json->unserialize($itemData);
+            } catch (\Exception $exception) {
+                return null;
+            }
         }
 
-        try {
-            $itemData = $this->json->unserialize($itemData);
-            return $this->getSkuFromGtin->execute($itemData['gtin'] ?? null, $storeId);
-        } catch (\Exception $exception) {
-            return null;
-        }
+        $gtin = $itemData['gtin'] ?? null;
+        $productId = isset($itemData['id']) && is_numeric($itemData['id']) ? (int)$itemData['id'] : null;
+
+        return $this->getSkuFromGtin->execute($gtin, $storeId, $productId);
     }
 }
