@@ -1,0 +1,4 @@
+/.github export-ignore
+/docs export-ignore
+/Test export-ignore
+phpstan.neon export-ignore
