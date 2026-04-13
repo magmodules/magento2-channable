@@ -12,7 +12,6 @@ use Magento\CatalogInventory\Observer\ItemsForReindex;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -24,117 +23,37 @@ use Magmodules\Channable\Api\Order\Data\DataInterface as ChannableOrderData;
 use Magmodules\Channable\Api\Order\RepositoryInterface as ChannableOrderRepository;
 use Magmodules\Channable\Exceptions\CouldNotImportOrder;
 use Magmodules\Channable\Model\Config\Source\Status;
+use Magmodules\Channable\Service\Order\Currency\Converter as CurrencyConverter;
 
 /**
  * Class Order Import
  */
 class Import
 {
-    /**
-     * Exception messages
-     */
     private const LVB_AUTO_SHIP_MESSAGE = 'LVB Order, automatically shipped';
     private const COULD_NOT_IMPORT_ORDER = 'Could not import order %1: %2';
 
-    /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
-     * @var QuoteManagement
-     */
-    private $quoteManagement;
-
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-
-    /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
-
-    /**
-     * @var ItemsForReindex
-     */
-    private $itemsForReindex;
-
-    /**
-     * @var Items\Add
-     */
-    private $addItems;
-
-    /**
-     * @var Quote\Create
-     */
-    private $createQuote;
-
-    /**
-     * @var Shipping\CalculatePrice
-     */
-    private $calculateShippingPrice;
-
-    /**
-     * @var Shipping\SetShippingMethod
-     */
-    private $setShippingMethod;
-
-    /**
-     * @var Process\CreateInvoice
-     */
-    private $createInvoice;
-
-    /**
-     * @var Process\SendOrderEmail
-     */
-    private $sendOrderEmail;
-
-    /**
-     * @var Process\CreateShipment
-     */
-    private $createShipment;
-
-    /**
-     * @var Process\AddPaymentData
-     */
-    private $addPaymentData;
-
-    /**
-     * @var Process\GetCustomIncrementId
-     */
-    private $getCustomIncrementId;
-
-    /**
-     * @var ChannableOrderRepository
-     */
-    private $channableOrderRepository;
-
-    /**
-     * @var Shipping\GetDescription
-     */
-    private $getShippingDescription;
-
-    /**
-     * @var CartRepositoryInterface
-     */
-    protected $quoteRepository;
-
-    /**
-     * @var ManagerInterface
-     */
-    private $eventManager;
-
-    /**
-     * @var LoggerRepository
-     */
-    private $logger;
+    protected CartRepositoryInterface $quoteRepository;
+    private ConfigProvider $configProvider;
+    private StoreManagerInterface $storeManager;
+    private QuoteManagement $quoteManagement;
+    private OrderRepositoryInterface $orderRepository;
+    private CheckoutSession $checkoutSession;
+    private ItemsForReindex $itemsForReindex;
+    private Items\Add $addItems;
+    private Quote\Create $createQuote;
+    private Shipping\CalculatePrice $calculateShippingPrice;
+    private Shipping\SetShippingMethod $setShippingMethod;
+    private Process\CreateInvoice $createInvoice;
+    private Process\SendOrderEmail $sendOrderEmail;
+    private Process\CreateShipment $createShipment;
+    private Process\AddPaymentData $addPaymentData;
+    private Process\GetCustomIncrementId $getCustomIncrementId;
+    private ChannableOrderRepository $channableOrderRepository;
+    private Shipping\GetDescription $getShippingDescription;
+    private ManagerInterface $eventManager;
+    private LoggerRepository $logger;
+    private CurrencyConverter $currencyConverter;
 
     public function __construct(
         ConfigProvider $configProvider,
@@ -156,7 +75,8 @@ class Import
         ChannableOrderRepository $channableOrderRepository,
         CartRepositoryInterface $quoteRepository,
         ManagerInterface $eventManager,
-        LoggerRepository $logger
+        LoggerRepository $logger,
+        CurrencyConverter $currencyConverter
     ) {
         $this->configProvider = $configProvider;
         $this->storeManager = $storeManager;
@@ -178,13 +98,13 @@ class Import
         $this->quoteRepository = $quoteRepository;
         $this->eventManager = $eventManager;
         $this->logger = $logger;
+        $this->currencyConverter = $currencyConverter;
     }
 
     /**
      * Create a Magento order from Channable order data
      *
      * @param ChannableOrderData $orderData
-     *
      * @return OrderInterface $order
      * @throws CouldNotImportOrder
      * @throws LocalizedException
@@ -236,12 +156,18 @@ class Import
             $order->setTransactionFee($quote->getTransactionFee());
 
             if (isset($orderData['price']['discount']) && !empty((float)$orderData['price']['discount'])) {
+                $orderCurrency = $orderData['price']['currency'] ?? '';
                 $discountAmount = abs((float)$orderData['price']['discount']);
+                $baseDiscountAmount = $this->currencyConverter->convertToBase(
+                    $discountAmount,
+                    $orderCurrency,
+                    $storeId
+                );
                 $order->setDiscountDescription($orderData['channel_name']);
-                $order->setBaseDiscountAmount($discountAmount * -1);
+                $order->setBaseDiscountAmount($baseDiscountAmount * -1);
                 $order->setDiscountAmount($discountAmount * -1);
                 $order->setGrandTotal($order->getGrandTotal() - $discountAmount);
-                $order->setBaseGrandTotal($order->getBaseGrandTotal() - $discountAmount);
+                $order->setBaseGrandTotal($order->getBaseGrandTotal() - $baseDiscountAmount);
             }
 
             $store->setCurrentCurrencyCode($store->getBaseCurrencyCode());
@@ -287,9 +213,8 @@ class Import
      * Check if we need to invoice and ship order
      *
      * @param OrderInterface $order
-     * @param int            $storeId
-     * @param bool           $lvbOrder
-     *
+     * @param int $storeId
+     * @param bool $lvbOrder
      * @return void
      */
     private function afterOrderImport(OrderInterface $order, int $storeId, bool $lvbOrder)
@@ -316,8 +241,7 @@ class Import
      * Add 'success' data to Channable Order on successfully import
      *
      * @param ChannableOrderData $channableOrder
-     * @param OrderInterface     $order
-     *
+     * @param OrderInterface $order
      * @throws LocalizedException
      */
     public function setChannableOrderImportSuccess(ChannableOrderData $channableOrder, OrderInterface $order): void
@@ -335,7 +259,6 @@ class Import
      *
      * @param ChannableOrderData $channableOrder
      * @param string $errorMsg
-     *
      * @throws LocalizedException
      */
     public function setChannableOrderImportError(ChannableOrderData $channableOrder, string $errorMsg): void

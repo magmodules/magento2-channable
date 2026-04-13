@@ -132,11 +132,39 @@ interface OrderInterface extends ReturnsInterface
     /**
      * Check whether tax needs to be calculated
      *
+     * @deprecated Use priceIncludesTax() or shippingIncludesTax() instead
+     * @see priceIncludesTax()
+     * @see shippingIncludesTax()
+     *
      * @param string $type
      * @param int|null $storeId
      * @return bool
      */
     public function getNeedsTaxCalculation(string $type, ?int $storeId = null): bool;
+
+    /**
+     * Whether catalog prices are entered including tax
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function priceIncludesTax(?int $storeId = null): bool;
+
+    /**
+     * Whether shipping prices are entered including tax
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function shippingIncludesTax(?int $storeId = null): bool;
+
+    /**
+     * Get shipping origin country ID
+     *
+     * @param int|null $storeId
+     * @return string|null
+     */
+    public function getShippingOriginCountry(?int $storeId = null): ?string;
 
     /**
      * Tax Class ID used for shipping
@@ -145,6 +173,14 @@ interface OrderInterface extends ReturnsInterface
      * @return string
      */
     public function getTaxClassShipping(?int $storeId = null): string;
+
+    /**
+     * Check whether cross-border trade is enabled
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function isCrossBorderTradeEnabled(?int $storeId = null): bool;
 
     /**
      * Invoice the order after import

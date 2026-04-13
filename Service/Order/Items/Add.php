@@ -20,9 +20,11 @@ use Magento\Framework\Phrase;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\ResourceModel\Quote\Item;
 use Magento\Store\Api\Data\StoreInterface;
+use Magento\Framework\DataObject;
 use Magento\Tax\Model\Calculation as TaxCalculation;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
 use Magmodules\Channable\Exceptions\CouldNotImportOrder;
+use Magmodules\Channable\Service\Order\Currency\Converter as CurrencyConverter;
 use Magento\Bundle\Model\Product\Price;
 
 /**
@@ -31,53 +33,21 @@ use Magento\Bundle\Model\Product\Price;
 class Add
 {
 
-    /**
-     * Exception messages
-     */
     public const EMPTY_ITEMS_EXCEPTION = 'No products found in order';
     public const PRODUCT_NOT_FOUND_EXCEPTION = 'Product "%1" not found in catalog (ID: %2)';
     public const PRODUCT_EXCEPTION = 'Product "%1" => %2';
-    /**
-     * @var ObjectFactory
-     */
-    protected $objectFactory;
-    /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-    /**
-     * @var ProductRepositoryInterface
-     */
-    private $productRepository;
-    /**
-     * @var StockRegistryInterface
-     */
-    private $stockRegistry;
-    /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
-    /**
-     * @var TaxCalculation
-     */
-    private $taxCalculation;
-    /**
-     * @var ResourceConnection
-     */
-    private $resourceConnection;
-    /**
-     * @var Item
-     */
-    private $itemResourceModel;
 
-    /**
-     * @param ConfigProvider $configProvider
-     * @param ProductRepositoryInterface $productRepository
-     * @param StockRegistryInterface $stockRegistry
-     * @param CheckoutSession $checkoutSession
-     * @param ResourceConnection $resourceConnection
-     * @param TaxCalculation $taxCalculation
-     */
+    protected ObjectFactory $objectFactory;
+
+    private ConfigProvider $configProvider;
+    private ProductRepositoryInterface $productRepository;
+    private StockRegistryInterface $stockRegistry;
+    private CheckoutSession $checkoutSession;
+    private TaxCalculation $taxCalculation;
+    private ResourceConnection $resourceConnection;
+    private Item $itemResourceModel;
+    private CurrencyConverter $currencyConverter;
+
     public function __construct(
         ConfigProvider $configProvider,
         ProductRepositoryInterface $productRepository,
@@ -86,7 +56,8 @@ class Add
         ResourceConnection $resourceConnection,
         TaxCalculation $taxCalculation,
         ObjectFactory $objectFactory,
-        Item $itemResourceModel
+        Item $itemResourceModel,
+        CurrencyConverter $currencyConverter
     ) {
         $this->configProvider = $configProvider;
         $this->productRepository = $productRepository;
@@ -96,6 +67,7 @@ class Add
         $this->taxCalculation = $taxCalculation;
         $this->objectFactory = $objectFactory;
         $this->itemResourceModel = $itemResourceModel;
+        $this->currencyConverter = $currencyConverter;
     }
 
     /**
@@ -120,11 +92,20 @@ class Add
         $isBusinessOrder = $this->configProvider->isBusinessOrderEnabled((int)$store->getId()) &&
             isset($data['customer']['business_order']) && ($data['customer']['business_order'] == true);
 
+        $orderCurrency = $data['price']['currency'] ?? '';
+        $storeId = (int)$store->getId();
+
         try {
             foreach ($data['products'] as $item) {
                 $product = $this->getProductById((int)$item['id'], (int)$store->getStoreId());
                 $price = $this->getProductPrice($item, $product, $store, $quote, $isBusinessOrder);
-                $product = $this->setProductData($product, $price, $store, $lvbOrder);
+                $basePrice = $this->currencyConverter->convertToBase($price, $orderCurrency, $storeId);
+                $channableBasePrice = $this->currencyConverter->convertToBase(
+                    (float)$item['price'],
+                    $orderCurrency,
+                    $storeId
+                );
+                $product = $this->setProductData($product, $basePrice, $store, $lvbOrder);
                 if ($isBusinessOrder && (isset($item['price_tax']) && $item['price_tax'] == 0)) {
                     $product->setTaxClassId(0);
                 }
@@ -151,6 +132,7 @@ class Add
                 }
 
                 $addedItem->setOriginalCustomPrice($price);
+                $addedItem->setOriginalPrice($channableBasePrice);
                 $this->itemResourceModel->save($addedItem);
                 $qty += (int)$item['quantity'];
             }
@@ -217,21 +199,97 @@ class Add
             return $price;
         }
 
-        if (!$this->configProvider->getNeedsTaxCalculation('price', (int)$store->getId())) {
-            $request = $this->taxCalculation->getRateRequest(
-                $quote->getShippingAddress(),
-                $quote->getBillingAddress(),
-                $quote->getCustomerTaxClassId(),
-                $store,
-                $quote->getCustomerId()
-            );
-            $percent = $this->taxCalculation->getRate(
-                $request->setData('product_class_id', $product->getData('tax_class_id'))
-            );
-            $price = $price / (100 + $percent) * 100;
+        if (!$this->configProvider->priceIncludesTax((int)$store->getId())) {
+            $price = $this->stripTaxFromPrice($price, $item, $product, $store, $quote);
+        } else {
+            $price = $this->compensateCrossBorderTax($price, $product, $store, $quote);
         }
 
         return $price - $this->getProductWeeTax($product, $quote);
+    }
+
+    /**
+     * Strip tax from price, using Channable's price_tax for cross-border orders
+     * to avoid rate mismatches between origin and destination tax rates.
+     *
+     * @param float $price
+     * @param array $item
+     * @param ProductInterface $product
+     * @param StoreInterface $store
+     * @param Quote $quote
+     * @return float
+     */
+    private function stripTaxFromPrice(
+        float $price,
+        array $item,
+        ProductInterface $product,
+        StoreInterface $store,
+        Quote $quote
+    ): float {
+        $request = $this->taxCalculation->getRateRequest(
+            $quote->getShippingAddress(),
+            $quote->getBillingAddress(),
+            $quote->getCustomerTaxClassId(),
+            $store,
+            $quote->getCustomerId()
+        );
+        $percent = $this->taxCalculation->getRate(
+            $request->setData('product_class_id', $product->getData('tax_class_id'))
+        );
+
+        $originRequest = $this->getOriginRateRequest($store, $quote);
+        if (!$originRequest) {
+            return $price / (100 + $percent) * 100;
+        }
+
+        $originRequest->setData('product_class_id', $product->getData('tax_class_id'));
+
+        if ($this->isCrossBorderOrder($originRequest, $request)
+            && !$this->configProvider->isCrossBorderTradeEnabled((int)$store->getId())
+            && isset($item['price_tax'])
+            && (float)$item['price_tax'] > 0
+        ) {
+            return $price - (float)$item['price_tax'];
+        }
+
+        return $price / (100 + $percent) * 100;
+    }
+
+    /**
+     * Build origin tax rate request from shipping origin config.
+     *
+     * Magento's TaxCalculation::getRateOriginRequest() is protected and returns null
+     * when called externally via interceptor. This method reads the origin country
+     * from the config interface instead.
+     *
+     * @param StoreInterface $store
+     * @param Quote $quote
+     * @return DataObject|null
+     */
+    private function getOriginRateRequest(StoreInterface $store, Quote $quote): ?DataObject
+    {
+        $countryId = $this->configProvider->getShippingOriginCountry((int)$store->getId());
+        if (!$countryId) {
+            return null;
+        }
+
+        return new DataObject([
+            'country_id' => $countryId,
+            'customer_class_id' => $quote->getCustomerTaxClassId(),
+        ]);
+    }
+
+    /**
+     * Check if destination country differs from shipping origin country.
+     *
+     * @param DataObject $originRequest
+     * @param DataObject $destRequest
+     * @return bool
+     */
+    private function isCrossBorderOrder(DataObject $originRequest, DataObject $destRequest): bool
+    {
+        return $destRequest->getCountryId()
+            && $originRequest->getCountryId() !== $destRequest->getCountryId();
     }
 
     /**
@@ -261,6 +319,62 @@ class Add
             ->limit(1);
 
         return (float)$connection->fetchOne($select);
+    }
+
+    /**
+     * Compensate for cross-border tax rate mismatch when cross_border_trade is disabled.
+     *
+     * When cross_border_trade_enabled = 0, Magento strips origin tax and applies destination tax,
+     * which changes the gross price. Pre-adjust the price so the final result matches the
+     * original Channable price.
+     *
+     * @param float $price
+     * @param ProductInterface $product
+     * @param StoreInterface $store
+     * @param Quote $quote
+     * @return float
+     */
+    private function compensateCrossBorderTax(
+        float $price,
+        ProductInterface $product,
+        StoreInterface $store,
+        Quote $quote
+    ): float {
+        if ($this->configProvider->isCrossBorderTradeEnabled((int)$store->getId())) {
+            return $price;
+        }
+
+        $originRequest = $this->getOriginRateRequest($store, $quote);
+        if (!$originRequest || !$originRequest->getCountryId()) {
+            return $price;
+        }
+
+        $destRequest = $this->taxCalculation->getRateRequest(
+            $quote->getShippingAddress(),
+            $quote->getBillingAddress(),
+            $quote->getCustomerTaxClassId(),
+            $store,
+            $quote->getCustomerId()
+        );
+        if (!$destRequest || !$destRequest->getCountryId()) {
+            return $price;
+        }
+
+        if (!$this->isCrossBorderOrder($originRequest, $destRequest)) {
+            return $price;
+        }
+
+        $originRequest->setData('product_class_id', $product->getData('tax_class_id'));
+        $originRate = $this->taxCalculation->getRate($originRequest);
+
+        $destRequest->setData('product_class_id', $product->getData('tax_class_id'));
+        $destRate = $this->taxCalculation->getRate($destRequest);
+
+        if ($originRate != $destRate && (100 + $destRate) > 0) {
+            $price = $price * (100 + $originRate) / (100 + $destRate);
+        }
+
+        return $price;
     }
 
     /**
