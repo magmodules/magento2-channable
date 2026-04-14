@@ -31,56 +31,22 @@ class ImportSimulator
     /**
      * Available options
      */
-    public const PARAMS = ['country', 'lvb', 'product_id', 'qty'];
+    public const PARAMS = ['country', 'lvb', 'product_id', 'qty', 'currency', 'price'];
 
     /**
      * Exception message
      */
     private const ORDER_IMPORT_DISABLED = 'Order import not enabled for this store (Store ID: %1)';
 
-    /**
-     * @var int
-     */
-    private $storeId = null;
+    private ?int $storeId = null;
+    private Import $import;
+    private ProductRepositoryInterface $productRepository;
+    private ProductCollectionFactory $productCollection;
+    private ConfigProvider $configProvider;
+    private Random $random;
+    private ChannableOrderRepository  $channableOrderRepository;
+    private Emulation $appEmulation;
 
-    /**
-     * @var Import
-     */
-    private $import;
-    /**
-     * @var ProductRepositoryInterface
-     */
-    private $productRepository;
-    /**
-     * @var ProductCollectionFactory
-     */
-    private $productCollection;
-    /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-    /**
-     * @var Random
-     */
-    private $random;
-    /**
-     * @var ChannableOrderRepository
-     */
-    private $channableOrderRepository;
-    /**
-     * @var Emulation
-     */
-    private $appEmulation;
-
-    /**
-     * @param Import $import
-     * @param ProductRepositoryInterface $productRepository
-     * @param ProductCollectionFactory $productCollection
-     * @param ConfigProvider $configProvider
-     * @param Random $random
-     * @param ChannableOrderRepository $channableOrderRepository
-     * @param Emulation $appEmulation
-     */
     public function __construct(
         Import $import,
         ProductRepositoryInterface $productRepository,
@@ -144,7 +110,8 @@ class ImportSimulator
      */
     public function getTestData(array $params): array
     {
-        $country = !empty($params['country']) ? $params['country'] : 'NL';
+        $country = $params['country'] ?? 'NL';
+        $currency = $params['currency'] ?? 'EUR';
         $product = $this->getProductData($params);
         $random = $this->random->getRandomString(5, '0123456789');
 
@@ -210,7 +177,7 @@ class ImportSimulator
             ],
             "price" => [
                 "payment_method" => "bol",
-                "currency" => "EUR",
+                "currency" => $currency,
                 "subtotal" => $product['price'],
                 "payment" => 0,
                 "shipping" => 0,

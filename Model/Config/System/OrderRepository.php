@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magmodules\Channable\Model\Config\System;
 
 use Magento\CatalogInventory\Model\Configuration as CatalogInventoryConfiguration;
+use Magento\Shipping\Model\Config as ShippingConfig;
 use Magmodules\Channable\Api\Config\System\OrderInterface;
 use Magento\Tax\Model\Config as TaxConfig;
 
@@ -86,7 +87,7 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getCustomerStreetLines(int $storeId): int
     {
@@ -94,7 +95,7 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getNeedsTaxCalculation(string $type, ?int $storeId = null): bool
     {
@@ -106,11 +107,43 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
+     */
+    public function priceIncludesTax(?int $storeId = null): bool
+    {
+        return $this->isSetFlag(TaxConfig::CONFIG_XML_PATH_PRICE_INCLUDES_TAX, (int)$storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function shippingIncludesTax(?int $storeId = null): bool
+    {
+        return $this->isSetFlag(TaxConfig::CONFIG_XML_PATH_SHIPPING_INCLUDES_TAX, (int)$storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getShippingOriginCountry(?int $storeId = null): ?string
+    {
+        return $this->getStoreValue(ShippingConfig::XML_PATH_ORIGIN_COUNTRY_ID, (int)$storeId) ?: null;
+    }
+
+    /**
+     * @inheritDoc
      */
     public function getTaxClassShipping(?int $storeId = null): string
     {
         return (string)$this->getStoreValue(TaxConfig::CONFIG_XML_PATH_SHIPPING_TAX_CLASS, (int)$storeId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isCrossBorderTradeEnabled(?int $storeId = null): bool
+    {
+        return $this->isSetFlag(TaxConfig::CONFIG_XML_PATH_CROSS_BORDER_TRADE_ENABLED, $storeId);
     }
 
     /**
@@ -258,7 +291,7 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getWebhookUrl(int $storeId): string
     {
@@ -271,7 +304,7 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getStatusUrl(int $storeId): string
     {
@@ -283,7 +316,7 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getCarrierTitle(?int $storeId = null): string
     {
@@ -295,7 +328,7 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getCarrierName(?int $storeId = null): string
     {
@@ -307,7 +340,7 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getEnableBackorders(?int $storeId = null): int
     {
@@ -315,7 +348,7 @@ class OrderRepository extends ReturnsRepository implements OrderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getDefaultManageStock(?int $storeId = null): bool
     {

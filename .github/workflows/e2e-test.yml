@@ -1,0 +1,114 @@
+name: End-2-end Tests
+on:
+  push:
+    tags:
+      - '*'
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - labeled
+  workflow_dispatch:
+
+jobs:
+  e2e-tests:
+    if: ${{ github.event.label.name == 'run_e2e_tests' || github.event.action != 'labeled' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - PHP_VERSION: php83-fpm
+            MAGENTO_VERSION: 2.4.7-p3
+    runs-on: ubuntu-latest
+    env:
+      PHP_VERSION: ${{ matrix.PHP_VERSION }}
+      MAGENTO_VERSION: ${{ matrix.MAGENTO_VERSION }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start the Magento container
+        run: |
+          openssl req -x509 -newkey rsa:4096 \
+            -keyout .github/workflows/templates/nginx-proxy/magento.test.key \
+            -out .github/workflows/templates/nginx-proxy/magento.test.crt \
+            -days 365 -nodes -subj "/CN=magento.test"
+          docker compose -f .github/workflows/templates/docker-compose.yml up -d --quiet-pull
+
+      - name: Upload the code into the docker container
+        run: |
+          sed -i '/version/d' ./composer.json
+          docker cp $(pwd) magento-project-community-edition:/data/extensions/
+          docker cp $(pwd)/Test/End-2-end/fixtures/config-setter.php magento-project-community-edition:/data/pub/opt/
+          docker exec magento-project-community-edition ./install-composer-package magmodules/magento2-channable:@dev
+
+      - name: Activate the extension
+        run: |
+          docker exec magento-project-community-edition ./retry "php bin/magento module:enable Magmodules_Channable"
+          docker exec magento-project-community-edition ./retry "php bin/magento setup:upgrade --keep-generated --no-interaction"
+
+      - name: Configure Channable and tax rules
+        run: |
+          docker exec magento-project-community-edition /bin/bash /data/configure-channable.sh
+
+      - name: Generate Channable token
+        run: |
+          docker exec magento-project-community-edition bin/magento channable:generate:token --force=1
+          CHANNABLE_TOKEN=$(docker exec magento-project-community-edition php -r "
+            foreach (['/var/www/html/app/etc/env.php', '/data/app/etc/env.php'] as \$p) { if (file_exists(\$p)) { \$env = include \$p; break; } }
+            \$db = \$env['db']['connection']['default'];
+            \$pdo = new PDO('mysql:host='.\$db['host'].';dbname='.\$db['dbname'], \$db['username'], \$db['password']);
+            \$r = \$pdo->query(\"SELECT value FROM core_config_data WHERE path = 'magmodules_channable/general/token' LIMIT 1\");
+            echo \$r->fetchColumn();
+          ")
+          echo "CHANNABLE_TOKEN=$CHANNABLE_TOKEN" >> $GITHUB_ENV
+
+      - name: Prepare Magento
+        run: |
+          sudo echo "127.0.0.1 magento.test" | sudo tee -a /etc/hosts
+          docker exec magento-project-community-edition /bin/bash ./change-base-url https://magento.test/
+          docker exec magento-project-community-edition ./retry "bin/magento config:set admin/security/admin_account_sharing 1"
+          docker exec magento-project-community-edition ./retry "bin/magento config:set admin/security/session_lifetime 86400"
+          docker exec magento-project-community-edition ./retry "bin/magento config:set web/cookie/cookie_lifetime 86400"
+          docker exec magento-project-community-edition ./retry "php bin/magento setup:di:compile"
+          docker exec magento-project-community-edition ./retry "php bin/magento setup:static-content:deploy -f"
+          docker exec magento-project-community-edition ./retry "php bin/magento indexer:reindex"
+
+      - name: Check if we can reach the Magento frontend
+        run: |
+          curl --fail-with-body -k -v -w "%{http_code}" https://magento.test/
+
+      - name: Check if we can reach the Magento backend
+        run: |
+          curl --fail-with-body -k -v -w "%{http_code}" https://magento.test/admin/
+
+      - name: Install Playwright dependencies
+        run: |
+          cd Test/End-2-end
+          npm install
+          npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: |
+          cd Test/End-2-end
+          BASE_URL="https://magento.test/" \
+          CHANNABLE_TOKEN="${CHANNABLE_TOKEN}" \
+          MAGENTO_CONTAINER="magento-project-community-edition" \
+          FORCE_COLOR=true \
+          npx playwright test
+
+      - name: Dump docker-compose logs
+        if: failure()
+        run: |
+          docker compose -f .github/workflows/templates/docker-compose.yml logs magento > magento.log
+
+      - name: Upload playwright logs
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: E2E logs - ${{ matrix.PHP_VERSION }} - ${{ matrix.MAGENTO_VERSION }}
+          retention-days: 3
+          path: |
+            Test/End-2-end/playwright-report
+            Test/End-2-end/test-results
+            magento-logs
+            magento.log
