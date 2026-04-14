@@ -42,12 +42,18 @@ class GetSkuFromGtin
     /**
      * @param string|null $gtin
      * @param int $storeId
+     * @param int|null $productId Fallback product entity ID (item.id from Channable)
      * @return string|null
      */
-    public function execute(?string $gtin, int $storeId): ?string
+    public function execute(?string $gtin, int $storeId, ?int $productId = null): ?string
     {
         $gtinAttribute = $this->getGtinAttributeCode($storeId);
-        if ($gtinAttribute == 'sku' || $gtinAttribute == null || $gtin == null) {
+
+        if ($gtin === null) {
+            return $this->resolveByProductId($productId, $storeId);
+        }
+
+        if ($gtinAttribute == 'sku' || $gtinAttribute == null) {
             return $gtin;
         }
 
@@ -74,11 +80,17 @@ class GetSkuFromGtin
             // Fallback: If no match found and GTIN is numeric, try loading by entity ID
             // This handles cases where channels (like Amazon) use Product ID instead of actual GTIN
             if (is_numeric($gtin)) {
-                try {
-                    $productById = $this->productRepository->getById((int)$gtin, false, $storeId);
-                    return $productById->getSku();
-                } catch (NoSuchEntityException $e) {
-                    // Product not found by ID, return null
+                $sku = $this->resolveByProductId((int)$gtin, $storeId);
+                if ($sku) {
+                    return $sku;
+                }
+            }
+
+            // Fallback: try item.id (Magento Product ID) when GTIN-based matching fails
+            if ($productId) {
+                $sku = $this->resolveByProductId($productId, $storeId);
+                if ($sku) {
+                    return $sku;
                 }
             }
         } catch (\Exception $exception) {
@@ -86,6 +98,25 @@ class GetSkuFromGtin
         }
 
         return null;
+    }
+
+    /**
+     * @param int|null $productId
+     * @param int $storeId
+     * @return string|null
+     */
+    private function resolveByProductId(?int $productId, int $storeId): ?string
+    {
+        if (!$productId) {
+            return null;
+        }
+
+        try {
+            $product = $this->productRepository->getById($productId, false, $storeId);
+            return $product->getSku();
+        } catch (NoSuchEntityException $e) {
+            return null;
+        }
     }
 
     /**

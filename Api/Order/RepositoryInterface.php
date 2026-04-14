@@ -100,7 +100,7 @@ interface RepositoryInterface
      *
      * @return int|bool
      */
-    public function getByChannableId(int $channableId);
+    public function getByChannableId(int $channableId, ?int $storeId = null);
 
     /**
      * @param array $orderData

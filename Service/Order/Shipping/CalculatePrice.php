@@ -11,49 +11,25 @@ use Magento\Quote\Model\Quote;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Tax\Model\Calculation as TaxCalculation;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magmodules\Channable\Service\Order\Currency\Converter as CurrencyConverter;
 
 /**
  * Get shipping price for quote
  */
 class CalculatePrice
 {
+    private ConfigProvider $configProvider;
+    private TaxCalculation $taxCalculation;
+    private CurrencyConverter $currencyConverter;
 
-    /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-    /**
-     * @var TaxCalculation
-     */
-    private $taxCalculation;
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-    /**
-     * @var PriceCurrencyInterface
-     */
-    private $priceManager;
-
-    /**
-     * CalculatePrice constructor.
-     * @param ConfigProvider $configProvider
-     * @param TaxCalculation $taxCalculation
-     * @param StoreManagerInterface $storeManager
-     * @param PriceCurrencyInterface $priceManager
-     */
     public function __construct(
         ConfigProvider $configProvider,
         TaxCalculation $taxCalculation,
-        StoreManagerInterface $storeManager,
-        PriceCurrencyInterface $priceManager
+        CurrencyConverter $currencyConverter
     ) {
         $this->configProvider = $configProvider;
         $this->taxCalculation = $taxCalculation;
-        $this->storeManager = $storeManager;
-        $this->priceManager = $priceManager;
+        $this->currencyConverter = $currencyConverter;
     }
 
     /**
@@ -72,14 +48,13 @@ class CalculatePrice
             return $amount;
         }
 
-        $baseCurrency = $this->getBaseCurrency($quote);
-        if ($baseCurrency && $baseCurrency != $orderData['price']['currency']) {
-            $rate = $this->priceManager->convert($amount, $quote->getStoreId()) / $amount;
-            $amount = $amount / $rate;
-        }
+        $storeId = (int)$quote->getStoreId();
+        $orderCurrency = $orderData['price']['currency'] ?? '';
 
-        $taxCalculation = $this->configProvider->getNeedsTaxCalculation('shipping', (int)$store->getId());
-        if (empty($taxCalculation)) {
+        // Convert shipping from order currency to base currency
+        $amount = $this->currencyConverter->convertToBase($amount, $orderCurrency, $storeId);
+
+        if (!$this->configProvider->shippingIncludesTax((int)$store->getId())) {
             $taxRateId = $this->configProvider->getTaxClassShipping((int)$store->getId());
             $request = $this->taxCalculation->getRateRequest(
                 $quote->getShippingAddress(),
@@ -88,23 +63,12 @@ class CalculatePrice
                 $store,
                 $quote->getCustomerId()
             );
-            $percent = $this->taxCalculation->getRate($request->setData('product_tax_class_id', $taxRateId));
+            $percent = $this->taxCalculation->getRate(
+                $request->setData('product_class_id', $taxRateId)
+            );
             $amount = ($amount / (100 + $percent) * 100);
         }
 
         return $amount;
-    }
-
-    /**
-     * @param Quote $quote
-     * @return string|null
-     */
-    private function getBaseCurrency(Quote $quote): ?string
-    {
-        try {
-            return $this->storeManager->getStore($quote->getStoreId())->getBaseCurrencyCode();
-        } catch (\Exception $exception) {
-            return null;
-        }
     }
 }

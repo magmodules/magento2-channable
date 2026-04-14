@@ -57,7 +57,7 @@ class GetCustomIncrementId
         $channelId = $orderData['channel_id'];
         $prefix = $this->configProvider->getOrderIdPrefix((int)$store->getId());
         if ($this->configProvider->stripChannelId((int)$store->getId())) {
-            $newIncrementId = $prefix . preg_replace('/[^a-zA-Z0-9]+/', '', $channelId);
+            $newIncrementId = $prefix . preg_replace('/[^a-zA-Z0-9-]+/', '', $channelId);
         } else {
             $newIncrementId = $prefix . preg_replace('/\s+/', '', $channelId);
         }
@@ -73,9 +73,12 @@ class GetCustomIncrementId
                 ->getLastItem();
 
             if ($lastOrder->getIncrementId()) {
-                $lastIncrement = explode('-', $lastOrder->getIncrementId());
-                $newIncrementId = substr($lastOrder->getIncrementId(), 0, -(strlen(end($lastIncrement)) + 1));
-                $newIncrementId .= '-' . (end($lastIncrement) + 1);
+                $suffix = substr($lastOrder->getIncrementId(), strlen($newIncrementId) + 1);
+                if (is_numeric($suffix)) {
+                    $newIncrementId .= '-' . ((int)$suffix + 1);
+                } else {
+                    $newIncrementId .= '-1';
+                }
             } else {
                 $newIncrementId .= '-1';
             }
