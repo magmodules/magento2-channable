@@ -321,8 +321,11 @@ class PriceData
             ''
         );
 
-        // Append currency if configured.
-        if ($useCurrency && $formattedPrice >= 0) {
+        // Clamp negative prices to 0 and always append currency if configured.
+        if ($useCurrency) {
+            if ($formattedPrice < 0) {
+                $formattedPrice = '0.00';
+            }
             $formattedPrice .= ' ' . $currency;
         }
 
