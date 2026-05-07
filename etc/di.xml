@@ -82,6 +82,9 @@
     <type name="Amasty\ShopbySeo\Helper\Data">
         <plugin name="channable_bypass_amasty_shopbyseo" type="Magmodules\Channable\Plugin\AroundIsAllowedRequest"/>
     </type>
+    <type name="Magento\Customer\Model\Address\Validator\Country">
+        <plugin name="channable_skip_region_validation" type="Magmodules\Channable\Plugin\Order\SkipRegionValidation" />
+    </type>
     <type name="Magento\Sales\Model\Order">
         <plugin name="channable_pickup_location" type="Magmodules\Channable\Plugin\AfterGetShippingDescription"/>
     </type>
