@@ -109,6 +109,13 @@ class AddressHandler
             $email = $this->cleanEmail($orderData['customer']['email'] ?? '');
         }
 
+        $stateCode = $address['state_code'] ?? '';
+        $stateName = $address['state'] ?? '';
+        $countryCode = $address['country_code'];
+        $regionId = !empty($stateCode) || !empty($stateName)
+            ? $this->getRegionId($stateCode, $countryCode, $stateName)
+            : null;
+
         $addressData = [
             'customer_id' => $customerId,
             'company' => $this->sanitize($company, self::PATTERN_NAME, 255),
@@ -117,10 +124,9 @@ class AddressHandler
             'lastname' => $this->sanitize($address['last_name'], self::PATTERN_NAME, 255) ?? '-',
             'street' => $this->getStreet($address, (int)$storeId),
             'city' => $this->sanitize($address['city'], self::PATTERN_CITY, 100),
-            'country_id' => $address['country_code'],
-            'region' => !empty($address['state_code'])
-                ? $this->getRegionId($address['state_code'], $address['country_code'])
-                : null,
+            'country_id' => $countryCode,
+            'region_id' => $regionId,
+            'region' => $regionId ? null : ($stateName ?: null),
             'postcode' => $address['zip_code'],
             'telephone' => $this->sanitize($telephone, self::PATTERN_TELEPHONE, 20) ?? '000',
             'vat_id' => $this->getVatId($type, $orderData, $storeId),
@@ -267,14 +273,40 @@ class AddressHandler
     }
 
     /**
+     * Multi-strategy region lookup:
+     * 1. loadByCode($code, $countryId) — e.g. "NH" + "US"
+     * 2. loadByCode($countryId-$code, $countryId) — e.g. "LV-099" + "LV"
+     * 3. loadByName($stateName, $countryId) — e.g. "Tukuma novads" + "LV"
+     * 4. Return null — graceful fallback
+     *
      * @param string $code
      * @param string $countryId
-     * @return mixed
+     * @param string $stateName
+     * @return int|null
      */
-    private function getRegionId(string $code, string $countryId)
+    private function getRegionId(string $code, string $countryId, string $stateName): ?int
     {
-        $region = $this->regionFactory->create();
-        return $region->loadByCode($code, $countryId)->getId();
+        if (!empty($code)) {
+            $region = $this->regionFactory->create()->loadByCode($code, $countryId);
+            if ($region->getId()) {
+                return (int)$region->getId();
+            }
+
+            $prefixedCode = $countryId . '-' . $code;
+            $region = $this->regionFactory->create()->loadByCode($prefixedCode, $countryId);
+            if ($region->getId()) {
+                return (int)$region->getId();
+            }
+        }
+
+        if (!empty($stateName)) {
+            $region = $this->regionFactory->create()->loadByName($stateName, $countryId);
+            if ($region->getId()) {
+                return (int)$region->getId();
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -297,7 +329,7 @@ class AddressHandler
             ->setStreet(explode("\n", (string)$addressData['street']))
             ->setCity($addressData['city'])
             ->setCountryId($addressData['country_id'])
-            ->setRegionId($addressData['region'])
+            ->setRegionId($addressData['region_id'])
             ->setPostcode($addressData['postcode'])
             ->setVatId($addressData['vat_id'])
             ->setTelephone($addressData['telephone']);
