@@ -108,7 +108,7 @@ class OrderSimulate extends Command
     /**
      * @inheritdoc
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$input->getOption(self::INPUT_KEY_STORE_ID)) {
             throw new \InvalidArgumentException('Please add ' . self::INPUT_KEY_STORE_ID . ' param.');
