@@ -68,6 +68,8 @@ export default class ChannableApi extends BaseApi {
    */
   buildOrderData(overrides: {
     country?: string;
+    state?: string;
+    stateCode?: string;
     price?: number;
     priceTax?: number;
     productId?: number;
@@ -105,10 +107,21 @@ export default class ChannableApi extends BaseApi {
       'AT': '1010',
       'BE': '1000',
       'FR': '75001',
+      'LV': 'LV-3101',
+      'PL': '00-001',
     };
     if (zipCodes[country]) {
       data.billing.zip_code = zipCodes[country];
       data.shipping.zip_code = zipCodes[country];
+    }
+
+    if (overrides.state !== undefined) {
+      data.billing.state = overrides.state;
+      data.shipping.state = overrides.state;
+    }
+    if (overrides.stateCode !== undefined) {
+      data.billing.state_code = overrides.stateCode;
+      data.shipping.state_code = overrides.stateCode;
     }
 
     if (productId) {
