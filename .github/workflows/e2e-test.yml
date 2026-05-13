@@ -81,11 +81,30 @@ jobs:
         run: |
           curl --fail-with-body -k -v -w "%{http_code}" https://magento.test/admin/
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(cd Test/End-2-end && node -e "console.log(require('./package-lock.json').packages['node_modules/@playwright/test'].version)")" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright dependencies
         run: |
           cd Test/End-2-end
           npm install
           npx playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Install Playwright (browsers cached)
+        run: |
+          cd Test/End-2-end
+          npm install
+          npx playwright install-deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: Run Playwright tests
         run: |

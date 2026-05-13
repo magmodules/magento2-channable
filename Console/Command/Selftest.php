@@ -56,7 +56,7 @@ class Selftest extends Command
     /**
      * {@inheritdoc}
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $result = $this->selftestRepository->test();
         foreach ($result as $test) {

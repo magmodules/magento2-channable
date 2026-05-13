@@ -73,7 +73,7 @@ class ItemUpdate extends Command
     /**
      * @inheritdoc
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->appState->setAreaCode('frontend');
         $itemModel = $this->itemFactory->create();

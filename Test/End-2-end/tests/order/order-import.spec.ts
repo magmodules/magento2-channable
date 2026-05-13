@@ -166,6 +166,26 @@ const testCases = [
     },
   },
   {
+    title: 'LV order with pycountry region code',
+    config: {
+      'general/region/state_required': 'LV',
+    },
+    orderOverrides: { country: 'LV', stateCode: '099', state: 'Tukuma novads' },
+    assert: async (page, incrementId) => {
+      const displayedId = await orderViewPage.getOrderIncrementId(page);
+      expect(displayedId).toBeTruthy();
+    },
+  },
+  {
+    title: 'PL order without region',
+    config: {},
+    orderOverrides: { country: 'PL', stateCode: '', state: '' },
+    assert: async (page, incrementId) => {
+      const displayedId = await orderViewPage.getOrderIncrementId(page);
+      expect(displayedId).toBeTruthy();
+    },
+  },
+  {
     title: 'Multi-currency order (PLN)',
     config: {
       'currency/options/allow': 'EUR,PLN',
