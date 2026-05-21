@@ -64,6 +64,79 @@ export default class ChannableApi extends BaseApi {
   }
 
   /**
+   * POST a return to the Channable returns webhook endpoint.
+   */
+  async postReturn(baseURL: string, returnData: any, storeId: number = 1): Promise<any> {
+    const token = process.env.CHANNABLE_TOKEN;
+    const url = `${baseURL}channable/returns/hook?store=${storeId}&code=${token}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(returnData),
+    });
+
+    return response.json();
+  }
+
+  /**
+   * Build return data for the Channable returns webhook.
+   */
+  buildReturnData(overrides: {
+    channelId?: string;
+    channableId?: string;
+    productId?: number;
+    orderId?: string | null;
+    status?: string;
+    channelName?: string;
+  } = {}): any {
+    const random = String(Math.floor(Math.random() * 900000) + 100000);
+    const channableId = overrides.channableId || random;
+    const channelId = overrides.channelId || 'TEST-' + random;
+    const productId = overrides.productId || 1;
+
+    return {
+      status: overrides.status || 'new',
+      channel_name: overrides.channelName || 'Channable',
+      channel_id: channelId,
+      channable_id: channableId,
+      item: {
+        id: productId,
+        order_id: overrides.orderId ?? null,
+        gtin: 'E2E-SKU-' + random,
+        title: 'E2E Test Product',
+        quantity: 1,
+        reason: 'Test return',
+        comment: 'Do not process',
+      },
+      customer: {
+        gender: 'male',
+        first_name: 'Test',
+        last_name: 'Channable',
+        email: 'dontemail@me.net',
+      },
+      address: {
+        first_name: 'Test',
+        last_name: 'Channable',
+        email: 'dontemail@me.net',
+        street: 'Test street',
+        house_number: '1',
+        address1: 'Test street 1 bis',
+        address2: null,
+        city: 'Test',
+        country_code: 'NL',
+        zip_code: '1234 AB',
+      },
+      meta: {
+        channel_return_id: channelId + '-return',
+        channel_order_id: channelId + '-order',
+        channel_order_id_internal: channelId + '-internal',
+        platform_order_id: channelId + '-platform',
+      },
+    };
+  }
+
+  /**
    * Build order data by merging overrides into the base template.
    */
   buildOrderData(overrides: {

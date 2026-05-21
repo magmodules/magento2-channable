@@ -20,14 +20,14 @@ interface SearchResultsInterface extends FrameworkSearchResultsInterface
     /**
      * Gets Code Items.
      *
-     * @return ChannableOrderData[]
+     * @return \Magmodules\Channable\Api\Order\Data\DataInterface[]
      */
     public function getItems(): array;
 
     /**
      * Sets Code Items.
      *
-     * @param ChannableOrderData[] $items
+     * @param \Magmodules\Channable\Api\Order\Data\DataInterface[] $items
      * @return $this
      */
     public function setItems(array $items): self;

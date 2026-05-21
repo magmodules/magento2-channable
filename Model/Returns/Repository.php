@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magmodules\Channable\Model\Returns;
 
+use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
@@ -40,6 +41,10 @@ class Repository implements RepositoryInterface
      * @var DataInterfaceFactory
      */
     private $dataFactory;
+    /**
+     * @var CollectionProcessorInterface
+     */
+    private $collectionProcessor;
 
     /**
      * Repository constructor.
@@ -48,17 +53,20 @@ class Repository implements RepositoryInterface
      * @param CollectionFactory $collectionFactory
      * @param ResourceModel $resource
      * @param DataInterfaceFactory $dataFactory
+     * @param CollectionProcessorInterface $collectionProcessor
      */
     public function __construct(
         SearchResultsInterfaceFactory $searchResultFactory,
         CollectionFactory $collectionFactory,
         ResourceModel $resource,
-        DataInterfaceFactory $dataFactory
+        DataInterfaceFactory $dataFactory,
+        CollectionProcessorInterface $collectionProcessor
     ) {
         $this->searchResultFactory = $searchResultFactory;
         $this->collectionFactory = $collectionFactory;
         $this->resource = $resource;
         $this->dataFactory = $dataFactory;
+        $this->collectionProcessor = $collectionProcessor;
     }
 
     /**
@@ -67,6 +75,7 @@ class Repository implements RepositoryInterface
     public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface
     {
         $collection = $this->collectionFactory->create();
+        $this->collectionProcessor->process($searchCriteria, $collection);
         return $this->searchResultFactory->create()
             ->setSearchCriteria($searchCriteria)
             ->setItems($collection->getItems())

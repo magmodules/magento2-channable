@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magmodules.eu. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <!-- Channable Orders API -->
+    <route url="/V1/channable/orders" method="GET">
+        <service class="Magmodules\Channable\Api\Order\SearchInterface" method="getList"/>
+        <resources>
+            <resource ref="Magmodules_Channable::order_view"/>
+        </resources>
+    </route>
+
+    <!-- Channable Returns API -->
+    <route url="/V1/channable/returns" method="GET">
+        <service class="Magmodules\Channable\Api\Returns\SearchInterface" method="getList"/>
+        <resources>
+            <resource ref="Magmodules_Channable::returns_view"/>
+        </resources>
+    </route>
+
+</routes>
