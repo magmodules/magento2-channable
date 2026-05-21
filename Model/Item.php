@@ -513,6 +513,23 @@ class Item extends AbstractModel
     /**
      *
      */
+    /**
+     * Force getId() to return the actual primary key (item_id) instead of
+     * the `id` column, which holds the Magento product ID. Without this
+     * override, AbstractModel::getId() returns getData('id') which causes
+     * constraint violations on save because Magento uses getId() as the
+     * WHERE clause value for the item_id primary key column.
+     */
+    public function getId()
+    {
+        return $this->getData('item_id');
+    }
+
+    public function setId($value)
+    {
+        return $this->setData('item_id', $value);
+    }
+
     protected function _construct()
     {
         $this->_init('Magmodules\Channable\Model\ResourceModel\Item');
