@@ -95,7 +95,6 @@ class Repository implements ChannableOrderRepository
     public function getList($criteria)
     {
         $collection = $this->channableOrderCollectionFactory->create();
-        $this->extensionAttributesJoinProcessor->process($collection, self::DATA_INTERFACE);
         $this->collectionProcessor->process($criteria, $collection);
         $searchResults = $this->channableOrderSearchResultsFactory->create();
         $searchResults->setSearchCriteria($criteria);

@@ -172,6 +172,13 @@
     </type>
     <!-- Channable Returns Block End -->
 
+    <!-- Channable REST API Block Start -->
+    <preference for="Magmodules\Channable\Api\Order\SearchInterface"
+                type="Magmodules\Channable\Model\Api\OrderSearch"/>
+    <preference for="Magmodules\Channable\Api\Returns\SearchInterface"
+                type="Magmodules\Channable\Model\Api\ReturnsSearch"/>
+    <!-- Channable REST API Block End -->
+
     <!-- Channable Selftest Block Start -->
     <preference for="Magmodules\Channable\Api\Selftest\RepositoryInterface"
                 type="Magmodules\Channable\Model\Selftest\Repository"/>

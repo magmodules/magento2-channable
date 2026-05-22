@@ -91,6 +91,23 @@ export default class BaseApi {
   }
 
   /**
+   * Call a Magento REST API endpoint with admin Bearer auth.
+   */
+  async restGet(baseURL: string, path: string): Promise<{ status: number; body: any }> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/V1${path}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    });
+    const body = await response.json();
+    return { status: response.status, body };
+  }
+
+  /**
    * Run a PHP snippet inside the container (for custom queries).
    */
   protected execInContainer(phpCode: string): string {

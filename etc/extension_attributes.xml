@@ -9,4 +9,6 @@
     <extension_attributes for="Magento\Quote\Api\Data\AddressInterface">
         <attribute code="channable_pickup_location" type="string"/>
     </extension_attributes>
+    <extension_attributes for="Magmodules\Channable\Api\Order\Data\DataInterface"/>
+    <extension_attributes for="Magmodules\Channable\Api\Returns\Data\DataInterface"/>
 </config>
