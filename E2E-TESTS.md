@@ -50,6 +50,17 @@ Channable periodically polls Magento for order status updates and shipment infor
 | Shipments — recent order | Returns shipment array for known orders |
 | Shipments — LVB with tracking | Shipped order includes tracking information |
 
+## Credit Memo
+
+Validates that orders placed through the Channable payment method can be refunded — both via the Magento admin UI and the REST API.
+
+Both tests create an auto-invoiced order (`invoice_order: 1`), then attempt to create a credit memo.
+
+| Test | Expected |
+|------|----------|
+| Credit memo via admin UI | Credit memo created successfully through invoice → Credit Memo → Refund Offline flow |
+| Credit memo via REST API (`V1/invoice/:id/refund`) | API returns 200 with credit memo ID, credit memo record exists in DB |
+
 ## Upcoming: Feed Generation
 
 The next suite of E2E tests will cover feed generation — validating that product data is correctly exported to Channable based on attribute mapping, category filters, and feed configuration. This will include tests for price rendering, image URLs, stock status, and custom attribute handling.
@@ -74,4 +85,5 @@ Run a specific suite:
 npx playwright test tests/order/cross-border-tax.spec.ts
 npx playwright test tests/order/order-import.spec.ts
 npx playwright test tests/order/webhooks.spec.ts
+npx playwright test tests/order/credit-memo.spec.ts
 ```
