@@ -13,6 +13,8 @@ class Channable extends AbstractMethod
     public const CODE = 'channable';
     protected $_code = self::CODE;
     protected $_isOffline = true;
+    protected $_canRefund = true;
+    protected $_canRefundInvoicePartial = true;
     protected $_canUseCheckout = false;
     protected $_canUseInternal = true;
     protected $_infoBlockType = 'Magmodules\Channable\Block\Info\Channable';
