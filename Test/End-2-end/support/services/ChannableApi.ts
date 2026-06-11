@@ -255,6 +255,102 @@ export default class ChannableApi extends BaseApi {
   }
 
   /**
+   * Get the invoice entity ID for an order by its increment ID (via REST API).
+   */
+  async getInvoiceId(baseURL: string, orderIncrementId: string): Promise<string> {
+    const token = process.env.admin_token;
+    const filter = encodeURIComponent(`searchCriteria[filterGroups][0][filters][0][field]=order_id&searchCriteria[filterGroups][0][filters][0][value]=${orderIncrementId}&searchCriteria[filterGroups][0][filters][0][conditionType]=eq&searchCriteria[pageSize]=1`);
+
+    // First get order entity ID
+    const orderUrl = `${baseURL}rest/all/V1/orders?searchCriteria[filterGroups][0][filters][0][field]=increment_id&searchCriteria[filterGroups][0][filters][0][value]=${orderIncrementId}&searchCriteria[pageSize]=1`;
+    const orderRes = await fetch(orderUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const orderData = await orderRes.json() as any;
+    const orderId = orderData.items?.[0]?.entity_id;
+    if (!orderId) throw new Error(`Order not found: ${orderIncrementId}`);
+
+    // Then get invoice for that order
+    const invoiceUrl = `${baseURL}rest/all/V1/invoices?searchCriteria[filterGroups][0][filters][0][field]=order_id&searchCriteria[filterGroups][0][filters][0][value]=${orderId}&searchCriteria[pageSize]=1`;
+    const invoiceRes = await fetch(invoiceUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const invoiceData = await invoiceRes.json() as any;
+    return String(invoiceData.items?.[0]?.entity_id || '');
+  }
+
+  /**
+   * Get order item info for an order by its increment ID (via REST API).
+   */
+  async getOrderItemInfo(baseURL: string, orderIncrementId: string): Promise<{ orderId: string; orderItemId: string; qty: number }> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/orders?searchCriteria[filterGroups][0][filters][0][field]=increment_id&searchCriteria[filterGroups][0][filters][0][value]=${orderIncrementId}&searchCriteria[pageSize]=1`;
+
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const data = await res.json() as any;
+    const order = data.items?.[0];
+    if (!order) throw new Error(`Order not found: ${orderIncrementId}`);
+
+    const item = order.items?.find((i: any) => i.product_type === 'simple') || order.items?.[0];
+    return {
+      orderId: String(order.entity_id),
+      orderItemId: String(item.item_id),
+      qty: item.qty_invoiced || item.qty_ordered,
+    };
+  }
+
+  /**
+   * Refund an invoice via the Magento REST API.
+   */
+  async refundInvoiceViaApi(baseURL: string, invoiceId: string, orderItemId: string, qty: number): Promise<{ status: number; body: any }> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/invoice/${invoiceId}/refund`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        items: [{ order_item_id: parseInt(orderItemId, 10), qty }],
+        notify: false,
+        isOnline: false,
+        arguments: { adjustment_positive: 0, adjustment_negative: 0, shipping_amount: 0 },
+      }),
+    });
+
+    const body = await response.json();
+    return { status: response.status, body };
+  }
+
+  /**
+   * Check if a credit memo exists for an order by increment ID (via REST API).
+   */
+  async hasCreditMemo(baseURL: string, orderIncrementId: string): Promise<boolean> {
+    const token = process.env.admin_token;
+
+    // Get order entity ID first
+    const orderUrl = `${baseURL}rest/all/V1/orders?searchCriteria[filterGroups][0][filters][0][field]=increment_id&searchCriteria[filterGroups][0][filters][0][value]=${orderIncrementId}&searchCriteria[pageSize]=1`;
+    const orderRes = await fetch(orderUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const orderData = await orderRes.json() as any;
+    const orderId = orderData.items?.[0]?.entity_id;
+    if (!orderId) return false;
+
+    // Search for credit memos on that order
+    const cmUrl = `${baseURL}rest/all/V1/creditmemos?searchCriteria[filterGroups][0][filters][0][field]=order_id&searchCriteria[filterGroups][0][filters][0][value]=${orderId}&searchCriteria[pageSize]=1`;
+    const cmRes = await fetch(cmUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const cmData = await cmRes.json() as any;
+    return (cmData.total_count || 0) > 0;
+  }
+
+  /**
    * Ensure a currency rate exists in Magento (needed for multi-currency orders).
    */
   async setupCurrencyRate(from: string, to: string, rate: number): Promise<void> {
