@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 import BaseApi from './BaseApi';
 
 export default class ChannableApi extends BaseApi {
@@ -64,6 +65,31 @@ export default class ChannableApi extends BaseApi {
   }
 
   /**
+   * GET a customer by email via the Magento REST API.
+   */
+  async getCustomerByEmail(baseURL: string, email: string): Promise<any> {
+    const token = process.env.admin_token;
+    const searchUrl = `${baseURL}rest/V1/customers/search?` +
+      `searchCriteria[filterGroups][0][filters][0][field]=email&` +
+      `searchCriteria[filterGroups][0][filters][0][value]=${encodeURIComponent(email)}`;
+
+    const response = await fetch(searchUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+    if (result.items && result.items.length > 0) {
+      return result.items[0];
+    }
+
+    throw new Error(`Customer not found for email: ${email}`);
+  }
+
+  /**
    * Build order data by merging overrides into the base template.
    */
   buildOrderData(overrides: {
@@ -84,6 +110,7 @@ export default class ChannableApi extends BaseApi {
     companyName?: string;
     channelName?: string;
     shipmentMethod?: string;
+    email?: string;
   } = {}): any {
     const channableId = overrides.channableId || String(Math.floor(Math.random() * 900000) + 100000);
     const country = overrides.country || 'NL';
@@ -148,6 +175,12 @@ export default class ChannableApi extends BaseApi {
       data.shipping.company = overrides.companyName;
     }
 
+    if (overrides.email) {
+      data.customer.email = overrides.email;
+      data.billing.email = overrides.email;
+      data.shipping.email = overrides.email;
+    }
+
     if (overrides.channelName) {
       data.channel_name = overrides.channelName;
     }
@@ -167,6 +200,58 @@ export default class ChannableApi extends BaseApi {
     data.products[0].commission = data.price.commission;
 
     return data;
+  }
+
+  /**
+   * Ensure a second store view exists for multi-store tests.
+   * Uses Magento bootstrap to create the store properly (triggers all observers/indexers).
+   * Returns the store ID, or null if no container is available.
+   */
+  ensureSecondStoreView(storeCode: string): number | null {
+    if (!this.container) return null;
+
+    const phpScript = [
+      '<?php',
+      'error_reporting(0);',
+      "require 'app/bootstrap.php';",
+      '$bootstrap = \\Magento\\Framework\\App\\Bootstrap::create(BP, $_SERVER);',
+      '$om = $bootstrap->getObjectManager();',
+      '$repo = $om->get(\\Magento\\Store\\Api\\StoreRepositoryInterface::class);',
+      'try {',
+      `    $store = $repo->get('${storeCode}');`,
+      '} catch (\\Magento\\Framework\\Exception\\NoSuchEntityException $e) {',
+      '    $store = $om->get(\\Magento\\Store\\Model\\StoreFactory::class)->create();',
+      `    $store->setCode('${storeCode}');`,
+      "    $store->setName('Second Store');",
+      '    $store->setWebsiteId(1);',
+      '    $store->setGroupId(1);',
+      '    $store->setIsActive(1);',
+      '    $store->setSortOrder(10);',
+      '    $store->save();',
+      '}',
+      'echo $store->getId();',
+    ].join('\n');
+
+    const tmpFile = '/tmp/e2e-create-store.php';
+    execSync(`docker exec -i ${this.container} tee ${tmpFile}`, {
+      input: phpScript,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+
+    const result = execSync(
+      `docker exec ${this.container} php ${tmpFile}`,
+      { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'], timeout: 120000 }
+    ).trim();
+
+    const storeId = parseInt(result, 10);
+
+    execSync(`docker exec ${this.container} bin/magento config:set --scope=stores --scope-code=${storeCode} magmodules_channable/general/enable 1`, { stdio: 'pipe' });
+    execSync(`docker exec ${this.container} bin/magento config:set --scope=stores --scope-code=${storeCode} magmodules_channable_marketplace/general/enable 1`, { stdio: 'pipe' });
+    execSync(`docker exec ${this.container} bin/magento indexer:reindex`, { stdio: 'pipe', timeout: 120000 });
+    this.flushAllCaches();
+    console.log(`Second store view '${storeCode}' ensured (ID: ${storeId}).`);
+
+    return storeId;
   }
 
   /**
