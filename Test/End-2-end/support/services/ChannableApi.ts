@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 import BaseApi from './BaseApi';
 
 export default class ChannableApi extends BaseApi {
@@ -190,5 +191,170 @@ export default class ChannableApi extends BaseApi {
     }
 
     this.flushAllCaches();
+  }
+
+  /**
+   * Create a product via the Magento REST API.
+   */
+  async createProduct(baseURL: string, payload: any): Promise<any> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/products`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ product: payload }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to create product ${payload.sku}: ${response.status} - ${text}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Delete a product by SKU via the Magento REST API.
+   */
+  async deleteProduct(baseURL: string, sku: string): Promise<void> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/products/${encodeURIComponent(sku)}`;
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+
+    if (!response.ok && response.status !== 404) {
+      const text = await response.text();
+      throw new Error(`Failed to delete product ${sku}: ${response.status} - ${text}`);
+    }
+  }
+
+  /**
+   * Set stock status and quantity for a product by SKU.
+   */
+  async setStockStatus(baseURL: string, sku: string, qty: number, inStock: boolean): Promise<void> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/products/${encodeURIComponent(sku)}`;
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        product: {
+          sku,
+          extension_attributes: {
+            stock_item: {
+              qty,
+              is_in_stock: inStock,
+            },
+          },
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to set stock for ${sku}: ${response.status} - ${text}`);
+    }
+  }
+
+  /**
+   * Reindex catalog prices via docker exec.
+   */
+  reindexPrices(): void {
+    if (!this.container) {
+      throw new Error('MAGENTO_CONTAINER env var is required for reindexing');
+    }
+
+    execSync(
+      `docker exec ${this.container} bin/magento indexer:reindex catalog_product_price cataloginventory_stock`,
+      { stdio: 'pipe', timeout: 120000 }
+    );
+    console.log('Price index rebuilt.');
+  }
+
+  /**
+   * Full reindex of all indexers + cache flush via docker exec.
+   */
+  reindexAll(): void {
+    if (!this.container) {
+      throw new Error('MAGENTO_CONTAINER env var is required for reindexing');
+    }
+
+    execSync(
+      `docker exec ${this.container} bin/magento indexer:reindex`,
+      { stdio: 'pipe', timeout: 120000 }
+    );
+    this.flushAllCaches();
+    console.log('Full reindex + cache flush done.');
+  }
+
+  /**
+   * Fetch a single product from the Channable feed by product ID.
+   */
+  async getFeedProduct(baseURL: string, pid: number, storeId: number = 1): Promise<any> {
+    const token = process.env.CHANNABLE_TOKEN || 'e2e-test-token';
+    const url = `${baseURL}channable/feed/json?id=${storeId}&token=${token}&pid=${pid}`;
+
+    const response = await fetch(url, {
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Feed request failed: ${response.status}`);
+    }
+
+    const body = await response.json() as any;
+
+    // ?pid= returns {"products": {"product": {...}, "feed": {...}}}
+    // ?page= returns {"products": [...]}
+    const productsNode = body.products;
+
+    if (!productsNode) {
+      throw new Error(`Product ${pid} not found in feed (no products key)`);
+    }
+
+    // Single product via ?pid= — return the processed feed object
+    if (productsNode.feed) {
+      return productsNode.feed;
+    }
+
+    // Array from ?page=
+    if (Array.isArray(productsNode) && productsNode.length > 0) {
+      return productsNode[0];
+    }
+
+    throw new Error(`Product ${pid} not found in feed`);
+  }
+
+  /**
+   * Get the Magento entity ID for a product by SKU (via REST API).
+   */
+  async getProductId(baseURL: string, sku: string): Promise<number> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/products/${encodeURIComponent(sku)}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Product ${sku} not found: ${response.status}`);
+    }
+
+    const data = await response.json() as any;
+    return data.id;
   }
 }

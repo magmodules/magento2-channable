@@ -50,6 +50,36 @@ Channable periodically polls Magento for order status updates and shipment infor
 | Shipments — recent order | Returns shipment array for known orders |
 | Shipments — LVB with tracking | Shipped order includes tracking information |
 
+## Bundle Pricing
+
+Dynamic bundle products derive their prices from their children rather than having a fixed price. This test suite validates that the feed correctly reports bundle prices across different tax configurations. The fix uses indexed prices (`$product->getData('min_price')`) instead of `getBaseAmount()`, matching how configurables are handled and ensuring correct behavior with Magento's `getTaxPrice()`.
+
+Test products are created via REST API: two simple children (€20 + €30, tax class 2), two bundles (one dynamic with two required options, one fixed at €100), and a single-option dynamic bundle for OOS testing. NL 21% tax rules are used.
+
+**Group A: Catalog prices including tax** (stored €50 = incl tax)
+
+| Test | Channable Config | Assert |
+|------|------------------|--------|
+| Dynamic, add tax on | `tax=1` | price = 50.00, min_price = 50.00 |
+| Dynamic, add tax off | `tax=0` | price = 50.00, min_price = 50.00 |
+| Dynamic, include both | `tax=1, tax_include_both=1` | price_incl = 50.00, price_excl ≈ 41.32 |
+| Fixed, add tax on | `tax=1` | price = 100.00 |
+
+**Group B: Catalog prices excluding tax** (stored €50 = excl tax, incl = €60.50)
+
+| Test | Channable Config | Assert |
+|------|------------------|--------|
+| Dynamic, add tax on | `tax=1` | price ≈ 60.50, min_price ≈ 60.50 |
+| Dynamic, add tax off | `tax=0` | price = 50.00, min_price = 50.00 |
+| Dynamic, include both | `tax=1, tax_include_both=1` | price_incl ≈ 60.50, price_excl = 50.00 |
+| Fixed, add tax on | `tax=1` | price ≈ 121.00 |
+
+**Group C: Stock scenarios** (prices incl tax)
+
+| Test | Setup | Assert |
+|------|-------|--------|
+| Dynamic (single option), OOS child | child-b set OOS + reindex | min_price = 20.00 (only in-stock child) |
+
 ## Upcoming: Feed Generation
 
 The next suite of E2E tests will cover feed generation — validating that product data is correctly exported to Channable based on attribute mapping, category filters, and feed configuration. This will include tests for price rendering, image URLs, stock status, and custom attribute handling.
@@ -74,4 +104,5 @@ Run a specific suite:
 npx playwright test tests/order/cross-border-tax.spec.ts
 npx playwright test tests/order/order-import.spec.ts
 npx playwright test tests/order/webhooks.spec.ts
+npx playwright test tests/feed/bundle-pricing.spec.ts
 ```
