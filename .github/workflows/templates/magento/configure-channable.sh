@@ -25,6 +25,12 @@ bin/magento config:set tax/calculation/cross_border_trade_enabled 0
 bin/magento config:set tax/calculation/based_on shipping
 bin/magento config:set tax/calculation/algorithm TOTAL_BASE_CALCULATION
 
+# Default tax destination — must match shipping origin so getTaxPrice() resolves
+# the correct rate when no customer is logged in (e.g. feed generation context)
+bin/magento config:set tax/defaults/country NL
+bin/magento config:set tax/defaults/region 0
+bin/magento config:set tax/defaults/postcode '1000 AA'
+
 # Tax display settings
 bin/magento config:set tax/display/type 2
 bin/magento config:set tax/display/shipping 2
