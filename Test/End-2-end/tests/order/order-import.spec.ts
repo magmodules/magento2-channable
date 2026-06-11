@@ -13,6 +13,9 @@ const orderViewPage = new OrderViewPage();
 const customerViewPage = new CustomerViewPage();
 
 const PRODUCT_ID = parseInt(process.env.PRODUCT_ID || '1', 10);
+const SECOND_STORE_CODE = 'second_store';
+
+let secondStoreId: number | null = null;
 
 const CONFIG_BASE = 'magmodules_channable_marketplace/order';
 
@@ -210,11 +213,29 @@ const testCases = [
       expect(baseCurrencyTotal).toBeGreaterThan(0);
     },
   },
+  {
+    title: 'Customer created in correct store view',
+    config: {
+      [`${CONFIG_BASE}/import_customer`]: '1',
+    },
+    orderOverrides: {
+      email: `e2e-storeview-${Date.now()}@magmodules.eu`,
+    },
+    secondStore: true,
+    skipOrderView: true,
+    setup: async () => {
+      secondStoreId = channableApi.ensureSecondStoreView(SECOND_STORE_CODE);
+    },
+    assert: async (page, incrementId, orderData, baseURL) => {
+      const customer = await channableApi.getCustomerByEmail(baseURL, orderData.customer.email);
+      expect(customer.store_id).toBe(secondStoreId);
+    },
+  },
 ];
 
 for (const testCase of testCases) {
   test(`Order import: ${testCase.title}`, async ({ page, baseURL }) => {
-    // 0. Run optional setup (e.g. currency rates)
+    // 0. Run optional setup (e.g. currency rates, store views)
     if (testCase.setup) {
       await testCase.setup();
     }
@@ -231,14 +252,20 @@ for (const testCase of testCases) {
       ...testCase.orderOverrides,
     });
 
-    const response = await channableApi.postOrder(baseURL, orderData);
+    let storeId = 1;
+    if (testCase.secondStore && secondStoreId) {
+      storeId = secondStoreId;
+    }
+    const response = await channableApi.postOrder(baseURL, orderData, storeId);
     const incrementId = getOrderIncrementId(response);
     console.log(`Order created: ${incrementId} (${testCase.title})`);
 
-    // 3. Open order in admin
-    await orderViewPage.openByIncrementId(page, incrementId);
+    // 3. Open order in admin (skip for tests that only need API assertions)
+    if (!testCase.skipOrderView) {
+      await orderViewPage.openByIncrementId(page, incrementId);
+    }
 
     // 4. Run test-specific assertions
-    await testCase.assert(page, incrementId);
+    await testCase.assert(page, incrementId, orderData, baseURL);
   });
 }
