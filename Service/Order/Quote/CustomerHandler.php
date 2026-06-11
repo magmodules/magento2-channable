@@ -92,6 +92,7 @@ class CustomerHandler
         } catch (NoSuchEntityException $exception) {
             $customer = $this->customerFactory->create();
             $customer->setWebsiteId($websiteId);
+            $customer->setStoreId((int)$storeId);
             $customer->setFirstname($this->validateName($orderData['customer']['first_name'], 'first_name'));
             $customer->setMiddlename($this->validateName($orderData['customer']['middle_name'], 'middle_name'));
             $customer->setLastname($this->validateName($orderData['customer']['last_name'], 'last_name'));
