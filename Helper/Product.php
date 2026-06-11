@@ -233,7 +233,7 @@ class Product extends AbstractHelper
             }
         }
 
-        $visibilityFilter = $filters['visibility'] ?? [];
+        $visibilityFilter = array_map('intval', $filters['visibility'] ?? []);
         if (!empty($visibilityFilter) && in_array($product->getVisibility(), $visibilityFilter, true)) {
             return true;
         }
@@ -972,7 +972,11 @@ class Product extends AbstractHelper
                     }
                 } catch (\Exception $e) {
                     $this->logger->addErrorLog('addAttributeData', $e->getMessage());
-                    unset($attributes[$key]);
+                    if (!empty($value['label'])) {
+                        $attributes[$key]['type'] = null;
+                    } else {
+                        unset($attributes[$key]);
+                    }
                 }
             }
 

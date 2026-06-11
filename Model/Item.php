@@ -131,6 +131,10 @@ class Item extends AbstractModel
      */
     public function add($row, $storeId)
     {
+        if (empty($row['id'])) {
+            return;
+        }
+
         $data = [];
         $data['item_id'] = $storeId . sprintf('%08d', $row['id']);
         $data['store_id'] = $storeId;
