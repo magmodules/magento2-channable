@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 import BaseApi from './BaseApi';
 
 export default class ChannableApi extends BaseApi {
@@ -64,6 +65,31 @@ export default class ChannableApi extends BaseApi {
   }
 
   /**
+   * GET a customer by email via the Magento REST API.
+   */
+  async getCustomerByEmail(baseURL: string, email: string): Promise<any> {
+    const token = process.env.admin_token;
+    const searchUrl = `${baseURL}rest/V1/customers/search?` +
+      `searchCriteria[filterGroups][0][filters][0][field]=email&` +
+      `searchCriteria[filterGroups][0][filters][0][value]=${encodeURIComponent(email)}`;
+
+    const response = await fetch(searchUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+    if (result.items && result.items.length > 0) {
+      return result.items[0];
+    }
+
+    throw new Error(`Customer not found for email: ${email}`);
+  }
+
+  /**
    * Build order data by merging overrides into the base template.
    */
   buildOrderData(overrides: {
@@ -84,6 +110,7 @@ export default class ChannableApi extends BaseApi {
     companyName?: string;
     channelName?: string;
     shipmentMethod?: string;
+    email?: string;
   } = {}): any {
     const channableId = overrides.channableId || String(Math.floor(Math.random() * 900000) + 100000);
     const country = overrides.country || 'NL';
@@ -148,6 +175,12 @@ export default class ChannableApi extends BaseApi {
       data.shipping.company = overrides.companyName;
     }
 
+    if (overrides.email) {
+      data.customer.email = overrides.email;
+      data.billing.email = overrides.email;
+      data.shipping.email = overrides.email;
+    }
+
     if (overrides.channelName) {
       data.channel_name = overrides.channelName;
     }
@@ -167,6 +200,154 @@ export default class ChannableApi extends BaseApi {
     data.products[0].commission = data.price.commission;
 
     return data;
+  }
+
+  /**
+   * Ensure a second store view exists for multi-store tests.
+   * Uses Magento bootstrap to create the store properly (triggers all observers/indexers).
+   * Returns the store ID, or null if no container is available.
+   */
+  ensureSecondStoreView(storeCode: string): number | null {
+    if (!this.container) return null;
+
+    const phpScript = [
+      '<?php',
+      'error_reporting(0);',
+      "require 'app/bootstrap.php';",
+      '$bootstrap = \\Magento\\Framework\\App\\Bootstrap::create(BP, $_SERVER);',
+      '$om = $bootstrap->getObjectManager();',
+      '$repo = $om->get(\\Magento\\Store\\Api\\StoreRepositoryInterface::class);',
+      'try {',
+      `    $store = $repo->get('${storeCode}');`,
+      '} catch (\\Magento\\Framework\\Exception\\NoSuchEntityException $e) {',
+      '    $store = $om->get(\\Magento\\Store\\Model\\StoreFactory::class)->create();',
+      `    $store->setCode('${storeCode}');`,
+      "    $store->setName('Second Store');",
+      '    $store->setWebsiteId(1);',
+      '    $store->setGroupId(1);',
+      '    $store->setIsActive(1);',
+      '    $store->setSortOrder(10);',
+      '    $store->save();',
+      '}',
+      'echo $store->getId();',
+    ].join('\n');
+
+    const tmpFile = '/tmp/e2e-create-store.php';
+    execSync(`docker exec -i ${this.container} tee ${tmpFile}`, {
+      input: phpScript,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+
+    const result = execSync(
+      `docker exec ${this.container} php ${tmpFile}`,
+      { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'], timeout: 120000 }
+    ).trim();
+
+    const storeId = parseInt(result, 10);
+
+    execSync(`docker exec ${this.container} bin/magento config:set --scope=stores --scope-code=${storeCode} magmodules_channable/general/enable 1`, { stdio: 'pipe' });
+    execSync(`docker exec ${this.container} bin/magento config:set --scope=stores --scope-code=${storeCode} magmodules_channable_marketplace/general/enable 1`, { stdio: 'pipe' });
+    execSync(`docker exec ${this.container} bin/magento indexer:reindex`, { stdio: 'pipe', timeout: 120000 });
+    this.flushAllCaches();
+    console.log(`Second store view '${storeCode}' ensured (ID: ${storeId}).`);
+
+    return storeId;
+  }
+
+  /**
+   * Get the invoice entity ID for an order by its increment ID (via REST API).
+   */
+  async getInvoiceId(baseURL: string, orderIncrementId: string): Promise<string> {
+    const token = process.env.admin_token;
+    const filter = encodeURIComponent(`searchCriteria[filterGroups][0][filters][0][field]=order_id&searchCriteria[filterGroups][0][filters][0][value]=${orderIncrementId}&searchCriteria[filterGroups][0][filters][0][conditionType]=eq&searchCriteria[pageSize]=1`);
+
+    // First get order entity ID
+    const orderUrl = `${baseURL}rest/all/V1/orders?searchCriteria[filterGroups][0][filters][0][field]=increment_id&searchCriteria[filterGroups][0][filters][0][value]=${orderIncrementId}&searchCriteria[pageSize]=1`;
+    const orderRes = await fetch(orderUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const orderData = await orderRes.json() as any;
+    const orderId = orderData.items?.[0]?.entity_id;
+    if (!orderId) throw new Error(`Order not found: ${orderIncrementId}`);
+
+    // Then get invoice for that order
+    const invoiceUrl = `${baseURL}rest/all/V1/invoices?searchCriteria[filterGroups][0][filters][0][field]=order_id&searchCriteria[filterGroups][0][filters][0][value]=${orderId}&searchCriteria[pageSize]=1`;
+    const invoiceRes = await fetch(invoiceUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const invoiceData = await invoiceRes.json() as any;
+    return String(invoiceData.items?.[0]?.entity_id || '');
+  }
+
+  /**
+   * Get order item info for an order by its increment ID (via REST API).
+   */
+  async getOrderItemInfo(baseURL: string, orderIncrementId: string): Promise<{ orderId: string; orderItemId: string; qty: number }> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/orders?searchCriteria[filterGroups][0][filters][0][field]=increment_id&searchCriteria[filterGroups][0][filters][0][value]=${orderIncrementId}&searchCriteria[pageSize]=1`;
+
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const data = await res.json() as any;
+    const order = data.items?.[0];
+    if (!order) throw new Error(`Order not found: ${orderIncrementId}`);
+
+    const item = order.items?.find((i: any) => i.product_type === 'simple') || order.items?.[0];
+    return {
+      orderId: String(order.entity_id),
+      orderItemId: String(item.item_id),
+      qty: item.qty_invoiced || item.qty_ordered,
+    };
+  }
+
+  /**
+   * Refund an invoice via the Magento REST API.
+   */
+  async refundInvoiceViaApi(baseURL: string, invoiceId: string, orderItemId: string, qty: number): Promise<{ status: number; body: any }> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/invoice/${invoiceId}/refund`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        items: [{ order_item_id: parseInt(orderItemId, 10), qty }],
+        notify: false,
+        isOnline: false,
+        arguments: { adjustment_positive: 0, adjustment_negative: 0, shipping_amount: 0 },
+      }),
+    });
+
+    const body = await response.json();
+    return { status: response.status, body };
+  }
+
+  /**
+   * Check if a credit memo exists for an order by increment ID (via REST API).
+   */
+  async hasCreditMemo(baseURL: string, orderIncrementId: string): Promise<boolean> {
+    const token = process.env.admin_token;
+
+    // Get order entity ID first
+    const orderUrl = `${baseURL}rest/all/V1/orders?searchCriteria[filterGroups][0][filters][0][field]=increment_id&searchCriteria[filterGroups][0][filters][0][value]=${orderIncrementId}&searchCriteria[pageSize]=1`;
+    const orderRes = await fetch(orderUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const orderData = await orderRes.json() as any;
+    const orderId = orderData.items?.[0]?.entity_id;
+    if (!orderId) return false;
+
+    // Search for credit memos on that order
+    const cmUrl = `${baseURL}rest/all/V1/creditmemos?searchCriteria[filterGroups][0][filters][0][field]=order_id&searchCriteria[filterGroups][0][filters][0][value]=${orderId}&searchCriteria[pageSize]=1`;
+    const cmRes = await fetch(cmUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const cmData = await cmRes.json() as any;
+    return (cmData.total_count || 0) > 0;
   }
 
   /**
@@ -190,5 +371,170 @@ export default class ChannableApi extends BaseApi {
     }
 
     this.flushAllCaches();
+  }
+
+  /**
+   * Create a product via the Magento REST API.
+   */
+  async createProduct(baseURL: string, payload: any): Promise<any> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/products`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ product: payload }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to create product ${payload.sku}: ${response.status} - ${text}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Delete a product by SKU via the Magento REST API.
+   */
+  async deleteProduct(baseURL: string, sku: string): Promise<void> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/products/${encodeURIComponent(sku)}`;
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+
+    if (!response.ok && response.status !== 404) {
+      const text = await response.text();
+      throw new Error(`Failed to delete product ${sku}: ${response.status} - ${text}`);
+    }
+  }
+
+  /**
+   * Set stock status and quantity for a product by SKU.
+   */
+  async setStockStatus(baseURL: string, sku: string, qty: number, inStock: boolean): Promise<void> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/products/${encodeURIComponent(sku)}`;
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        product: {
+          sku,
+          extension_attributes: {
+            stock_item: {
+              qty,
+              is_in_stock: inStock,
+            },
+          },
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to set stock for ${sku}: ${response.status} - ${text}`);
+    }
+  }
+
+  /**
+   * Reindex catalog prices via docker exec.
+   */
+  reindexPrices(): void {
+    if (!this.container) {
+      throw new Error('MAGENTO_CONTAINER env var is required for reindexing');
+    }
+
+    execSync(
+      `docker exec ${this.container} bin/magento indexer:reindex catalog_product_price cataloginventory_stock`,
+      { stdio: 'pipe', timeout: 120000 }
+    );
+    console.log('Price index rebuilt.');
+  }
+
+  /**
+   * Full reindex of all indexers + cache flush via docker exec.
+   */
+  reindexAll(): void {
+    if (!this.container) {
+      throw new Error('MAGENTO_CONTAINER env var is required for reindexing');
+    }
+
+    execSync(
+      `docker exec ${this.container} bin/magento indexer:reindex`,
+      { stdio: 'pipe', timeout: 120000 }
+    );
+    this.flushAllCaches();
+    console.log('Full reindex + cache flush done.');
+  }
+
+  /**
+   * Fetch a single product from the Channable feed by product ID.
+   */
+  async getFeedProduct(baseURL: string, pid: number, storeId: number = 1): Promise<any> {
+    const token = process.env.CHANNABLE_TOKEN || 'e2e-test-token';
+    const url = `${baseURL}channable/feed/json?id=${storeId}&token=${token}&pid=${pid}`;
+
+    const response = await fetch(url, {
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Feed request failed: ${response.status}`);
+    }
+
+    const body = await response.json() as any;
+
+    // ?pid= returns {"products": {"product": {...}, "feed": {...}}}
+    // ?page= returns {"products": [...]}
+    const productsNode = body.products;
+
+    if (!productsNode) {
+      throw new Error(`Product ${pid} not found in feed (no products key)`);
+    }
+
+    // Single product via ?pid= — return the processed feed object
+    if (productsNode.feed) {
+      return productsNode.feed;
+    }
+
+    // Array from ?page=
+    if (Array.isArray(productsNode) && productsNode.length > 0) {
+      return productsNode[0];
+    }
+
+    throw new Error(`Product ${pid} not found in feed`);
+  }
+
+  /**
+   * Get the Magento entity ID for a product by SKU (via REST API).
+   */
+  async getProductId(baseURL: string, sku: string): Promise<number> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/products/${encodeURIComponent(sku)}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Product ${sku} not found: ${response.status}`);
+    }
+
+    const data = await response.json() as any;
+    return data.id;
   }
 }

@@ -92,10 +92,12 @@ class PriceData
             case 'bundle':
                 $price = $product->getPrice();
                 if ((int)$product->getPriceType() === Price::PRICE_TYPE_DYNAMIC) {
-                    $product['min_price'] = $product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getBaseAmount();
-                    $product['max_price'] = $product->getPriceInfo()->getPrice('final_price')->getMaximalPrice()->getBaseAmount();
+                    $product['min_price'] = $product->getData('min_price');
+                    $product['max_price'] = $product->getData('max_price');
+                    $finalPrice = $product->getData('final_price') ?: $product->getData('min_price');
+                } else {
+                    $finalPrice = $product->getFinalPrice();
                 }
-                $finalPrice = $product->getFinalPrice();
                 $specialPrice = $product->getSpecialPrice();
                 $rulePrice = $this->ruleFactory->create()->getRulePrice(
                     $config['timestamp'],
@@ -294,7 +296,7 @@ class PriceData
         }
 
         if (isset($config['incl_vat'])) {
-            $price = $this->catalogHelper->getTaxPrice($product, $price, ['incl_vat']);
+            $price = $this->catalogHelper->getTaxPrice($product, $price, true);
         }
 
         return $this->formatPrice($price, $config);
