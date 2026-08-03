@@ -107,6 +107,7 @@ export default class ChannableApi extends BaseApi {
     businessOrder?: boolean;
     shipping?: number;
     discount?: number;
+    itemDiscount?: number;
     companyName?: string;
     channelName?: string;
     shipmentMethod?: string;
@@ -159,6 +160,10 @@ export default class ChannableApi extends BaseApi {
 
     if (priceTax !== undefined) {
       data.products[0].price_tax = priceTax;
+    }
+
+    if (overrides.itemDiscount !== undefined) {
+      data.products[0].discount = overrides.itemDiscount;
     }
 
     if (overrides.orderStatus) {

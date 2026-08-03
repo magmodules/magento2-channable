@@ -131,7 +131,11 @@ class Add
                     throw new CouldNotImportOrder(__($addedItem));
                 }
 
-                $addedItem->setOriginalCustomPrice($price);
+                $itemDiscount = (isset($item['discount']) && (float)$item['discount'] > 0)
+                    ? (float)$item['discount']
+                    : 0.0;
+
+                $addedItem->setOriginalCustomPrice($price - $itemDiscount);
                 $addedItem->setOriginalPrice($channableBasePrice);
                 $this->itemResourceModel->save($addedItem);
                 $qty += (int)$item['quantity'];

@@ -189,6 +189,43 @@ const testCases = [
     },
   },
   {
+    title: 'Item-level discount: original price vs discounted price',
+    config: {},
+    orderOverrides: { price: 24.99, itemDiscount: 2.50, discount: 2.50 },
+    assert: async (page, incrementId) => {
+      // Original price should be the full Channable price (24.99)
+      const originalPriceStr = await orderViewPage.getOriginalPrice(page);
+      const originalPrice = parsePrice(originalPriceStr);
+      expect(originalPrice).toBeCloseTo(24.99, 1);
+
+      // Item price should be lower than original (discount applied)
+      const itemPriceStr = await orderViewPage.getItemPrice(page);
+      const itemPrice = parsePrice(itemPriceStr);
+      expect(itemPrice).toBeLessThan(originalPrice);
+
+      // Grand total must equal discounted price (22.49), not full price (24.99)
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(22.49, 1);
+    },
+  },
+  {
+    title: 'Item-level discount: multi-qty grand total',
+    config: {},
+    orderOverrides: { price: 24.99, quantity: 3, itemDiscount: 2.50, discount: 7.50 },
+    assert: async (page, incrementId) => {
+      // Grand total should be 3 * (24.99 - 2.50) = 67.47
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(67.47, 1);
+
+      // Row total must be less than undiscounted (3 * 24.99 = 74.97)
+      const rowTotalStr = await orderViewPage.getRowTotal(page);
+      const rowTotal = parsePrice(rowTotalStr);
+      expect(rowTotal).toBeLessThan(74.97);
+    },
+  },
+  {
     title: 'Multi-currency order (PLN)',
     config: {
       'currency/options/allow': 'EUR,PLN',
