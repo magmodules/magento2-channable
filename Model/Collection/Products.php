@@ -374,6 +374,48 @@ class Products
         $colls = ['final_price', 'min_price', 'max_price'];
         $tableName = ['price_index' => $collection->getTable('catalog_product_index_price')];
         $collection->getSelect()->joinLeft($tableName, $joinCond, $colls);
+
+        $this->addMinRegularPriceColumn($collection, $websiteId);
+    }
+
+    /**
+     * Add the lowest regular price of the child products as min_regular_price.
+     *
+     * The price index only holds the configurable's own price, which is empty on most
+     * configurables, while min_price/max_price hold the lowest/highest child final price.
+     * Without the lowest child regular price a discount can not be told apart from a
+     * regular price, which would push the sale price into the price field.
+     *
+     * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $collection
+     * @param                                                         $websiteId
+     */
+    private function addMinRegularPriceColumn($collection, $websiteId)
+    {
+        $linkField = $this->generalHelper->getLinkField();
+        $superLinkTable = $collection->getTable('catalog_product_super_link');
+        $entityTable = $collection->getTable('catalog_product_entity');
+        $indexTable = $collection->getTable('catalog_product_index_price');
+
+        $select = $collection->getConnection()->select()
+            ->from(['super_link' => $superLinkTable], [])
+            ->join(
+                ['parent_entity' => $entityTable],
+                'parent_entity.' . $linkField . ' = super_link.parent_id',
+                []
+            )
+            ->join(
+                ['child_price' => $indexTable],
+                'child_price.entity_id = super_link.product_id'
+                . ' AND child_price.website_id = ' . (int)$websiteId
+                . ' AND child_price.customer_group_id = 0',
+                []
+            )
+            ->columns(['min_regular_price' => new \Zend_Db_Expr('MIN(child_price.price)')])
+            ->where('parent_entity.entity_id = e.entity_id');
+
+        $collection->getSelect()->columns([
+            'min_regular_price' => new \Zend_Db_Expr('(' . $select . ')')
+        ]);
     }
 
     /**
