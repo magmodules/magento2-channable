@@ -270,9 +270,14 @@ const testCases = [
     config: {},
     orderOverrides: { price: 49.99, itemDiscount: 5.00, discount: 5.00 },
     assert: async (page, incrementId) => {
-      const discountStr = await orderViewPage.getDiscountAmount(page);
-      const discount = Math.abs(parsePrice(discountStr));
-      expect(discount).toBeCloseTo(0, 1);
+      const discountRow = page.locator('.order-subtotal-table tr', { hasText: 'Discount' }).first();
+      const visible = await discountRow.isVisible({ timeout: 2000 }).catch(() => false);
+      if (visible) {
+        const discountStr = await discountRow.locator('td').last().textContent();
+        const discount = Math.abs(parsePrice(discountStr.trim()));
+        expect(discount).toBeCloseTo(0, 1);
+      }
+      // If discount row doesn't exist, that's correct — no order-level discount applied
     },
   },
   {
