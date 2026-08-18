@@ -13,6 +13,7 @@ const orderViewPage = new OrderViewPage();
 const customerViewPage = new CustomerViewPage();
 
 const PRODUCT_ID = parseInt(process.env.PRODUCT_ID || '1', 10);
+const SECOND_PRODUCT_ID = parseInt(process.env.SECOND_PRODUCT_ID || '2', 10);
 const SECOND_STORE_CODE = 'second_store';
 
 let secondStoreId: number | null = null;
@@ -223,6 +224,55 @@ const testCases = [
       const rowTotalStr = await orderViewPage.getRowTotal(page);
       const rowTotal = parsePrice(rowTotalStr);
       expect(rowTotal).toBeLessThan(74.97);
+    },
+  },
+  {
+    title: 'Item-level discount: price excl tax config',
+    config: {
+      'tax/calculation/price_includes_tax': '0',
+    },
+    orderOverrides: { price: 49.99, itemDiscount: 5.00, discount: 5.00 },
+    assert: async (page, incrementId) => {
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(44.99, 1);
+    },
+  },
+  {
+    title: 'Item-level discount: price incl tax config',
+    config: {
+      'tax/calculation/price_includes_tax': '1',
+    },
+    orderOverrides: { price: 49.99, itemDiscount: 5.00, discount: 5.00 },
+    assert: async (page, incrementId) => {
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(44.99, 1);
+    },
+  },
+  {
+    title: 'Item-level discount: multi-product (Sam payload)',
+    config: {},
+    orderOverrides: {
+      price: 49.99,
+      itemDiscount: 5.00,
+      discount: 10.00,
+      extraProducts: [{ id: SECOND_PRODUCT_ID, price: 49.99, discount: 5.00 }],
+    },
+    assert: async (page, incrementId) => {
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(89.98, 1);
+    },
+  },
+  {
+    title: 'Item-level discount: no order-level discount applied',
+    config: {},
+    orderOverrides: { price: 49.99, itemDiscount: 5.00, discount: 5.00 },
+    assert: async (page, incrementId) => {
+      const discountStr = await orderViewPage.getDiscountAmount(page);
+      const discount = Math.abs(parsePrice(discountStr));
+      expect(discount).toBeCloseTo(0, 1);
     },
   },
   {

@@ -135,6 +135,10 @@ class Add
                     ? (float)$item['discount']
                     : 0.0;
 
+                if ($itemDiscount > 0 && (float)$item['price'] > 0) {
+                    $itemDiscount = $itemDiscount * ($price / (float)$item['price']);
+                }
+
                 $addedItem->setOriginalCustomPrice($price - $itemDiscount);
                 $addedItem->setOriginalPrice($channableBasePrice);
                 $this->itemResourceModel->save($addedItem);
