@@ -58,8 +58,20 @@ class PriceData
                     $price = 0;
                     $finalPrice = 0;
                 } else {
-                    $price = $product->getData('price');
-                    $finalPrice = $product->getData('final_price');
+                    /**
+                     * The price index only holds the configurable's own price, which is empty on
+                     * most configurables, while min_price holds the lowest child final price.
+                     * Using the lowest child regular price keeps a discounted child out of the
+                     * price field and reports it as sale price instead. The price system is only
+                     * used as fallback, as it loads the child products one configurable at a time.
+                     */
+                    $price = (float)$product->getData('min_regular_price');
+                    $finalPrice = (float)$product->getData('min_price');
+                    if ($price <= 0) {
+                        $priceInfo = $product->getPriceInfo();
+                        $price = (float)$priceInfo->getPrice('regular_price')->getValue();
+                        $finalPrice = (float)$priceInfo->getPrice('final_price')->getValue();
+                    }
                     $specialPrice = $product->getSpecialPrice();
                     $product['min_price'] = $product['min_price'] >= 0 ? $product['min_price'] : null;
                     $product['max_price'] = $product['max_price'] >= 0 ? $product['max_price'] : null;
