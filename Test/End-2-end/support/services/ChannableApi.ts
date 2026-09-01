@@ -107,10 +107,12 @@ export default class ChannableApi extends BaseApi {
     businessOrder?: boolean;
     shipping?: number;
     discount?: number;
+    itemDiscount?: number;
     companyName?: string;
     channelName?: string;
     shipmentMethod?: string;
     email?: string;
+    extraProducts?: Array<{ id: number; price: number; quantity?: number; discount?: number }>;
   } = {}): any {
     const channableId = overrides.channableId || String(Math.floor(Math.random() * 900000) + 100000);
     const country = overrides.country || 'NL';
@@ -161,6 +163,10 @@ export default class ChannableApi extends BaseApi {
       data.products[0].price_tax = priceTax;
     }
 
+    if (overrides.itemDiscount !== undefined) {
+      data.products[0].discount = overrides.itemDiscount;
+    }
+
     if (overrides.orderStatus) {
       data.order_status = overrides.orderStatus;
     }
@@ -189,14 +195,33 @@ export default class ChannableApi extends BaseApi {
       data.shipment_method = overrides.shipmentMethod;
     }
 
+    if (overrides.extraProducts) {
+      for (const extra of overrides.extraProducts) {
+        const extraItem = JSON.parse(JSON.stringify(data.products[0]));
+        extraItem.id = String(extra.id);
+        extraItem.price = extra.price;
+        extraItem.quantity = extra.quantity ?? 1;
+        extraItem.discount = extra.discount ?? 0;
+        extraItem.title = `Extra product ${extra.id}`;
+        data.products.push(extraItem);
+      }
+    }
+
+    let subtotal = 0;
+    let totalDiscount = 0;
+    for (const p of data.products) {
+      subtotal += p.price * p.quantity;
+      totalDiscount += (p.discount ?? 0) * p.quantity;
+    }
+
     const shipping = overrides.shipping ?? 0;
-    const discount = overrides.discount ?? 0;
+    const discount = overrides.discount ?? totalDiscount;
     data.price.currency = currency;
     data.price.shipping = shipping;
     data.price.discount = discount;
-    data.price.subtotal = price * quantity;
-    data.price.total = (price * quantity) + shipping - discount;
-    data.price.commission = Math.round(price * quantity * 0.10 * 100) / 100;
+    data.price.subtotal = subtotal;
+    data.price.total = subtotal + shipping - discount;
+    data.price.commission = Math.round(subtotal * 0.10 * 100) / 100;
     data.products[0].commission = data.price.commission;
 
     return data;

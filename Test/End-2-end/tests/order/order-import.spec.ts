@@ -13,6 +13,7 @@ const orderViewPage = new OrderViewPage();
 const customerViewPage = new CustomerViewPage();
 
 const PRODUCT_ID = parseInt(process.env.PRODUCT_ID || '1', 10);
+const SECOND_PRODUCT_ID = parseInt(process.env.SECOND_PRODUCT_ID || '2', 10);
 const SECOND_STORE_CODE = 'second_store';
 
 let secondStoreId: number | null = null;
@@ -186,6 +187,97 @@ const testCases = [
     assert: async (page, incrementId) => {
       const displayedId = await orderViewPage.getOrderIncrementId(page);
       expect(displayedId).toBeTruthy();
+    },
+  },
+  {
+    title: 'Item-level discount: original price vs discounted price',
+    config: {},
+    orderOverrides: { price: 24.99, itemDiscount: 2.50, discount: 2.50 },
+    assert: async (page, incrementId) => {
+      // Original price should be the full Channable price (24.99)
+      const originalPriceStr = await orderViewPage.getOriginalPrice(page);
+      const originalPrice = parsePrice(originalPriceStr);
+      expect(originalPrice).toBeCloseTo(24.99, 1);
+
+      // Item price should be lower than original (discount applied)
+      const itemPriceStr = await orderViewPage.getItemPrice(page);
+      const itemPrice = parsePrice(itemPriceStr);
+      expect(itemPrice).toBeLessThan(originalPrice);
+
+      // Grand total must equal discounted price (22.49), not full price (24.99)
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(22.49, 1);
+    },
+  },
+  {
+    title: 'Item-level discount: multi-qty grand total',
+    config: {},
+    orderOverrides: { price: 24.99, quantity: 3, itemDiscount: 2.50, discount: 7.50 },
+    assert: async (page, incrementId) => {
+      // Grand total should be 3 * (24.99 - 2.50) = 67.47
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(67.47, 1);
+
+      // Row total must be less than undiscounted (3 * 24.99 = 74.97)
+      const rowTotalStr = await orderViewPage.getRowTotal(page);
+      const rowTotal = parsePrice(rowTotalStr);
+      expect(rowTotal).toBeLessThan(74.97);
+    },
+  },
+  {
+    title: 'Item-level discount: price excl tax config',
+    config: {
+      'tax/calculation/price_includes_tax': '0',
+    },
+    orderOverrides: { price: 49.99, itemDiscount: 5.00, discount: 5.00 },
+    assert: async (page, incrementId) => {
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(44.99, 1);
+    },
+  },
+  {
+    title: 'Item-level discount: price incl tax config',
+    config: {
+      'tax/calculation/price_includes_tax': '1',
+    },
+    orderOverrides: { price: 49.99, itemDiscount: 5.00, discount: 5.00 },
+    assert: async (page, incrementId) => {
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(44.99, 1);
+    },
+  },
+  {
+    title: 'Item-level discount: multi-product (Sam payload)',
+    config: {},
+    orderOverrides: {
+      price: 49.99,
+      itemDiscount: 5.00,
+      discount: 10.00,
+      extraProducts: [{ id: SECOND_PRODUCT_ID, price: 49.99, discount: 5.00 }],
+    },
+    assert: async (page, incrementId) => {
+      const grandTotalStr = await orderViewPage.getGrandTotal(page);
+      const grandTotal = parsePrice(grandTotalStr);
+      expect(grandTotal).toBeCloseTo(89.98, 1);
+    },
+  },
+  {
+    title: 'Item-level discount: no order-level discount applied',
+    config: {},
+    orderOverrides: { price: 49.99, itemDiscount: 5.00, discount: 5.00 },
+    assert: async (page, incrementId) => {
+      const discountRow = page.locator('.order-subtotal-table tr', { hasText: 'Discount' }).first();
+      const visible = await discountRow.isVisible({ timeout: 2000 }).catch(() => false);
+      if (visible) {
+        const discountStr = await discountRow.locator('td').last().textContent();
+        const discount = Math.abs(parsePrice(discountStr.trim()));
+        expect(discount).toBeCloseTo(0, 1);
+      }
+      // If discount row doesn't exist, that's correct — no order-level discount applied
     },
   },
   {
