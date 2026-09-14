@@ -124,5 +124,10 @@
         "column": {
             "transaction_fee": true
         }
+    },
+    "sales_shipment": {
+        "column": {
+            "channable_delivery_bill_id": true
+        }
     }
 }

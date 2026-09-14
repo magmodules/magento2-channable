@@ -10,6 +10,7 @@ namespace Magmodules\Channable\Service\Order\Shipping;
 use Magento\Sales\Api\Data\ShipmentTrackInterface;
 use Magento\Sales\Model\Order\Shipment;
 use Magmodules\Channable\Api\Config\RepositoryInterface as ConfigProvider;
+use Magmodules\Channable\Plugin\Shipment\DeliveryBillId as DeliveryBillIdPlugin;
 
 /**
  * Service class to return Fulfillment data
@@ -35,6 +36,11 @@ class Fulfillment
      * Returns fulfillment data for shipment.
      * See; https://docs.channable.com/api/v1/#shipment-update
      *
+     * The delivery_bill_id defaults to the Magento shipment increment ID. This ID is printed on
+     * the default Magento packing slip and is therefore available on the physical delivery note.
+     * ERP systems can supply their own delivery note number through the channable_delivery_bill_id
+     * extension attribute on the shipment.
+     *
      * @param Shipment $shipment
      *
      * @return array
@@ -55,7 +61,34 @@ class Fulfillment
             }
         }
 
+        $fulfillment['delivery_bill_id'] = $this->getDeliveryBillId($shipment);
+
         return $fulfillment;
+    }
+
+    /**
+     * Returns the delivery bill ID for the shipment.
+     *
+     * Uses the value supplied by an ERP through the channable_delivery_bill_id extension
+     * attribute, and falls back to the Magento shipment increment ID when not set.
+     *
+     * @param Shipment $shipment
+     *
+     * @return string
+     */
+    private function getDeliveryBillId(Shipment $shipment): string
+    {
+        // Shipments loaded through a collection carry the value as data, not as extension attribute
+        $deliveryBillId = $shipment->getData(DeliveryBillIdPlugin::ATTRIBUTE_CODE);
+
+        if (!$deliveryBillId) {
+            $extensionAttributes = $shipment->getExtensionAttributes();
+            $deliveryBillId = $extensionAttributes !== null
+                ? $extensionAttributes->getChannableDeliveryBillId()
+                : null;
+        }
+
+        return $deliveryBillId ? (string)$deliveryBillId : (string)$shipment->getIncrementId();
     }
 
     /**

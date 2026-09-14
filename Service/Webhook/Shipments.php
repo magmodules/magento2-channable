@@ -95,6 +95,7 @@ class Shipments
         foreach ($collection as $shipment) {
             $response[] = [
                 'id' => $shipment->getOrderIncrementId(),
+                'shipment_id' => $shipment->getIncrementId(),
                 'type'=> 'shipment',
                 'status' => $shipment->getStatus(),
                 'date' => $this->localeDate->date($shipment->getCreatedAt())->format('Y-m-d H:i:s'),

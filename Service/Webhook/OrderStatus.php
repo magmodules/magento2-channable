@@ -80,28 +80,31 @@ class OrderStatus
             'status' => $order->getStatus()
         ];
 
-        if ($fulfillment = $this->getFulfillment($order)) {
-            $response['fulfillment'] = $fulfillment;
+        if ($fulfillments = $this->getFulfillments($order)) {
+            $response['fulfillment'] = end($fulfillments);
+            $response['fulfillments'] = $fulfillments;
         }
 
         return $response;
     }
 
     /**
+     * Returns fulfillment data, one entry per shipment.
+     *
      * @param OrderInterface $order
      *
-     * @return array|bool
+     * @return array
      */
-    private function getFulfillment(OrderInterface $order)
+    private function getFulfillments(OrderInterface $order): array
     {
-        $fulfillment = [];
+        $fulfillments = [];
         $shipmentCollection = $order->getShipmentsCollection();
         foreach ($shipmentCollection as $shipment) {
-            $fulfillment += $this->fulfillment->execute($shipment);
+            $fulfillment = $this->fulfillment->execute($shipment);
+            $fulfillment['shipment_id'] = $shipment->getIncrementId();
+            $fulfillments[] = $fulfillment;
         }
 
-        return (!empty($fulfillment))
-            ? ($fulfillment)
-            : (false);
+        return $fulfillments;
     }
 }
