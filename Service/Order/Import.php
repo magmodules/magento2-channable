@@ -156,18 +156,20 @@ class Import
             $order->setTransactionFee($quote->getTransactionFee());
 
             if (isset($orderData['price']['discount']) && !empty((float)$orderData['price']['discount'])) {
-                $orderCurrency = $orderData['price']['currency'] ?? '';
-                $discountAmount = abs((float)$orderData['price']['discount']);
-                $baseDiscountAmount = $this->currencyConverter->convertToBase(
-                    $discountAmount,
-                    $orderCurrency,
-                    $storeId
-                );
-                $order->setDiscountDescription($orderData['channel_name']);
-                $order->setBaseDiscountAmount($baseDiscountAmount * -1);
-                $order->setDiscountAmount($discountAmount * -1);
-                $order->setGrandTotal($order->getGrandTotal() - $discountAmount);
-                $order->setBaseGrandTotal($order->getBaseGrandTotal() - $baseDiscountAmount);
+                if (!$this->hasItemLevelDiscounts($orderData)) {
+                    $orderCurrency = $orderData['price']['currency'] ?? '';
+                    $discountAmount = abs((float)$orderData['price']['discount']);
+                    $baseDiscountAmount = $this->currencyConverter->convertToBase(
+                        $discountAmount,
+                        $orderCurrency,
+                        $storeId
+                    );
+                    $order->setDiscountDescription($orderData['channel_name']);
+                    $order->setBaseDiscountAmount($baseDiscountAmount * -1);
+                    $order->setDiscountAmount($discountAmount * -1);
+                    $order->setGrandTotal($order->getGrandTotal() - $discountAmount);
+                    $order->setBaseGrandTotal($order->getBaseGrandTotal() - $baseDiscountAmount);
+                }
             }
 
             $store->setCurrentCurrencyCode($store->getBaseCurrencyCode());
@@ -196,6 +198,19 @@ class Import
         } finally {
             $this->unsetCheckoutSessionData();
         }
+    }
+
+    /**
+     * Check if any product in the order data has an item-level discount.
+     */
+    private function hasItemLevelDiscounts(array $orderData): bool
+    {
+        foreach ($orderData['products'] ?? [] as $item) {
+            if (isset($item['discount']) && (float)$item['discount'] > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
