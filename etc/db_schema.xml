@@ -140,6 +140,11 @@
         <column name="channel_label" xsi:type="varchar" length="255" comment="Channable: Channel Label"/>
     </table>
 
+    <!-- Declaration Schema for delivery_bill_id column in sales_shipment Table -->
+    <table name="sales_shipment">
+        <column name="channable_delivery_bill_id" xsi:type="varchar" length="64" nullable="true" comment="Channable: Delivery Bill ID"/>
+    </table>
+
     <!-- Declaration Schema for transaction_fee column in sales_invoice Table -->
     <table name="sales_invoice">
         <column name="transaction_fee" xsi:type="decimal" precision="20" scale="4" nullable="true" comment="Channable Transaction Fee"/>

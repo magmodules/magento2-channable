@@ -9,4 +9,10 @@
     <extension_attributes for="Magento\Quote\Api\Data\AddressInterface">
         <attribute code="channable_pickup_location" type="string"/>
     </extension_attributes>
+    <extension_attributes for="Magento\Sales\Api\Data\ShipmentInterface">
+        <attribute code="channable_delivery_bill_id" type="string"/>
+    </extension_attributes>
+    <extension_attributes for="Magento\Sales\Api\Data\ShipmentCreationArgumentsInterface">
+        <attribute code="channable_delivery_bill_id" type="string"/>
+    </extension_attributes>
 </config>

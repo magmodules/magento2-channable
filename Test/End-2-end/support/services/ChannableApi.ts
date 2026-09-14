@@ -562,4 +562,112 @@ export default class ChannableApi extends BaseApi {
     const data = await response.json() as any;
     return data.id;
   }
+
+  /**
+   * Get the Magento order entity ID by increment ID (via REST API).
+   */
+  async getOrderEntityId(baseURL: string, orderIncrementId: string): Promise<string> {
+    const token = process.env.admin_token;
+    const url = `${baseURL}rest/all/V1/orders?searchCriteria[filterGroups][0][filters][0][field]=increment_id` +
+      `&searchCriteria[filterGroups][0][filters][0][value]=${orderIncrementId}&searchCriteria[pageSize]=1`;
+
+    const response = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+
+    const data = await response.json() as any;
+    const orderId = data.items?.[0]?.entity_id;
+    if (!orderId) throw new Error(`Order not found: ${orderIncrementId}`);
+
+    return String(orderId);
+  }
+
+  /**
+   * Ship an order through the Magento REST API (POST /V1/order/:id/ship).
+   *
+   * An ERP supplies its own delivery note number through the channable_delivery_bill_id
+   * extension attribute on the shipment creation arguments.
+   */
+  async shipOrder(baseURL: string, orderIncrementId: string, options: {
+    deliveryBillId?: string;
+    trackNumber?: string;
+    carrierCode?: string;
+    title?: string;
+    items?: Array<{ orderItemId: string | number; qty: number }>;
+  } = {}): Promise<{ status: number; shipmentId: string; body: any }> {
+    const token = process.env.admin_token;
+    const orderId = await this.getOrderEntityId(baseURL, orderIncrementId);
+
+    const payload: any = { notify: false };
+
+    if (options.items) {
+      payload.items = options.items.map((item) => ({
+        order_item_id: parseInt(String(item.orderItemId), 10),
+        qty: item.qty,
+      }));
+    }
+
+    if (options.trackNumber) {
+      payload.tracks = [{
+        track_number: options.trackNumber,
+        carrier_code: options.carrierCode ?? 'custom',
+        title: options.title ?? 'E2E Carrier',
+      }];
+    }
+
+    if (options.deliveryBillId !== undefined) {
+      payload.arguments = {
+        extension_attributes: { channable_delivery_bill_id: options.deliveryBillId },
+      };
+    }
+
+    const response = await fetch(`${baseURL}rest/all/V1/order/${orderId}/ship`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const body = await response.json();
+
+    return { status: response.status, shipmentId: String(body), body };
+  }
+
+  /**
+   * Get a shipment by entity ID (via REST API).
+   */
+  async getShipment(baseURL: string, shipmentId: string): Promise<any> {
+    const token = process.env.admin_token;
+
+    const response = await fetch(`${baseURL}rest/all/V1/shipment/${shipmentId}`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Shipment ${shipmentId} not found: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Update an existing shipment through the Magento REST API (POST /V1/shipment).
+   * Used to verify ERP systems can set the delivery bill ID after shipment creation.
+   */
+  async saveShipment(baseURL: string, shipment: any): Promise<{ status: number; body: any }> {
+    const token = process.env.admin_token;
+
+    const response = await fetch(`${baseURL}rest/all/V1/shipment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ entity: shipment }),
+    });
+
+    return { status: response.status, body: await response.json() };
+  }
 }
