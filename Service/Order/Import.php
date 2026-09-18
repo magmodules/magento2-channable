@@ -7,12 +7,12 @@ declare(strict_types=1);
 
 namespace Magmodules\Channable\Service\Order;
 
-use Exception;
 use Magento\CatalogInventory\Observer\ItemsForReindex;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Model\Quote as QuoteEntity;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -24,6 +24,7 @@ use Magmodules\Channable\Api\Order\RepositoryInterface as ChannableOrderReposito
 use Magmodules\Channable\Exceptions\CouldNotImportOrder;
 use Magmodules\Channable\Model\Config\Source\Status;
 use Magmodules\Channable\Service\Order\Currency\Converter as CurrencyConverter;
+use Throwable;
 
 /**
  * Class Order Import
@@ -32,6 +33,11 @@ class Import
 {
     private const LVB_AUTO_SHIP_MESSAGE = 'LVB Order, automatically shipped';
     private const COULD_NOT_IMPORT_ORDER = 'Could not import order %1: %2';
+    private const SUBMIT_RETURNED_NULL = 'Order placement failed, no order was created for quote %1. '
+        . 'Magento returns no order when the quote holds no visible items at submit '
+        . '(quote items: %2, visible: %3), or when a third party plugin on '
+        . 'Magento\\Quote\\Api\\CartManagementInterface::submit() does not return the result of proceed(). '
+        . 'Check plugins and observers on the quote submit process.';
 
     protected CartRepositoryInterface $quoteRepository;
     private ConfigProvider $configProvider;
@@ -152,7 +158,7 @@ class Import
 
             $this->eventManager->dispatch('checkout_submit_before', ['quote' => $quote]);
 
-            $order = $this->quoteManagement->submit($quote);
+            $order = $this->assertOrderCreated($this->quoteManagement->submit($quote), $quote);
             $order->setTransactionFee($quote->getTransactionFee());
 
             if (isset($orderData['price']['discount']) && !empty((float)$orderData['price']['discount'])) {
@@ -186,7 +192,7 @@ class Import
             $this->eventManager->dispatch('checkout_submit_all_after', ['order' => $order, 'quote' => $quote]);
 
             return $order;
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             $couldNotImportMsg = self::COULD_NOT_IMPORT_ORDER;
             $message = __(
                 $couldNotImportMsg,
@@ -198,6 +204,38 @@ class Import
         } finally {
             $this->unsetCheckoutSessionData();
         }
+    }
+
+    /**
+     * Assert Magento actually created an order for the submitted quote
+     *
+     * QuoteManagement::submit() returns null instead of throwing when the quote holds no
+     * visible items. Without this guard that null surfaces as a fatal error on the next
+     * setter call, which bypasses the error handling below and leaves the Channable order
+     * without a readable reason for the failure.
+     *
+     * @param OrderInterface|null $order
+     * @param QuoteEntity $quote
+     * @return OrderInterface
+     * @throws CouldNotImportOrder
+     */
+    private function assertOrderCreated(?OrderInterface $order, QuoteEntity $quote): OrderInterface
+    {
+        if ($order !== null) {
+            return $order;
+        }
+
+        $submitReturnedNullMsg = self::SUBMIT_RETURNED_NULL;
+        $message = __(
+            $submitReturnedNullMsg,
+            (string)$quote->getId(),
+            count($quote->getAllItems()),
+            count($quote->getAllVisibleItems())
+        );
+
+        $this->logger->addErrorLog('SubmitQuote', $message->render());
+
+        throw new CouldNotImportOrder($message);
     }
 
     /**
