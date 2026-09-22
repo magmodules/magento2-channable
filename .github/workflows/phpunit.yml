@@ -1,0 +1,55 @@
+name: Unit Tests
+
+on:
+  pull_request:
+    paths:
+      - '**/*.php'
+      - 'phpunit.xml.dist'
+      - 'Test/**'
+      - 'composer.json'
+  workflow_dispatch:
+
+jobs:
+  phpunit:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - PHP_VERSION: php83-fpm
+            MAGENTO_VERSION: 2.4.7
+          - PHP_VERSION: php84-fpm
+            MAGENTO_VERSION: 2.4.8-p4
+          - PHP_VERSION: php85-fpm
+            MAGENTO_VERSION: 2.4.9
+
+    name: PHPUnit ${{ matrix.PHP_VERSION }} Magento ${{ matrix.MAGENTO_VERSION }}
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Docker
+        run: docker run --detach --name magento-project-community-edition michielgerritsen/magento-project-community-edition:${{ matrix.PHP_VERSION }}-magento${{ matrix.MAGENTO_VERSION }}
+
+      - name: Remove version from composer.json
+        run: sed -i '/version/d' ./composer.json
+
+      - name: Upload our code into the docker container
+        run: docker cp $(pwd) magento-project-community-edition:/data/extensions/
+
+      - name: Install the extension in Magento
+        run: docker exec magento-project-community-edition ./install-composer-package magmodules/magento2-channable:@dev
+
+      # PHPUnit lives in Test/vendor rather than the module's own composer.json: Magento's root
+      # autoloader excludes **/Test/** from its class map, which breaks the PHPUnit copy that ships
+      # with Magento itself.
+      # docker cp copies the checkout directory, which is named after the repository - and this
+      # module lives in two of them (magento2-channable and magento2-channable-dev), so the path
+      # cannot be hardcoded.
+      - name: Install the test dependencies
+        run: docker exec magento-project-community-edition /bin/bash -c "cd /data/extensions/${{ github.event.repository.name }}/Test && composer install --no-interaction --prefer-dist --no-progress"
+
+      - name: Run PHPUnit
+        run: docker exec magento-project-community-edition /bin/bash -c "cd /data/extensions/${{ github.event.repository.name }} && Test/vendor/bin/phpunit -c phpunit.xml.dist"

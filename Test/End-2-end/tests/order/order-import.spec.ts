@@ -306,6 +306,28 @@ const testCases = [
     },
   },
   {
+    // The unit suite pins the sanitizing itself; this case proves the other half of the claim -
+    // that addressRepository->save() accepts these characters, so the order really is created and
+    // the house number survives all the way into the stored address.
+    title: 'House number with a separator survives the import',
+    config: {},
+    orderOverrides: { street: 'Examplestreet', houseNumber: '55/3' },
+    assert: async (page, incrementId) => {
+      const shipping = await orderViewPage.getShippingAddress(page);
+      const billing = await orderViewPage.getBillingAddress(page);
+
+      // customer/address/street_lines decides whether the house number lands on its own line, so
+      // compare on collapsed whitespace - what matters here is the separator, not the line break.
+      const collapse = (address: string) => address.replace(/\s+/g, ' ');
+
+      expect(collapse(shipping)).toContain('Examplestreet 55/3');
+      expect(collapse(billing)).toContain('Examplestreet 55/3');
+      // "553" is the failure this guards against: a different, undeliverable house number.
+      expect(shipping).not.toContain('553');
+      expect(billing).not.toContain('553');
+    },
+  },
+  {
     title: 'Customer created in correct store view',
     config: {
       [`${CONFIG_BASE}/import_customer`]: '1',

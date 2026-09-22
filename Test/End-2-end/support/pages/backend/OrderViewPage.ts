@@ -153,6 +153,20 @@ export default class OrderViewPage {
     return groupText === 'NOT LOGGED IN';
   }
 
+  /**
+   * Read the shipping address block as a single string with the line breaks kept, so a street
+   * that was split or mangled during import is visible in the assertion diff.
+   */
+  async getShippingAddress(page: Page): Promise<string> {
+    const block = page.locator('.order-shipping-address address').first();
+    return (await block.innerText()).trim();
+  }
+
+  async getBillingAddress(page: Page): Promise<string> {
+    const block = page.locator('.order-billing-address address').first();
+    return (await block.innerText()).trim();
+  }
+
   async getRowTotal(page: Page): Promise<string> {
     return this.getItemColumnValue(page, 'Row Total');
   }
