@@ -17,8 +17,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - PHP_VERSION: php83-fpm
-            MAGENTO_VERSION: 2.4.7-p3
+          - PHP_VERSION: php84-fpm
+            MAGENTO_VERSION: 2.4.8-p2
+          - PHP_VERSION: php85-fpm
+            MAGENTO_VERSION: 2.4.9
     runs-on: ubuntu-latest
     env:
       PHP_VERSION: ${{ matrix.PHP_VERSION }}
