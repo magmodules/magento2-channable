@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.25.0]
+
+**Features:**
+* Added `delivery_bill_id` to the shipment fulfillment payload.
+
+**Bugfixes:**
+* Feed filters are now applied to static product attributes such as `entity_id`, `type_id` and `attribute_set_id`, which were silently skipped.
+* Fixed the `lteg` operator typo that stopped the "less than or equal" filter from working.
+* Cleared image attributes are no longer written to the feed as a `no_selection` media URL.
+* Street addresses keep `/ # ( ) :` on import, so house number additions survive.
+* Fixed the class name on the source deduction plugin, which stopped it from applying to LVB orders.
+* Feed and item values are cast before `number_format`/`round` under strict types.
+
+**Improvements:**
+* Dropped PHP 7.4 support.
+* Added a unit test suite, a release drafting workflow and a changelog.
+
+**Minimum requirements:**
+* Magento 2.4.x
+* PHP 8.1 to 8.5
+
 ## [1.24.3]
 
 **Improvements:**
