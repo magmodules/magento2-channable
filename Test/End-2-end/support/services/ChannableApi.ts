@@ -365,7 +365,16 @@ export default class ChannableApi extends BaseApi {
       }),
     });
 
-    const body = await response.json();
+    // A core TypeError comes back as JSON on some PHP versions and as a bare string on others,
+    // so the body is read as text and only then parsed.
+    const text = await response.text();
+    let body: any;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      body = text;
+    }
+
     return { status: response.status, body };
   }
 
