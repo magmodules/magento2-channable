@@ -89,6 +89,14 @@
         <plugin name="channable_pickup_location" type="Magmodules\Channable\Plugin\AfterGetShippingDescription"/>
     </type>
 
+    <type name="Magento\Sales\Api\ShipmentRepositoryInterface">
+        <plugin name="channable_delivery_bill_id" type="Magmodules\Channable\Plugin\Shipment\DeliveryBillId"/>
+    </type>
+
+    <type name="Magento\Sales\Model\Order\ShipmentDocumentFactory">
+        <plugin name="channable_delivery_bill_id_argument" type="Magmodules\Channable\Plugin\Shipment\DeliveryBillIdArgument"/>
+    </type>
+
     <type name="Magento\Sales\Model\Order\Invoice">
         <plugin name="channable_add_discount_to_invoice" type="Magmodules\Channable\Plugin\AddDiscountToInvoice"/>
     </type>
