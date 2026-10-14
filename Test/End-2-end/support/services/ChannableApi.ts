@@ -113,6 +113,9 @@ export default class ChannableApi extends BaseApi {
     shipmentMethod?: string;
     email?: string;
     extraProducts?: Array<{ id: number; price: number; quantity?: number; discount?: number }>;
+    street?: string;
+    houseNumber?: string;
+    houseNumberExt?: string;
   } = {}): any {
     const channableId = overrides.channableId || String(Math.floor(Math.random() * 900000) + 100000);
     const country = overrides.country || 'NL';
@@ -185,6 +188,21 @@ export default class ChannableApi extends BaseApi {
       data.customer.email = overrides.email;
       data.billing.email = overrides.email;
       data.shipping.email = overrides.email;
+    }
+
+    if (overrides.street !== undefined) {
+      data.billing.street = overrides.street;
+      data.shipping.street = overrides.street;
+    }
+
+    if (overrides.houseNumber !== undefined) {
+      data.billing.house_number = overrides.houseNumber;
+      data.shipping.house_number = overrides.houseNumber;
+    }
+
+    if (overrides.houseNumberExt !== undefined) {
+      data.billing.house_number_ext = overrides.houseNumberExt;
+      data.shipping.house_number_ext = overrides.houseNumberExt;
     }
 
     if (overrides.channelName) {
