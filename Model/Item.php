@@ -389,9 +389,9 @@ class Item extends AbstractModel
             $update['id'] = $id;
             $update['title'] = $product['title'] ?? $item->getTitle();
             $update['gtin'] = $product['ean'] ?? $item->getGtin();
-            $update['stock'] = isset($product['qty']) ? round($product['qty']) : 0;
+            $update['stock'] = isset($product['qty']) ? round((float)$product['qty']) : 0;
             $update['availability'] = $product['availability'] ?? 0;
-            $update['price'] = $product['price'] ?? number_format($item->getPrice(), 2);
+            $update['price'] = $product['price'] ?? number_format((float)$item->getPrice(), 2);
             $update['discount_price'] = $product['sale_price'] ?? '';
 
             $postData[] = $update;
