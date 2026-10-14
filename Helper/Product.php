@@ -857,12 +857,12 @@ class Product extends AbstractHelper
             }
             if (in_array('number', $actions)) {
                 if (is_numeric($value)) {
-                    $value = number_format($value, 2);
+                    $value = number_format((float)$value, 2);
                 }
             }
             if (in_array('round', $actions)) {
                 if (is_numeric($value)) {
-                    $value = round($value);
+                    $value = round((float)$value);
                 }
             }
             if (in_array('replacetags', $actions)) {
