@@ -127,6 +127,7 @@ class Import
             $lvbOrder = $orderData['order_status'] == 'shipped';
             $quote = $this->createQuote->createCustomerQuote($orderData, $store);
             $this->addItems->execute($quote, $orderData, $store, $lvbOrder);
+            $this->logQuoteItems('after addItems', $quote, $orderData);
 
             $shippingPrice = $this->calculateShippingPrice->execute($quote, $orderData, $store);
             $quote->collectTotals();
@@ -156,7 +157,9 @@ class Import
                 $this->itemsForReindex->clear();
             }
 
+            $this->logQuoteItems('before checkout_submit_before', $quote, $orderData);
             $this->eventManager->dispatch('checkout_submit_before', ['quote' => $quote]);
+            $this->logQuoteItems('before submit', $quote, $orderData);
 
             $order = $this->assertOrderCreated($this->quoteManagement->submit($quote), $quote);
             $order->setTransactionFee($quote->getTransactionFee());
@@ -219,6 +222,33 @@ class Import
      * @return OrderInterface
      * @throws CouldNotImportOrder
      */
+    private function logQuoteItems(string $stage, QuoteEntity $quote, array $orderData): void
+    {
+        $detail = [];
+        foreach ($quote->getAllItems() as $item) {
+            $detail[] = sprintf(
+                'item %s: product %s, qty %s, deleted %s, parent %s, status %s',
+                (string)$item->getId(),
+                (string)$item->getProductId(),
+                (string)$item->getQty(),
+                $item->isDeleted() ? 'yes' : 'no',
+                (string)$item->getParentItemId(),
+                $item->getProduct() ? (string)$item->getProduct()->getStatus() : 'no product'
+            );
+        }
+
+        $this->logger->addErrorLog('SubmitQuote', sprintf(
+            '%s - channable_id %s, store %s, quote %s: items %d, visible %d%s',
+            $stage,
+            (string)($orderData['channable_id'] ?? ''),
+            (string)($orderData['store_id'] ?? ''),
+            (string)$quote->getId(),
+            count($quote->getAllItems()),
+            count($quote->getAllVisibleItems()),
+            $detail ? ' | ' . implode(' | ', $detail) : ''
+        ));
+    }
+
     private function assertOrderCreated(?OrderInterface $order, QuoteEntity $quote): OrderInterface
     {
         if ($order !== null) {
