@@ -1,33 +1,37 @@
 name: Lint PHP files
-on: [push, pull_request]
+on:
+  pull_request:
+    paths:
+      - '**/*.php'
+      - '**/*.phtml'
 
 jobs:
-  php-74:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: prestashop/github-action-php-lint/7.4@v2.3.1
-
   php-81:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: prestashop/github-action-php-lint/8.1@v2.3.1
 
   php-82:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: prestashop/github-action-php-lint/8.2@v2.3.1
 
   php-83:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: prestashop/github-action-php-lint/8.3@v2.3.1
 
   php-84:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: prestashop/github-action-php-lint/8.4@v2.3.1
 
   php-85:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: prestashop/github-action-php-lint/8.5@master

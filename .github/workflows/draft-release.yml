@@ -1,0 +1,104 @@
+name: Draft Release
+
+# Creates (or updates) a draft GitHub release when a release/* PR is merged into the default branch.
+# - Tag + title = composer.json version (no "v" prefix), target = the merge commit.
+# - Release notes = the matching "## [x.y.z]" section from CHANGELOG.md.
+# Publishing the draft (manually) triggers the Adobe Marketplace Release workflow.
+
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  draft-release:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       github.event.pull_request.base.ref == github.event.repository.default_branch &&
+       startsWith(github.event.pull_request.head.ref, 'release/'))
+    runs-on: ubuntu-latest
+    env:
+      # REPO_TOKEN (personal fine-grained PAT, Contents: read & write on the module repos) makes the draft
+      # show up under that person's name; falls back to the workflow token ("github-actions") when not set.
+      GH_TOKEN: ${{ secrets.REPO_TOKEN || github.token }}
+      GH_REPO: ${{ github.repository }}
+      TARGET_SHA: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+
+      - name: Resolve version
+        run: |
+          VERSION=$(jq -r '.version' composer.json)
+          [ "$VERSION" != "null" ] || { echo "::error::No version in composer.json"; exit 1; }
+          # Follow the repo's existing tag convention ("1.2.3" or "v1.2.3")
+          LAST_TAG=$(gh release list --exclude-drafts --limit 1 --json tagName -q '.[0].tagName // ""')
+          PREFIX=""
+          [[ "$LAST_TAG" == v* ]] && PREFIX="v"
+          TAG="$PREFIX$VERSION"
+
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          echo "Version: $VERSION | Tag: $TAG (last: ${LAST_TAG:-none}) | Target: $TARGET_SHA"
+
+          CONFIG_VERSION=$(grep -oE '<version>v?[0-9][^<]*</version>' etc/config.xml 2>/dev/null | head -1 | sed -E 's#</?version>##g; s/^v//')
+          if [ -n "$CONFIG_VERSION" ] && [ "$CONFIG_VERSION" != "$VERSION" ]; then
+            echo "::warning::etc/config.xml version ($CONFIG_VERSION) does not match composer.json ($VERSION)"
+          fi
+
+      - name: Check tag is not released yet
+        run: |
+          for CANDIDATE in "$VERSION" "v$VERSION"; do
+            if gh api "repos/$GH_REPO/git/ref/tags/$CANDIDATE" >/dev/null 2>&1; then
+              echo "::error::Tag $CANDIDATE already exists; bump the version in composer.json"
+              exit 1
+            fi
+          done
+
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          [ -f CHANGELOG.md ] || { echo "::error::CHANGELOG.md is missing"; exit 1; }
+          awk -v v="## [$VERSION]" 'index($0, v) == 1 {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md \
+            | sed '/./,$!d' > "$RUNNER_TEMP/notes.md"
+          [ -s "$RUNNER_TEMP/notes.md" ] || { echo "::error::No '## [$VERSION]' section in CHANGELOG.md"; exit 1; }
+          cat "$RUNNER_TEMP/notes.md"
+
+      - name: Create or update draft release
+        run: |
+          IS_DRAFT=$(gh release view "$TAG" --json isDraft -q .isDraft 2>/dev/null || echo "none")
+          case "$IS_DRAFT" in
+            true)
+              gh release edit "$TAG" --target "$TARGET_SHA" --notes-file "$RUNNER_TEMP/notes.md"
+              echo "Updated existing draft $TAG"
+              ;;
+            false)
+              echo "::error::Release $TAG is already published"
+              exit 1
+              ;;
+            *)
+              gh release create "$TAG" --draft --title "$TAG" --target "$TARGET_SHA" --notes-file "$RUNNER_TEMP/notes.md"
+              echo "Created draft $TAG"
+              ;;
+          esac
+          echo "RELEASE_URL=$(gh release view "$TAG" --json url -q .url)" >> "$GITHUB_ENV"
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Draft Release"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Version | \`${VERSION:-n/a}\` |"
+            echo "| Target | \`$TARGET_SHA\` |"
+            echo "| Draft | ${RELEASE_URL:-n/a} |"
+            echo ""
+            echo "Review the draft and click **Publish release** to trigger the Adobe Marketplace submission."
+          } >> "$GITHUB_STEP_SUMMARY"
