@@ -70,7 +70,7 @@
     <type name="Magento\CatalogInventory\Observer\QuantityValidatorObserver">
         <plugin name="channable_skip_quantity_validator_lvb_orders" type="Magmodules\Channable\Plugin\AroundQuantityValidator" />
     </type>
-    <type name="Magento\InventorySourceDeductionApi\Model\SourceDeductionServicer">
+    <type name="Magento\InventorySourceDeductionApi\Model\SourceDeductionService">
         <plugin name="channable_skip_source_deduction_lvb_orders" type="Magmodules\Channable\Plugin\AroundSourceDeductionService" />
     </type>
     <type name="Magento\InventoryConfiguration\Model\StockItemConfiguration">
