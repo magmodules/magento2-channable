@@ -776,6 +776,14 @@ class Product extends AbstractHelper
             $value = (string)$value;
 
             if ($type === 'media_image' && $value) {
+                // Magento stores a cleared image attribute as the literal 'no_selection'. Handing
+                // that to getMediaUrl() produces a URL that looks real, so marketplaces fetch it
+                // and end up showing a broken image. An attribute that was never filled already
+                // leaves the feed empty; a cleared one has to do the same.
+                if ($value === 'no_selection') {
+                    return '';
+                }
+
                 return $this->catalogProductMediaConfig->getMediaUrl($value);
             }
 
@@ -849,12 +857,12 @@ class Product extends AbstractHelper
             }
             if (in_array('number', $actions)) {
                 if (is_numeric($value)) {
-                    $value = number_format($value, 2);
+                    $value = number_format((float)$value, 2);
                 }
             }
             if (in_array('round', $actions)) {
                 if (is_numeric($value)) {
-                    $value = round($value);
+                    $value = round((float)$value);
                 }
             }
             if (in_array('replacetags', $actions)) {
