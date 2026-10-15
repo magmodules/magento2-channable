@@ -1,120 +1,113 @@
-# E2E Tests
+# E2E Test Cases — Channable Module
 
-Browser-based end-to-end tests for the Channable module, powered by [Playwright](https://playwright.dev/). Tests run against a real Magento instance — orders are submitted via the Channable webhook endpoint and the resulting Magento state is verified through the admin panel and REST API.
+Browser- and API-based end-to-end tests for the Channable module, powered by [Playwright](https://playwright.dev/). Tests run against a real Magento instance: orders are submitted through the Channable webhook endpoints and the resulting Magento state is verified through the admin panel, the REST API and the module's own webhooks.
 
-Tests run automatically on release tags, pull requests, and when the `run_e2e_tests` label is added. They can also be triggered manually via GitHub Actions. The CI environment spins up a Dockerized Magento instance with sample data, configures the module, and runs the full suite.
+Tests run automatically on release tags, pull requests and when the `run_e2e_tests` label is added, and can be triggered manually through GitHub Actions. The CI environment spins up a Dockerized Magento instance with sample data, configures the module and runs the full suite.
 
-## Cross-Border Tax
+## Cross-Border Tax (`tests/order/cross-border-tax.spec.ts`)
 
-The most complex part of order import is tax calculation. Channable sends prices as shown on the marketplace (gross, including destination tax), but Magento may need to recalculate tax based on its own tax rules and origin country.
+Channable sends prices as shown on the marketplace (gross, including destination tax), while Magento may recalculate tax based on its own rules and origin country. All scenarios use a product price of €12.10 and verify the grand total stays consistent. Tax rules are provisioned for NL (21%), DE (19%), AT (20%), BE (21%) and FR (20%); shipping origin is always NL.
 
-These tests validate that the module correctly handles the interplay between Magento's tax configuration and cross-border scenarios. All scenarios use a fixed product price of €12.10 and verify the grand total stays consistent — regardless of whether prices include/exclude tax, whether cross-border trade (CBT) is enabled, or which destination country is involved.
+1. Domestic NL→NL, price incl tax — €12.10 grand total, 21% tax applied
+2. Cross-border NL→DE, price incl tax, CBT disabled — €12.10 grand total, 19% tax, module compensates for the rate difference
+3. Cross-border NL→DE, price incl tax, CBT enabled — €12.10 grand total, 19% tax, Magento handles it natively
+4. Cross-border NL→DE, price excl tax, CBT disabled — €12.10 grand total, 19% tax, uses Channable's `price_tax` for stripping
+5. Domestic NL→NL, price excl tax — €12.10 grand total, 21% tax applied
+6. Cross-border NL→AT, price incl tax, CBT disabled — €12.10 grand total, 20% tax, verifies a different destination rate
 
-| Test | Expected |
-|------|----------|
-| Domestic NL→NL, price incl tax | €12.10 grand total, 21% tax applied |
-| Cross-border NL→DE, price incl tax, CBT off | €12.10 grand total, 19% tax — module compensates for rate difference |
-| Cross-border NL→DE, price incl tax, CBT on | €12.10 grand total, 19% tax — Magento handles natively |
-| Cross-border NL→DE, price excl tax, CBT off | €12.10 grand total, 19% tax — uses Channable's price_tax for stripping |
-| Domestic NL→NL, price excl tax | €12.10 grand total, 21% tax applied |
-| Cross-border NL→AT, price incl tax, CBT off | €12.10 grand total, 20% tax — verifies with a different destination rate |
+## Order Import (`tests/order/order-import.spec.ts`)
 
-Tax rules are provisioned during CI setup with rates for NL (21%), DE (19%), AT (20%), BE (21%), and FR (20%). Shipping origin is always set to NL (Netherlands).
+Each test submits an order through the Channable webhook with a specific module configuration enabled, then verifies in the Magento admin that the order was created with the correct properties.
 
-## Order Import
+7. Guest checkout (default) — order created, customer group is NOT LOGGED IN
+8. Customer creation — customer account created and linked to the order
+9. Business order (VAT exempt) — tax is €0.00, VAT ID stored on the order
+10. LVB order (auto-shipped) — order auto-shipped, shipment record present
+11. Auto-invoice — invoice created automatically after import
+12. Custom increment ID with prefix — order increment ID starts with CHAN-
+13. Custom increment ID (alphanumeric strip) — special characters removed from the channel order ID
+14. Shipping cost in order — shipping amount is €5.00 on the order
+15. Discount in order — discount of -€2.00 reflected in the order totals
+16. Multiple quantities — grand total correctly multiplied for qty 3
+17. LV order with pycountry region code — region resolved from the Channable region code
+18. PL order without region — order created without a region set
+19. Item-level discount: original price vs discounted price — item price and discount stored separately
+20. Item-level discount: multi-qty grand total — discount multiplied by quantity
+21. Item-level discount: price excl tax config — discount applied on the excl tax price
+22. Item-level discount: price incl tax config — discount applied on the incl tax price
+23. Item-level discount: multi-product — discounts per item across multiple products
+24. Item-level discount: no order-level discount applied — item discounts do not duplicate into the order discount
+25. Multi-currency order (PLN) — order created in PLN with the correct currency conversion
+26. Customer created in correct store view — customer assigned to the store view the order was placed in
+27. Item updates regression — order import leaves the `channable_items` table consistent
 
-Each test submits an order through the Channable webhook with a specific module configuration enabled, then navigates to the Magento admin to verify the order was created with the correct properties. This covers the full range of config-driven behavior: customer handling, invoicing, shipping, custom order IDs, discounts, and multi-currency support.
+## Webhooks (`tests/order/webhooks.spec.ts`)
 
-| Test | Expected |
-|------|----------|
-| Guest checkout (default) | Order created, customer group = NOT LOGGED IN |
-| Customer creation enabled | Customer account created and linked to order |
-| Business order (VAT exempt) | Tax = €0.00, VAT ID stored on order |
-| LVB order (auto-shipped) | Order auto-shipped, shipment record present |
-| Auto-invoice enabled | Invoice automatically created after import |
-| Custom increment ID with prefix | Order increment ID starts with CHAN- |
-| Custom increment ID (alphanumeric strip) | Special characters removed from channel order ID |
-| Shipping cost | Shipping amount = €5.00 on order |
-| Discount applied | Discount = -€2.00 reflected in order totals |
-| Multiple quantities | Grand total correctly multiplied for qty 3 |
-| Multi-currency (PLN) | Order created in PLN with correct currency conversion |
+Channable periodically polls Magento for order status updates and shipment information. These tests verify the read-only GET endpoints return the correct structure and content.
 
-## Webhooks
+28. Order status — processing — returns the order id and a valid status string
+29. Order status — invalid ID — returns `validated=false` with error details
+30. Shipments — recent order appears — returns a shipment array for known orders
+31. Shipments — LVB order has fulfillment — shipped order includes its tracking information
 
-Channable periodically polls Magento for order status updates and shipment information. These tests verify the read-only GET endpoints return the correct data structure and content, ensuring the bi-directional sync between Magento and Channable works as expected.
+## Delivery Bill ID (`tests/order/delivery-bill-id.spec.ts`)
 
-| Test | Expected |
-|------|----------|
-| Order status — pending/processing | Returns order id and valid status string |
-| Order status — invalid ID | Returns validated=false with error details |
-| Shipments — recent order | Returns shipment array for known orders |
-| Shipments — LVB with tracking | Shipped order includes tracking information |
+Every shipment update carries a `delivery_bill_id`: the number of the delivery note physically included in the parcel, used by marketplaces such as Conrad to match their invoice to the delivery. It defaults to the Magento shipment increment ID, which is printed on Magento's standard packing slip. ERP systems that generate their own delivery note number can supply it through the `channable_delivery_bill_id` extension attribute, either when creating the shipment (`POST /V1/order/:id/ship`) or afterwards (`POST /V1/shipment`).
 
-## Bundle Pricing
+32. Shipments webhook — `delivery_bill_id` defaults to the shipment increment ID
+33. Shipments webhook — entry exposes `shipment_id` next to the order `id`
+34. Delivery bill ID does not replace the tracking data — `tracking_code` and `carrier_code` unchanged
+35. Shipment without tracking still reports a delivery bill ID
+36. ERP value supplied on shipment creation is used instead of the increment ID
+37. ERP value is exposed as extension attribute on the shipment through the REST API
+38. ERP value can be set on an existing shipment and is reflected in the webhook
+39. Empty ERP value falls back to the shipment increment ID
+40. Order status returns a delivery bill ID per shipment, plus a `fulfillments` array
+41. Order without shipments has no `fulfillment` and no `fulfillments` key
+42. Multiple shipments — each shipment keeps its own delivery bill ID and tracking data
+43. Multiple shipments — `fulfillments` holds one entry per shipment, `fulfillment` the most recent
 
-Dynamic bundle products derive their prices from their children rather than having a fixed price. This test suite validates that the feed correctly reports bundle prices across different tax configurations. The fix uses indexed prices (`$product->getData('min_price')`) instead of `getBaseAmount()`, matching how configurables are handled and ensuring correct behavior with Magento's `getTaxPrice()`.
+## Bundle Pricing (`tests/feed/bundle-pricing.spec.ts`)
 
-Test products are created via REST API: two simple children (€20 + €30, tax class 2), two bundles (one dynamic with two required options, one fixed at €100), and a single-option dynamic bundle for OOS testing. NL 21% tax rules are used.
+Dynamic bundle products derive their prices from their children rather than having a fixed price. These tests validate that the feed reports bundle prices correctly across tax configurations, using indexed prices (`min_price`) instead of `getBaseAmount()`. Test products are created through the REST API: two simple children (€20 + €30), a dynamic bundle with two required options, a fixed bundle at €100, and a single-option dynamic bundle for the out-of-stock scenario.
 
-**Group A: Catalog prices including tax** (stored €50 = incl tax)
+**Group A — catalog prices including tax** (stored €50 = incl tax)
 
-| Test | Channable Config | Assert |
-|------|------------------|--------|
-| Dynamic, add tax on | `tax=1` | price = 50.00, min_price = 50.00 |
-| Dynamic, add tax off | `tax=0` | price = 50.00, min_price = 50.00 |
-| Dynamic, include both | `tax=1, tax_include_both=1` | price_incl = 50.00, price_excl ≈ 41.32 |
-| Fixed, add tax on | `tax=1` | price = 100.00 |
+44. Dynamic bundle, add tax on — price = 50.00, min_price = 50.00
+45. Dynamic bundle, add tax off — price = 50.00, min_price = 50.00
+46. Dynamic bundle, include both — price_incl = 50.00, price_excl ≈ 41.32
+47. Fixed bundle, add tax on — price = 100.00
 
-**Group B: Catalog prices excluding tax** (stored €50 = excl tax, incl = €60.50)
+**Group B — catalog prices excluding tax** (stored €50 = excl tax, incl = €60.50)
 
-| Test | Channable Config | Assert |
-|------|------------------|--------|
-| Dynamic, add tax on | `tax=1` | price ≈ 60.50, min_price ≈ 60.50 |
-| Dynamic, add tax off | `tax=0` | price = 50.00, min_price = 50.00 |
-| Dynamic, include both | `tax=1, tax_include_both=1` | price_incl ≈ 60.50, price_excl = 50.00 |
-| Fixed, add tax on | `tax=1` | price ≈ 121.00 |
+48. Dynamic bundle, add tax on — price ≈ 60.50, min_price ≈ 60.50
+49. Dynamic bundle, add tax off — price = 50.00, min_price = 50.00
+50. Dynamic bundle, include both — price_incl ≈ 60.50, price_excl = 50.00
+51. Fixed bundle, add tax on — price ≈ 121.00
 
-**Group C: Stock scenarios** (prices incl tax)
+**Group C — stock scenarios** (prices incl tax)
 
-| Test | Setup | Assert |
-|------|-------|--------|
-| Dynamic (single option), OOS child | child-b set OOS + reindex | min_price = 20.00 (only in-stock child) |
+52. Dynamic bundle with an out-of-stock child — min_price = 20.00, only in-stock children counted
 
-## Credit Memo
+## Credit Memo (`tests/order/credit-memo.spec.ts`)
 
-Validates that orders placed through the Channable payment method can be refunded — both via the Magento admin UI and the REST API.
+Validates that orders placed through the Channable payment method can be refunded. Both tests create an auto-invoiced order and then create a credit memo.
 
-Both tests create an auto-invoiced order (`invoice_order: 1`), then attempt to create a credit memo.
+53. Credit memo via admin UI — created through the invoice → Credit Memo → Refund Offline flow
+54. Credit memo via REST API (`V1/invoice/:id/refund`) — returns 200 with a credit memo ID and the record exists
 
-| Test | Expected |
-|------|----------|
-| Credit memo via admin UI | Credit memo created successfully through invoice → Credit Memo → Refund Offline flow |
-| Credit memo via REST API (`V1/invoice/:id/refund`) | API returns 200 with credit memo ID, credit memo record exists in DB |
+## Feed Generation (`tests/feed/feed-generation.spec.ts`)
 
-## Upcoming: Feed Generation
+Validates that the product feed endpoint returns valid data and handles configuration and token errors gracefully.
 
-The next suite of E2E tests will cover feed generation — validating that product data is correctly exported to Channable based on attribute mapping, category filters, and feed configuration. This will include tests for price rendering, image URLs, stock status, and custom attribute handling.
+55. Feed endpoint returns valid JSON without errors
+56. Feed endpoint returns a products array
+57. Feed products contain the required id and title fields
+58. Feed does not crash with the visibility filter enabled
+59. Feed returns empty for an invalid token
+60. Feed returns empty when the module is disabled
+61. Single product feed through the `pid` parameter
 
-## Running Locally
+## Item Updates (`tests/order/item-save.spec.ts`)
 
-```bash
-cd Test/End-2-end
-npm install && npx playwright install chromium
-
-BASE_URL="https://magento-248.test/" \
-MAGENTO_CONTAINER="magento-248-phpfpm-1" \
-MAGENTO_ADMIN_USER="e2e-admin" \
-MAGENTO_ADMIN_PASS="E2eTest1234!" \
-CHANNABLE_TOKEN="<token>" \
-PRODUCT_ID="3" \
-npx playwright test
-```
-
-Run a specific suite:
-```bash
-npx playwright test tests/order/cross-border-tax.spec.ts
-npx playwright test tests/order/order-import.spec.ts
-npx playwright test tests/order/webhooks.spec.ts
-npx playwright test tests/feed/bundle-pricing.spec.ts
-npx playwright test tests/order/credit-memo.spec.ts
-```
+62. Saving a product in the admin does not cause a constraint violation on `channable_items`

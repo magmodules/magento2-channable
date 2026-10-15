@@ -232,8 +232,10 @@ class Products
             'gt'   => '>',
             'gteq' => '>=',
             'lt'   => '<',
-            'lteg' => '<='
+            'lteq' => '<='
         ];
+
+        $staticAttributes = ['entity_id', 'type_id', 'attribute_set_id'];
 
         if (!isset($filters['add_disabled'])) {
             $collection->addAttributeToFilter('status', 1);
@@ -253,12 +255,16 @@ class Products
                 continue;
             }
 
-            $attributeModel = $this->eavConfig->getAttribute('catalog_product', $attribute);
-            if (!$frontendInput = $attributeModel->getFrontendInput()) {
-                continue;
+            $frontendInput = null;
+            $attributeModel = null;
+            if (!in_array($attribute, $staticAttributes)) {
+                $attributeModel = $this->eavConfig->getAttribute('catalog_product', $attribute);
+                if (!$frontendInput = $attributeModel->getFrontendInput()) {
+                    continue;
+                }
             }
 
-            if ($frontendInput == 'select' || $frontendInput == 'multiselect') {
+            if ($attributeModel && ($frontendInput == 'select' || $frontendInput == 'multiselect')) {
                 $options = $attributeModel->getSource()->getAllOptions();
                 if (strpos($value, ',') !== false) {
                     $values = [];

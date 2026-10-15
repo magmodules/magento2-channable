@@ -70,7 +70,7 @@
     <type name="Magento\CatalogInventory\Observer\QuantityValidatorObserver">
         <plugin name="channable_skip_quantity_validator_lvb_orders" type="Magmodules\Channable\Plugin\AroundQuantityValidator" />
     </type>
-    <type name="Magento\InventorySourceDeductionApi\Model\SourceDeductionServicer">
+    <type name="Magento\InventorySourceDeductionApi\Model\SourceDeductionService">
         <plugin name="channable_skip_source_deduction_lvb_orders" type="Magmodules\Channable\Plugin\AroundSourceDeductionService" />
     </type>
     <type name="Magento\InventoryConfiguration\Model\StockItemConfiguration">
@@ -87,6 +87,14 @@
     </type>
     <type name="Magento\Sales\Model\Order">
         <plugin name="channable_pickup_location" type="Magmodules\Channable\Plugin\AfterGetShippingDescription"/>
+    </type>
+
+    <type name="Magento\Sales\Api\ShipmentRepositoryInterface">
+        <plugin name="channable_delivery_bill_id" type="Magmodules\Channable\Plugin\Shipment\DeliveryBillId"/>
+    </type>
+
+    <type name="Magento\Sales\Model\Order\ShipmentDocumentFactory">
+        <plugin name="channable_delivery_bill_id_argument" type="Magmodules\Channable\Plugin\Shipment\DeliveryBillIdArgument"/>
     </type>
 
     <type name="Magento\Sales\Model\Order\Invoice">

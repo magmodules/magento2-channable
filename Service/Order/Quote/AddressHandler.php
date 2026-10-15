@@ -22,7 +22,7 @@ class AddressHandler
     // Strip any characters not explicitly allowed for each field
     private const PATTERN_NAME      = '/[^\p{L}\p{M},\-_\.\'’`&\s\d]/u';
     private const PATTERN_CITY      = '/[^\p{L}\p{M}\d\s\-_\'’\.,&\(\)]/u';
-    private const PATTERN_STREET    = '/[^\p{L}\p{M}"\[\],\-\.\'’`&\s\d]/u';
+    private const PATTERN_STREET    = '/[^\p{L}\p{M}"\[\]\(\),:#\-\.\/\'’`&\s\d]/u';
     private const PATTERN_TELEPHONE = '/[^0-9\+\-\(\)\s]/u';
 
     /**

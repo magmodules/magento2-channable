@@ -1,0 +1,278 @@
+name: Adobe Marketplace Release
+
+# Submits a new version of an existing Marketplace package to the EQP technical review.
+# - Module name comes from registration.php, SKU + version from composer.json (no per-module config).
+# - Documentation artifacts and version compatibility are reused from the previous version,
+#   so the very first version of a package must be submitted manually in the Developer Portal.
+# - Requires org secrets MARKETPLACE_APP_ID / MARKETPLACE_APP_SECRET (production) and
+#   MARKETPLACE_SANDBOX_APP_ID / MARKETPLACE_SANDBOX_APP_SECRET (sandbox).
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'EQP environment'
+        type: choice
+        options: [sandbox, production]
+        default: sandbox
+      dry_run:
+        description: 'Only build and validate the zip (no upload/submit)'
+        type: boolean
+        default: true
+
+jobs:
+  marketplace-submit:
+    runs-on: ubuntu-latest
+    env:
+      EQP_ENV: ${{ github.event_name == 'release' && 'production' || inputs.environment }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve module, SKU and version
+        run: |
+          MODULE_NAME=$(grep -oE "'[A-Za-z0-9]+_[A-Za-z0-9]+'" registration.php | head -1 | tr -d "'")
+          SKU=$(jq -r '.name' composer.json)
+          VERSION=$(jq -r '.version' composer.json)
+          [ -n "$MODULE_NAME" ] || { echo "::error::Could not read module name from registration.php"; exit 1; }
+          [ "$VERSION" != "null" ] || { echo "::error::No version in composer.json"; exit 1; }
+
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+            [ "${TAG#v}" = "$VERSION" ] || { echo "::error::Release tag $TAG does not match composer.json version $VERSION"; exit 1; }
+          fi
+
+          if [ "$EQP_ENV" = "production" ]; then
+            BASE_URL="https://commercedeveloper-api.adobe.com"
+          else
+            BASE_URL="https://commercedeveloper-sandbox-api.adobe.com"
+          fi
+
+          {
+            echo "MODULE_NAME=$MODULE_NAME"
+            echo "SKU=$SKU"
+            echo "VERSION=$VERSION"
+            echo "EQP_BASE_URL=$BASE_URL"
+            echo "ZIP_NAME=MP-$MODULE_NAME-$VERSION.zip"
+          } >> "$GITHUB_ENV"
+          echo "Module: $MODULE_NAME | SKU: $SKU | Version: $VERSION | Env: $EQP_ENV | Dry run: $DRY_RUN"
+
+      - name: Build zip
+        run: |
+          BUILD_DIR="$RUNNER_TEMP/package"
+          mkdir -p "$BUILD_DIR"
+          git archive --format=tar HEAD | tar -x -C "$BUILD_DIR"
+
+          # Strip everything that must not ship to the Marketplace (on top of .gitattributes export-ignore)
+          cd "$BUILD_DIR"
+          rm -rf .github Test Tests test tests docs node_modules
+          rm -f .gitignore .gitattributes .editorconfig \
+                phpstan.neon phpstan.neon.dist phpcs.xml phpcs.xml.dist phpunit.xml phpunit.xml.dist \
+                E2E-TESTS.md package.json package-lock.json playwright.config.ts
+          zip -qr "$GITHUB_WORKSPACE/$ZIP_NAME" .
+
+      - name: Verify zip contents
+        run: |
+          LIST=$(unzip -Z1 "$ZIP_NAME")
+          BAD=$(echo "$LIST" | grep -E '(^|/)\.|^(\.github|Test|Tests|test|tests|docs|node_modules)/|^(phpstan\.neon(\.dist)?|phpcs\.xml(\.dist)?|phpunit\.xml(\.dist)?|E2E-TESTS\.md|package(-lock)?\.json|playwright\.config\.ts)$' || true)
+          if [ -n "$BAD" ]; then
+            echo "::error::Forbidden files in $ZIP_NAME:"
+            echo "$BAD"
+            exit 1
+          fi
+          for REQUIRED in composer.json registration.php etc/module.xml; do
+            echo "$LIST" | grep -qx "$REQUIRED" || { echo "::error::$REQUIRED missing from zip root"; exit 1; }
+          done
+          echo "Zip OK: $(echo "$LIST" | grep -vc '/$') files"
+          echo "$LIST" | awk -F/ '{print $1}' | sort | uniq -c
+
+      - name: Upload zip as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ZIP_NAME }}
+          path: ${{ env.ZIP_NAME }}
+
+      - name: Get EQP session token
+        if: env.DRY_RUN != 'true'
+        env:
+          APP_ID: ${{ env.EQP_ENV == 'production' && secrets.MARKETPLACE_APP_ID || secrets.MARKETPLACE_SANDBOX_APP_ID }}
+          APP_SECRET: ${{ env.EQP_ENV == 'production' && secrets.MARKETPLACE_APP_SECRET || secrets.MARKETPLACE_SANDBOX_APP_SECRET }}
+        run: |
+          [ -n "$APP_ID" ] && [ -n "$APP_SECRET" ] || { echo "::error::Marketplace API keys for $EQP_ENV are not configured"; exit 1; }
+          RESPONSE=$(curl -sS --fail-with-body -X POST "$EQP_BASE_URL/rest/v1/app/session/token" \
+            -u "$APP_ID:$APP_SECRET" \
+            -H 'Content-Type: application/json' \
+            -d '{"grant_type":"session"}')
+          UST=$(jq -r '.ust // empty' <<<"$RESPONSE")
+          [ -n "$UST" ] || { echo "::error::No session token returned"; exit 1; }
+          echo "::add-mask::$UST"
+          echo "EQP_TOKEN=$UST" >> "$GITHUB_ENV"
+
+      - name: Load previous version
+        if: env.DRY_RUN != 'true'
+        run: |
+          ENCODED_SKU=$(jq -rn --arg s "$SKU" '$s|@uri')
+          RESPONSE=$(curl -sS --fail-with-body \
+            -H "Authorization: Bearer $EQP_TOKEN" \
+            "$EQP_BASE_URL/rest/v1/products/packages/skus/$ENCODED_SKU")
+          PACKAGES=$(jq 'if type == "array" then . else [.] end' <<<"$RESPONSE")
+
+          if jq -e --arg v "$VERSION" 'any(.[]; .version == $v)' <<<"$PACKAGES" >/dev/null; then
+            echo "::error::Version $VERSION of $SKU is already submitted"
+            exit 1
+          fi
+
+          LATEST=$(jq 'sort_by(.created_at) | last' <<<"$PACKAGES")
+          if [ "$LATEST" = "null" ]; then
+            echo "::error::No previous version of $SKU found in $EQP_ENV; submit the first version manually in the Developer Portal"
+            exit 1
+          fi
+
+          echo "Previous version: $(jq -r '.version' <<<"$LATEST")"
+          echo "Raw documentation_artifacts: $(jq -c '.documentation_artifacts' <<<"$LATEST")"
+          echo "Raw version_compatibility: $(jq -c '.version_compatibility' <<<"$LATEST")"
+
+          # Adobe rejects versions it no longer supports (e.g. "2.2"): keep 2.3+ and drop empty editions
+          jq -c '(.version_compatibility // [])
+            | map(.versions |= map(select((split(".") | map(tonumber)) >= [2, 3])))
+            | map(select(.versions | length > 0))' <<<"$LATEST" > "$RUNNER_TEMP/compat.json"
+          if [ "$(jq 'length' "$RUNNER_TEMP/compat.json")" = "0" ]; then
+            echo "::error::No supported Magento versions left in the previous version's compatibility"
+            exit 1
+          fi
+
+          # documentation_artifacts values can be a single file object or an array of them
+          # (the API returns arrays for some packages); keep only { file_upload_id } per type.
+          jq -c '
+            def pick: if type == "array" then (map(select(type == "object" and .file_upload_id != null)) | last)
+                      elif type == "object" and .file_upload_id != null then .
+                      else null end;
+            (.documentation_artifacts // {})
+            | if type == "array" then {} else . end
+            | with_entries(.value |= pick | select(.value != null) | .value |= {file_upload_id})
+          ' <<<"$LATEST" > "$RUNNER_TEMP/docs.json"
+
+          if [ "$(jq 'length' "$RUNNER_TEMP/docs.json")" = "0" ]; then
+            echo "::error::Could not read documentation artifacts from the previous version (see raw output above)"
+            exit 1
+          fi
+          echo "Documentation artifacts: $(cat "$RUNNER_TEMP/docs.json")"
+          echo "Compatibility: $(cat "$RUNNER_TEMP/compat.json")"
+
+      - name: Upload zip to EQP
+        if: env.DRY_RUN != 'true'
+        run: |
+          RESPONSE=$(curl -sS --fail-with-body -X POST "$EQP_BASE_URL/rest/v1/files/uploads" \
+            -H "Authorization: Bearer $EQP_TOKEN" \
+            -F "file[]=@$ZIP_NAME;type=application/zip")
+          FILE_UPLOAD_ID=$(jq -r '.[0].file_upload_id // empty' <<<"$RESPONSE")
+          [ -n "$FILE_UPLOAD_ID" ] || { echo "::error::Upload failed: $RESPONSE"; exit 1; }
+          echo "FILE_UPLOAD_ID=$FILE_UPLOAD_ID" >> "$GITHUB_ENV"
+          echo "Upload ID: $FILE_UPLOAD_ID"
+
+          # Packages are only accepted once the malware scan has passed
+          for i in $(seq 1 30); do
+            STATUS=$(curl -sS --fail-with-body -H "Authorization: Bearer $EQP_TOKEN" \
+              "$EQP_BASE_URL/rest/v1/files/uploads/$FILE_UPLOAD_ID" \
+              | jq -r 'if type == "array" then .[0] else . end | .malware_status')
+            echo "Malware scan: $STATUS"
+            # Docs say pass/fail, the API actually returns passed/failed
+            case "$STATUS" in
+              pass|passed) exit 0 ;;
+              fail|failed) echo "::error::Malware scan failed"; exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo "::error::Malware scan did not finish in time"
+          exit 1
+
+      - name: Submit package
+        if: env.DRY_RUN != 'true'
+        env:
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          NOTES="$RELEASE_BODY"
+          if [ -z "$NOTES" ]; then
+            NOTES=$(awk -v v="## [$VERSION]" 'index($0, v) == 1 {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md)
+          fi
+          # Strip bold markers and the Compatibility / Minimum requirements block (Marketplace shows that itself)
+          NOTES=$(printf '%s\n' "$NOTES" \
+            | sed 's/\r$//; s/\*\*//g' \
+            | awk '/^(Compatibility|Minimum requirements):[[:space:]]*$/ {skip=1; next}
+                   skip && /^([*-] |[[:space:]]*$)/ {next}
+                   {skip=0; print}' \
+            | sed '/[^[:space:]]/,$!d' \
+            | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')
+          [ -n "$NOTES" ] || { echo "::error::No release notes (release body empty and no CHANGELOG.md section for $VERSION)"; exit 1; }
+
+          PAYLOAD=$(jq -n \
+            --arg sku "$SKU" \
+            --arg version "$VERSION" \
+            --arg notes "$NOTES" \
+            --arg file_id "$FILE_UPLOAD_ID" \
+            --slurpfile compat "$RUNNER_TEMP/compat.json" \
+            --slurpfile docs "$RUNNER_TEMP/docs.json" \
+            '[{
+              action: { technical: "submit" },
+              type: "extension",
+              platform: "M2",
+              sku: $sku,
+              version: $version,
+              release_notes: $notes,
+              artifact: { file_upload_id: $file_id },
+              version_compatibility: $compat[0],
+              documentation_artifacts: $docs[0]
+            }]')
+
+          # A failed earlier attempt can leave this version behind (e.g. as a draft): update that
+          # submission instead of creating a duplicate. The API's sku/version filters are substring
+          # matches, so match exactly here.
+          EXISTING=$(curl -sS --fail-with-body -G "$EQP_BASE_URL/rest/v1/products/packages" \
+            -H "Authorization: Bearer $EQP_TOKEN" \
+            --data-urlencode "sku=$SKU" \
+            --data-urlencode "version=$VERSION" \
+            | jq -c --arg sku "$SKU" --arg v "$VERSION" \
+              '[(if type == "array" then . else [.] end)[] | select(.sku == $sku and .version == $v)]
+               | sort_by(.created_at) | last // empty')
+          METHOD=POST
+          if [ -n "$EXISTING" ]; then
+            EXISTING_ID=$(jq -r '.submission_id' <<<"$EXISTING")
+            echo "Version $VERSION already exists as submission $EXISTING_ID, status: $(jq -c '.eqp_status' <<<"$EXISTING")"
+            echo "Updating and resubmitting it"
+            METHOD=PUT
+            PAYLOAD=$(jq --arg sid "$EXISTING_ID" 'map(. + {submission_id: $sid})' <<<"$PAYLOAD")
+          fi
+
+          RESPONSE=$(curl -sS --fail-with-body -X "$METHOD" "$EQP_BASE_URL/rest/v1/products/packages" \
+            -H "Authorization: Bearer $EQP_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d "$PAYLOAD")
+          CODE=$(jq -r '.[0].code' <<<"$RESPONSE")
+          if [ "$CODE" != "200" ]; then
+            echo "::error::Submission failed: $(jq -r '.[0].message' <<<"$RESPONSE")"
+            echo "$RESPONSE"
+            exit 1
+          fi
+          echo "SUBMISSION_ID=$(jq -r '.[0].submission_id' <<<"$RESPONSE")" >> "$GITHUB_ENV"
+          echo "EQP_STATUS=$(jq -r '.[0].eqp_status.overall // "submitted"' <<<"$RESPONSE")" >> "$GITHUB_ENV"
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Adobe Marketplace Submission"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Module | \`$MODULE_NAME\` |"
+            echo "| SKU | \`$SKU\` |"
+            echo "| Version | \`$VERSION\` |"
+            echo "| Environment | \`$EQP_ENV\` |"
+            echo "| Dry run | \`$DRY_RUN\` |"
+            echo "| Zip | \`$ZIP_NAME\` |"
+            echo "| Submission ID | \`${SUBMISSION_ID:-n/a}\` |"
+            echo "| EQP Status | \`${EQP_STATUS:-n/a}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
