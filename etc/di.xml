@@ -55,6 +55,10 @@
     </type>
 
 
+    <!-- Diagnostic only, not for release. -->
+    <type name="Magento\Quote\Model\Quote\Item">
+        <plugin name="channable_diagnostic_log_parent_item" type="Magmodules\Channable\Plugin\Diagnostic\LogParentItem"/>
+    </type>
     <type name="Magento\CatalogInventory\Model\StockState">
         <plugin name="channable_skip_qty_check" type="Magmodules\Channable\Plugin\AfterCheckQty"/>
     </type>
