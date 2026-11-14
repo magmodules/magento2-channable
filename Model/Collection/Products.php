@@ -271,14 +271,14 @@ class Products
                     $value = explode(',', $value);
                     foreach ($value as $v) {
                         $valueId = array_search(trim($v), array_column($options, 'label'));
-                        if ($valueId) {
+                        if ($valueId !== false) {
                             $values[] = $options[$valueId]['value'];
                         }
                     }
                     $value = implode(',', $values);
                 } else {
                     $valueId = array_search($value, array_column($options, 'label'));
-                    if ($valueId) {
+                    if ($valueId !== false) {
                         $value = $options[$valueId]['value'];
                     }
                 }
