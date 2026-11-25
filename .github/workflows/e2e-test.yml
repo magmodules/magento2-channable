@@ -21,7 +21,7 @@ jobs:
             MAGENTO_VERSION: 2.4.8-p2
           - PHP_VERSION: php85-fpm
             MAGENTO_VERSION: 2.4.9
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       PHP_VERSION: ${{ matrix.PHP_VERSION }}
       MAGENTO_VERSION: ${{ matrix.MAGENTO_VERSION }}
