@@ -141,7 +141,7 @@ class Add
 
                 $addedItem->setOriginalCustomPrice($price - $itemDiscount);
                 $addedItem->setOriginalPrice($channableBasePrice);
-                $this->itemResourceModel->save($addedItem);
+                $this->saveItem($addedItem);
                 $qty += (int)$item['quantity'];
             }
         } catch (Exception $exception) {
@@ -150,6 +150,25 @@ class Add
         }
 
         return $qty;
+    }
+
+    /**
+     * Save the item together with its children.
+     *
+     * Magento only leaves the quantity of a child item alone once that child has an ID. An order
+     * can hold the same bundle on several lines, and every further line would otherwise raise the
+     * quantity of the unsaved children as well, on top of the quantity of the bundle itself.
+     *
+     * @param Quote\Item $item
+     * @return void
+     * @throws Exception
+     */
+    private function saveItem(Quote\Item $item): void
+    {
+        $this->itemResourceModel->save($item);
+        foreach ($item->getChildren() as $childItem) {
+            $this->itemResourceModel->save($childItem);
+        }
     }
 
     /**

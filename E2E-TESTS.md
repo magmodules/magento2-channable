@@ -111,3 +111,11 @@ Validates that the product feed endpoint returns valid data and handles configur
 ## Item Updates (`tests/order/item-save.spec.ts`)
 
 62. Saving a product in the admin does not cause a constraint violation on `channable_items`
+
+## Bundle On Several Order Lines (`tests/order/bundle-split-lines.spec.ts`)
+
+A marketplace can split one product over several order lines, two lines with quantity 1 instead of one line with quantity 2. Magento merges those lines into one item. These tests import a fixed bundle with two children and verify in `sales_order_item` that the children end up with the same quantity as the bundle.
+
+63. One line with quantity 2 — bundle 2, each child 2
+64. Two lines with quantity 1 — bundle 2, each child 2
+65. Four lines with quantity 2 + 1 + 1 + 1 — bundle 5, each child 5
